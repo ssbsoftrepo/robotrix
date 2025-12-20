@@ -1,0 +1,527 @@
+
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useAppContext } from '../context/AppContext';
+import { Landmarks, Point } from '../types';
+
+// --- Helper Functions ---
+const angleBetweenVectors = (v1: Point, v2: Point) => {
+    const dot = v1.x * v2.x + v1.y * v2.y;
+    const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
+    const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
+    if (mag1 === 0 || mag2 === 0) return 0;
+    const cosTheta = Math.max(-1, Math.min(1, dot / (mag1 * mag2)));
+    return Math.acos(cosTheta) * (180 / Math.PI);
+};
+
+// Component to display the original X-ray with only HKA line
+const HKAView: React.FC = () => {
+    const { longLegImageSrc, longLegLandmarks, longLegCanvasDataUrl } = useAppContext();
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
+        if (!longLegImageSrc || !canvasRef.current || !longLegCanvasDataUrl) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const xrayImg = new Image();
+        xrayImg.crossOrigin = "anonymous";
+        xrayImg.src = longLegImageSrc;
+
+        xrayImg.onload = () => {
+            // Using the cached canvas data URL to determine original dimensions for scaling landmarks
+            const refImg = new Image();
+            refImg.src = longLegCanvasDataUrl;
+            refImg.onload = () => {
+                const parent = canvas.parentElement;
+                if (!parent) return;
+
+                const width = parent.clientWidth;
+                const height = width * (xrayImg.naturalHeight / xrayImg.naturalWidth);
+                canvas.width = width;
+                canvas.height = height;
+
+                // Draw Xray
+                ctx.drawImage(xrayImg, 0, 0, width, height);
+
+                // Calculate Scale: New Canvas Width / Original Planner Canvas Width
+                const scale = width / refImg.width;
+
+                const { hipCenter, kneeCenter, ankleCenter } = longLegLandmarks;
+                if (hipCenter && kneeCenter && ankleCenter) {
+                    ctx.strokeStyle = '#89CFF0'; // Baby Blue
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(hipCenter.x * scale, hipCenter.y * scale);
+                    ctx.lineTo(kneeCenter.x * scale, kneeCenter.y * scale);
+                    ctx.lineTo(ankleCenter.x * scale, ankleCenter.y * scale);
+                    ctx.stroke();
+
+                    [hipCenter, kneeCenter, ankleCenter].forEach(p => {
+                        ctx.beginPath();
+                        ctx.arc(p.x * scale, p.y * scale, 4, 0, Math.PI * 2);
+                        ctx.fillStyle = '#89CFF0';
+                        ctx.fill();
+                    });
+                }
+            };
+        };
+    }, [longLegImageSrc, longLegLandmarks, longLegCanvasDataUrl]);
+
+    if (!longLegImageSrc) return null;
+
+    return (
+        <div className="gemini-dark-card p-3 rounded-lg flex flex-col items-center h-full">
+            <h3 className="text-gray-300 font-semibold mb-3 text-lg">Pre-Op Alignment</h3>
+            <div className="w-full flex-grow flex items-center justify-center bg-black rounded overflow-hidden">
+                <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
+            </div>
+        </div>
+    );
+};
+
+const SimulationPage: React.FC = () => {
+    const {
+        longLegImageSrc,
+        longLegLandmarks,
+        longLegCanvasDataUrl,
+        setSimAfterImage,
+        legSide,
+        setPage,
+        longLegResults,
+        femurBoundary,
+        tibiaBoundary,
+        femoralCutSim, setFemoralCutSim,
+        tibialCutSim, setTibialCutSim,
+        appliedFemoralCutSim, setAppliedFemoralCutSim,
+        appliedTibialCutSim, setAppliedTibialCutSim
+    } = useAppContext();
+
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
+    const originalScaledLandmarksRef = useRef<Landmarks>({});
+
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    const [isSplitView, setIsSplitView] = useState(true);
+    const [centerlineX, setCenterlineX] = useState(300);
+    const [isDraggingCenterline, setIsDraggingCenterline] = useState(false);
+
+    const getBoundaryAdjustedValues = useCallback(() => {
+        // Femoral Cut
+        let displayFemoralCutStr = longLegResults.cut;
+        if (femurBoundary === 'basic') {
+            if (longLegResults.cut === '2° valgus cut') displayFemoralCutStr = '3° valgus cut';
+            else if (longLegResults.cut === '6° valgus cut') displayFemoralCutStr = '5° valgus cut';
+        }
+
+        // Tibial Cut
+        const mpta = longLegResults.mpta;
+        let tibialVarusCut = 0;
+        if (mpta !== null) {
+            if (mpta < 85) tibialVarusCut = 4;
+            else if (mpta < 87) tibialVarusCut = 3;
+            else if (mpta < 88) tibialVarusCut = 2;
+            else if (mpta < 89) tibialVarusCut = 1;
+        }
+        if (tibiaBoundary === 'basic' && tibialVarusCut > 2) {
+            tibialVarusCut = 2;
+        }
+
+        const initialFemoral = displayFemoralCutStr ? parseFloat(displayFemoralCutStr) : 3;
+        const initialTibial = tibialVarusCut;
+        return { initialFemoral, initialTibial };
+    }, [longLegResults, femurBoundary, tibiaBoundary]);
+
+    useEffect(() => {
+        const { initialFemoral, initialTibial } = getBoundaryAdjustedValues();
+
+        if (femoralCutSim === null) setFemoralCutSim(initialFemoral);
+        if (tibialCutSim === null) setTibialCutSim(initialTibial);
+        if (appliedFemoralCutSim === null) setAppliedFemoralCutSim(0);
+        if (appliedTibialCutSim === null) setAppliedTibialCutSim(0);
+
+    }, [longLegResults, femurBoundary, tibiaBoundary, femoralCutSim, tibialCutSim, appliedFemoralCutSim, appliedTibialCutSim, setFemoralCutSim, setTibialCutSim, setAppliedFemoralCutSim, setAppliedTibialCutSim, getBoundaryAdjustedValues]);
+
+
+    const resetSimulation = useCallback(() => {
+        const { initialFemoral, initialTibial } = getBoundaryAdjustedValues();
+        setFemoralCutSim(initialFemoral);
+        setTibialCutSim(initialTibial);
+        setAppliedFemoralCutSim(0);
+        setAppliedTibialCutSim(0);
+        if (canvasRef.current) {
+            setCenterlineX(canvasRef.current.width / 2);
+        }
+    }, [getBoundaryAdjustedValues, setFemoralCutSim, setTibialCutSim, setAppliedFemoralCutSim, setAppliedTibialCutSim]);
+
+    const postOpMHKA = useMemo(() => {
+        if (!isLoaded || Object.keys(originalScaledLandmarksRef.current).length === 0) return null;
+
+        const originalLandmarks = originalScaledLandmarksRef.current;
+        const { hipCenter: originalHip, kneeCenter: originalKnee, ankleCenter: originalAnkle } = originalLandmarks;
+        if (!originalHip || !originalKnee || !originalAnkle) return null;
+
+        const lateralDirection = legSide === 'left' ? 1 : -1;
+        const femoralRad = (appliedFemoralCutSim ?? 0) * (Math.PI / 180);
+        const dxFemoral = Math.abs(originalKnee.y - originalHip.y) * Math.tan(femoralRad);
+        const tibialRad = (appliedTibialCutSim ?? 0) * (Math.PI / 180);
+        const dxTibial = Math.abs(originalAnkle.y - originalKnee.y) * Math.tan(tibialRad);
+        const totalDx = (-dxFemoral - dxTibial) * lateralDirection;
+        const newKnee = { x: originalKnee.x + totalDx, y: originalKnee.y };
+
+        const femurVec = { x: originalHip.x - newKnee.x, y: originalHip.y - newKnee.y };
+        const tibiaVec = { x: originalAnkle.x - newKnee.x, y: originalAnkle.y - newKnee.y };
+        return 180 - angleBetweenVectors(femurVec, tibiaVec);
+
+    }, [isLoaded, appliedFemoralCutSim, appliedTibialCutSim, legSide]);
+
+
+    const draw = useCallback(() => {
+        const canvas = canvasRef.current;
+        const offscreenCanvas = offscreenCanvasRef.current;
+        if (!canvas || !offscreenCanvas || !isLoaded || Object.keys(originalScaledLandmarksRef.current).length === 0) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // --- Calculations ---
+        const originalLandmarks = originalScaledLandmarksRef.current;
+        const { hipCenter: originalHip, kneeCenter: originalKnee, ankleCenter: originalAnkle } = originalLandmarks;
+        const lateralDirection = legSide === 'left' ? 1 : -1;
+        const femoralRad = (appliedFemoralCutSim ?? 0) * (Math.PI / 180);
+        const dxFemoral = Math.abs(originalKnee.y - originalHip.y) * Math.tan(femoralRad);
+        const tibialRad = (appliedTibialCutSim ?? 0) * (Math.PI / 180);
+        const dxTibial = Math.abs(originalAnkle.y - originalKnee.y) * Math.tan(tibialRad);
+        const totalDx = (-dxFemoral - dxTibial) * lateralDirection;
+        const newKnee = { x: originalKnee.x + totalDx, y: originalKnee.y };
+
+        // --- Create a separate canvas with the fully warped image ---
+        const warpedCanvas = document.createElement('canvas');
+        warpedCanvas.width = canvas.width;
+        warpedCanvas.height = canvas.height;
+        const warpedCtx = warpedCanvas.getContext('2d');
+        if (!warpedCtx) return;
+
+        const allX = Object.values(originalLandmarks).map((p: Point) => p.x);
+        const padding = 75;
+        const legMinX = Math.max(0, Math.min(...allX) - padding);
+        const legMaxX = Math.min(canvas.width, Math.max(...allX) + padding);
+        const legWidth = legMaxX - legMinX;
+
+        // Draw static (non-leg) parts onto warpedCanvas
+        warpedCtx.drawImage(offscreenCanvas, 0, 0, legMinX, canvas.height, 0, 0, legMinX, canvas.height);
+        warpedCtx.drawImage(offscreenCanvas, legMaxX, 0, canvas.width - legMaxX, canvas.height, legMaxX, 0, canvas.width - legMaxX, canvas.height);
+        warpedCtx.drawImage(offscreenCanvas, legMinX, 0, legWidth, originalHip.y, legMinX, 0, legWidth, originalHip.y);
+        warpedCtx.drawImage(offscreenCanvas, legMinX, originalAnkle.y, legWidth, canvas.height - originalAnkle.y, legMinX, originalAnkle.y, legWidth, canvas.height - originalAnkle.y);
+
+        // Draw warped leg segments onto warpedCanvas
+        for (let y = Math.floor(originalHip.y); y < Math.floor(originalKnee.y); y++) {
+            const t = (y - originalHip.y) / (originalKnee.y - originalHip.y);
+            const shiftX = (newKnee.x - originalKnee.x) * t;
+            warpedCtx.drawImage(offscreenCanvas, legMinX, y, legWidth, 1, legMinX + shiftX, y, legWidth, 1);
+        }
+        for (let y = Math.floor(originalKnee.y); y < Math.floor(originalAnkle.y); y++) {
+            const t = 1 - ((y - originalKnee.y) / (originalAnkle.y - originalKnee.y));
+            const shiftX = (newKnee.x - originalKnee.x) * t;
+            warpedCtx.drawImage(offscreenCanvas, legMinX, y, legWidth, 1, legMinX + shiftX, y, legWidth, 1);
+        }
+
+        // --- Compose Final View on Visible Canvas ---
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const operatedSide: 'left' | 'right' = legSide === 'left' ? 'right' : 'left';
+
+        if (isSplitView) {
+            if (operatedSide === 'right') { // Operate on right side of screen
+                ctx.drawImage(offscreenCanvas, 0, 0, centerlineX, canvas.height, 0, 0, centerlineX, canvas.height);
+                ctx.drawImage(warpedCanvas, centerlineX, 0, canvas.width - centerlineX, canvas.height, centerlineX, 0, canvas.width - centerlineX, canvas.height);
+            } else { // Operate on left side of screen
+                ctx.drawImage(warpedCanvas, 0, 0, centerlineX, canvas.height, 0, 0, centerlineX, canvas.height);
+                ctx.drawImage(offscreenCanvas, centerlineX, 0, canvas.width - centerlineX, canvas.height, centerlineX, 0, canvas.width - centerlineX, canvas.height);
+            }
+        } else {
+            ctx.drawImage(warpedCanvas, 0, 0);
+        }
+
+        // --- Draw Overlays ---
+        const drawOverlay = (context: CanvasRenderingContext2D) => {
+            context.strokeStyle = 'rgba(255, 255, 0, 0.9)';
+            context.fillStyle = 'rgba(255, 255, 0, 0.9)';
+            context.lineWidth = 3;
+            context.beginPath();
+            context.moveTo(originalHip.x, originalHip.y);
+            context.lineTo(newKnee.x, newKnee.y);
+            context.lineTo(originalAnkle.x, originalAnkle.y);
+            context.stroke();
+            [originalHip, newKnee, originalAnkle].forEach(p => {
+                context.beginPath(); context.arc(p.x, p.y, 6, 0, Math.PI * 2); context.fill();
+            });
+
+            context.font = 'bold 24px Roboto, sans-serif';
+            const text = `mHKA: ${postOpMHKA?.toFixed(1) ?? '--'}°`;
+            const textMetrics = context.measureText(text);
+            const textX = newKnee.x - (textMetrics.width / 2);
+            context.fillStyle = 'rgba(29, 29, 31, 0.8)';
+            context.fillRect(textX - 10, newKnee.y - 48, textMetrics.width + 20, 38);
+            context.fillStyle = 'white';
+            context.fillText(text, textX, newKnee.y - 22);
+        };
+
+        if (isSplitView) {
+            ctx.save();
+            if (operatedSide === 'right') ctx.rect(centerlineX, 0, canvas.width - centerlineX, canvas.height);
+            else ctx.rect(0, 0, centerlineX, canvas.height);
+            ctx.clip();
+            drawOverlay(ctx);
+            ctx.restore();
+        } else {
+            drawOverlay(ctx);
+        }
+
+        if (isSplitView) {
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerlineX, 0);
+            ctx.lineTo(centerlineX, canvas.height);
+            ctx.stroke();
+        }
+
+        setSimAfterImage(canvas.toDataURL('image/png'));
+
+    }, [appliedFemoralCutSim, appliedTibialCutSim, legSide, isLoaded, centerlineX, isSplitView, setSimAfterImage, postOpMHKA]);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || !longLegImageSrc) { setIsLoaded(false); return; }
+
+        const mainImage = new Image();
+        mainImage.crossOrigin = "anonymous";
+        mainImage.src = longLegImageSrc;
+        setIsLoaded(false);
+
+        mainImage.onload = () => {
+            const container = canvas.parentElement;
+            if (!container) return;
+            const ar = mainImage.naturalWidth / mainImage.naturalHeight;
+            let newWidth = container.clientWidth;
+            let newHeight = newWidth / ar;
+
+            const maxHeight = Math.max(container.clientHeight, 600);
+            if (newHeight > maxHeight) {
+                newHeight = maxHeight; newWidth = newHeight * ar;
+            }
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            setCenterlineX(newWidth / 2); // Initialize centerline to the center
+
+            const offscreen = document.createElement('canvas');
+            offscreen.width = newWidth;
+            offscreen.height = newHeight;
+            offscreen.getContext('2d')?.drawImage(mainImage, 0, 0, newWidth, newHeight);
+            offscreenCanvasRef.current = offscreen;
+
+            const getScaledLandmarks = (plannerCanvas: HTMLImageElement) => {
+                const plannerCanvasWidth = plannerCanvas.width;
+                const scale = newWidth / plannerCanvasWidth;
+                const scaledLandmarks: Landmarks = {};
+                for (const key in longLegLandmarks) {
+                    scaledLandmarks[key] = {
+                        x: longLegLandmarks[key].x * scale,
+                        y: longLegLandmarks[key].y * scale,
+                    };
+                }
+                return scaledLandmarks;
+            };
+
+            if (longLegCanvasDataUrl && Object.keys(longLegLandmarks).length > 0) {
+                const plannerCanvasImage = new Image();
+                plannerCanvasImage.src = longLegCanvasDataUrl;
+                plannerCanvasImage.onload = () => {
+                    originalScaledLandmarksRef.current = getScaledLandmarks(plannerCanvasImage);
+                    setIsLoaded(true);
+                };
+            } else {
+                originalScaledLandmarksRef.current = { ...longLegLandmarks };
+                setIsLoaded(true);
+            }
+        };
+    }, [longLegImageSrc, longLegCanvasDataUrl, longLegLandmarks]);
+
+    useEffect(() => {
+        if (isLoaded) {
+            draw();
+        }
+    }, [isLoaded, draw]);
+
+    const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        if (isSplitView && Math.abs(x - centerlineX) < 10) {
+            setIsDraggingCenterline(true);
+        }
+    };
+
+    const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        // This handler is now only for the cursor
+        if (isDraggingCenterline) {
+            e.currentTarget.style.cursor = 'ew-resize';
+            return;
+        }
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        if (isSplitView && Math.abs(x - centerlineX) < 10) {
+            e.currentTarget.style.cursor = 'ew-resize';
+        } else {
+            e.currentTarget.style.cursor = 'default';
+        }
+    };
+
+    const handleWindowMouseMove = useCallback((e: MouseEvent) => {
+        if (isDraggingCenterline) {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            const newX = Math.max(0, Math.min(e.clientX - rect.left, canvas.width));
+            setCenterlineX(newX);
+        }
+    }, [isDraggingCenterline]);
+
+    const handleWindowMouseUp = useCallback(() => {
+        if (isDraggingCenterline) {
+            setIsDraggingCenterline(false);
+        }
+    }, [isDraggingCenterline]);
+
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        e.preventDefault(); // Prevent scrolling
+        const touch = e.touches[0];
+        if (!touch) return;
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+
+        if (isSplitView && Math.abs(x - centerlineX) < 20) { // Wider touch target
+            setIsDraggingCenterline(true);
+        }
+    };
+
+    const handleTouchMove = useCallback((e: TouchEvent) => {
+        if (!isDraggingCenterline) return;
+        e.preventDefault(); // Critical: stops page scroll
+
+        const touch = e.touches[0];
+        if (!touch) return;
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const newX = Math.max(50, Math.min(e.touches[0].clientX - rect.left, canvas.width - 50)); // Prevent edge sticking
+        setCenterlineX(newX);
+    }, [isDraggingCenterline]);
+
+    const handleTouchEnd = useCallback(() => {
+        setIsDraggingCenterline(false);
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('mousemove', handleWindowMouseMove);
+        window.addEventListener('mouseup', handleWindowMouseUp);
+
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd);
+        window.addEventListener('touchcancel', handleTouchEnd);
+
+        return () => {
+            window.removeEventListener('mousemove', handleWindowMouseMove);
+            window.removeEventListener('mouseup', handleWindowMouseUp);
+
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
+            window.removeEventListener('touchcancel', handleTouchEnd);
+        };
+    }, [handleWindowMouseMove, handleWindowMouseUp, handleTouchMove, handleTouchEnd]);
+
+    const { initialFemoral, initialTibial } = getBoundaryAdjustedValues();
+
+    return (
+        <div className="flex flex-col h-full">
+            <h2 className="text-5xl font-bold mb-8">Resection Simulation</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-grow">
+                {/* Column 1: Pre-Op HKA View */}
+                <div className="lg:col-span-1 hidden lg:block">
+                    <HKAView />
+                </div>
+
+                {/* Column 2: Controls */}
+                <div className="lg:col-span-1 gemini-dark-card p-8 rounded-lg space-y-6 flex flex-col">
+                    <div className="flex items-center justify-between">
+                        <label htmlFor="split-view-toggle" className="text-xl font-semibold text-gray-300">Split View</label>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="split-view-toggle" className="sr-only peer" checked={isSplitView} onChange={() => setIsSplitView(!isSplitView)} />
+                            <div className="w-14 h-8 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#6D282C]"></div>
+                        </label>
+                    </div>
+                    <div className="bg-gray-900 p-4 rounded-md text-center">
+                        <p className="text-lg text-gray-400">Pre-Op mHKA</p>
+                        <p className="font-bold text-4xl text-gray-100">{longLegResults.mhka?.toFixed(1) ?? '--'}°</p>
+                    </div>
+                    <div>
+                        <label className="block text-xl font-semibold mb-3">Femoral Valgus Cut</label>
+                        <div className="flex items-center space-x-3">
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">-</button>
+                            <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => setFemoralCutSim(parseFloat(e.target.value))} className="gemini-dark-input w-full p-2 rounded-md text-center text-2xl font-bold" />
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">+</button>
+                        </div>
+                        <button onClick={() => setAppliedFemoralCutSim(femoralCutSim)} className="gemini-dark-button font-bold py-3 px-5 rounded-lg w-full text-lg mt-3">Apply Femoral Cut</button>
+                    </div>
+                    <div>
+                        <label className="block text-xl font-semibold mb-3">Tibial Varus Cut</label>
+                        <div className="flex items-center space-x-3">
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">-</button>
+                            <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => setTibialCutSim(parseFloat(e.target.value))} className="gemini-dark-input w-full p-2 rounded-md text-center text-2xl font-bold" />
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">+</button>
+                        </div>
+                        <button onClick={() => setAppliedTibialCutSim(tibialCutSim)} className="gemini-dark-button font-bold py-3 px-5 rounded-lg w-full text-lg mt-3">Apply Tibial Cut</button>
+                    </div>
+                    <div className="bg-gray-800 border-2 border-yellow-500 p-4 rounded-md text-center">
+                        <p className="text-xl text-yellow-400">Post-Simulation mHKA</p>
+                        <p className="font-bold text-5xl text-yellow-300">{postOpMHKA?.toFixed(1) ?? '--'}°</p>
+                    </div>
+                    <div className="flex-grow"></div>
+                    <div>
+                        <button onClick={resetSimulation} className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-lg transition text-xl">Reset Simulation</button>
+                    </div>
+                </div>
+
+                {/* Simulation View - Columns 3,4,5 */}
+                <div className="lg:col-span-3 gemini-dark-card p-2 rounded-lg flex items-center justify-center min-h-[600px] h-full bg-black">
+                    {!isLoaded && !longLegImageSrc && <p className="text-gray-500 p-4 text-center">Load a Long Leg X-ray in the planner to begin simulation.</p>}
+                    {!isLoaded && longLegImageSrc && <p className="text-gray-400">Loading Simulation...</p>}
+                    <canvas
+                        ref={canvasRef}
+                        className={`transition-opacity duration-300 ${!isLoaded ? 'opacity-0' : 'opacity-100'}`}
+                        onMouseDown={handleCanvasMouseDown}
+                        onMouseMove={handleCanvasMouseMove}
+                        onMouseLeave={() => canvasRef.current ? canvasRef.current.style.cursor = 'default' : null}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={(e) => e.preventDefault()}
+                        style={{ touchAction: 'none' }}
+                    />
+                </div>
+            </div>
+            <div className="mt-8 flex justify-between">
+                <button onClick={() => setPage('results-analysis')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-10 rounded-lg transition text-xl">&larr; Back to Results</button>
+                <button onClick={() => setPage('report')} className="gemini-dark-button font-bold py-4 px-10 rounded-lg transition text-xl">View Report &rarr;</button>
+            </div>
+        </div>
+    );
+};
+
+export default SimulationPage;

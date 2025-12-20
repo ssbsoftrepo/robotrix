@@ -1,0 +1,7 @@
+{
+  "name": "Robotrix V5",
+  "description": "An advanced orthopedic surgical planning tool for Total Knee Replacement (TKR). This application utilizes the CPAK (Coronal Plane Alignment of the Knee) matrix to analyze X-ray images, calculate critical angles, and simulate surgical cuts, assisting surgeons in creating precise, patient-specific plans.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

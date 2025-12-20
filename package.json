@@ -1,0 +1,31 @@
+{
+  "name": "robotrix-v5",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@bcyesil/capacitor-plugin-printer": "^0.0.6",
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/camera": "^7.0.3",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/filesystem": "^7.1.5",
+    "@capacitor/ios": "^7.4.4",
+    "@google/genai": "^1.29.1",
+    "idb-keyval": "^6.2.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.4.4",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
