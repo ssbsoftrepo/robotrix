@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Patient, Page } from '../types';
-import { getPlansForPatient, createNewPlan, PlanMetadata } from '../utils/storage';
+import { getPlansForPatient, createNewPlan, PlanMetadata, getNextPatientId, getNextPatientIdPreview } from '../utils/storage';
 import LdfaModeModal from '../components/LdfaModeModal';
 import ImplantThicknessModal from '../components/ImplantThicknessModal';
 
@@ -235,18 +235,23 @@ const CaseManagementPage: React.FC = () => {
         id: `PID-${Date.now()}`,
         date: new Date().toISOString().split('T')[0],
         firstName: '',
-        lastName: '', // Kept for data structure consistency, but UI uses a single name field
-        age: '', // Kept for data structure, removed from UI
-        gender: 'Male', // Default, removed from UI
+        lastName: '',
+        age: '',
+        gender: 'Male',
         legSide: 'Left',
     });
 
-    // This effect should only run ONCE when the component mounts to reset the state.
+    const [suggestedId, setSuggestedId] = useState<string>('Loading...');
+
     useEffect(() => {
-        // We only clear if we are strictly initializing/resetting.
-        // If we have selected a patient but not a plan, we keep patient ID.
-        // But the previous logic was clearing everything on mount.
-        // Let's keep existing behavior but be mindful.
+        if (!currentPatientId) {
+            getNextPatientIdPreview().then(setSuggestedId);
+        } else {
+            setSuggestedId(''); // Clear when editing existing
+        }
+    }, [currentPatientId]);
+
+    useEffect(() => {
         setCurrentPatientId(null);
         setCurrentPlanId(null);
         setPlannerMode(null);
@@ -280,30 +285,41 @@ const CaseManagementPage: React.FC = () => {
         setFormData(prev => ({ ...prev, [id]: value as any }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // When creating a new patient, we save, set as current, and then PROMPT for a plan?
-        // Or create a default one?
-        // Let's create a default plan automatically for new patients to streamline flow.
-        (async () => {
-            await savePatient(formData);
-            await setCurrentPatientId(formData.id);
-            const planId = await createNewPlan(formData.id, 'Initial Plan');
+
+        let patientId: string;
+
+        if (currentPatientId) {
+            patientId = currentPatientId; // Update → keep old ID
+        } else {
+            patientId = await getNextPatientId(); // New → actually increment
+        }
+
+        const patientToSave: Patient = {
+            ...formData,
+            id: patientId,
+        };
+
+        await savePatient(patientToSave);
+        await setCurrentPatientId(patientId);
+
+        if (!currentPatientId) {
+            const planId = await createNewPlan(patientId, 'Initial Plan');
             await setCurrentPlanId(planId);
             setPlannerMode('advanced');
-        })();
+        }
     };
 
     const selectPatient = async (id: string) => {
         await setCurrentPatientId(id);
-        // Show plan selection modal
         setPlanModalConfig({ isOpen: true, patientId: id, intent: 'load' });
     };
 
     const handlePlanSelected = async (planId: string) => {
         await setCurrentPlanId(planId);
         const currentIntent = planModalConfig.intent;
-        setPlanModalConfig(prev => ({ ...prev, isOpen: false })); // Keep intent until we know the next step
+        setPlanModalConfig(prev => ({ ...prev, isOpen: false }));
 
         if (currentIntent === 'load') {
             setPlannerMode('advanced');
@@ -352,8 +368,6 @@ const CaseManagementPage: React.FC = () => {
     };
 
     const handleSelectResultType = async (type: 'long-leg' | 'valgus-stress') => {
-        // If we are here, we should have a plan loaded or be in legacy mode.
-        // If selectedPatientForResults is set, we use it.
         const pid = selectedPatientForResults || currentPatientId;
         if (!pid) return;
 
@@ -599,7 +613,16 @@ const CaseManagementPage: React.FC = () => {
                             </div>
                             <div className="md:col-span-2">
                                 <label htmlFor="id" className="block mb-2 text-sm font-medium text-gray-400">Patient ID</label>
-                                <input type="text" id="id" value={formData.id} onChange={handleInputChange} className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg" required />
+                                <input
+                                    type="text"
+                                    id="id"
+                                    value={currentPatientId ? formData.id : suggestedId}
+                                    onChange={handleInputChange}
+                                    disabled={!!currentPatientId}
+                                    className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg bg-gray-800"
+                                    required
+                                    placeholder="Auto-generated ID"
+                                />
                             </div>
                             <div className="md:col-span-2">
                                 <label htmlFor="legSide" className="block mb-2 text-sm font-medium text-gray-400">Leg Side</label>

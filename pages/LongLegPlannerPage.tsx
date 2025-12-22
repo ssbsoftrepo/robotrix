@@ -32,39 +32,30 @@ const angleBetweenVectors = (v1: Point, v2: Point) => {
 
 const getLongLegCpakType = (ahka: number, jlo: number): string => {
     let ahkaClass: 'varus' | 'neutral' | 'valgus';
-    if (ahka < -2) {
-        ahkaClass = 'varus';
-    } else if (ahka > 2) {
-        ahkaClass = 'valgus';
-    } else {
-        ahkaClass = 'neutral';
-    }
+    if (ahka < -2) ahkaClass = 'varus';
+    else if (ahka > 2) ahkaClass = 'valgus';
+    else ahkaClass = 'neutral';
 
     let jloClass: 'distal' | 'neutral' | 'proximal';
-    if (jlo < 177) {
-        jloClass = 'distal';
-    } else if (jlo > 183) {
-        jloClass = 'proximal';
-    } else {
-        jloClass = 'neutral';
-    }
+    if (jlo > 3) jloClass = 'proximal';
+    else if (jlo < 1) jloClass = 'distal';
+    else jloClass = 'neutral';
 
     if (jloClass === 'distal') {
         if (ahkaClass === 'varus') return 'I';
         if (ahkaClass === 'neutral') return 'II';
-        if (ahkaClass === 'valgus') return 'III';
-    } else if (jloClass === 'neutral') {
+        return 'III';
+    }
+    if (jloClass === 'neutral') {
         if (ahkaClass === 'varus') return 'IV';
         if (ahkaClass === 'neutral') return 'V';
-        if (ahkaClass === 'valgus') return 'VI';
-    } else if (jloClass === 'proximal') {
-        if (ahkaClass === 'varus') return 'VII';
-        if (ahkaClass === 'neutral') return 'VIII';
-        if (ahkaClass === 'valgus') return 'IX';
+        return 'VI';
     }
-
-    return '--';
+    if (ahkaClass === 'varus') return 'VII';
+    if (ahkaClass === 'neutral') return 'VIII';
+    return 'IX';
 };
+
 
 const getLongLegValgusCut = (ldfa: number | null): string => {
     if (ldfa === null) return '--';
@@ -306,48 +297,74 @@ const LongLegPlannerPage: React.FC = () => {
             newResults.vca = vca;
         }
 
-        if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femoralJointLine') && femoralMedial && femoralLateral) {
-            const isLeftKnee = legSide === 'left';
-            const medialFemoralCondyle = (isLeftKnee ? femoralMedial.x < femoralLateral.x : femoralMedial.x > femoralLateral.x) ? femoralMedial : femoralLateral;
-            const lateralFemoralCondyle = (isLeftKnee ? femoralMedial.x > femoralLateral.x : femoralMedial.x < femoralLateral.x) ? femoralMedial : femoralLateral;
+        if (
+            visibleLandmarkSets.has('hkaLine') &&
+            visibleLandmarkSets.has('femoralJointLine') &&
+            femoralMedial &&
+            femoralLateral
+        ) {
+            const femurMechAxis = {
+                x: hipCenter.x - kneeCenter.x,
+                y: hipCenter.y - kneeCenter.y
+            };
 
-            const femoralAxisVec = { x: kneeCenter.x - hipCenter.x, y: kneeCenter.y - hipCenter.y };
+            const femurJointLine =
+                legSide === 'left'
+                    ? {
+                        x: femoralLateral.x - femoralMedial.x,
+                        y: femoralLateral.y - femoralMedial.y
+                    }
+                    : {
+                        x: femoralMedial.x - femoralLateral.x,
+                        y: femoralMedial.y - femoralLateral.y
+                    };
 
-            let femoralJointLineVec;
-            if (legSide === 'left') {
-                femoralJointLineVec = { x: lateralFemoralCondyle.x - medialFemoralCondyle.x, y: lateralFemoralCondyle.y - medialFemoralCondyle.y };
-            } else {
-                femoralJointLineVec = { x: medialFemoralCondyle.x - lateralFemoralCondyle.x, y: medialFemoralCondyle.y - lateralFemoralCondyle.y };
-            }
+            const rawAngle = angleBetweenVectors(femurMechAxis, femurJointLine);
+            const ldfa = Math.min(rawAngle, 180 - rawAngle);
 
-            const ldfa = angleBetweenVectors(femoralAxisVec, femoralJointLineVec);
+
             newResults.ldfa = ldfa;
         }
 
-        if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('tibialJointLine') && tibialMedial && tibialLateral) {
-            const isLeftKnee = legSide === 'left';
-            const medialTibialCondyle = (isLeftKnee ? tibialMedial.x < tibialLateral.x : tibialMedial.x > tibialLateral.x) ? tibialMedial : tibialLateral;
-            const lateralTibialCondyle = (isLeftKnee ? tibialMedial.x > tibialLateral.x : tibialMedial.x < tibialLateral.x) ? tibialMedial : tibialLateral;
+        if (
+            visibleLandmarkSets.has('hkaLine') &&
+            visibleLandmarkSets.has('tibialJointLine') &&
+            tibialMedial &&
+            tibialLateral
+        ) {
+            const tibiaMechAxis = {
+                x: ankleCenter.x - kneeCenter.x,
+                y: ankleCenter.y - kneeCenter.y
+            };
 
-            const tibialAxisVec = { x: ankleCenter.x - kneeCenter.x, y: ankleCenter.y - kneeCenter.y };
-            const tibialJointLineVec = { x: medialTibialCondyle.x - lateralTibialCondyle.x, y: medialTibialCondyle.y - lateralTibialCondyle.y };
+            const tibiaJointLine = {
+                x: tibialMedial.x - tibialLateral.x,
+                y: tibialMedial.y - tibialLateral.y
+            };
 
-            const mpta = angleBetweenVectors(tibialAxisVec, tibialJointLineVec);
+            const rawAngle = angleBetweenVectors(tibiaMechAxis, tibiaJointLine);
+            const mpta = Math.min(rawAngle, 180 - rawAngle);
+
             newResults.mpta = mpta;
+
         }
 
+
         if (newResults.ldfa !== null && newResults.mpta !== null) {
-            const ahka = newResults.mpta - newResults.ldfa;
-            const jlo = newResults.mpta + newResults.ldfa;
-            let jloType = '--';
-            if (jlo < 177) { jloType = 'APEX DISTAL'; }
-            else if (jlo > 183) { jloType = 'APEX PROXIMAL'; }
-            else { jloType = 'APEX NEUTRAL'; }
+            const ahka = newResults.mpta + newResults.ldfa - 180;
+            const jlo = newResults.mpta - newResults.ldfa;
+
+            let jloType: 'APEX DISTAL' | 'APEX PROXIMAL' | 'APEX NEUTRAL';
+            if (jlo > 3) jloType = 'APEX PROXIMAL';
+            else if (jlo < -3) jloType = 'APEX DISTAL';
+            else jloType = 'APEX NEUTRAL';
 
             newResults = {
                 ...newResults,
-                ahka, jlo, jloType,
-                cpak: getLongLegCpakType(ahka, jlo),
+                ahka,
+                jlo: Math.abs(jlo),
+                jloType,
+                cpak: getLongLegCpakType(ahka, Math.abs(jlo)),
                 cut: getLongLegValgusCut(newResults.ldfa),
                 recommendedVarusCut: getRecommendedVarusCut(newResults.mpta),
             };
@@ -832,7 +849,7 @@ const LongLegPlannerPage: React.FC = () => {
                 </div>
 
                 {/* Viewer Panel */}
-                <div className="lg:col-span-2 gemini-dark-card p-2 rounded-lg relative min-h-[600px] flex items-center justify-center overflow-hidden">
+                <div className="lg:col-span-2 gemini-dark-card p-2 rounded-lg relative min-h-[600px] max-h-screen flex items-center justify-center overflow-hidden">
                     {!longLegImageSrc ? (
                         <div className="text-center text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v5a4 4 0 01-4-4H7z" /></svg>
@@ -843,27 +860,45 @@ const LongLegPlannerPage: React.FC = () => {
                             <div className="relative">
                                 <img ref={imageRef} src={longLegImageSrc} alt="X-ray" className="block max-w-full max-h-full"
                                     onLoad={(e) => {
-                                        const canvas = canvasRef.current;
                                         const image = imageRef.current;
-                                        if (canvas && image) {
-                                            const ar = image.naturalWidth / image.naturalHeight;
-                                            const viewer = canvas.parentElement?.parentElement;
-                                            if (viewer) {
-                                                let newWidth = viewer.clientWidth;
-                                                let newHeight = newWidth / ar;
-                                                if (newHeight > viewer.clientHeight) {
-                                                    newHeight = viewer.clientHeight;
-                                                    newWidth = newHeight * ar;
-                                                }
-                                                canvas.width = newWidth;
-                                                canvas.height = newHeight;
-                                                image.style.width = `${newWidth}px`;
-                                                image.style.height = `${newHeight}px`;
-                                                if (Object.keys(longLegLandmarks).length === 0) {
-                                                    resetLandmarks(canvas);
-                                                }
-                                            }
+                                        const canvas = canvasRef.current;
+                                        if (!image || !canvas) return;
+
+                                        const viewer = canvas.parentElement?.parentElement;
+                                        if (!viewer) return;
+
+                                        // Get available space: subtract padding and some safe margin
+                                        const availableHeight = viewer.clientHeight - 32; // ~p-2 (8px*4) + margin
+                                        const availableWidth = viewer.clientWidth - 32;
+
+                                        const aspectRatio = image.naturalWidth / image.naturalHeight;
+
+                                        // Start by trying to fit height first (best for long vertical X-rays)
+                                        let displayHeight = availableHeight;
+                                        let displayWidth = displayHeight * aspectRatio;
+
+                                        // If it would be too wide, constrain by width instead
+                                        if (displayWidth > availableWidth) {
+                                            displayWidth = availableWidth;
+                                            displayHeight = displayWidth / aspectRatio;
                                         }
+
+                                        // Apply sizes
+                                        canvas.width = displayWidth;
+                                        canvas.height = displayHeight;
+
+                                        image.style.width = `${displayWidth}px`;
+                                        image.style.height = `${displayHeight}px`;
+                                        image.style.maxHeight = 'none'; // override any tailwind max-h
+                                        image.style.maxWidth = 'none';
+
+                                        // Initialize landmarks only once
+                                        if (Object.keys(longLegLandmarks).length === 0) {
+                                            resetLandmarks(canvas);
+                                        }
+
+                                        // Force redraw
+                                        requestAnimationFrame(draw);
                                     }}
                                 />
                                 <canvas ref={canvasRef} onTouchStart={handleTouchStart} onMouseDown={handleMouseDown} className="absolute top-0 left-0 cursor-crosshair" />

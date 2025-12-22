@@ -4,7 +4,7 @@ import { Patient } from '../types';
 import { saveImageToFilesystem, loadImageFromFilesystem, deleteImageFromFilesystem } from './filesystem';
 
 const PATIENTS_KEY = 'cpakPatients';
-
+const PATIENT_COUNTER_KEY = 'cpakPatientCounter';
 export const savePatients = async (patients: Patient[]) => {
     try {
         await set(PATIENTS_KEY, patients);
@@ -12,8 +12,6 @@ export const savePatients = async (patients: Patient[]) => {
         console.error('Failed to save patients to IDB', e);
     }
 };
-
-// --- Plan Interfaces & Management ---
 
 export interface PlanMetadata {
     id: string;
@@ -25,14 +23,36 @@ export interface PlanMetadata {
 
 const PLAN_INDEX_PREFIX = 'patientPlans_';
 
+export const getNextPatientId = async (): Promise<string> => {
+    try {
+        const currentCounter = (await get<number>(PATIENT_COUNTER_KEY)) || 0;
+        const nextCounter = currentCounter + 1;
+        await set(PATIENT_COUNTER_KEY, nextCounter);
+
+        // Format as PID-0001, PID-0002, etc.
+        return `PID-${nextCounter.toString().padStart(4, '0')}`;
+    } catch (e) {
+        console.error('Failed to generate next patient ID, falling back to timestamp', e);
+        // Fallback in case of error
+        return `PID-${Date.now()}`;
+    }
+};
+
+export const getNextPatientIdPreview = async (): Promise<string> => {
+    try {
+        const currentCounter = (await get<number>(PATIENT_COUNTER_KEY)) || 0;
+        const nextCounter = currentCounter + 1;
+        return `PID-${nextCounter.toString().padStart(4, '0')}`;
+    } catch (e) {
+        console.error('Failed to preview next patient ID', e);
+        return `PID-????`;
+    }
+};
+
 export const getPlansForPatient = async (patientId: string): Promise<PlanMetadata[]> => {
     try {
         const plans = await get<PlanMetadata[]>(`${PLAN_INDEX_PREFIX}${patientId}`);
         if (plans && plans.length > 0) return plans;
-
-        // Backward compatibility: Check if legacy caseData exists
-        // If so, verify if it actually has meaningful data (optional, but good practice)
-        // For now, if no plans exist, we check if there's a legacy case blob.
         const legacyData = await get(`caseData_${patientId}`);
         const lsLegacyData = localStorage.getItem(`caseData_${patientId}`);
 
@@ -66,12 +86,6 @@ export const createNewPlan = async (patientId: string, name: string): Promise<st
 
     try {
         const currentPlans = (await get<PlanMetadata[]>(`${PLAN_INDEX_PREFIX}${patientId}`)) || [];
-        // If this is the first real plan being created, we should seemingly migrate the legacy plan if it exists
-        // OR we just append this new one. If we append, the legacy one might be lost if we don't return it in getPlans.
-        // Let's ensure if we are creating a new plan, we check and "solidify" the legacy plan if it exists?
-        // Actually, getPlans returns a virtual one.
-        // If we write to this array, next time getPlans is called, it returns what's in DB.
-        // So we MUST include the virtual plan in the DB now if we are starting to save explicit plans.
 
         if (currentPlans.length === 0) {
             const legacyData = await get(`caseData_${patientId}`);
@@ -85,10 +99,6 @@ export const createNewPlan = async (patientId: string, name: string): Promise<st
                     updatedAt: new Date().toISOString()
                 };
                 currentPlans.push(legacyPlan);
-                // Note: The data for this legacy plan is already at caseData_${patientId}
-                // Our load logic handles `legacy_${patientId}` special case?
-                // Or we should migrate the DATA too?
-                // Simpler: loadCaseData handles the key mapping.
             }
         }
 
@@ -143,16 +153,12 @@ const processForSave = async (data: any): Promise<any> => {
             if (Object.prototype.hasOwnProperty.call(data, key)) {
                 const value = data[key];
 
-                // If value is a Base64 image string, save it
                 if (typeof value === 'string' && isBase64Image(value)) {
                     try {
                         const fileName = await saveImageToFilesystem(value);
                         newData[key] = `${FILE_PREFIX}${fileName}`;
                     } catch (e) {
                         console.error(`Failed to save image for key ${key}`, e);
-                        // Fallback: keep original data if save fails? 
-                        // Or set null? Keeping original might blow up quota if that was the issue.
-                        // Let's keep original to prevent data loss.
                         newData[key] = value;
                     }
                 } else {
@@ -167,7 +173,6 @@ const processForSave = async (data: any): Promise<any> => {
     return data;
 };
 
-// Recursive function to process data after loading
 const processForLoad = async (data: any): Promise<any> => {
     if (data === null || data === undefined) return data;
 
@@ -229,9 +234,6 @@ export const saveCaseData = async (id: string, caseData: any) => {
 
 
 export const loadCaseData = async (id: string): Promise<any | null> => {
-    // If id starts with "legacy_", it maps to caseData_<patientId>
-    // If id starts with "plan_", it maps to caseData_<planId>
-    // If id is just a raw patientId (old behavior), maps to caseData_<patientId>
 
     let storageKey = `caseData_${id}`;
 
@@ -269,9 +271,6 @@ const loadDataByKey = async (storageKey: string, debugId: string): Promise<any |
 }
 
 export const clearCaseData = async (patientId: string) => {
-    // Ideally we should also delete the files?
-    // This is tricky because we need to know WHICH files.
-    // If we want to be clean, we load first, find refs, delete files, then delete IDB.
     try {
         const data = await get(`caseData_${patientId}`);
         if (data) {

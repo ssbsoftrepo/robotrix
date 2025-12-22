@@ -71,12 +71,25 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
     return '--';
 };
 
-const getLongLegValgusCut = (ldfa: number | null): string => {
-    if (ldfa === null) return '--';
-    if (ldfa >= 92) return '3° valgus cut';
-    if (ldfa >= 88) return '4° valgus cut';
-    if (ldfa >= 87) return '5° valgus cut';
-    return '5° valgus cut'; // Default for lower values
+const getValgusStressFemurCut = (obliquity: number): string => {
+    if (obliquity >= 3) return '5° valgus cut';
+    if (obliquity >= 1) return '4° valgus cut';
+    return '3° valgus cut';
+};
+
+const getValgusStressCPAK = (
+    obliquity: number,
+    ldfa: number,
+    mpta: number
+): string => {
+    if (obliquity >= 3) return 'CPAK 2';
+    if (obliquity >= 1) return 'CPAK 1';
+
+    // Neutral obliquity
+    if (Math.abs(ldfa - 90) < 1 && Math.abs(mpta - 90) < 1) {
+        return 'CPAK 5';
+    }
+    return 'CPAK 4';
 };
 
 
@@ -199,6 +212,8 @@ const ValgusStressPlannerPage: React.FC = () => {
             mpta: null as number | null,
             femurType: '--',
             cpak: '--',
+            ahka: null,
+            jlo: null,
             cut: '--',
         };
 
@@ -228,49 +243,86 @@ const ValgusStressPlannerPage: React.FC = () => {
         const lateralPoint = legSide === 'left' ? onScreenRightPoint : onScreenLeftPoint;
 
         // 2. LDFA Calculation
-        if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter && medialPoint && lateralPoint) {
-            const femurAxisVec = { x: femurAxisPoint.x - jointCenter.x, y: femurAxisPoint.y - jointCenter.y };
-            let femoralJointLineVec;
-            if (legSide === 'left') {
-                femoralJointLineVec = { x: lateralPoint.x - medialPoint.x, y: lateralPoint.y - medialPoint.y };
-            } else {
-                femoralJointLineVec = { x: medialPoint.x - lateralPoint.x, y: medialPoint.y - lateralPoint.y };
-            }
-            const ldfa = angleBetweenVectors(femurAxisVec, femoralJointLineVec);
-            newResults.ldfa = ldfa;
+        if (
+            visibleLandmarkSets.has('femurAnatomicAxis') &&
+            femurAxisPoint &&
+            jointCenter &&
+            medialPoint &&
+            lateralPoint
+        ) {
+            const femurAxisVec = {
+                x: jointCenter.x - femurAxisPoint.x,
+                y: jointCenter.y - femurAxisPoint.y
+            };
+
+            const femoralJointLineVec =
+                legSide === 'left'
+                    ? { x: lateralPoint.x - medialPoint.x, y: lateralPoint.y - medialPoint.y }
+                    : { x: medialPoint.x - lateralPoint.x, y: medialPoint.y - lateralPoint.y };
+
+            const rawAngle = angleBetweenVectors(femurAxisVec, femoralJointLineVec);
+            newResults.ldfa = rawAngle > 90 ? rawAngle : 180 - rawAngle;
         }
 
         // 3. MPTA Calculation
-        if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter && medialPoint && lateralPoint) {
-            const tibiaAxisVec = { x: tibiaAxisPoint.x - jointCenter.x, y: tibiaAxisPoint.y - jointCenter.y };
-            const tibialJointLineVec = { x: medialPoint.x - lateralPoint.x, y: medialPoint.y - lateralPoint.y };
-            const mpta = angleBetweenVectors(tibiaAxisVec, tibialJointLineVec);
-            newResults.mpta = mpta;
+        if (
+            visibleLandmarkSets.has('tibiaAnatomicAxis') &&
+            tibiaAxisPoint &&
+            jointCenter &&
+            medialPoint &&
+            lateralPoint
+        ) {
+            const tibiaAxisVec = {
+                x: tibiaAxisPoint.x - jointCenter.x,
+                y: tibiaAxisPoint.y - jointCenter.y
+            };
+            const tibialJointLineVec = {
+                x: medialPoint.x - lateralPoint.x,
+                y: medialPoint.y - lateralPoint.y
+            };
+
+            const rawMpta = angleBetweenVectors(tibiaAxisVec, tibialJointLineVec);
+            newResults.mpta = rawMpta > 90 ? rawMpta : 180 - rawMpta;
         }
 
-        // 4. Derived Results
-        if (newResults.ldfa !== null && newResults.mpta !== null) {
-            const ahka = newResults.mpta - newResults.ldfa;
-            const jlo = newResults.mpta + newResults.ldfa;
-            newResults.cpak = getLongLegCpakType(ahka, jlo);
-            newResults.cut = getLongLegValgusCut(newResults.ldfa);
+        if (
+            newResults.ldfa !== null &&
+            newResults.mpta !== null &&
+            newResults.obliquity !== null
+        ) {
+            newResults.ahka = newResults.mpta + newResults.ldfa - 180;
+            newResults.jlo = Math.abs(newResults.mpta - newResults.ldfa);
 
-            if (newResults.obliquity !== null) {
-                if (newResults.obliquity >= 3) {
-                    newResults.femurType = 'Valgoid';
-                } else if (newResults.obliquity >= 1) {
-                    newResults.femurType = 'Median';
-                } else {
-                    newResults.femurType = 'Varoid';
-                }
+            if (newResults.ldfa < 87) {
+                newResults.femurType = 'Valgoid';
+            } else if (newResults.ldfa > 90) {
+                newResults.femurType = 'Varoid';
+            } else {
+                newResults.femurType = 'Median';
             }
+
+            if (newResults.obliquity >= 3) {
+                newResults.cpak = 'CPAK 2';
+
+            } else if (newResults.obliquity >= 1) {
+                newResults.cpak = 'CPAK 1';
+
+            } else {
+
+                const diff = Math.abs(newResults.ldfa - newResults.mpta);
+                newResults.cpak = diff <= 1.5 ? 'CPAK 5' : 'CPAK 4';
+            }
+
+            newResults.cut = getValgusStressFemurCut(newResults.obliquity);
         }
 
-        // Only update if results have actually changed to prevent infinite loops
+
+
         if (JSON.stringify(newResults) !== JSON.stringify(localResultsRef.current)) {
             localResultsRef.current = newResults;
             setValgusResults(newResults);
         }
+
     }, [valgusLandmarks, visibleLandmarkSets, legSide, setValgusResults]);
 
     // Effect to trigger calculations only when inputs change
@@ -462,7 +514,16 @@ const ValgusStressPlannerPage: React.FC = () => {
         }
         setVisibleLandmarkSets(new Set());
         setActiveInstruction(null);
-        setValgusResults({ obliquity: null, femurType: '--', cpak: '--', cut: '--', ldfa: null, mpta: null });
+        setValgusResults({
+            obliquity: null,
+            ldfa: null,
+            mpta: null,
+            ahka: null,
+            jlo: null,
+            femurType: '--',
+            cpak: '--',
+            cut: '--'
+        });
         setValgusCanvasDataUrl(null);
     };
 
@@ -623,9 +684,7 @@ const ValgusStressPlannerPage: React.FC = () => {
         window.addEventListener('mouseup', handleMouseUp);
         window.addEventListener('mousemove', handlePipMove);
         window.addEventListener('mouseup', handlePipMouseUp);
-        window.addEventListener('mousemove', handlePipMove);
         window.addEventListener('touchmove', handlePipMove, { passive: false });
-
         window.addEventListener('touchmove', handleTouchMove, { passive: false });
         window.addEventListener('touchend', handleTouchEnd);
         window.addEventListener('touchcancel', handleTouchEnd);
@@ -694,42 +753,75 @@ const ValgusStressPlannerPage: React.FC = () => {
                     {!valgusImageSrc ? (
                         <div className="text-center text-gray-400"><p className="mt-4 text-xl">Upload an X-ray to begin</p></div>
                     ) : (
-                        <div className="w-full h-full relative flex items-center justify-center transition-all duration-300">
-                            <div className="relative w-full flex justify-center">
+                        <div className="w-full h-full relative flex items-center justify-center">
+                            <div className="relative">
                                 <img
                                     ref={imageRef}
                                     src={valgusImageSrc}
                                     alt="Valgus Stress X-ray"
-                                    className="max-h-[80vh] w-auto max-w-full object-contain"
-                                    style={{ touchAction: 'none' }}
+                                    className="block max-w-full max-h-full"
                                     onLoad={(e) => {
-                                        const img = e.currentTarget;
-                                        if (canvasRef.current) {
-                                            canvasRef.current.width = img.width;
-                                            canvasRef.current.height = img.height;
+                                        const image = imageRef.current;
+                                        const canvas = canvasRef.current;
+                                        if (!image || !canvas) return;
+
+                                        const viewer = canvas.parentElement?.parentElement;
+                                        if (!viewer) return;
+
+                                        // Calculate available space inside the gemini-dark-card (p-2 ≈ 16px padding total)
+                                        const availableHeight = viewer.clientHeight - 32;
+                                        const availableWidth = viewer.clientWidth - 32;
+
+                                        const aspectRatio = image.naturalWidth / image.naturalHeight;
+
+                                        // Prioritize height for tall X-rays
+                                        let displayHeight = availableHeight;
+                                        let displayWidth = displayHeight * aspectRatio;
+
+                                        if (displayWidth > availableWidth) {
+                                            displayWidth = availableWidth;
+                                            displayHeight = displayWidth / aspectRatio;
                                         }
-                                        if (Object.keys(valgusLandmarks).length === 0 && canvasRef.current) {
-                                            resetLandmarks(canvasRef.current);
+
+                                        // Set exact pixel sizes
+                                        canvas.width = displayWidth;
+                                        canvas.height = displayHeight;
+
+                                        image.style.width = `${displayWidth}px`;
+                                        image.style.height = `${displayHeight}px`;
+                                        image.style.maxHeight = 'none';
+                                        image.style.maxWidth = 'none';
+
+                                        // Initialize landmarks only on first load
+                                        if (Object.keys(valgusLandmarks).length === 0) {
+                                            if (canvasRef.current) resetLandmarks(canvasRef.current);
                                         }
-                                        draw();
+
+                                        requestAnimationFrame(draw);
                                     }}
                                 />
                                 <canvas
                                     ref={canvasRef}
                                     onTouchStart={handleTouchStart}
-                                    style={{ touchAction: 'none', width: '100%', height: '100%' }}
                                     onMouseDown={handleMouseDown}
                                     className="absolute top-0 left-0 cursor-crosshair touch-none"
+                                    style={{ touchAction: 'none' }}
                                 />
                             </div>
-                            {valgusImageSrc && <div ref={pipViewerRef}
-                                onMouseDown={handlePipStart}
-                                onTouchStart={handlePipStart}
-                                className="absolute w-40 h-40 border-2 border-dark-maroon bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg touch-none"
-                                style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px`, touchAction: 'none' }}
-                            >
-                                <canvas ref={pipCanvasRef} width="160" height="160" className="rounded-full"></canvas>
-                            </div>}
+
+                            {/* PIP Viewer */}
+                            {valgusImageSrc && (
+                                <div
+                                    ref={pipViewerRef}
+                                    onMouseDown={handlePipStart}
+                                    onTouchStart={handlePipStart}
+                                    onMouseLeave={handlePipMouseUp}
+                                    className="absolute w-40 h-40 border-2 border-[#800000] bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg touch-none"
+                                    style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px`, touchAction: 'none' }}
+                                >
+                                    <canvas ref={pipCanvasRef} width="160" height="160" className="rounded-full" />
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
