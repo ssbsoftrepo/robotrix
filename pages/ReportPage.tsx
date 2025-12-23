@@ -78,7 +78,7 @@ const ReportPage: React.FC = () => {
         <div className="min-h-full pb-8 flex flex-col">
             {/* Header */}
             <div className="flex justify-between items-center mb-8 no-print px-2">
-                <h2 className="text-5xl font-extrabold text-white tracking-tight">Surgical Case Report</h2>
+                <h2 className="text-4xl font-extrabold text-white tracking-tight">Surgical Case Report</h2>
                 <div className="flex space-x-4">
                     <button
                         onClick={() => setPage('results-analysis')}

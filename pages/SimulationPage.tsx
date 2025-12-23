@@ -72,8 +72,8 @@ const HKAView: React.FC = () => {
     if (!longLegImageSrc) return null;
 
     return (
-        <div className="gemini-dark-card p-3 rounded-lg flex flex-col items-center h-full">
-            <h3 className="text-gray-300 font-semibold mb-3 text-lg">Pre-Op Alignment</h3>
+        <div className="gemini-dark-card p-2 rounded-lg flex flex-col items-center h-full">
+            <h3 className="text-gray-300 font-semibold mb-1 text-base">Pre-Op Alignment</h3>
             <div className="w-full flex-grow flex items-center justify-center bg-black rounded overflow-hidden">
                 <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
             </div>
@@ -451,57 +451,57 @@ const SimulationPage: React.FC = () => {
     const { initialFemoral, initialTibial } = getBoundaryAdjustedValues();
 
     return (
-        <div className="flex flex-col h-full">
-            <h2 className="text-5xl font-bold mb-8">Resection Simulation</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-grow">
+        <div className="flex flex-col h-full overflow-hidden">
+            <h2 className="text-4xl font-bold mb-4">Resection Simulation</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 flex-grow min-h-0">
                 {/* Column 1: Pre-Op HKA View */}
                 <div className="lg:col-span-1 hidden lg:block">
                     <HKAView />
                 </div>
 
                 {/* Column 2: Controls */}
-                <div className="lg:col-span-1 gemini-dark-card p-8 rounded-lg space-y-6 flex flex-col">
+                <div className="lg:col-span-1 gemini-dark-card p-4 rounded-lg space-y-4 flex flex-col">
                     <div className="flex items-center justify-between">
-                        <label htmlFor="split-view-toggle" className="text-xl font-semibold text-gray-300">Split View</label>
+                        <label htmlFor="split-view-toggle" className="text-base font-semibold text-gray-300">Split View</label>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="split-view-toggle" className="sr-only peer" checked={isSplitView} onChange={() => setIsSplitView(!isSplitView)} />
-                            <div className="w-14 h-8 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#6D282C]"></div>
+                            <div className="w-12 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6D282C]"></div>
                         </label>
                     </div>
-                    <div className="bg-gray-900 p-4 rounded-md text-center">
-                        <p className="text-lg text-gray-400">Pre-Op mHKA</p>
-                        <p className="font-bold text-4xl text-gray-100">{longLegResults.mhka?.toFixed(1) ?? '--'}°</p>
+                    <div className="bg-gray-900 p-3 rounded-md text-center">
+                        <p className="text-sm text-gray-400">Pre-Op mHKA</p>
+                        <p className="font-bold text-2xl text-gray-100">{longLegResults.mhka?.toFixed(1) ?? '--'}°</p>
                     </div>
                     <div>
-                        <label className="block text-xl font-semibold mb-3">Femoral Valgus Cut</label>
-                        <div className="flex items-center space-x-3">
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">-</button>
-                            <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => setFemoralCutSim(parseFloat(e.target.value))} className="gemini-dark-input w-full p-2 rounded-md text-center text-2xl font-bold" />
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">+</button>
+                        <label className="block text-sm font-semibold mb-2">Femoral Valgus Cut</label>
+                        <div className="flex items-center space-x-2">
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="gemini-dark-button font-bold w-10 h-10 text-xl rounded-md">-</button>
+                            <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => setFemoralCutSim(parseFloat(e.target.value))} className="gemini-dark-input w-full p-1.5 rounded-md text-center text-xl font-bold" />
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="gemini-dark-button font-bold w-10 h-10 text-xl rounded-md">+</button>
                         </div>
-                        <button onClick={() => setAppliedFemoralCutSim(femoralCutSim)} className="gemini-dark-button font-bold py-3 px-5 rounded-lg w-full text-lg mt-3">Apply Femoral Cut</button>
+                        <button onClick={() => setAppliedFemoralCutSim(femoralCutSim)} className="gemini-dark-button font-bold py-2 px-4 rounded-lg w-full text-base mt-2">Apply Femoral Cut</button>
                     </div>
                     <div>
-                        <label className="block text-xl font-semibold mb-3">Tibial Varus Cut</label>
-                        <div className="flex items-center space-x-3">
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">-</button>
-                            <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => setTibialCutSim(parseFloat(e.target.value))} className="gemini-dark-input w-full p-2 rounded-md text-center text-2xl font-bold" />
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="gemini-dark-button font-bold w-12 h-12 text-2xl rounded-md">+</button>
+                        <label className="block text-sm font-semibold mb-2">Tibial Varus Cut</label>
+                        <div className="flex items-center space-x-2">
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="gemini-dark-button font-bold w-10 h-10 text-xl rounded-md">-</button>
+                            <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => setTibialCutSim(parseFloat(e.target.value))} className="gemini-dark-input w-full p-1.5 rounded-md text-center text-xl font-bold" />
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="gemini-dark-button font-bold w-10 h-10 text-xl rounded-md">+</button>
                         </div>
-                        <button onClick={() => setAppliedTibialCutSim(tibialCutSim)} className="gemini-dark-button font-bold py-3 px-5 rounded-lg w-full text-lg mt-3">Apply Tibial Cut</button>
+                        <button onClick={() => setAppliedTibialCutSim(tibialCutSim)} className="gemini-dark-button font-bold py-2 px-4 rounded-lg w-full text-base mt-2">Apply Tibial Cut</button>
                     </div>
-                    <div className="bg-gray-800 border-2 border-yellow-500 p-4 rounded-md text-center">
-                        <p className="text-xl text-yellow-400">Post-Simulation mHKA</p>
-                        <p className="font-bold text-5xl text-yellow-300">{postOpMHKA?.toFixed(1) ?? '--'}°</p>
+                    <div className="bg-gray-800 border-2 border-yellow-500 p-3 rounded-md text-center">
+                        <p className="text-base text-yellow-400">Post-Simulation mHKA</p>
+                        <p className="font-bold text-3xl text-yellow-300">{postOpMHKA?.toFixed(1) ?? '--'}°</p>
                     </div>
                     <div className="flex-grow"></div>
                     <div>
-                        <button onClick={resetSimulation} className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-lg transition text-xl">Reset Simulation</button>
+                        <button onClick={resetSimulation} className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition text-base">Reset Simulation</button>
                     </div>
                 </div>
 
                 {/* Simulation View - Columns 3,4,5 */}
-                <div className="lg:col-span-3 gemini-dark-card p-2 rounded-lg flex items-center justify-center min-h-[600px] h-full bg-black">
+                <div className="lg:col-span-3 gemini-dark-card p-2 rounded-lg flex items-center justify-center h-full bg-black min-h-0">
                     {!isLoaded && !longLegImageSrc && <p className="text-gray-500 p-4 text-center">Load a Long Leg X-ray in the planner to begin simulation.</p>}
                     {!isLoaded && longLegImageSrc && <p className="text-gray-400">Loading Simulation...</p>}
                     <canvas
@@ -516,9 +516,9 @@ const SimulationPage: React.FC = () => {
                     />
                 </div>
             </div>
-            <div className="mt-8 flex justify-between">
-                <button onClick={() => setPage('results-analysis')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-10 rounded-lg transition text-xl">&larr; Back to Results</button>
-                <button onClick={() => setPage('report')} className="gemini-dark-button font-bold py-4 px-10 rounded-lg transition text-xl">View Report &rarr;</button>
+            <div className="mt-4 flex justify-between">
+                <button onClick={() => setPage('results-analysis')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-8 rounded-lg transition text-lg">&larr; Back to Results</button>
+                <button onClick={() => setPage('report')} className="gemini-dark-button font-bold py-2 px-8 rounded-lg transition text-lg">View Report &rarr;</button>
             </div>
         </div>
     );

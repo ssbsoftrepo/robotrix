@@ -3,31 +3,28 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { GoogleGenAI } from "@google/genai";
 
-// Placeholder image for when no reference is loaded
-const noLaxityImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 interface LaxityOptionProps {
     level: string;
     onClick: () => void;
-    onUploadClick: (e: React.MouseEvent) => void;
     imageSrc?: string | null;
     isSelected: boolean;
     isSuggested: boolean;
     color: string;
 }
 
-const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, onUploadClick, imageSrc, isSelected, isSuggested, color }) => {
+const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, isSelected, isSuggested, color }) => {
     let bgClass = 'bg-[#1e1f20]';
-    
+
     if (isSelected) {
         bgClass = 'bg-[#252629]';
     }
 
     return (
-        <div 
+        <div
             onClick={onClick}
             className={`relative flex flex-col p-3 rounded-xl border-4 cursor-pointer transition-all duration-200 h-full hover:scale-[1.02] ${bgClass}`}
-            style={{ 
+            style={{
                 borderColor: color,
                 boxShadow: isSelected ? `0 0 20px ${color}60` : 'none'
             }}
@@ -37,33 +34,25 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, onUploadCli
                     AI Suggestion
                 </div>
             )}
-            
+
             <div className="text-center mb-3 min-h-[3rem] flex items-center justify-center">
                 <p className="font-bold text-lg leading-tight text-gray-100">{level}</p>
             </div>
 
-            <div 
+            <div
                 className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-gray-800 group"
-                onClick={onUploadClick}
             >
-                 {imageSrc ? (
+                {imageSrc ? (
                     <img src={imageSrc} alt={`Reference for ${level}`} className="absolute inset-0 w-full h-full object-contain" />
-                 ) : (
+                ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <p className="text-gray-600 italic text-sm px-4 text-center">No Reference Image</p>
                     </div>
-                 )}
-                 
-                 {/* Hover Overlay */}
-                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <span className="text-white text-xs font-bold bg-gray-800/80 px-3 py-1.5 rounded border border-gray-600 shadow-md">
-                        {imageSrc ? 'Change Image' : 'Upload Image'}
-                    </span>
-                 </div>
+                )}
             </div>
-            
-            <div 
-                className="mt-3 h-3 rounded-full w-full transition-colors duration-300" 
+
+            <div
+                className="mt-3 h-3 rounded-full w-full transition-colors duration-300"
                 style={{ backgroundColor: isSelected ? color : '#374151' }}
             ></div>
         </div>
@@ -72,13 +61,11 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, onUploadCli
 
 
 const ValgusStressLaxityCheckPage: React.FC = () => {
-    const { 
-        setPage, 
-        setLateralLaxity, 
+    const {
+        setPage,
+        setLateralLaxity,
         valgusImageSrc,
-        setValgusImageSrc,
-        valgusLaxityReferenceImages,
-        setValgusLaxityReferenceImages
+        setValgusImageSrc
     } = useAppContext();
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -86,12 +73,6 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
     const [userSelection, setUserSelection] = useState<string | null>(null);
 
     const patientFileInputRef = useRef<HTMLInputElement>(null);
-    const refUploadRefs = {
-        'No Lateral Laxity': useRef<HTMLInputElement>(null),
-        'Mild lateral laxity': useRef<HTMLInputElement>(null),
-        'Moderate lateral laxity': useRef<HTMLInputElement>(null),
-        'Severe lateral laxity': useRef<HTMLInputElement>(null),
-    };
 
     useEffect(() => {
         if (valgusImageSrc) {
@@ -105,9 +86,9 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
         setAiSuggestion(null);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
             const base64Data = imageDataUrl.split(',')[1];
-            
+
             const imagePart = {
                 inlineData: { mimeType: 'image/jpeg', data: base64Data },
             };
@@ -115,23 +96,23 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
             const textPart = {
                 text: "Analyze this knee X-ray, likely a varus stress or one-leg standing view, for lateral laxity. Classify the degree of lateral joint space opening into one of these four categories: 'No Lateral Laxity' (joint space is closed), 'Mild lateral laxity' (slight opening of a few millimeters), 'Moderate lateral laxity' (clear opening), or 'Severe lateral laxity' (significant gapping or subluxation). Your response must consist of ONLY one of these four exact category names and nothing else.",
             };
-            
+
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-1.5-flash',
                 contents: { parts: [imagePart, textPart] },
             });
-            
+
             const suggestionText = response.text ? response.text.trim() : '';
             const validSuggestions = ['No Lateral Laxity', 'Mild lateral laxity', 'Moderate lateral laxity', 'Severe lateral laxity'];
-            
+
             let foundSuggestion: string | null = null;
             for (const valid of validSuggestions) {
                 if (suggestionText.includes(valid)) {
                     foundSuggestion = valid;
-                    break; 
+                    break;
                 }
             }
-            
+
             if (foundSuggestion) {
                 setAiSuggestion(foundSuggestion);
             }
@@ -151,20 +132,6 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                 setPreviewImage(result);
                 setValgusImageSrc(result); // Persist to Valgus Planner context
                 analyzeLaxity(result);
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    };
-    
-    const handleReferenceFileChange = (level: string, e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const newImages = { 
-                    ...valgusLaxityReferenceImages, 
-                    [level]: event.target?.result as string 
-                };
-                setValgusLaxityReferenceImages(newImages);
             };
             reader.readAsDataURL(e.target.files[0]);
         }
@@ -191,29 +158,36 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
         'Moderate lateral laxity',
         'Severe lateral laxity',
     ];
-    
+
+    const laxityImages: Record<string, string> = {
+        'No Lateral Laxity': '/nolaterl.jpeg',
+        'Mild lateral laxity': '/mildlaterl.jpeg',
+        'Moderate lateral laxity': '/moderate.jpeg',
+        'Severe lateral laxity': '/severe.jpeg',
+    };
+
     const laxityColors = ['#22C55E', '#3B82F6', '#F97316', '#EF4444']; // Green, Blue, Orange, Red
 
     return (
         <div className="flex flex-col h-full p-2">
             <div className="flex justify-between items-center mb-4">
-                 <h2 className="text-3xl font-bold text-gray-100">Check for lateral laxity ( Valgus stress film)</h2>
-                 <div className="flex space-x-4">
-                     <button onClick={handleSkip} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg text-md flex items-center transition shadow">
+                <h2 className="text-3xl font-bold text-gray-100">Check for lateral laxity ( Valgus stress film)</h2>
+                <div className="flex space-x-4">
+                    <button onClick={handleSkip} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg text-md flex items-center transition shadow">
                         <span>Skip to Planner</span>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                         </svg>
-                     </button>
-                     <button onClick={goBack} className="bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-5 rounded-lg transition">
+                    </button>
+                    <button onClick={goBack} className="bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-5 rounded-lg transition">
                         Cancel
                     </button>
-                 </div>
+                </div>
             </div>
 
             {/* Main Layout: Reference Group vs Patient X-ray */}
             <div className="flex flex-col lg:flex-row gap-6 flex-grow min-h-[65vh]">
-                
+
                 {/* Left Side: Reference Images Group */}
                 <div className="flex-grow-[3] flex flex-col min-w-0">
                     <div className="bg-gray-800/50 p-2 rounded-t-lg border-b border-gray-700 mb-4">
@@ -221,19 +195,13 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
                         {laxityLevels.map((level, index) => {
-                            const typedLevel = level as keyof typeof refUploadRefs;
-                            const currentImage = valgusLaxityReferenceImages[level] || (level === 'No Lateral Laxity' ? noLaxityImage : null);
-                            
+                            const currentImage = laxityImages[level];
+
                             return (
                                 <React.Fragment key={level}>
-                                    <input type="file" ref={refUploadRefs[typedLevel]} onChange={(e) => handleReferenceFileChange(level, e)} accept="image/*" className="hidden" />
-                                    <LaxityOption 
+                                    <LaxityOption
                                         level={level}
                                         onClick={() => setUserSelection(level)}
-                                        onUploadClick={(e) => { 
-                                            // Allow propagation so selecting image also selects the option
-                                            refUploadRefs[typedLevel].current?.click(); 
-                                        }}
                                         imageSrc={currentImage}
                                         isSelected={userSelection === level}
                                         isSuggested={aiSuggestion === level}
@@ -257,7 +225,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                                 <p className="mt-4 text-lg text-cyan-300 font-semibold">AI Analyzing...</p>
                             </div>
                         )}
-                        
+
                         <div className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-gray-700 group cursor-pointer" onClick={() => patientFileInputRef.current?.click()}>
                             {previewImage ? (
                                 <img src={previewImage} alt="Patient X-ray" className="absolute inset-0 w-full h-full object-contain" />
@@ -269,7 +237,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                                     <p className="text-lg font-medium">Click to Upload X-ray</p>
                                 </div>
                             )}
-                            
+
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <span className="bg-gray-800 text-white px-4 py-2 rounded-full font-semibold text-sm shadow-lg">
                                     {previewImage ? 'Change Image' : 'Upload Image'}
@@ -295,7 +263,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                     <p className="text-gray-300 text-sm mb-2 self-center lg:self-end">
                         Selected: <span className="font-bold text-white">{userSelection || 'None'}</span>
                     </p>
-                    <button 
+                    <button
                         onClick={handleConfirmSelection}
                         disabled={!userSelection}
                         className="w-full lg:w-auto bg-[#6D282C] hover:bg-[#893338] disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold text-xl py-3 px-8 rounded-lg shadow-lg transition-all transform active:scale-95"

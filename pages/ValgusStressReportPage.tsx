@@ -64,7 +64,7 @@ const ValgusStressReportPage: React.FC = () => {
         <div className="min-h-full pb-8 flex flex-col">
             {/* Header */}
             <div className="flex justify-between items-center mb-8 no-print px-2">
-                <h2 className="text-5xl font-extrabold text-white tracking-tight">Valgus Surgical Case Report</h2>
+                <h2 className="text-4xl font-extrabold text-white tracking-tight">Valgus Surgical Case Report</h2>
                 <div className="flex space-x-4">
                     <button
                         onClick={() => setPage('planner-valgus-stress-results')}
@@ -168,69 +168,63 @@ const ValgusStressReportPage: React.FC = () => {
                     </ReportCard>
 
                     <ReportCard title="Functional Tibial Planning" className="border-t-4 border-t-green-500 h-full">
-                        {valgusFunctionalTibialCutImage ? (
-                            <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative h-[400px] w-full">
-                                <img src={valgusFunctionalTibialCutImage} alt="Functional Cut Plan" className="w-full h-full object-contain" />
+                        {/* Always show the section if we have the static image fallback */}
+                        <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative h-[400px] w-full">
+                            <img src={valgusFunctionalTibialCutImage || "/tibiacut.jpeg"} alt="Functional Cut Plan" className="w-full h-full object-contain" />
 
-                                {/* Red Lines Overlay */}
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
-                                    {/* Using a fixed Y for display purposes in report, or can assume roughly 30% down */}
-                                    {[0, 1, 2, 3].map(deg => {
-                                        const isTarget = deg === selectedDegree;
-                                        const startYPercent = 30;
-                                        const yOffsetPercent = deg * 2.5;
-                                        return (
-                                            <g key={deg}>
-                                                <line
-                                                    x1="0"
-                                                    y1={`${startYPercent}%`}
-                                                    x2="100%"
-                                                    y2={`${startYPercent + yOffsetPercent}%`}
-                                                    stroke={isTarget ? "#ef4444" : "#7f1d1d"}
-                                                    strokeWidth={isTarget ? "4" : "1.5"}
-                                                    strokeDasharray={isTarget ? "0" : "5,2"}
-                                                    opacity={isTarget ? 1 : 0.6}
-                                                />
-                                                {isTarget && (
-                                                    <text
-                                                        x="95%"
-                                                        y={`${startYPercent + yOffsetPercent - 2}%`}
-                                                        fill="#ef4444"
-                                                        fontSize="14"
-                                                        fontWeight="bold"
-                                                        textAnchor="end"
-                                                    >
-                                                        {deg}°
-                                                    </text>
-                                                )}
-                                            </g>
-                                        );
-                                    })}
-                                </svg>
+                            {/* Red Lines Overlay */}
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
+                                {[0, 1, 2, 3].map(deg => {
+                                    const isTarget = deg === selectedDegree;
+                                    const startYPercent = useAppContext().valgusFunctionalLinesY || 30;
+                                    const yOffsetPercent = deg * 2.5;
+                                    return (
+                                        <g key={deg}>
+                                            <line
+                                                x1="0"
+                                                y1={`${startYPercent}%`}
+                                                x2="100%"
+                                                y2={`${startYPercent + yOffsetPercent}%`}
+                                                stroke={isTarget ? "#ef4444" : "#7f1d1d"}
+                                                strokeWidth={isTarget ? "4" : "1.5"}
+                                                strokeDasharray={isTarget ? "0" : "5,2"}
+                                                opacity={isTarget ? 1 : 0.6}
+                                            />
+                                            {isTarget && (
+                                                <text
+                                                    x="95%"
+                                                    y={`${startYPercent + yOffsetPercent - 2}%`}
+                                                    fill="#ef4444"
+                                                    fontSize="14"
+                                                    fontWeight="bold"
+                                                    textAnchor="end"
+                                                >
+                                                    {deg}°
+                                                </text>
+                                            )}
+                                        </g>
+                                    );
+                                })}
+                            </svg>
 
-                                {/* Gap Info Overlays - Scaled Down slightly for report */}
-                                <div className="absolute top-4 left-4 z-40 bg-gray-900/90 backdrop-blur-sm border-2 border-gray-500 rounded-xl px-4 py-2 text-center shadow-lg">
-                                    <p className="text-[10px] text-gray-300 uppercase font-bold tracking-widest mb-0.5">Lateral Gap</p>
-                                    <p className="text-2xl font-black text-white leading-none">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
-                                </div>
-
-                                <div className="absolute top-4 right-4 z-40 bg-gray-900/90 backdrop-blur-sm border-2 border-yellow-500 rounded-xl px-4 py-2 text-center shadow-lg">
-                                    <p className="text-[10px] text-yellow-500 uppercase font-bold tracking-widest mb-0.5">Medial Gap</p>
-                                    <p className="text-2xl font-black text-yellow-400 leading-none">{medialGapValue} <span className="text-sm text-yellow-700 font-bold">mm</span></p>
-                                </div>
-
-                                {/* Corrected Varus Overlay */}
-                                <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-gray-600 shadow-lg text-center">
-                                    <p className="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
-                                    <p className="text-2xl font-extrabold text-white">{selectedDegree}°</p>
-                                </div>
-
+                            {/* Gap Info Overlays - Scaled Down slightly for report */}
+                            <div className="absolute top-4 left-4 z-40 bg-gray-900/90 backdrop-blur-sm border-2 border-gray-500 rounded-xl px-4 py-2 text-center shadow-lg">
+                                <p className="text-[10px] text-gray-300 uppercase font-bold tracking-widest mb-0.5">Lateral Gap</p>
+                                <p className="text-2xl font-black text-white leading-none">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
                             </div>
-                        ) : (
-                            <div className="h-[400px] flex items-center justify-center bg-black border-2 border-gray-700 rounded-lg">
-                                <p className="text-gray-500">No functional planning image.</p>
+
+                            <div className="absolute top-4 right-4 z-40 bg-gray-900/90 backdrop-blur-sm border-2 border-yellow-500 rounded-xl px-4 py-2 text-center shadow-lg">
+                                <p className="text-[10px] text-yellow-500 uppercase font-bold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
+                                <p className="text-2xl font-black text-yellow-400 leading-none">{medialGapValue} <span className="text-sm text-yellow-700 font-bold">mm</span></p>
                             </div>
-                        )}
+
+                            {/* Corrected Varus Overlay */}
+                            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-gray-600 shadow-lg text-center">
+                                <p className="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
+                                <p className="text-2xl font-extrabold text-white">{selectedDegree}°</p>
+                            </div>
+
+                        </div>
                     </ReportCard>
                 </div>
             </div>

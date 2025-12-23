@@ -602,7 +602,7 @@ const CaseManagementPage: React.FC = () => {
 
             {view === 'list' ? renderListView() : (
                 <>
-                    <h2 className="text-5xl font-bold mb-8 text-center">Surgical Planner</h2>
+                    <h2 className="text-5xl font-bold mb-8 text-start">Surgical Planner</h2>
 
                     <div className="gemini-dark-card p-6 rounded-lg mb-10">
                         <h3 className="text-2xl font-semibold mb-4 text-gray-200">Patient Details</h3>

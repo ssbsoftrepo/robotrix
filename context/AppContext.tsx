@@ -68,6 +68,10 @@ export interface CaseData {
     // Functional Cut Degrees for Report
     valgusFunctionalCutDegree: number;
     longLegFunctionalCutDegree: number;
+
+    // Line Positions Persistence
+    valgusFunctionalLinesY: number;
+    longLegFunctionalLinesY: number;
 }
 
 // Combine all context values into a single interface
@@ -132,6 +136,9 @@ interface AppContextType extends CaseData {
     setValgusFunctionalCutDegree: (degree: number) => void;
     setLongLegFunctionalCutDegree: (degree: number) => void;
 
+    setValgusFunctionalLinesY: (y: number) => void;
+    setLongLegFunctionalLinesY: (y: number) => void;
+
     isLoading: boolean;
 }
 
@@ -183,6 +190,8 @@ const initialCaseData: CaseData = {
     longLegLaxityReferenceImages: {},
     valgusFunctionalCutDegree: 2,
     longLegFunctionalCutDegree: 2,
+    valgusFunctionalLinesY: 30,
+    longLegFunctionalLinesY: 30,
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -377,8 +386,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     const createSetter = <K extends keyof CaseData>(key: K) =>
-        useCallback((value: CaseData[K]) => {
-            setCaseData(prev => ({ ...prev, [key]: value }));
+        useCallback((value: React.SetStateAction<CaseData[K]>) => {
+            setCaseData(prev => {
+                const prevValue = prev[key];
+                const newValue = value instanceof Function ? value(prevValue) : value;
+                return { ...prev, [key]: newValue };
+            });
         }, []);
 
     const value: AppContextType = {
@@ -436,6 +449,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         setValgusFunctionalCutDegree: createSetter('valgusFunctionalCutDegree'),
         setLongLegFunctionalCutDegree: createSetter('longLegFunctionalCutDegree'),
+
+        setValgusFunctionalLinesY: createSetter('valgusFunctionalLinesY'),
+        setLongLegFunctionalLinesY: createSetter('longLegFunctionalLinesY'),
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

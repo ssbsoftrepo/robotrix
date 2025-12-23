@@ -96,7 +96,15 @@ const getValgusStressCPAK = (
 // --- Camera Modal Component ---
 const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (dataUrl: string) => void; }> = ({ isOpen, onClose, onCapture }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const overlayRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+    // Crop state
+    const [cropRect, setCropRect] = useState({ x: 10, y: 10, width: 80, height: 80 }); // Percentages
+    const cropBoxRef = useRef<HTMLDivElement>(null);
+    const [isDraggingCrop, setIsDraggingCrop] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     const stopCamera = useCallback(() => {
         if (streamRef.current) {
@@ -106,11 +114,31 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
     }, []);
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !capturedImage) {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(stream => {
                     streamRef.current = stream;
-                    if (videoRef.current) videoRef.current.srcObject = stream;
+                    if (videoRef.current) {
+                        videoRef.current.srcObject = stream;
+                        videoRef.current.onloadedmetadata = () => {
+                            if (overlayRef.current && videoRef.current) {
+                                overlayRef.current.width = videoRef.current.videoWidth;
+                                overlayRef.current.height = videoRef.current.videoHeight;
+                                // Draw grid
+                                const ctx = overlayRef.current.getContext('2d');
+                                if (ctx) {
+                                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                                    ctx.lineWidth = 1;
+                                    ctx.beginPath();
+                                    ctx.moveTo(ctx.canvas.width / 2, 0);
+                                    ctx.lineTo(ctx.canvas.width / 2, ctx.canvas.height);
+                                    ctx.moveTo(0, ctx.canvas.height / 2);
+                                    ctx.lineTo(ctx.canvas.width, ctx.canvas.height / 2);
+                                    ctx.stroke();
+                                }
+                            }
+                        };
+                    }
                 })
                 .catch(err => {
                     console.error("Error accessing camera: ", err);
@@ -120,7 +148,7 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
             stopCamera();
         }
         return () => stopCamera();
-    }, [isOpen, onClose, stopCamera]);
+    }, [isOpen, onClose, stopCamera, capturedImage]);
 
     const handleCapture = () => {
         if (videoRef.current) {
@@ -128,9 +156,59 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
             canvas.width = videoRef.current.videoWidth;
             canvas.height = videoRef.current.videoHeight;
             canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
-            onCapture(canvas.toDataURL('image/png'));
-            onClose();
+            setCapturedImage(canvas.toDataURL('image/png'));
+            stopCamera();
         }
+    };
+
+    const handleCropSave = () => {
+        if (capturedImage) {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const scaleX = img.width / 100;
+                const scaleY = img.height / 100;
+
+                canvas.width = (cropRect.width * scaleX);
+                canvas.height = (cropRect.height * scaleY);
+
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(
+                        img,
+                        cropRect.x * scaleX, cropRect.y * scaleY,
+                        cropRect.width * scaleX, cropRect.height * scaleY,
+                        0, 0, canvas.width, canvas.height
+                    );
+                    onCapture(canvas.toDataURL('image/png'));
+                    onClose();
+                }
+            };
+            img.src = capturedImage;
+        }
+    };
+
+    const handleCropMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+        setIsDraggingCrop(true);
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        setDragStart({ x: clientX, y: clientY });
+    };
+
+    const handleCropMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!isDraggingCrop) return;
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+        const dx = ((clientX - dragStart.x) / (cropBoxRef.current?.parentElement?.clientWidth || 1)) * 100;
+        const dy = ((clientY - dragStart.y) / (cropBoxRef.current?.parentElement?.clientHeight || 1)) * 100;
+
+        setCropRect(prev => ({
+            ...prev,
+            x: Math.max(0, Math.min(100 - prev.width, prev.x + dx)),
+            y: Math.max(0, Math.min(100 - prev.height, prev.y + dy))
+        }));
+        setDragStart({ x: clientX, y: clientY });
     };
 
     if (!isOpen) return null;
@@ -138,15 +216,62 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
             <div className="bg-gray-800 p-4 rounded-lg relative w-full max-w-3xl text-center">
-                <video ref={videoRef} autoPlay playsInline className="w-full h-auto rounded"></video>
-                <div className="mt-4 flex justify-center space-x-4">
-                    <button onClick={handleCapture} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Capture</button>
-                    <button onClick={onClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
-                </div>
+                {!capturedImage ? (
+                    <>
+                        <h3 className="text-xl font-semibold mb-4">Live Capture with Alignment Grid</h3>
+                        <div className="relative inline-block border-2 border-gray-600">
+                            <video ref={videoRef} autoPlay playsInline className="w-full h-auto rounded"></video>
+                            <canvas ref={overlayRef} className="absolute top-0 left-0 w-full h-full"></canvas>
+                        </div>
+                        <div className="mt-4 flex justify-center space-x-4">
+                            <button onClick={handleCapture} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Capture</button>
+                            <button onClick={onClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <h3 className="text-xl font-semibold mb-4">Crop Captured Image</h3>
+                        <div
+                            className="relative inline-block border-2 border-yellow-500 overflow-hidden select-none touch-none"
+                            onMouseMove={handleCropMouseMove}
+                            onTouchMove={handleCropMouseMove}
+                            onMouseUp={() => setIsDraggingCrop(false)}
+                            onTouchEnd={() => setIsDraggingCrop(false)}
+                        >
+                            <img src={capturedImage} alt="Captured" className="w-full h-auto pointer-events-none" />
+                            <div
+                                ref={cropBoxRef}
+                                onMouseDown={handleCropMouseDown}
+                                onTouchStart={handleCropMouseDown}
+                                className="absolute border-2 border-dashed border-white bg-white/20 cursor-move"
+                                style={{
+                                    left: `${cropRect.x}%`,
+                                    top: `${cropRect.y}%`,
+                                    width: `${cropRect.width}%`,
+                                    height: `${cropRect.height}%`
+                                }}
+                            >
+                                <div className="absolute top-0 left-0 bg-white p-1 text-[10px] text-black font-bold">Crop Area (Drag to move)</div>
+                            </div>
+                        </div>
+                        <div className="mt-4 flex justify-center space-x-4">
+                            <button onClick={handleCropSave} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Finalize Crop</button>
+                            <button onClick={() => setCapturedImage(null)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Retake</button>
+                            <button onClick={onClose} className="bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
 };
+
+const MetricItem: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
+    <div className="flex flex-col justify-center items-center bg-gray-800/80 p-3 rounded-lg text-center h-full">
+        <p className="text-lg text-gray-400">{label}</p>
+        <p className="font-extrabold text-3xl text-gray-100 mt-1">{value}</p>
+    </div>
+);
 
 
 // --- Main Page Component ---
@@ -175,6 +300,17 @@ const ValgusStressPlannerPage: React.FC = () => {
     const isDraggingPipRef = useRef(false);
     const pipDragOffset = useRef({ x: 0, y: 0 });
     const localResultsRef = useRef(valgusResults);
+    const [zoom, setZoom] = useState(1);
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 3;
+    const lastResizeTimeRef = useRef(0);
+
+    const zoomIn = () => setZoom(z => Math.min(z + 0.2, MAX_ZOOM));
+    const zoomOut = () => setZoom(z => Math.max(z - 0.2, MIN_ZOOM));
+    const resetZoom = () => setZoom(1);
+
+    const viewerRef = useRef<HTMLDivElement>(null);
+    const activeLandmarkRef = useRef<string | null>(null);
 
     useEffect(() => {
         localResultsRef.current = valgusResults;
@@ -337,11 +473,15 @@ const ValgusStressPlannerPage: React.FC = () => {
         if (!ctx || Object.keys(valgusLandmarks).length === 0) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = 'bold 16px Roboto, sans-serif';
+        if (Object.keys(valgusLandmarks).length === 0) return;
 
-        const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = valgusLandmarks;
+        const {
+            medialJointSpace, lateralJointSpace,
+            femurAxisPoint, tibiaAxisPoint
+        } = valgusLandmarks;
 
-        const drawTextWithBackground = (text: string, x: number, y: number, color: string = 'white') => {
+        const drawTextWithBackground = (text: string, x: number, y: number, color: string = '#fdd835') => {
+            ctx.font = 'bold 20px Inter, sans-serif';
             ctx.fillStyle = 'rgba(29, 29, 31, 0.8)';
             const textMetrics = ctx.measureText(text);
             const textWidth = textMetrics.width;
@@ -446,31 +586,56 @@ const ValgusStressPlannerPage: React.FC = () => {
     // Handle Resize (Moved here)
     useEffect(() => {
         const handleResize = () => {
+            const now = Date.now();
+            if (now - lastResizeTimeRef.current < 100) return;
+            lastResizeTimeRef.current = now;
+
             const img = imageRef.current;
             const canvas = canvasRef.current;
-            if (img && canvas && img.width > 0 && canvas.width > 0) {
-                if (Math.abs(img.width - canvas.width) > 1 || Math.abs(img.height - canvas.height) > 1) {
-                    const scaleX = img.width / canvas.width;
-                    const scaleY = img.height / canvas.height;
+            if (!img || !canvas || img.naturalWidth === 0) return;
 
-                    canvas.width = img.width;
-                    canvas.height = img.height;
+            const viewer = canvas.parentElement?.parentElement;
+            if (!viewer) return;
 
-                    setValgusLandmarks(prev => {
-                        const next: any = {};
-                        for (const key in prev) {
-                            if (prev[key]) {
-                                next[key] = {
-                                    x: prev[key].x * scaleX,
-                                    y: prev[key].y * scaleY
-                                };
-                            }
+            const availWidth = viewer.clientWidth - 16;
+            const availHeight = viewer.clientHeight - 16;
+
+            // Current displayed dimensions (from style or attribute)
+            const oldW = parseFloat(img.style.width) || img.width;
+
+            // Calculate new fit dimensions based on new container size
+            const aspect = img.naturalWidth / img.naturalHeight;
+            let newW = availHeight * aspect;
+            let newH = availHeight;
+
+            if (newW > availWidth) {
+                newW = availWidth;
+                newH = newW / aspect;
+            }
+
+            // If dimensions changed significantly, re-scale everything
+            if (Math.abs(newW - oldW) > 1) {
+                const scale = newW / oldW;
+
+                img.style.width = `${newW}px`;
+                img.style.height = `${newH}px`;
+                canvas.width = newW;
+                canvas.height = newH;
+
+                setValgusLandmarks(prev => {
+                    const next: any = {};
+                    for (const key in prev) {
+                        if (prev[key]) {
+                            next[key] = {
+                                x: prev[key].x * scale,
+                                y: prev[key].y * scale
+                            };
                         }
-                        return next as Landmarks;
-                    });
+                    }
+                    return next as Landmarks;
+                });
 
-                    requestAnimationFrame(draw);
-                }
+                requestAnimationFrame(draw);
             }
         };
 
@@ -532,14 +697,49 @@ const ValgusStressPlannerPage: React.FC = () => {
         return { x: clientX - rect.left, y: clientY - rect.top };
     };
 
-    const updatePip = useCallback(() => {
+    const getImageCoordinates = (
+        e: React.MouseEvent | React.TouchEvent,
+        container: HTMLDivElement
+    ) => {
+        const rect = container.getBoundingClientRect();
+
+        const clientX =
+            'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY =
+            'touches' in e ? e.touches[0].clientY : e.clientY;
+
+        const x = (clientX - rect.left) / zoom;
+        const y = (clientY - rect.top) / zoom;
+
+        return { x, y };
+    };
+
+    const handleViewerTap = (
+        e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+    ) => {
+        if (!viewerRef.current || !activeLandmarkRef.current) return;
+
+        e.preventDefault();
+
+        const { x, y } = getImageCoordinates(e, viewerRef.current);
+
+        setValgusLandmarks(prev => ({
+            ...prev,
+            [activeLandmarkRef.current!]: { x, y }
+        }));
+    };
+
+    const updatePip = useCallback((overridePos?: Point) => {
         const key = draggingPointRef.current;
         const image = imageRef.current;
         const canvas = canvasRef.current;
         const pipCanvas = pipCanvasRef.current;
-        if (!key || !valgusLandmarks[key] || !image || !canvas || !pipCanvas) return;
 
-        const pos = valgusLandmarks[key];
+        // Use overridePos if provided, otherwise fall back to state (stale is okay for non-dragging)
+        const pos = overridePos || (key ? valgusLandmarks[key] : null);
+
+        if (!pos || !image || !canvas || !pipCanvas) return;
+
         const pipCtx = pipCanvas.getContext('2d');
         if (!pipCtx) return;
 
@@ -562,11 +762,11 @@ const ValgusStressPlannerPage: React.FC = () => {
         pipCtx.moveTo(pipCanvas.width / 2, 0); pipCtx.lineTo(pipCanvas.width / 2, pipCanvas.height);
         pipCtx.moveTo(0, pipCanvas.height / 2); pipCtx.lineTo(pipCanvas.width, pipCanvas.height / 2);
         pipCtx.stroke();
-    }, [valgusLandmarks]);
+    }, []); // Removed valgusLandmarks dependency to keep handlers stable
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-        const hitRadiusSq = (HANDLE_RADIUS + 5) ** 2;
+        const hitRadiusSq = (HANDLE_RADIUS + 30) ** 2; // Increased hit radius
         for (const key in valgusLandmarks) {
             if (!valgusLandmarks[key]) continue;
             const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
@@ -581,14 +781,16 @@ const ValgusStressPlannerPage: React.FC = () => {
         if (!draggingPointRef.current) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
+
         const pos = getCanvasPos(canvas, e.clientX, e.clientY);
-        const newLandmarks = {
-            ...valgusLandmarks,
+
+        setValgusLandmarks(prev => ({
+            ...prev,
             [draggingPointRef.current!]: pos
-        };
-        setValgusLandmarks(newLandmarks);
-        updatePip();
-    }, [valgusLandmarks, setValgusLandmarks, updatePip]);
+        }));
+
+        updatePip(pos);
+    }, [setValgusLandmarks, updatePip]);
 
     const handleMouseUp = useCallback(() => {
         draggingPointRef.current = null;
@@ -596,7 +798,6 @@ const ValgusStressPlannerPage: React.FC = () => {
     }, [captureCanvasState]);
 
     const handlePipStart = (e: React.MouseEvent | React.TouchEvent) => {
-        e.preventDefault();
         isDraggingPipRef.current = true;
 
         const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
@@ -608,6 +809,10 @@ const ValgusStressPlannerPage: React.FC = () => {
             y: clientY - pipRect.top,
         };
     };
+
+    const handlePipEnd = useCallback(() => {
+        isDraggingPipRef.current = false;
+    }, []);
 
     // Use same handler for both mouse and touch move
     const handlePipMove = useCallback((e: MouseEvent | TouchEvent) => {
@@ -635,7 +840,6 @@ const ValgusStressPlannerPage: React.FC = () => {
     }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-        e.preventDefault(); // Prevent scrolling
         const touch = e.touches[0];
         if (!touch) return;
 
@@ -648,7 +852,7 @@ const ValgusStressPlannerPage: React.FC = () => {
         for (const key in valgusLandmarks) {
             if (!valgusLandmarks[key]) continue;
             const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
-            if (distSq < (HANDLE_RADIUS + 30) ** 2) {
+            if (distSq < (HANDLE_RADIUS + 30) ** 2) { // Increased hit radius
                 draggingPointRef.current = key;
                 break;
             }
@@ -666,13 +870,14 @@ const ValgusStressPlannerPage: React.FC = () => {
         if (!canvas) return;
 
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-        const newLandmarks = {
-            ...valgusLandmarks,
+
+        setValgusLandmarks(prev => ({
+            ...prev,
             [draggingPointRef.current!]: pos
-        };
-        setValgusLandmarks(newLandmarks);
-        updatePip();
-    }, [valgusLandmarks, setValgusLandmarks, updatePip]);
+        }));
+
+        updatePip(pos);
+    }, [setValgusLandmarks, updatePip]);
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
@@ -683,186 +888,230 @@ const ValgusStressPlannerPage: React.FC = () => {
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
         window.addEventListener('mousemove', handlePipMove);
-        window.addEventListener('mouseup', handlePipMouseUp);
+        window.addEventListener('mouseup', handlePipEnd);
         window.addEventListener('touchmove', handlePipMove, { passive: false });
         window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handlePipEnd);
+        window.addEventListener('touchcancel', handlePipEnd);
         window.addEventListener('touchend', handleTouchEnd);
         window.addEventListener('touchcancel', handleTouchEnd);
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
             window.removeEventListener('mousemove', handlePipMove);
-            window.removeEventListener('mouseup', handlePipMouseUp);
+            window.removeEventListener('mouseup', handlePipEnd);
+            window.removeEventListener('touchmove', handlePipMove);
             window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handlePipEnd);
+            window.removeEventListener('touchcancel', handlePipEnd);
             window.removeEventListener('touchend', handleTouchEnd);
             window.removeEventListener('touchcancel', handleTouchEnd);
         };
-    }, [handleMouseMove, handleMouseUp, handlePipMove, handlePipMouseUp, handleTouchMove, handleTouchEnd]);
+    }, [handleMouseMove, handleMouseUp, handlePipMove, handlePipEnd, handleTouchMove, handleTouchEnd]);
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full gap-4">
             <CameraModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onCapture={(dataUrl) => handleImageLoad(dataUrl, 'Live Photo.png', 'camera')} />
-            <h2 className="text-5xl font-bold mb-8">Valgus Stress Film CPAK Planner</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-grow">
-                <div className="lg:col-span-1 gemini-dark-card p-6 rounded-lg space-y-6 flex flex-col">
-                    <div>
-                        <h3 className="text-xl font-semibold text-gray-300 mb-3">Step 1: Upload X-ray</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <label htmlFor="xray-upload" className={`cursor-pointer text-center p-3 rounded-lg font-semibold text-lg border transition ${uploadMethod === 'file' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368] hover:bg-[#6D282C]'}`}>Choose File</label>
+
+            <h2 className="text-4xl font-bold text-start">Valgus Stress Film CPAK Planner</h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-4 flex-grow min-h-0">
+
+                {/* ================= LEFT : XRAY VIEWER (70%) ================= */}
+                <div className="gemini-dark-card rounded-lg relative overflow-hidden h-[calc(100vh-180px)] flex items-center justify-center">
+                    {zoom > 1 && (
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg animate-pulse">
+                            Reset zoom to mark the markings
+                        </div>
+                    )}
+
+                    <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                        <button onClick={zoomIn} className="bg-black/70 px-3 py-1 rounded">＋</button>
+                        <button onClick={zoomOut} className="bg-black/70 px-3 py-1 rounded">－</button>
+                        <button onClick={resetZoom} className="bg-black/70 px-2 py-1 rounded text-xs">
+                            Reset
+                        </button>
+                    </div>
+
+                    {!valgusImageSrc ? (
+                        <div className="text-center text-gray-400">
+                            <p className="text-xl">Upload an X-ray to begin</p>
+                        </div>
+                    ) : (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <div
+                                ref={viewerRef}
+                                onClick={handleViewerTap}
+                                onTouchEnd={handleViewerTap}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onTouchStart={(e) => { }}
+                                className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center nav-ignore"
+                            >
+                                <div
+                                    className="relative"
+                                    style={{
+                                        transform: `scale(${zoom})`,
+                                        transformOrigin: 'center center'
+                                    }}
+                                >
+                                    <img
+                                        ref={imageRef}
+                                        src={valgusImageSrc}
+                                        alt="Valgus Stress X-ray"
+                                        className="block"
+                                        onLoad={() => {
+                                            const image = imageRef.current;
+                                            const canvas = canvasRef.current;
+                                            if (!image || !canvas) return;
+
+                                            const viewer = canvas.parentElement?.parentElement;
+                                            if (!viewer) return;
+
+                                            const availableHeight = viewer.clientHeight - 16;
+                                            const availableWidth = viewer.clientWidth - 16;
+
+                                            const aspectRatio = image.naturalWidth / image.naturalHeight;
+
+                                            let displayHeight = availableHeight;
+                                            let displayWidth = displayHeight * aspectRatio;
+
+                                            if (displayWidth > availableWidth) {
+                                                displayWidth = availableWidth;
+                                                displayHeight = displayWidth / aspectRatio;
+                                            }
+
+                                            canvas.width = displayWidth;
+                                            canvas.height = displayHeight;
+
+                                            image.style.width = `${displayWidth}px`;
+                                            image.style.height = `${displayHeight}px`;
+
+                                            if (Object.keys(valgusLandmarks).length === 0) {
+                                                resetLandmarks(canvas);
+                                            }
+
+                                            requestAnimationFrame(draw);
+                                        }}
+                                    />
+                                    <canvas
+                                        ref={canvasRef}
+                                        onMouseDown={handleMouseDown}
+                                        onTouchStart={handleTouchStart}
+                                        className="absolute top-0 left-0 cursor-crosshair touch-none"
+                                    />
+                                </div>
+
+                                {/* PIP */}
+                                <div
+                                    ref={pipViewerRef}
+                                    onMouseDown={handlePipStart}
+                                    onTouchStart={handlePipStart}
+                                    className="absolute w-40 h-40 rounded-full border-2 border-dark-maroon bg-black shadow-lg cursor-grab touch-none"
+                                    style={{ top: pipPosition.y, left: pipPosition.x }}
+                                >
+                                    <canvas
+                                        ref={pipCanvasRef}
+                                        width={160}
+                                        height={160}
+                                        className="rounded-full"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* ================= RIGHT : CONTROLS + INSTRUCTIONS + METRICS (30%) ================= */}
+                <div className="gemini-dark-card rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-180px)]">
+
+                    {/* STEP 1: Upload */}
+                    <section>
+                        <h3 className="text-lg font-semibold mb-2 text-gray-300">Upload X-ray</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            <label htmlFor="xray-upload" className="cursor-pointer text-center py-2 rounded bg-gray-700 hover:bg-[#6D282C]">
+                                File
+                            </label>
                             <input type="file" id="xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                            <button onClick={() => setIsCameraOpen(true)} className={`text-center p-3 rounded-lg font-semibold text-lg border transition ${uploadMethod === 'camera' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368] hover:bg-[#6D282C]'}`}>Live Photo</button>
+                            <button onClick={() => setIsCameraOpen(true)} className="py-2 rounded bg-gray-700 hover:bg-[#6D282C]">
+                                Camera
+                            </button>
                         </div>
-                        <span className="text-sm text-gray-400 truncate mt-2 inline-block">{fileName}</span>
-                    </div>
-                    <hr className="border-gray-600" />
-                    <div>
-                        <h3 className="text-xl font-semibold text-gray-300 mb-3">Step 2: Choose Leg Side</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <button onClick={() => setLegSide('left')} className={`py-3 px-4 rounded-lg font-semibold text-lg border ${legSide === 'left' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368]'}`}>Left</button>
-                            <button onClick={() => setLegSide('right')} className={`py-3 px-4 rounded-lg font-semibold text-lg border ${legSide === 'right' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368]'}`}>Right</button>
+                        <p className="text-xs text-gray-400 mt-1 truncate">{fileName}</p>
+                    </section>
+
+                    <hr className="border-gray-700" />
+
+                    {/* STEP 2: Leg Side */}
+                    <section>
+                        <h3 className="text-lg font-semibold mb-2 text-gray-300">Leg Side</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            <button onClick={() => setLegSide('left')} className={`py-2 rounded ${legSide === 'left' ? 'bg-[#6D282C]' : 'bg-gray-700'}`}>Left</button>
+                            <button onClick={() => setLegSide('right')} className={`py-2 rounded ${legSide === 'right' ? 'bg-[#6D282C]' : 'bg-gray-700'}`}>Right</button>
                         </div>
-                    </div>
-                    <hr className="border-gray-600" />
-                    <div className="flex-grow">
-                        <h3 className="text-xl font-semibold text-gray-300 mb-3">Step 3: Mark Landmarks</h3>
-                        <div className="space-y-3">
+                    </section>
+
+                    <hr className="border-gray-700" />
+
+                    {/* STEP 3: Landmarks */}
+                    <section>
+                        <h3 className="text-lg font-semibold mb-2 text-gray-300">Landmarks</h3>
+                        <div className="space-y-2">
                             {Object.entries(landmarkInstructions).map(([key, value]) => {
                                 const isSelected = visibleLandmarkSets.has(key);
                                 return (
                                     <button
                                         key={key}
                                         onClick={() => toggleLandmarkSet(key as any)}
-                                        style={{ '--landmark-color': LANDMARK_COLORS[key as keyof typeof LANDMARK_COLORS] } as React.CSSProperties}
-                                        className={`w-full text-left py-3 px-4 rounded-lg font-semibold text-lg border-2 transition-all duration-200 
-                                            ${isSelected
-                                                ? 'bg-[#6D282C] border-transparent text-white hover:bg-[#893338]'
-                                                : 'bg-transparent border-[var(--landmark-color)] text-gray-200 hover:bg-gray-700'
-                                            }
-                                        `}
+                                        className={`w-full py-2 rounded border ${isSelected ? 'bg-[#6D282C]' : 'border-gray-600 hover:bg-gray-700'}`}
                                     >
                                         {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                     </button>
                                 )
                             })}
                         </div>
-                        <button onClick={handleResetAll} className="w-full mt-6 text-center py-3 px-4 rounded-lg font-semibold text-lg border bg-gray-600 hover:bg-gray-700 border-gray-500 text-white transition">Reset All Markings</button>
-                    </div>
-                </div>
+                        <button onClick={handleResetAll} className="mt-3 w-full py-2 rounded bg-gray-600 hover:bg-gray-700">
+                            Reset All
+                        </button>
+                    </section>
 
-                <div className="lg:col-span-2 gemini-dark-card p-2 rounded-lg relative min-h-[600px] flex items-center justify-center overflow-hidden">
-                    {!valgusImageSrc ? (
-                        <div className="text-center text-gray-400"><p className="mt-4 text-xl">Upload an X-ray to begin</p></div>
-                    ) : (
-                        <div className="w-full h-full relative flex items-center justify-center">
-                            <div className="relative">
-                                <img
-                                    ref={imageRef}
-                                    src={valgusImageSrc}
-                                    alt="Valgus Stress X-ray"
-                                    className="block max-w-full max-h-full"
-                                    onLoad={(e) => {
-                                        const image = imageRef.current;
-                                        const canvas = canvasRef.current;
-                                        if (!image || !canvas) return;
-
-                                        const viewer = canvas.parentElement?.parentElement;
-                                        if (!viewer) return;
-
-                                        // Calculate available space inside the gemini-dark-card (p-2 ≈ 16px padding total)
-                                        const availableHeight = viewer.clientHeight - 32;
-                                        const availableWidth = viewer.clientWidth - 32;
-
-                                        const aspectRatio = image.naturalWidth / image.naturalHeight;
-
-                                        // Prioritize height for tall X-rays
-                                        let displayHeight = availableHeight;
-                                        let displayWidth = displayHeight * aspectRatio;
-
-                                        if (displayWidth > availableWidth) {
-                                            displayWidth = availableWidth;
-                                            displayHeight = displayWidth / aspectRatio;
-                                        }
-
-                                        // Set exact pixel sizes
-                                        canvas.width = displayWidth;
-                                        canvas.height = displayHeight;
-
-                                        image.style.width = `${displayWidth}px`;
-                                        image.style.height = `${displayHeight}px`;
-                                        image.style.maxHeight = 'none';
-                                        image.style.maxWidth = 'none';
-
-                                        // Initialize landmarks only on first load
-                                        if (Object.keys(valgusLandmarks).length === 0) {
-                                            if (canvasRef.current) resetLandmarks(canvasRef.current);
-                                        }
-
-                                        requestAnimationFrame(draw);
-                                    }}
-                                />
-                                <canvas
-                                    ref={canvasRef}
-                                    onTouchStart={handleTouchStart}
-                                    onMouseDown={handleMouseDown}
-                                    className="absolute top-0 left-0 cursor-crosshair touch-none"
-                                    style={{ touchAction: 'none' }}
-                                />
-                            </div>
-
-                            {/* PIP Viewer */}
-                            {valgusImageSrc && (
-                                <div
-                                    ref={pipViewerRef}
-                                    onMouseDown={handlePipStart}
-                                    onTouchStart={handlePipStart}
-                                    onMouseLeave={handlePipMouseUp}
-                                    className="absolute w-40 h-40 border-2 border-[#800000] bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg touch-none"
-                                    style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px`, touchAction: 'none' }}
-                                >
-                                    <canvas ref={pipCanvasRef} width="160" height="160" className="rounded-full" />
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                <div className="lg:col-span-1 gemini-dark-card p-6 rounded-lg flex flex-col items-center justify-center">
-                    <h3 className="text-3xl font-bold text-gray-300 mb-4 text-center">Instructions</h3>
-                    <div className="text-2xl text-yellow-300 min-h-[150px] w-full p-4 bg-gray-900/50 rounded-lg border border-gray-700 flex items-center justify-center">
+                    {/* INSTRUCTIONS */}
+                    <section className="bg-gray-900/50 p-3 rounded border border-gray-700">
+                        <h4 className="text-md font-semibold text-yellow-300 mb-1">Instructions</h4>
                         {activeInstruction ? (
-                            <div className="text-center space-y-4">
-                                {activeInstruction.map((inst, i) => <p key={i}>{inst}</p>)}
-                            </div>
+                            <ul className="list-disc list-inside space-y-1 text-sm">
+                                {activeInstruction.map((i, idx) => (
+                                    <li key={idx}>{i}</li>
+                                ))}
+                            </ul>
                         ) : (
-                            <p className="text-center">Select a landmark group.</p>
+                            <p className="text-sm text-gray-400">Select a landmark to begin</p>
                         )}
-                    </div>
+                    </section>
+
+                    {/* METRICS */}
+                    <section>
+                        <h4 className="text-md font-semibold mb-2">Metrics</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                            <MetricItem label="Obliquity" value={`${valgusResults.obliquity?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="LDFA" value={`${valgusResults.ldfa?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="MPTA" value={`${valgusResults.mpta?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="aHKA" value={`${valgusResults.ahka?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="JLO" value={`${valgusResults.jlo?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="CPAK" value={valgusResults.cpak} />
+                        </div>
+                    </section>
                 </div>
             </div>
 
-            <div className="mt-6">
-                <div className="gemini-dark-card p-6 rounded-lg space-y-4">
-                    <h3 className="text-center font-bold text-2xl text-gray-200 mb-4">Detailed Metrics</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-gray-800/80 p-4 rounded-lg text-center">
-                            <p className="text-xl text-gray-400">Obliquity</p>
-                            <p className="font-bold text-3xl text-gray-100">{valgusResults.obliquity?.toFixed(1) ?? '--'}°</p>
-                            <p className="text-md text-gray-300 mt-1">{getObliquityDescription(valgusResults.obliquity)}</p>
-                        </div>
-                        <div className="bg-gray-800/80 p-4 rounded-lg text-center">
-                            <p className="text-xl text-gray-400">LDFA</p>
-                            <p className="font-bold text-3xl text-gray-100">{valgusResults.ldfa?.toFixed(1) ?? '--'}°</p>
-                        </div>
-                        <div className="bg-gray-800/80 p-4 rounded-lg text-center">
-                            <p className="text-xl text-gray-400">MPTA</p>
-                            <p className="font-bold text-3xl text-gray-100">{valgusResults.mpta?.toFixed(1) ?? '--'}°</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="mt-6 flex justify-end">
-                <button onClick={() => setPage('planner-valgus-stress-results')} className="gemini-dark-button font-bold text-xl py-3 px-8 rounded-lg transition" disabled={!valgusResults.cpak || valgusResults.cpak === '--'}>Go to analysis & Results</button>
+            {/* FOOTER ACTION */}
+            <div className="flex justify-end">
+                <button
+                    onClick={() => setPage('planner-valgus-stress-results')}
+                    disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
+                    className="gemini-dark-button px-8 py-3 text-lg"
+                >
+                    Go to Analysis & Results
+                </button>
             </div>
         </div>
     );

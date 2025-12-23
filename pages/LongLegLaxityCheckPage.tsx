@@ -9,14 +9,13 @@ const noLaxityImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQ
 interface LaxityOptionProps {
     level: string;
     onClick: () => void;
-    onUploadClick: (e: React.MouseEvent) => void;
     imageSrc?: string | null;
     isSelected: boolean;
     isSuggested: boolean;
     color: string;
 }
 
-const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, onUploadClick, imageSrc, isSelected, isSuggested, color }) => {
+const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, isSelected, isSuggested, color }) => {
     let bgClass = 'bg-[#1e1f20]';
 
     if (isSelected) {
@@ -44,7 +43,6 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, onUploadCli
 
             <div
                 className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-gray-800 group"
-                onClick={onUploadClick}
             >
                 {imageSrc ? (
                     <img src={imageSrc} alt={`Reference for ${level}`} className="absolute inset-0 w-full h-full object-contain" />
@@ -53,13 +51,6 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, onUploadCli
                         <p className="text-gray-600 italic text-sm px-4 text-center">No Reference Image</p>
                     </div>
                 )}
-
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <span className="text-white text-xs font-bold bg-gray-800/80 px-3 py-1.5 rounded border border-gray-600 shadow-md">
-                        {imageSrc ? 'Change Image' : 'Upload Image'}
-                    </span>
-                </div>
             </div>
 
             <div
@@ -77,8 +68,6 @@ const LongLegLaxityCheckPage: React.FC = () => {
         setLateralLaxity,
         longLegImageSrc,
         setPlannerMode,
-        longLegLaxityReferenceImages,
-        setLongLegLaxityReferenceImages
     } = useAppContext();
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -86,12 +75,6 @@ const LongLegLaxityCheckPage: React.FC = () => {
     const [userSelection, setUserSelection] = useState<string | null>(null);
 
     const patientFileInputRef = useRef<HTMLInputElement>(null);
-    const refUploadRefs = {
-        'No Lateral Laxity': useRef<HTMLInputElement>(null),
-        'Mild lateral laxity': useRef<HTMLInputElement>(null),
-        'Moderate lateral laxity': useRef<HTMLInputElement>(null),
-        'Severe lateral laxity': useRef<HTMLInputElement>(null),
-    };
 
     useEffect(() => {
         if (longLegImageSrc) {
@@ -105,7 +88,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
         setAiSuggestion(null);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY as string });
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
             const base64Data = imageDataUrl.split(',')[1];
 
             const imagePart = {
@@ -117,7 +100,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
             };
 
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-1.5-flash',
                 contents: { parts: [imagePart, textPart] },
             });
 
@@ -155,19 +138,6 @@ const LongLegLaxityCheckPage: React.FC = () => {
         }
     };
 
-    const handleReferenceFileChange = (level: string, e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const newImages = {
-                    ...longLegLaxityReferenceImages,
-                    [level]: event.target?.result as string
-                };
-                setLongLegLaxityReferenceImages(newImages);
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    };
 
     const handleConfirmSelection = () => {
         if (!userSelection) return;
@@ -222,25 +192,22 @@ const LongLegLaxityCheckPage: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
                         {laxityLevels.map((level, index) => {
-                            const typedLevel = level as keyof typeof refUploadRefs;
-                            const currentImage = longLegLaxityReferenceImages[level] || (level === 'No Lateral Laxity' ? noLaxityImage : null);
+                            let staticImage = null;
+                            if (level === 'No Lateral Laxity') staticImage = '/nolaterl.jpeg';
+                            else if (level === 'Mild lateral laxity') staticImage = '/mildlaterl.jpeg';
+                            else if (level === 'Moderate lateral laxity') staticImage = '/moderate.jpeg';
+                            else if (level === 'Severe lateral laxity') staticImage = '/severe.jpeg';
 
                             return (
-                                <React.Fragment key={level}>
-                                    <input type="file" ref={refUploadRefs[typedLevel]} onChange={(e) => handleReferenceFileChange(level, e)} accept="image/*" className="hidden" />
-                                    <LaxityOption
-                                        level={level}
-                                        onClick={() => setUserSelection(level)}
-                                        onUploadClick={(e) => {
-                                            // Allow propagation so selecting image also selects the option
-                                            refUploadRefs[typedLevel].current?.click();
-                                        }}
-                                        imageSrc={currentImage}
-                                        isSelected={userSelection === level}
-                                        isSuggested={aiSuggestion === level}
-                                        color={laxityColors[index]}
-                                    />
-                                </React.Fragment>
+                                <LaxityOption
+                                    key={level}
+                                    level={level}
+                                    onClick={() => setUserSelection(level)}
+                                    imageSrc={staticImage}
+                                    isSelected={userSelection === level}
+                                    isSuggested={aiSuggestion === level}
+                                    color={laxityColors[index]}
+                                />
                             );
                         })}
                     </div>

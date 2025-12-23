@@ -13,22 +13,22 @@ const BoundarySelector: React.FC<{
     const setBoundary = bone === 'femur' ? setFemurBoundary : setTibiaBoundary;
 
     return (
-        <div className="gemini-dark-card p-4 rounded-lg h-full flex flex-col justify-center">
-            <h3 className="text-center font-bold text-2xl text-gray-200 mb-4">{title}</h3>
-            <div className="space-y-4">
+        <div className="gemini-dark-card p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
+            <h3 className="text-center font-bold text-lg text-gray-200 mb-2">{title}</h3>
+            <div className="space-y-2">
                 {options.map(opt => (
-                    <div 
+                    <div
                         key={opt.key}
                         onClick={() => setBoundary(opt.key)}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all flex items-center justify-between ${currentBoundary === opt.key ? 'border-cyan-400 bg-cyan-900/30 ring-2 ring-cyan-400/50' : 'border-gray-700 hover:border-gray-500 hover:bg-gray-800/50'}`}
+                        className={`p-2 border-2 rounded-lg cursor-pointer transition-all flex items-center justify-between ${currentBoundary === opt.key ? 'border-cyan-400 bg-cyan-900/30 ring-2 ring-cyan-400/50' : 'border-gray-700 hover:border-gray-500 hover:bg-gray-800/50'}`}
                     >
                         <div>
-                            <p className="font-semibold text-2xl text-gray-100">{opt.label}</p>
-                            <p className="text-gray-300 text-lg">{opt.range}</p>
+                            <p className="font-semibold text-sm text-gray-100">{opt.label}</p>
+                            <p className="text-gray-300 text-xs">{opt.range}</p>
                         </div>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${currentBoundary === opt.key ? 'bg-cyan-400 border-cyan-300' : 'border-gray-500 bg-gray-700'}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${currentBoundary === opt.key ? 'bg-cyan-400 border-cyan-300' : 'border-gray-500 bg-gray-700'}`}>
                             {currentBoundary === opt.key && (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-black" viewBox="0 0 20 20" fill="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-black" viewBox="0 0 20 20" fill="currentColor">
                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
                             )}
@@ -52,22 +52,22 @@ const WarningMessage: React.FC<{ message: string }> = ({ message }) => (
 const CpakDiagram: React.FC<{ cpakType: string | null }> = ({ cpakType }) => {
     if (!cpakType || cpakType === '--') return null;
     const diagrams: { [key: string]: React.JSX.Element } = {
-        'I':    <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 20 30 L 15 60 M 10 28 L 20 32" /><path d="M 45 0 L 40 30 L 45 60 M 50 28 L 40 32" /></g></svg>,
-        'II':   <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 15 60 M 10 28 L 20 32" /><path d="M 45 0 L 45 60 M 50 28 L 40 32" /></g></svg>,
-        'III':  <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 28 L 20 32" /><path d="M 40 0 L 45 30 L 40 60 M 50 28 L 40 32" /></g></svg>,
-        'IV':   <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 20 30 L 15 60 M 10 30 L 20 30" /><path d="M 45 0 L 40 30 L 45 60 M 50 30 L 40 30" /></g></svg>,
-        'V':    <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 15 60 M 10 30 L 20 30" /><path d="M 45 0 L 45 60 M 50 30 L 40 30" /></g></svg>,
-        'VI':   <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 30 L 20 30" /><path d="M 40 0 L 45 30 L 40 60 M 50 30 L 40 30" /></g></svg>,
-        'VII':  <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 20 30 L 15 60 M 10 32 L 20 28" /><path d="M 45 0 L 40 30 L 45 60 M 50 32 L 40 28" /></g></svg>,
+        'I': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 20 30 L 15 60 M 10 28 L 20 32" /><path d="M 45 0 L 40 30 L 45 60 M 50 28 L 40 32" /></g></svg>,
+        'II': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 15 60 M 10 28 L 20 32" /><path d="M 45 0 L 45 60 M 50 28 L 40 32" /></g></svg>,
+        'III': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 28 L 20 32" /><path d="M 40 0 L 45 30 L 40 60 M 50 28 L 40 32" /></g></svg>,
+        'IV': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 20 30 L 15 60 M 10 30 L 20 30" /><path d="M 45 0 L 40 30 L 45 60 M 50 30 L 40 30" /></g></svg>,
+        'V': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 15 60 M 10 30 L 20 30" /><path d="M 45 0 L 45 60 M 50 30 L 40 30" /></g></svg>,
+        'VI': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 30 L 20 30" /><path d="M 40 0 L 45 30 L 40 60 M 50 30 L 40 30" /></g></svg>,
+        'VII': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 20 30 L 15 60 M 10 32 L 20 28" /><path d="M 45 0 L 40 30 L 45 60 M 50 32 L 40 28" /></g></svg>,
         'VIII': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 15 60 M 10 32 L 20 28" /><path d="M 45 0 L 45 60 M 50 32 L 40 28" /></g></svg>,
-        'IX':   <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 32 L 20 28" /><path d="M 40 0 L 45 30 L 40 60 M 50 32 L 40 28" /></g></svg>,
+        'IX': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 32 L 20 28" /><path d="M 40 0 L 45 30 L 40 60 M 50 32 L 40 28" /></g></svg>,
     };
-    return <div className="h-24 w-24 md:h-28 md:w-28 text-yellow-400">{diagrams[cpakType] || null}</div>;
+    return <div className="h-20 w-20 md:h-24 md:w-24 text-yellow-400">{diagrams[cpakType] || null}</div>;
 };
 
 const ImageUploadBox: React.FC<{
     imageSrc: string | null;
-    onImageChange: (src: string | null) => void;
+    onImageChange?: (src: string | null) => void;
     transparent?: boolean;
     seamless?: boolean;
 }> = ({ imageSrc, onImageChange, transparent, seamless }) => {
@@ -81,11 +81,11 @@ const ImageUploadBox: React.FC<{
         }
     };
 
-    let containerClasses = "w-48 h-48 flex-shrink-0 flex flex-col items-center justify-center relative overflow-hidden group transition-all cursor-pointer rounded-xl ";
-    
+    let containerClasses = "w-32 h-32 flex-shrink-0 flex flex-col items-center justify-center relative overflow-hidden group transition-all cursor-pointer rounded-xl ";
+
     if (seamless) {
         // Seamless mode: No border, transparent background, blends into container
-        containerClasses += "hover:opacity-90"; 
+        containerClasses += "hover:opacity-90";
     } else if (transparent) {
         containerClasses += "hover:bg-white/5";
     } else {
@@ -93,11 +93,11 @@ const ImageUploadBox: React.FC<{
     }
 
     return (
-        <div 
-            className={containerClasses}
-            onClick={() => fileInputRef.current?.click()}
+        <div
+            className={`${containerClasses} ${!onImageChange ? 'cursor-default pointer-events-none' : ''}`}
+            onClick={() => onImageChange && fileInputRef.current?.click()}
         >
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFile} />
+            {onImageChange && <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFile} />}
             {imageSrc ? (
                 <img src={imageSrc} className="w-full h-full object-contain rounded-xl" alt="Step Upload" />
             ) : (
@@ -108,7 +108,7 @@ const ImageUploadBox: React.FC<{
                     <span className={`text-sm text-center px-2 ${transparent || seamless ? 'text-gray-300 opacity-70' : 'text-gray-400'}`}>Upload Reference</span>
                 </>
             )}
-            {imageSrc && (
+            {imageSrc && onImageChange && (
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl">
                     <span className="text-sm text-white font-bold">Change</span>
                 </div>
@@ -134,27 +134,27 @@ const StepCard: React.FC<{
     let theme;
     switch (colorTheme) {
         case 'yellow':
-            theme = { 
-                bg: 'bg-yellow-600/10', 
-                border: 'border-yellow-600/30', 
-                text: 'text-yellow-200', 
-                badge: 'bg-yellow-900/40 text-yellow-100 border border-yellow-700/50' 
+            theme = {
+                bg: 'bg-yellow-600/10',
+                border: 'border-yellow-600/30',
+                text: 'text-yellow-200',
+                badge: 'bg-yellow-900/40 text-yellow-100 border border-yellow-700/50'
             };
             break;
         case 'pink':
-            theme = { 
-                bg: 'bg-rose-600/10', 
-                border: 'border-rose-600/30', 
-                text: 'text-rose-200', 
-                badge: 'bg-rose-900/40 text-rose-100 border border-rose-700/50' 
+            theme = {
+                bg: 'bg-rose-600/10',
+                border: 'border-rose-600/30',
+                text: 'text-rose-200',
+                badge: 'bg-rose-900/40 text-rose-100 border border-rose-700/50'
             };
             break;
         case 'blue':
-            theme = { 
-                bg: 'bg-sky-600/10', 
-                border: 'border-sky-600/30', 
-                text: 'text-sky-200', 
-                badge: 'bg-sky-900/40 text-sky-100 border border-sky-700/50' 
+            theme = {
+                bg: 'bg-sky-600/10',
+                border: 'border-sky-600/30',
+                text: 'text-sky-200',
+                badge: 'bg-sky-900/40 text-sky-100 border border-sky-700/50'
             };
             break;
         default:
@@ -162,16 +162,16 @@ const StepCard: React.FC<{
     }
 
     return (
-        <div className={`${theme.bg} border-2 ${theme.border} rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 ${className}`}>
+        <div className={`${theme.bg} border-2 ${theme.border} rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3 ${className}`}>
             <div className="flex-grow text-center md:text-left flex flex-col justify-center items-center md:items-start h-full">
-                {!hideStepBadge && <span className={`inline-block px-6 py-2 rounded-full text-xl font-bold mb-4 ${theme.badge}`}>STEP {step} &gt;</span>}
-                <h4 className="text-3xl md:text-4xl text-gray-200 font-bold mb-4 leading-tight">{title}</h4>
-                <div className={`text-6xl font-extrabold ${theme.text} mb-4`}>{value}</div>
-                
-                {subTitle && <p className="text-2xl text-gray-300 mt-2 font-medium">{subTitle}</p>}
-                {subValue && <div className={`text-5xl md:text-6xl font-extrabold ${theme.text} mt-3 border-4 border-dashed border-gray-600 inline-block px-6 py-4 rounded-xl shadow-lg bg-black/20`}>{subValue}</div>}
+                {!hideStepBadge && <span className={`inline-block px-3 py-0.5 rounded-full text-xs font-bold mb-1 ${theme.badge}`}>STEP {step} &gt;</span>}
+                <h4 className="text-base text-gray-200 font-bold mb-1 leading-tight">{title}</h4>
+                <div className={`text-xl font-extrabold ${theme.text} mb-1`}>{value}</div>
+
+                {subTitle && <p className="text-xs text-gray-300 mt-0.5 font-medium">{subTitle}</p>}
+                {subValue && <div className={`text-xl font-extrabold ${theme.text} mt-1 border-2 border-dashed border-gray-600 inline-block px-2 py-1 rounded-lg shadow-md bg-black/20`}>{subValue}</div>}
             </div>
-            {setImageSrc && (
+            {(imageSrc || setImageSrc) && (
                 <div className="flex flex-col justify-center">
                     <ImageUploadBox imageSrc={imageSrc || null} onImageChange={setImageSrc} transparent={transparentImage} seamless={seamlessImage} />
                 </div>
@@ -181,21 +181,19 @@ const StepCard: React.FC<{
 };
 
 const ResultAnalysisPage: React.FC = () => {
-    const { 
-        setPage, 
-        longLegCanvasDataUrl, 
-        longLegResults, 
+    const {
+        setPage,
+        longLegCanvasDataUrl,
+        longLegResults,
         femurBoundary, setFemurBoundary,
         tibiaBoundary, setTibiaBoundary,
-        resultAnalysisFemoralImage, setResultAnalysisFemoralImage,
-        resultAnalysisTibialImage, setResultAnalysisTibialImage
     } = useAppContext();
 
     useEffect(() => {
         if (femurBoundary === null) setFemurBoundary('expanded');
         if (tibiaBoundary === null) setTibiaBoundary('expanded');
     }, [femurBoundary, tibiaBoundary, setFemurBoundary, setTibiaBoundary]);
-    
+
     const getFemoralCut = () => {
         const originalCut = longLegResults.cut;
         if (!originalCut || originalCut === '--') return '--';
@@ -226,35 +224,35 @@ const ResultAnalysisPage: React.FC = () => {
     const showMptaWarning = longLegResults.mpta !== null && longLegResults.mpta < 84;
 
     return (
-        <div className="h-full flex flex-col">
-            <div className="flex justify-between items-center mb-4 no-print">
-                <h2 className="text-4xl font-bold">Long leg film Analysis &amp; Results</h2>
-                 <button onClick={() => setPage('planner-long-leg')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition text-lg">&larr; Back to Planner</button>
+        <div className="h-full flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center mb-2 no-print">
+                <h2 className="text-4xl font-bold">Long leg film Analysis</h2>
+                <button onClick={() => setPage('planner-long-leg')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-lg transition text-base">&larr; Back</button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
-                
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-grow min-h-0">
+
                 {/* Column 1: Image (Reduced Width ~25%) */}
-                <div className="lg:col-span-3 gemini-dark-card p-2 rounded-lg flex items-center justify-center min-h-[400px] lg:min-h-0 bg-black">
-                    {longLegCanvasDataUrl ? 
+                <div className="lg:col-span-3 gemini-dark-card p-2 rounded-lg flex items-center justify-center min-h-[300px] lg:min-h-0 bg-black text-center">
+                    {longLegCanvasDataUrl ?
                         <img src={longLegCanvasDataUrl} alt="Long Leg Analysis" className="max-w-full max-h-full object-contain rounded-md" /> :
                         <p className="text-gray-500 text-lg">No analysis image.</p>
                     }
                 </div>
 
                 {/* Column 2: Data & Matrix (Medium Width ~33%) */}
-                <div className="lg:col-span-4 flex flex-col gap-6">
-                    {/* Results Box */}
-                    <div className="gemini-dark-card p-6 rounded-lg space-y-8 flex flex-col justify-center">
-                        <div className="text-center border-b border-gray-700 pb-6">
-                            <p className="text-gray-400 text-xl uppercase tracking-wider mb-2">JLO Type</p>
-                            <p className="font-bold text-5xl text-yellow-400">{longLegResults.jloType}</p>
+                <div className="lg:col-span-4 flex flex-col gap-3 min-h-0 overflow-y-auto">
+                    {/* Results Box - Compact Horizontal */}
+                    <div className="gemini-dark-card p-2 rounded-lg flex flex-row items-center justify-around min-h-0 shrink-0">
+                        <div className="text-center border-r border-gray-700 pr-4">
+                            <p className="text-gray-400 text-xs uppercase tracking-wider mb-0.5">JLO Type</p>
+                            <p className="font-bold text-lg text-yellow-400">{longLegResults.jloType}</p>
                         </div>
-                        <div className="text-center pt-2">
-                            <p className="text-gray-400 text-xl uppercase tracking-wider mb-4">CPAK Type</p>
-                            <div className="flex flex-row items-center justify-center gap-6 mt-2">
-                                <p className="font-bold text-6xl text-yellow-400 leading-none">CPAK {longLegResults.cpak}</p>
-                                <div className="scale-125 transform">
+                        <div className="text-center flex flex-col items-center pl-4">
+                            <p className="text-gray-400 text-xs uppercase tracking-wider mb-0.5">CPAK Type</p>
+                            <div className="flex flex-row items-center gap-2">
+                                <p className="font-bold text-xl text-yellow-400 leading-none">CPAK {longLegResults.cpak}</p>
+                                <div className="scale-50 transform origin-center -my-2">
                                     <CpakDiagram cpakType={longLegResults.cpak} />
                                 </div>
                             </div>
@@ -262,8 +260,8 @@ const ResultAnalysisPage: React.FC = () => {
                     </div>
 
                     {/* Matrix Selectors */}
-                    <div className="flex-grow flex flex-col gap-4">
-                        <BoundarySelector 
+                    <div className="flex-grow flex flex-col gap-2 min-h-0">
+                        <BoundarySelector
                             title="Distal Femur cut"
                             bone="femur"
                             options={[
@@ -271,7 +269,7 @@ const ResultAnalysisPage: React.FC = () => {
                                 { key: 'expanded', label: 'Expanded matrix', range: '2-6 deg' }
                             ]}
                         />
-                        <BoundarySelector 
+                        <BoundarySelector
                             title="Proximal tibial cut"
                             bone="tbia"
                             options={[
@@ -283,36 +281,34 @@ const ResultAnalysisPage: React.FC = () => {
                 </div>
 
                 {/* Column 3: Steps & Recommendations (Widest ~42%) */}
-                <div className="lg:col-span-5 flex flex-col gap-6 h-full overflow-y-auto">
-                    <div className="gemini-dark-card p-1 rounded-lg bg-transparent flex-grow flex flex-col gap-6">
+                <div className="lg:col-span-5 flex flex-col gap-3 min-h-0 overflow-y-auto">
+                    <div className="gemini-dark-card p-1 rounded-lg bg-transparent flex-grow flex flex-col gap-3 min-h-0">
                         <h3 className="text-2xl font-bold text-gray-100 text-center hidden">Recommendations</h3>
-                        
+
                         {/* STEP 1 */}
-                        <StepCard 
+                        <StepCard
                             step={1}
                             title="Recommended Foundational distal femoral cut"
                             value={displayFemoralCut}
                             colorTheme="yellow"
-                            imageSrc={resultAnalysisFemoralImage}
-                            setImageSrc={setResultAnalysisFemoralImage}
+                            imageSrc="/valguscut.jpeg"
                             className="flex-1"
                             seamlessImage={true}
                         />
 
                         {/* STEP 2 */}
-                        <StepCard 
+                        <StepCard
                             step={2}
                             title="Provisional 90 deg tibial cut"
                             value="90°"
                             colorTheme="pink"
-                            imageSrc={resultAnalysisTibialImage}
-                            setImageSrc={setResultAnalysisTibialImage}
+                            imageSrc="/tibialcut.jpeg"
                             className="flex-1"
                             transparentImage={true}
                         />
 
                         {/* STEP 3 */}
-                        <StepCard 
+                        <StepCard
                             step={3}
                             title="Anticipated tibial cut"
                             value={displayTibialCut}
@@ -325,18 +321,18 @@ const ResultAnalysisPage: React.FC = () => {
             </div>
 
             {/* Footer / Warning Section */}
-            <div className="mt-6 space-y-4 pb-4">
+            <div className="mt-auto pt-3 space-y-2 pb-4">
                 {(showLdfaWarning || showMptaWarning) && (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         {showLdfaWarning && <WarningMessage message="Native LDFA Out of boundary – release anticipated." />}
                         {showMptaWarning && <WarningMessage message="Native MPTA Out of boundary – release anticipated." />}
                     </div>
                 )}
-                
-                <div className="flex justify-center w-full">
-                    <button 
-                        onClick={() => setPage('planner-long-leg-coronal-balancing')} 
-                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-2xl py-5 px-12 rounded-full shadow-xl transition transform hover:scale-105"
+
+                <div className="flex justify-end w-full">
+                    <button
+                        onClick={() => setPage('planner-long-leg-coronal-balancing')}
+                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-2.5 px-8 rounded-full shadow-xl transition transform hover:scale-105"
                         disabled={!longLegResults.cpak || longLegResults.cpak === '--'}
                     >
                         Proceed to Coronal Balancing
