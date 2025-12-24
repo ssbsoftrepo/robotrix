@@ -34,7 +34,8 @@ const ValgusStressReportPage: React.FC = () => {
         valgusCoronalBalancingResults,
         setPage,
         valgusFunctionalTibialCutImage,
-        valgusFunctionalCutDegree
+        valgusFunctionalCutDegree,
+        valgusFunctionalLinesY
     } = useAppContext();
     const patient = patients.find(p => p.id === currentPatientId);
 
@@ -169,14 +170,14 @@ const ValgusStressReportPage: React.FC = () => {
 
                     <ReportCard title="Functional Tibial Planning" className="border-t-4 border-t-green-500 h-full">
                         {/* Always show the section if we have the static image fallback */}
-                        <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative h-[400px] w-full">
+                        <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[400px] w-full mx-auto">
                             <img src={valgusFunctionalTibialCutImage || "/tibiacut.jpeg"} alt="Functional Cut Plan" className="w-full h-full object-contain" />
 
                             {/* Red Lines Overlay */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
                                 {[0, 1, 2, 3].map(deg => {
                                     const isTarget = deg === selectedDegree;
-                                    const startYPercent = useAppContext().valgusFunctionalLinesY || 30;
+                                    const startYPercent = valgusFunctionalLinesY || 30;
                                     const yOffsetPercent = deg * 2.5;
                                     return (
                                         <g key={deg}>
@@ -205,6 +206,7 @@ const ValgusStressReportPage: React.FC = () => {
                                         </g>
                                     );
                                 })}
+                                <circle cx="0" cy={`${valgusFunctionalLinesY || 30}%`} r="6" fill="#ef4444" />
                             </svg>
 
                             {/* Gap Info Overlays - Scaled Down slightly for report */}
@@ -219,11 +221,10 @@ const ValgusStressReportPage: React.FC = () => {
                             </div>
 
                             {/* Corrected Varus Overlay */}
-                            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-gray-600 shadow-lg text-center">
+                            <div className="absolute top-[65%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-gray-600 shadow-lg text-center">
                                 <p className="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
                                 <p className="text-2xl font-extrabold text-white">{selectedDegree}°</p>
                             </div>
-
                         </div>
                     </ReportCard>
                 </div>

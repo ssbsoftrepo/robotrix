@@ -284,7 +284,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
             {/* Footer Section */}
             <div className="mt-auto pt-3 space-y-2 pb-4">
-                <div className="flex justify-center w-full">
+                <div className="flex justify-end w-full">
                     <button
                         onClick={() => setPage('planner-valgus-stress-coronal-balancing')}
                         className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-2.5 px-8 rounded-full shadow-xl transition transform hover:scale-105"

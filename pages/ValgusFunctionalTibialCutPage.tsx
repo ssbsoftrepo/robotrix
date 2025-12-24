@@ -98,9 +98,8 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
     } = useAppContext();
 
 
-    // Line Dragging State
+    // Line Position (Static)
     const [linesYPercent, setLinesYPercent] = useState<number>(valgusFunctionalLinesY || 30); // Vertical position as %
-    const [isDragging, setIsDragging] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut based on Valgus results
@@ -162,65 +161,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
         setSelectedDegree(adjustedDegree);
     };
 
-    const handleMouseDown = (e: React.MouseEvent) => {
-        setIsDragging(true);
-    };
-
-    const handleMouseMove = useCallback((e: MouseEvent) => {
-        if (!isDragging || !containerRef.current) return;
-
-        const rect = containerRef.current.getBoundingClientRect();
-        const y = e.clientY - rect.top;
-        const newPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
-        setLinesYPercent(newPercent);
-    }, [isDragging]);
-
-    const handleMouseUp = useCallback(() => {
-        setIsDragging(false);
-    }, []);
-
-    // TOUCH SUPPORT — RED LINE DRAGGING
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        e.preventDefault(); // Prevent scrolling
-        setIsDragging(true);
-    };
-
-    const handleTouchMove = useCallback((e: TouchEvent) => {
-        if (!isDragging || !containerRef.current) return;
-        e.preventDefault(); // Critical: stops page scroll
-
-        const touch = e.touches[0];
-        if (!touch) return;
-
-        const rect = containerRef.current.getBoundingClientRect();
-        const y = touch.clientY - rect.top;
-        const newPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
-        setLinesYPercent(newPercent);
-    }, [isDragging]);
-
-    const handleTouchEnd = useCallback(() => {
-        setIsDragging(false);
-    }, []);
-
-    useEffect(() => {
-        // Mouse
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
-
-        // Touch
-        window.addEventListener('touchmove', handleTouchMove, { passive: false });
-        window.addEventListener('touchend', handleTouchEnd);
-        window.addEventListener('touchcancel', handleTouchEnd);
-
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
-
-            window.removeEventListener('touchmove', handleTouchMove);
-            window.removeEventListener('touchend', handleTouchEnd);
-            window.removeEventListener('touchcancel', handleTouchEnd);
-        };
-    }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
+    // No dragging logic needed as per user request (static lines)
 
     const lateralGapValue = valgusCoronalBalancingResults?.lateralGap || '--';
     const baseMedialGap = valgusCoronalBalancingResults?.selectedSeries || 0;
@@ -287,10 +228,8 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                         {/* Container for Image & Lines */}
                         <div
                             ref={containerRef}
-                            className="relative w-full h-full bg-black border-2 border-gray-700 rounded-xl overflow-hidden shadow-2xl cursor-ns-resize group"
+                            className="relative aspect-[3/4] h-full mx-auto bg-black border-2 border-gray-700 rounded-xl overflow-hidden shadow-2xl group"
                             style={{ touchAction: 'none' }}
-                            onMouseDown={handleMouseDown}
-                            onTouchStart={handleTouchStart}
                         >
 
                             {/* Gap Info Overlays - Symmetrical Display with Highlighting */}
@@ -350,14 +289,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 })}
                             </svg>
 
-                            <div
-                                className="absolute left-0 w-full h-10 -mt-5 z-10 flex items-center justify-start pl-2 opacity-50 group-hover:opacity-100 transition-opacity"
-                                style={{ top: `${linesYPercent}%` }}
-                            >
-                                <div className="bg-red-600/30 text-red-200 text-xs px-2 py-1 rounded cursor-ns-resize backdrop-blur-md border border-red-500/50">
-                                    Drag to Move
-                                </div>
-                            </div>
+                            {/* Static indicator removed as per user request */}
                         </div>
                     </div>
 

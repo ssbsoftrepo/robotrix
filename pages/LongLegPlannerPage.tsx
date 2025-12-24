@@ -92,18 +92,49 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
 
     const stopCamera = useCallback(() => {
         if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
+            console.log("Stopping camera tracks...");
+            streamRef.current.getTracks().forEach(track => {
+                track.stop();
+                console.log(`Track ${track.label} stopped.`);
+            });
             streamRef.current = null;
+        }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+            videoRef.current.load(); // Force release
         }
     }, []);
 
+    // Cleanup Blob URLs
+    useEffect(() => {
+        return () => {
+            if (capturedImage && capturedImage.startsWith('blob:')) {
+                URL.revokeObjectURL(capturedImage);
+            }
+            stopCamera(); // Defensive cleanup on unmount
+        };
+    }, [capturedImage, stopCamera]);
+
+    const handleClose = useCallback(() => {
+        console.log("Closing CameraModal...");
+        if (capturedImage && capturedImage.startsWith('blob:')) {
+            URL.revokeObjectURL(capturedImage);
+        }
+        setCapturedImage(null);
+        stopCamera();
+        onClose();
+    }, [capturedImage, onClose, stopCamera]);
+
     useEffect(() => {
         if (isOpen && !capturedImage) {
+            console.log("Requesting camera access...");
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(stream => {
+                    console.log("Camera stream obtained.");
                     streamRef.current = stream;
                     if (videoRef.current) {
                         videoRef.current.srcObject = stream;
+                        videoRef.current.play().catch(e => console.error("Auto-play failed:", e));
                         videoRef.current.onloadedmetadata = () => {
                             if (overlayRef.current && videoRef.current) {
                                 overlayRef.current.width = videoRef.current.videoWidth;
@@ -128,20 +159,59 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
                     console.error("Error accessing camera: ", err);
                     onClose();
                 });
-        } else {
-            stopCamera();
         }
-        return () => stopCamera();
-    }, [isOpen, onClose, stopCamera, capturedImage]);
+    }, [isOpen, capturedImage, onClose]);
 
-    const handleCapture = () => {
-        if (videoRef.current) {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoRef.current.videoWidth;
-            canvas.height = videoRef.current.videoHeight;
-            canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
-            setCapturedImage(canvas.toDataURL('image/png'));
-            stopCamera();
+    const handleCapture = async () => {
+        const video = videoRef.current;
+        if (video && video.videoWidth > 0 && video.videoHeight > 0) {
+            try {
+                // Ensure video is playing and has data
+                if (video.paused) await video.play();
+
+                // Wait until we have at least some progress in time or readyState is good
+                let attempts = 0;
+                while ((video.readyState < 2 || video.currentTime === 0) && attempts < 10) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    attempts++;
+                }
+
+                // Final small buffer for hardware exposure adjustment
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                const canvas = document.createElement('canvas');
+                // Cap resolution at 1024px for Capacitor stability
+                const MAX_DIM = 1024;
+                let w = video.videoWidth;
+                let h = video.videoHeight;
+                if (w > MAX_DIM || h > MAX_DIM) {
+                    const scale = MAX_DIM / Math.max(w, h);
+                    w *= scale;
+                    h *= scale;
+                }
+
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(video, 0, 0, w, h);
+
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            if (capturedImage && capturedImage.startsWith('blob:')) {
+                                URL.revokeObjectURL(capturedImage);
+                            }
+                            const url = URL.createObjectURL(blob);
+                            setCapturedImage(url);
+                            stopCamera();
+                        }
+                    }, 'image/jpeg', 0.85);
+                }
+            } catch (err) {
+                console.error("Capture failed:", err);
+            }
+        } else {
+            console.error("Video dimensions are not valid yet.");
         }
     };
 
@@ -150,22 +220,37 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const scaleX = img.width / 100;
-                const scaleY = img.height / 100;
+                // Use natural dimensions for accurate scaling
+                const fullW = img.naturalWidth;
+                const fullH = img.naturalHeight;
+                const scaleX = fullW / 100;
+                const scaleY = fullH / 100;
 
-                canvas.width = (cropRect.width * scaleX);
-                canvas.height = (cropRect.height * scaleY);
+                const cropW = cropRect.width * scaleX;
+                const cropH = cropRect.height * scaleY;
+
+                canvas.width = cropW;
+                canvas.height = cropH;
 
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
                     ctx.drawImage(
                         img,
                         cropRect.x * scaleX, cropRect.y * scaleY,
-                        cropRect.width * scaleX, cropRect.height * scaleY,
-                        0, 0, canvas.width, canvas.height
+                        cropW, cropH,
+                        0, 0, cropW, cropH
                     );
-                    onCapture(canvas.toDataURL('image/png'));
-                    onClose();
+
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                onCapture(reader.result as string);
+                                handleClose();
+                            };
+                            reader.readAsDataURL(blob);
+                        }
+                    }, 'image/jpeg', 0.9);
                 }
             };
             img.src = capturedImage;
@@ -204,12 +289,12 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
                     <>
                         <h3 className="text-xl font-semibold mb-4">Live Capture with Alignment Grid</h3>
                         <div className="relative inline-block border-2 border-gray-600">
-                            <video ref={videoRef} autoPlay playsInline className="w-full h-auto rounded"></video>
+                            <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto rounded"></video>
                             <canvas ref={overlayRef} className="absolute top-0 left-0 w-full h-full"></canvas>
                         </div>
                         <div className="mt-4 flex justify-center space-x-4">
                             <button onClick={handleCapture} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Capture</button>
-                            <button onClick={onClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
+                            <button onClick={handleClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
                         </div>
                     </>
                 ) : (
@@ -240,8 +325,8 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
                         </div>
                         <div className="mt-4 flex justify-center space-x-4">
                             <button onClick={handleCropSave} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Finalize Crop</button>
-                            <button onClick={() => setCapturedImage(null)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Retake</button>
-                            <button onClick={onClose} className="bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
+                            <button onClick={() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); }} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Retake</button>
+                            <button onClick={handleClose} className="bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
                         </div>
                     </>
                 )}
@@ -1010,13 +1095,13 @@ const LongLegPlannerPage: React.FC = () => {
     return (
         <div className="flex flex-col h-full gap-4">
 
-            <CameraModal
-                isOpen={isCameraOpen}
-                onClose={() => setIsCameraOpen(false)}
-                onCapture={(dataUrl) =>
-                    handleImageLoad(dataUrl, 'Live Photo.png', 'camera')
-                }
-            />
+            {isCameraOpen && (
+                <CameraModal
+                    isOpen={isCameraOpen}
+                    onClose={() => setIsCameraOpen(false)}
+                    onCapture={(dataUrl) => handleImageLoad(dataUrl, 'Live Photo.png', 'camera')}
+                />
+            )}
 
             {/* Header */}
             <h2 className="text-4xl font-bold text-start">
