@@ -69,13 +69,21 @@ const landmarkInstructions = {
 
 
 const PostOpPlanner: React.FC = () => {
-    const { ldfaMode, legSide: preOpLegSide, postOpLongLegImage, setPostOpLongLegImage } = useAppContext();
+    const {
+        ldfaMode,
+        legSide: preOpLegSide,
+        postOpLongLegImage,
+        setPostOpLongLegImage,
+        postOpLongLegLandmarks: landmarks,
+        setPostOpLongLegLandmarks: setLandmarks,
+        postOpLongLegResults: results,
+        setPostOpLongLegResults: setResults
+    } = useAppContext();
 
     const [fileName, setFileName] = useState('No file chosen');
     const [legSide, setLegSide] = useState<LegSide>(preOpLegSide);
 
-    const [landmarks, setLandmarks] = useState<Landmarks>({});
-    const [results, setResults] = useState<Partial<LongLegResults>>({ cpak: '--', jloType: '--', mhka: null, ldfa: null, mpta: null, vca: null });
+    // Removed local state definitions for landmarks and results as they are now mapped to context
     const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
     const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
 

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
+import tibiaCutBg from '../assets/tibiacut.jpeg';
 
 // Reusable Label-Value component matching ReportPage
 const ReportItem: React.FC<{ label: string; value: string | number | undefined | null; highlight?: boolean }> = ({ label, value, highlight }) => (
@@ -12,7 +13,7 @@ const ReportItem: React.FC<{ label: string; value: string | number | undefined |
 
 // Reusable Card component matching ReportPage
 const ReportCard: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-    <div className={`gemini-dark-card rounded-xl overflow-hidden border border-gray-700 shadow-xl ${className}`}>
+    <div className={`gemini-dark-card rounded-xl overflow-hidden border border-gray-700 shadow-xl print-break-inside-avoid ${className}`}>
         <div className="bg-gray-800/50 px-6 py-4 border-b border-gray-700">
             <h3 className="text-2xl font-bold text-gray-200 uppercase tracking-wide">{title}</h3>
         </div>
@@ -114,7 +115,7 @@ const ValgusStressReportPage: React.FC = () => {
                 )}
 
                 {/* Main Content Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print-grid-2">
 
                     {/* Left Col: Analysis */}
                     <ReportCard title="Pre-Operative Analysis" className="h-full border-t-4 border-t-purple-500">
@@ -154,8 +155,11 @@ const ValgusStressReportPage: React.FC = () => {
                     </ReportCard>
                 </div>
 
+                {/* Explicit Page Break */}
+                <div className="print-break-before w-full h-1"></div>
+
                 {/* X-Ray & Functional Planning Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print-grid-2">
                     <ReportCard title="Annotated X-Ray Analysis" className="border-t-4 border-t-blue-500 h-full">
                         {valgusCanvasDataUrl ? (
                             <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[400px]">
@@ -171,7 +175,7 @@ const ValgusStressReportPage: React.FC = () => {
                     <ReportCard title="Functional Tibial Planning" className="border-t-4 border-t-green-500 h-full">
                         {/* Always show the section if we have the static image fallback */}
                         <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[400px] w-full mx-auto">
-                            <img src={valgusFunctionalTibialCutImage || "/tibiacut.jpeg"} alt="Functional Cut Plan" className="w-full h-full object-contain" />
+                            <img src={valgusFunctionalTibialCutImage && valgusFunctionalTibialCutImage !== '/tibiacut.jpeg' ? valgusFunctionalTibialCutImage : tibiaCutBg} alt="Functional Cut Plan" className="w-full h-full object-contain" />
 
                             {/* Red Lines Overlay */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">

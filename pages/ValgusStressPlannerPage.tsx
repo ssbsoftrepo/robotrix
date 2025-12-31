@@ -103,7 +103,7 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
     // Crop state
     const [cropRect, setCropRect] = useState({ x: 10, y: 10, width: 80, height: 80 }); // Percentages
     const cropBoxRef = useRef<HTMLDivElement>(null);
-    const [isDraggingCrop, setIsDraggingCrop] = useState(false);
+    const [activeInteraction, setActiveInteraction] = useState<string | null>(null); // 'move', 'tl', 'tr', 'bl', 'br'
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     const stopCamera = useCallback(() => {
@@ -273,26 +273,48 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
         }
     };
 
-    const handleCropMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
-        setIsDraggingCrop(true);
+    const handleCropMouseDown = (e: React.MouseEvent | React.TouchEvent, interaction: string) => {
+        e.stopPropagation();
+        setActiveInteraction(interaction);
         const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
         setDragStart({ x: clientX, y: clientY });
     };
 
     const handleCropMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isDraggingCrop) return;
+        if (!activeInteraction) return;
         const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 
-        const dx = ((clientX - dragStart.x) / (cropBoxRef.current?.parentElement?.clientWidth || 1)) * 100;
-        const dy = ((clientY - dragStart.y) / (cropBoxRef.current?.parentElement?.clientHeight || 1)) * 100;
+        const container = cropBoxRef.current?.parentElement;
+        if (!container) return;
 
-        setCropRect(prev => ({
-            ...prev,
-            x: Math.max(0, Math.min(100 - prev.width, prev.x + dx)),
-            y: Math.max(0, Math.min(100 - prev.height, prev.y + dy))
-        }));
+        const dx = ((clientX - dragStart.x) / container.clientWidth) * 100;
+        const dy = ((clientY - dragStart.y) / container.clientHeight) * 100;
+
+        setCropRect(prev => {
+            let next = { ...prev };
+            if (activeInteraction === 'move') {
+                next.x = Math.max(0, Math.min(100 - prev.width, prev.x + dx));
+                next.y = Math.max(0, Math.min(100 - prev.height, prev.y + dy));
+            } else {
+                if (activeInteraction.includes('l')) { // Left
+                    next.x = Math.min(prev.x + prev.width - 10, Math.max(0, prev.x + dx));
+                    next.width = prev.width + (prev.x - next.x);
+                }
+                if (activeInteraction.includes('r')) { // Right
+                    next.width = Math.max(10, Math.min(100 - prev.x, prev.width + dx));
+                }
+                if (activeInteraction.includes('t')) { // Top
+                    next.y = Math.min(prev.y + prev.height - 10, Math.max(0, prev.y + dy));
+                    next.height = prev.height + (prev.y - next.y);
+                }
+                if (activeInteraction.includes('b')) { // Bottom
+                    next.height = Math.max(10, Math.min(100 - prev.y, prev.height + dy));
+                }
+            }
+            return next;
+        });
         setDragStart({ x: clientX, y: clientY });
     };
 
@@ -320,14 +342,14 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
                             className="relative inline-block border-2 border-yellow-500 overflow-hidden select-none touch-none"
                             onMouseMove={handleCropMouseMove}
                             onTouchMove={handleCropMouseMove}
-                            onMouseUp={() => setIsDraggingCrop(false)}
-                            onTouchEnd={() => setIsDraggingCrop(false)}
+                            onMouseUp={() => setActiveInteraction(null)}
+                            onTouchEnd={() => setActiveInteraction(null)}
                         >
                             <img src={capturedImage} alt="Captured" className="w-full h-auto pointer-events-none" />
                             <div
                                 ref={cropBoxRef}
-                                onMouseDown={handleCropMouseDown}
-                                onTouchStart={handleCropMouseDown}
+                                onMouseDown={(e) => handleCropMouseDown(e, 'move')}
+                                onTouchStart={(e) => handleCropMouseDown(e, 'move')}
                                 className="absolute border-2 border-dashed border-white bg-white/20 cursor-move"
                                 style={{
                                     left: `${cropRect.x}%`,
@@ -336,7 +358,27 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
                                     height: `${cropRect.height}%`
                                 }}
                             >
-                                <div className="absolute top-0 left-0 bg-white p-1 text-[10px] text-black font-bold">Crop Area (Drag to move)</div>
+                                {/* Corner Handles */}
+                                <div
+                                    className="absolute -top-3 -left-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-nw-resize z-50 shadow-md"
+                                    onMouseDown={(e) => handleCropMouseDown(e, 'tl')}
+                                    onTouchStart={(e) => handleCropMouseDown(e, 'tl')}
+                                />
+                                <div
+                                    className="absolute -top-3 -right-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-ne-resize z-50 shadow-md"
+                                    onMouseDown={(e) => handleCropMouseDown(e, 'tr')}
+                                    onTouchStart={(e) => handleCropMouseDown(e, 'tr')}
+                                />
+                                <div
+                                    className="absolute -bottom-3 -left-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-sw-resize z-50 shadow-md"
+                                    onMouseDown={(e) => handleCropMouseDown(e, 'bl')}
+                                    onTouchStart={(e) => handleCropMouseDown(e, 'bl')}
+                                />
+                                <div
+                                    className="absolute -bottom-3 -right-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-se-resize z-50 shadow-md"
+                                    onMouseDown={(e) => handleCropMouseDown(e, 'br')}
+                                    onTouchStart={(e) => handleCropMouseDown(e, 'br')}
+                                />
                             </div>
                         </div>
                         <div className="mt-4 flex justify-center space-x-4">
@@ -779,7 +821,14 @@ const ValgusStressPlannerPage: React.FC = () => {
 
     const getCanvasPos = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
         const rect = canvas.getBoundingClientRect();
-        return { x: clientX - rect.left, y: clientY - rect.top };
+        // Since canvas is scaled via CSS transform (zoom), rect is scaled. 
+        // We need coordinates relative to the internal canvas resolution.
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
     };
 
     const getImageCoordinates = (
@@ -851,7 +900,8 @@ const ValgusStressPlannerPage: React.FC = () => {
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-        const hitRadiusSq = (HANDLE_RADIUS + 30) ** 2; // Increased hit radius
+        // Generous hit radius for easier grabbing (~50px)
+        const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2;
         for (const key in valgusLandmarks) {
             if (!valgusLandmarks[key]) continue;
             const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
@@ -932,12 +982,14 @@ const ValgusStressPlannerPage: React.FC = () => {
         if (!canvas) return;
 
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-        // Removed hitRadiusSq declaration
+
+        // Generous hit radius for touch (using hardcoded calculation)
+        const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2;
 
         for (const key in valgusLandmarks) {
             if (!valgusLandmarks[key]) continue;
             const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
-            if (distSq < (HANDLE_RADIUS + 30) ** 2) { // Increased hit radius
+            if (distSq < hitRadiusSq) {
                 draggingPointRef.current = key;
                 break;
             }
@@ -1025,8 +1077,12 @@ const ValgusStressPlannerPage: React.FC = () => {
                     </div>
 
                     {!valgusImageSrc ? (
-                        <div className="text-center text-gray-400">
-                            <p className="text-xl">Upload an X-ray to begin</p>
+                        <div
+                            className="text-center text-gray-400 cursor-pointer p-10 border-2 border-dashed border-gray-600 rounded-lg hover:bg-white/5 transition"
+                            onClick={() => document.getElementById('xray-upload')?.click()}
+                        >
+                            <p className="text-xl font-bold">Upload an X-ray to begin</p>
+                            <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
                         </div>
                     ) : (
                         <div className="relative w-full h-full flex items-center justify-center">

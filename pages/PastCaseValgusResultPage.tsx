@@ -65,13 +65,22 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
 };
 
 const PostOpValgusPlanner: React.FC = () => {
-    const { postOpValgusImage, setPostOpValgusImage } = useAppContext();
+    const {
+        postOpValgusImage,
+        setPostOpValgusImage,
+        postOpValgusLandmarks: landmarks,
+        setPostOpValgusLandmarks: setLandmarks,
+        postOpValgusResults: results,
+        setPostOpValgusResults: setResults
+    } = useAppContext();
     const [fileName, setFileName] = useState('No file chosen');
     const [legSide, setLegSide] = useState<LegSide>('left');
-    const [landmarks, setLandmarks] = useState<Landmarks>({});
-    const [results, setResults] = useState<Partial<ValgusResults>>({});
+
+    // removed local landmarks and results state
     const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
 
+    const landmarksRef = useRef(landmarks);
+    useEffect(() => { landmarksRef.current = landmarks; }, [landmarks]);
     const imageRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const draggingPointRef = useRef<string | null>(null);
@@ -166,13 +175,93 @@ const PostOpValgusPlanner: React.FC = () => {
             reader.readAsDataURL(file);
         }
     };
+
+    // Reverted resize logic to onLoad, removed DPR
+    useEffect(() => {
+        const imgElement = imageRef.current;
+        const canvasElement = canvasRef.current;
+
+        const handleImageLoad = () => {
+            if (!imgElement || !canvasElement) return;
+
+            const viewer = canvasElement.parentElement?.parentElement; // container
+            if (!viewer) return;
+
+            const imgNaturalWidth = imgElement.naturalWidth;
+            const imgNaturalHeight = imgElement.naturalHeight;
+
+            if (imgNaturalWidth === 0 || imgNaturalHeight === 0) return;
+
+            const availWidth = viewer.clientWidth;
+            const availHeight = viewer.clientHeight;
+
+            const aspectRatio = imgNaturalWidth / imgNaturalHeight;
+
+            let displayWidth = availWidth;
+            let displayHeight = displayWidth / aspectRatio;
+
+            if (displayHeight > availHeight) {
+                displayHeight = availHeight;
+                displayWidth = displayHeight * aspectRatio;
+            }
+
+            // Set canvas and image display sizes
+            imgElement.style.width = `${displayWidth}px`;
+            imgElement.style.height = `${displayHeight}px`;
+            canvasElement.style.width = `${displayWidth}px`;
+            canvasElement.style.height = `${displayHeight}px`;
+
+            // Set canvas internal resolution to match display size (no DPR scaling)
+            canvasElement.width = displayWidth;
+            canvasElement.height = displayHeight;
+
+            // Reset landmarks ONLY if they are empty (prevent overwriting saved data)
+            if (Object.keys(landmarksRef.current).length === 0) {
+                resetLandmarks(canvasElement);
+            }
+            draw(); // Redraw after resize and potential landmark reset
+        };
+
+        if (imgElement) {
+            imgElement.addEventListener('load', handleImageLoad);
+            // If image is already loaded (e.g., from cache or initial render), trigger resize
+            if (imgElement.complete && imgElement.naturalWidth > 0) {
+                handleImageLoad();
+            }
+        }
+
+        return () => {
+            if (imgElement) {
+                imgElement.removeEventListener('load', handleImageLoad);
+            }
+        };
+    }, [draw, postOpValgusImage, resetLandmarks]);
+
+
+    // Update getCanvasPos to account for DPR and Scale
     const getCanvasPos = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
-        const rect = canvas.getBoundingClientRect(); return { x: clientX - rect.left, y: clientY - rect.top };
+        const rect = canvas.getBoundingClientRect();
+        // rect is Visual Size
+        // canvas.width is Visual Size * DPR
+        // Internal coordinate system (for drawing) is scaled by DPR via ctx.scale
+        // BUT, our LANDMARKS are stored in "Display Space" (e.g. 0-400).
+        // If we draw at x=100 with ctx.scale(2,2), it draws at internal pixel 200. Correct.
+        // This means landmarks should be stored in CSS Pixel Space.
+
+        // clientX - rect.left gives the coordinate in CSS Pixel Space relative to the canvas.
+        // This is the desired coordinate system for storing landmarks.
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
     };
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
+        // Larger hit radius
+        const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2;
         for (const key in landmarks) {
-            if (landmarks[key] && (landmarks[key].x - pos.x) ** 2 + (landmarks[key].y - pos.y) ** 2 < (HANDLE_RADIUS + 5) ** 2) {
+            const point = landmarks[key];
+            if (point && (point.x - pos.x) ** 2 + (point.y - pos.y) ** 2 < hitRadiusSq) {
                 draggingPointRef.current = key; break;
             }
         }
@@ -193,11 +282,11 @@ const PostOpValgusPlanner: React.FC = () => {
         if (!canvas) return;
 
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-        const hitRadius = HANDLE_RADIUS + 10; // Larger hit area for fingers
+        const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2;
 
         for (const key in landmarks) {
             const point = landmarks[key];
-            if (point && (point.x - pos.x) ** 2 + (point.y - pos.y) ** 2 < hitRadius ** 2) {
+            if (point && (point.x - pos.x) ** 2 + (point.y - pos.y) ** 2 < hitRadiusSq) {
                 draggingPointRef.current = key;
                 break;
             }
@@ -247,10 +336,29 @@ const PostOpValgusPlanner: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-full space-y-4 bg-gray-900 rounded-lg p-2">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-grow h-full">
-                {/* Controls */}
-                <div className="lg:col-span-1 flex flex-col space-y-3">
+        <div className="flex flex-col h-full bg-gray-900 rounded-lg p-2">
+            <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-4 flex-grow min-h-0">
+                {/* Viewer (Left 70%) - Swapped to match LongLeg Page Layout */}
+                <div className="lg:col-span-1 relative w-full h-full bg-black rounded-lg flex items-center justify-center overflow-hidden min-h-[400px]">
+                    {postOpValgusImage ? (<>
+                        <img
+                            ref={imageRef}
+                            src={postOpValgusImage}
+                            className="block max-w-full max-h-full object-contain"
+                            alt=""
+                        />
+                        <canvas
+                            ref={canvasRef}
+                            className="absolute cursor-crosshair touch-none"
+                            style={{ touchAction: 'none' }}
+                            onMouseDown={handleMouseDown}
+                            onTouchStart={handleTouchStart}
+                        />
+                    </>) : <p className="text-gray-500 text-center p-2 text-sm">Upload post-op X-ray.</p>}
+                </div>
+
+                {/* Controls (Right 30%) */}
+                <div className="lg:col-span-1 flex flex-col space-y-3 overflow-y-auto">
                     <div>
                         <h4 className="text-md font-semibold text-gray-300 mb-1">Upload Post-Op</h4>
                         <label htmlFor="postop-xray-upload" className="cursor-pointer text-center p-2 rounded-lg font-semibold text-sm bg-[#2a2b2c] border border-[#5f6368] hover:bg-[#6D282C] block">
@@ -276,19 +384,6 @@ const PostOpValgusPlanner: React.FC = () => {
                             ))}
                         </div>
                     </div>
-                </div>
-                {/* Viewer */}
-                <div className="lg:col-span-3 relative w-full h-full bg-black rounded-lg flex items-center justify-center overflow-hidden min-h-[400px]">
-                    {postOpValgusImage ? (<>
-                        <img ref={imageRef} src={postOpValgusImage} className="block max-w-full max-h-full object-contain" onLoad={() => { if (canvasRef.current) resetLandmarks(canvasRef.current); }} />
-                        <canvas
-                            ref={canvasRef}
-                            className="absolute top-0 left-0 w-full h-full touch-none"
-                            style={{ touchAction: 'none' }} 
-                            onMouseDown={handleMouseDown}
-                            onTouchStart={handleTouchStart}  
-                        />
-                    </>) : <p className="text-gray-500 text-center p-2 text-sm">Upload post-op X-ray.</p>}
                 </div>
             </div>
             {/* Results */}

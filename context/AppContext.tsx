@@ -46,7 +46,12 @@ export interface CaseData {
     // Image Persistence
     coronalBalancingSimImage: string | null;
     postOpLongLegImage: string | null;
+    postOpLongLegLandmarks: Landmarks;
+    postOpLongLegResults: Partial<LongLegResults>;
+
     postOpValgusImage: string | null;
+    postOpValgusLandmarks: Landmarks;
+    postOpValgusResults: Partial<ValgusResults>;
 
     // New persisted images
     longLegCoronalBalancingMainImage: string | null;
@@ -117,7 +122,12 @@ interface AppContextType extends CaseData {
 
     setCoronalBalancingSimImage: (src: string | null) => void;
     setPostOpLongLegImage: (src: string | null) => void;
+    setPostOpLongLegLandmarks: (landmarks: Landmarks) => void;
+    setPostOpLongLegResults: (results: Partial<LongLegResults>) => void;
+
     setPostOpValgusImage: (src: string | null) => void;
+    setPostOpValgusLandmarks: (landmarks: Landmarks) => void;
+    setPostOpValgusResults: (results: Partial<ValgusResults>) => void;
 
     setLongLegCoronalBalancingMainImage: (src: string | null) => void;
     setLongLegCoronalBalancingBlockImage: (src: string | null) => void;
@@ -177,7 +187,11 @@ const initialCaseData: CaseData = {
     longLegCoronalBalancingResults: initialCoronalBalancingResults,
     coronalBalancingSimImage: null,
     postOpLongLegImage: null,
+    postOpLongLegLandmarks: {},
+    postOpLongLegResults: {},
     postOpValgusImage: null,
+    postOpValgusLandmarks: {},
+    postOpValgusResults: {},
     longLegCoronalBalancingMainImage: null,
     longLegCoronalBalancingBlockImage: null,
     longLegFunctionalTibialCutImage: null,
@@ -431,7 +445,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setLongLegCoronalBalancingResults: createSetter('longLegCoronalBalancingResults'),
         setCoronalBalancingSimImage: createSetter('coronalBalancingSimImage'),
         setPostOpLongLegImage: createSetter('postOpLongLegImage'),
+        setPostOpLongLegLandmarks: createSetter('postOpLongLegLandmarks'),
+        setPostOpLongLegResults: createSetter('postOpLongLegResults'),
+
         setPostOpValgusImage: createSetter('postOpValgusImage'),
+        setPostOpValgusLandmarks: createSetter('postOpValgusLandmarks'),
+        setPostOpValgusResults: createSetter('postOpValgusResults'),
 
         setLongLegCoronalBalancingMainImage: createSetter('longLegCoronalBalancingMainImage'),
         setLongLegCoronalBalancingBlockImage: createSetter('longLegCoronalBalancingBlockImage'),

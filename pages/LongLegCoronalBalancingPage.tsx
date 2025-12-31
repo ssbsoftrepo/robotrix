@@ -22,11 +22,9 @@ const LongLegCoronalBalancingPage: React.FC = () => {
 
 
     const handleProceed = () => {
-        // Save the calculated gaps to context so the next page can read them
         setLongLegCoronalBalancingResults({
-            lateralGap: thickness.toString(), // Store Lateral Gap (Implant Thickness)
-            selectedSeries: anticipatedMedialGap, // Store Base Medial Gap
-            // Defaults for unused fields in this flow
+            lateralGap: thickness.toString(),
+            selectedSeries: anticipatedMedialGap,
             medialRelease: 0,
             simFemoralCut: 0,
             simTibialCut: 0,

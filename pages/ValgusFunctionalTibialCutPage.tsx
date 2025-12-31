@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
+import tibiaCutBg from '../assets/tibiacut.jpeg';
 
 // Reusable Component for the Cutting Jig Visualization
 const CuttingBlock: React.FC<{
@@ -140,8 +141,8 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
     }, [linesYPercent, setValgusFunctionalLinesY]);
 
     useEffect(() => {
-        if (!valgusFunctionalTibialCutImage) {
-            setValgusFunctionalTibialCutImage('/tibiacut.jpeg');
+        if (!valgusFunctionalTibialCutImage || valgusFunctionalTibialCutImage === '/tibiacut.jpeg') {
+            setValgusFunctionalTibialCutImage(tibiaCutBg);
         }
     }, [valgusFunctionalTibialCutImage, setValgusFunctionalTibialCutImage]);
 
@@ -252,7 +253,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                             </div>
 
                             {/* Image Layer */}
-                            <img src="/tibiacut.jpeg" alt="X-ray Reference" className="w-full h-full object-contain pointer-events-none" />
+                            <img src={tibiaCutBg} alt="X-ray Reference" className="w-full h-full object-contain pointer-events-none" />
 
                             {/* Red Lines Overlay */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
