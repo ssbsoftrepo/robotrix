@@ -302,11 +302,11 @@ const CaseManagementPage: React.FC = () => {
         };
 
         await savePatient(patientToSave);
-        await setCurrentPatientId(patientId);
+        await setCurrentPatientId(patientId, patientToSave);
 
         if (!currentPatientId) {
             const planId = await createNewPlan(patientId, 'Initial Plan');
-            await setCurrentPlanId(planId);
+            await setCurrentPlanId(planId, patientToSave);
             setPlannerMode('advanced');
         }
     };

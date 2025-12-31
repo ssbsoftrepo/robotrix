@@ -1304,25 +1304,10 @@ const LongLegPlannerPage: React.FC = () => {
                     {/* STEP 2 */}
                     <section>
                         <h3 className="text-lg font-semibold mb-2">Leg Side</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button
-                                onClick={() => setLegSide('left')}
-                                className={`py-2 rounded ${legSide === 'left'
-                                    ? 'bg-[#6D282C]'
-                                    : 'bg-gray-700'
-                                    }`}
-                            >
-                                Left
-                            </button>
-                            <button
-                                onClick={() => setLegSide('right')}
-                                className={`py-2 rounded ${legSide === 'right'
-                                    ? 'bg-[#6D282C]'
-                                    : 'bg-gray-700'
-                                    }`}
-                            >
-                                Right
-                            </button>
+                        <div className="w-full">
+                            <div className="py-2 px-4 rounded bg-[#6D282C] text-center w-full font-bold text-white uppercase tracking-wider">
+                                {legSide} Leg
+                            </div>
                         </div>
                     </section>
 

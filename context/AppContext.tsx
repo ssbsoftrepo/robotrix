@@ -88,7 +88,7 @@ interface AppContextType extends CaseData {
     currentPatientId: string | null;
     setCurrentPatientId: (id: string | null) => void;
     currentPlanId: string | null;
-    setCurrentPlanId: (id: string | null) => void;
+    setCurrentPlanId: (id: string | null, overridePatient?: Patient) => void;
 
     // Setters for all case data properties
     setLegSide: (side: LegSide) => void;
@@ -223,30 +223,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         getPatients().then(setPatients);
     }, []);
 
+    // Reactively sync legSide with the current patient record
+    // This fixes race conditions where setCurrentPatientId runs before patients list update (e.g. new patient creation)
+    useEffect(() => {
+        if (currentPatientId) {
+            const patient = patients.find(p => p.id === currentPatientId);
+            if (patient) {
+                setCaseData(prev => {
+                    const targetSide = patient.legSide.toLowerCase() as LegSide;
+                    if (prev.legSide !== targetSide) {
+                        return { ...prev, legSide: targetSide };
+                    }
+                    return prev;
+                });
+            }
+        }
+    }, [currentPatientId, patients]);
+
     // Persist case data to IDB whenever it changes for the current patient/plan
     useEffect(() => {
         if (currentPlanId) {
             saveCaseData(currentPlanId, caseData);
         } else if (currentPatientId) {
-            // Fallback for when specific plan isn't selected (shouldn't really happen with new flow, but safe)
-            // Or maybe we treat "no plan selected" as "don't save"?
-            // For backward compatibility, if only patientId is set, we might be in a "default" state or not.
-            // But we changed logic to require a plan ID for saving new stuff properly.
-            // However, existing usage of saveCaseData supports `legacy_${patientId}` if passed explicitly.
-            // Let's assume the UI manages setting currentPlanId.
-            // But wait, if we are in "Default Plan" mode, we might want to save to `legacy_${patientId}`? 
-            // Or `caseData_${patientId}` directly.
-
-            // To be safe: checks if we have a planId. If we don't, we probably shouldn't auto-save to some random location
-            // unless we are sure. BUT valid legacy behavior was saving to patientId.
-            // So if `currentPlanId` is null but `currentPatientId` is set, let's NOT save automatically to avoid overwriting "Default" without intent?
-            // Actually, `currentPatientId` is set when we select a patient.
-            // We only want to save if a PLAN is active.
-
-            // Revert to: Only save if we have a plan ID OR if we decide to treat patientID as default key (legacy).
-            // Let's stick to: we need a planId to save.
-            // If the user selects "Default Plan", `currentPlanId` will be `legacy_${patientId}`.
-            // So relying on `currentPlanId` is sufficient.
+            // See note below about legacy saving behavior
         }
     }, [caseData, currentPlanId]);
 
@@ -300,20 +299,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [caseData, currentPatientId]);
 
 
-    const setCurrentPatientId = async (id: string | null) => {
+    const setCurrentPatientId = async (id: string | null, overridePatient?: Patient) => {
         if (id === currentPatientId) return; // No change, no reset
         _setCurrentPatientId(id);
         setCurrentPlanId(null); // Reset plan when patient changes
         if (id) {
-            // We DO NOT load case data here anymore automatically!
-            // We wait for the user to select a plan.
-            // However, to keep the UI from breaking or showing empty data if they navigate,
-            // we might want to clear the case data?
-            setCaseData(initialCaseData);
+            // Find the patient to set initial defaults correctly
+            const patient = patients.find(p => p.id === id);
 
-            // Special handling: If we want to support existing flows where we just "load patient",
-            // we might need to be careful. But the requirement is "add another planner",
-            // implying an interstitial step.
+            // Initialize with patient's leg side instead of generic default
+            setCaseData({
+                ...initialCaseData,
+                legSide: patient ? (patient.legSide.toLowerCase() as LegSide) : 'left'
+            });
         } else {
             setCaseData(initialCaseData);
         }
@@ -365,34 +363,34 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // Wait, the previous implementation of `setCurrentPatientId` (lines 257+) did exactly this: set ID, then load.
     // So if we make `setCurrentPlanId` do the loading, we are good.
 
-    const setPlanAndLoad = async (planId: string | null) => {
+    const setPlanAndLoad = async (planId: string | null, overridePatient?: Patient) => {
         setCurrentPlanId(planId);
         if (planId) {
             setIsLoading(true);
             try {
                 const storedData = await loadCaseData(planId);
-                // We also need to ensure legSide is correct for the patient if it's a new plan?
-                // The plan might have stored data.
-                // If it's a new plan, storedData is null (or we should initialize it before calling this?)
 
-                // If we are creating a new plan, we probably want to init with patient defaults.
-                // We can handle that in the UI or here.
-                // If storedData is found, use it.
-                if (storedData) {
-                    setCaseData({ ...initialCaseData, ...storedData });
-                } else {
-                    // Start fresh
-                    setCaseData(initialCaseData);
-                    // If we have a current patient, we should probably set legSide from it?
-                    if (currentPatientId) {
-                        const patient = patients.find(p => p.id === currentPatientId);
-                        if (patient) {
-                            setCaseData(prev => ({ ...prev, legSide: patient.legSide.toLowerCase() as LegSide }));
-                        }
-                    }
+                // Determine base data (stored or fresh)
+                let nextCaseData = storedData ? { ...initialCaseData, ...storedData } : initialCaseData;
+
+                // CRITICAL: Always enforce the Patient's Leg Side as the Source of Truth
+                // This fixes issues where old plans or defaults override the Patient's setting.
+
+                // Fix: Check overridePatient FIRST, because currentPatientId state might be stale (null) immediately after setting it in the same event loop
+                const effectivePatient = overridePatient || (currentPatientId ? patients.find(p => p.id === currentPatientId) : null);
+
+                if (effectivePatient) {
+                    nextCaseData = {
+                        ...nextCaseData,
+                        legSide: effectivePatient.legSide.toLowerCase() as LegSide
+                    };
                 }
+
+                setCaseData(nextCaseData);
+
             } catch (e) {
                 console.error("Error loading plan", e);
+                setCaseData(initialCaseData); // Should we also enforce leg side here? Ideally yes, but error case.
             } finally {
                 setIsLoading(false);
             }
@@ -408,6 +406,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             });
         }, []);
 
+    // Special setter for LegSide that syncs with Patient record
+    const handleSetLegSide = useCallback((side: LegSide) => {
+        setCaseData(prev => ({ ...prev, legSide: side }));
+
+        // Update patient record if we have a current patient
+        if (currentPatientId) {
+            setPatients(currentPatients => {
+                const index = currentPatients.findIndex(p => p.id === currentPatientId);
+                if (index !== -1) {
+                    const updatedPatient = { ...currentPatients[index], legSide: side };
+                    const newPatientsList = [...currentPatients];
+                    newPatientsList[index] = updatedPatient;
+
+                    // Persist to storage
+                    savePatients(newPatientsList);
+                    return newPatientsList;
+                }
+                return currentPatients;
+            });
+        }
+    }, [currentPatientId]);
+
     const value: AppContextType = {
         page,
         setPage,
@@ -419,7 +439,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCurrentPlanId: setPlanAndLoad,
         isLoading,
         ...caseData,
-        setLegSide: createSetter('legSide'),
+        setLegSide: handleSetLegSide,
         setPlannerMode: createSetter('plannerMode'),
         setKneeType: createSetter('kneeType'),
         setLdfaMode: createSetter('ldfaMode'),
