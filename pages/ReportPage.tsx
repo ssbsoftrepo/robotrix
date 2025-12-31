@@ -107,7 +107,7 @@ const ReportPage: React.FC = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4">
                             <div>
                                 <p className="text-gray-500 text-sm uppercase font-bold tracking-wider">Patient Name</p>
-                                <p className="text-3xl font-bold text-white mt-1">{patient.firstName} {patient.lastName}</p>
+                                <p className="text-3xl font-bold text-white mt-1 print-text-black">{patient.firstName} {patient.lastName}</p>
                             </div>
                             <div>
                                 <p className="text-gray-500 text-sm uppercase font-bold tracking-wider">ID / Case Number</p>
@@ -128,7 +128,7 @@ const ReportPage: React.FC = () => {
                 )}
 
                 {/* Main Content Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print-grid-2">
 
                     {/* Left Col: Analysis */}
                     <ReportCard title="Pre-Operative Analysis" className="h-full border-t-4 border-t-purple-500">
@@ -183,12 +183,15 @@ const ReportPage: React.FC = () => {
                     </ReportCard>
                 </div>
 
+                {/* Explicit Page Break */}
+                <div className="print-break-before w-full h-1"></div>
+
                 {/* Simulation Section - Full Width */}
                 {(simAfterImage || longLegCanvasDataUrl) && (
                     <ReportCard title="Surgical Simulation" className="border-t-4 border-t-green-500">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print-grid-2">
                             <div className="flex flex-col">
-                                <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[500px]">
+                                <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[500px] print-image-container">
                                     <span className="absolute top-3 left-3 bg-black/70 text-white px-3 py-1 rounded text-sm font-bold border border-gray-600 z-10">PRE-OP</span>
                                     {longLegCanvasDataUrl ? (
                                         <img src={longLegCanvasDataUrl} className="w-full h-full object-contain" alt="Pre-Op Xray" />
@@ -196,7 +199,7 @@ const ReportPage: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex flex-col">
-                                <div className="bg-black border-2 border-green-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[500px]">
+                                <div className="bg-black border-2 border-green-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[500px] print-image-container">
                                     <span className="absolute top-3 left-3 bg-green-900/80 text-white px-3 py-1 rounded text-sm font-bold border border-green-500 z-10">SIMULATION</span>
                                     {simAfterImage ? (
                                         <img src={simAfterImage} className="w-full h-full object-contain" alt="Post-Op Simulation" />

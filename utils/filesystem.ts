@@ -24,14 +24,29 @@ const ensureDir = async () => {
     }
 };
 
-// Helper to compute SHA-256 hash of a string
 const computeHash = async (data: string): Promise<string> => {
-    const encoder = new TextEncoder();
-    const dataBuffer = encoder.encode(data);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hashHex;
+    // 1. Try Native Crypto API
+    if (typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
+        try {
+            const encoder = new TextEncoder();
+            const dataBuffer = encoder.encode(data);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        } catch (e) {
+            console.warn('Native crypto hash failed, falling back to simple hash', e);
+        }
+    }
+
+    // 2. Simple fallback hash (DJB2 variant) for environments without crypto.subtle
+    // This is less collision-resistant but sufficient for local filename uniqueness optimization
+    let hash = 5381;
+    for (let i = 0; i < data.length; i++) {
+        hash = ((hash << 5) + hash) + data.charCodeAt(i); /* hash * 33 + c */
+    }
+    // Return positive hex string
+    return (hash >>> 0).toString(16);
 };
 
 /**

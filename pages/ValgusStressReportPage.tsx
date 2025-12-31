@@ -41,6 +41,11 @@ const ValgusStressReportPage: React.FC = () => {
     const patient = patients.find(p => p.id === currentPatientId);
 
     const handlePrint = () => {
+        // Guard: Ensure base64 conversion is complete before printing
+        if (typeof tibiaCutBg === 'string' && !tibiaCutBg.startsWith('data:') && (!base64TibiaBg || !base64TibiaBg.startsWith('data:'))) {
+            alert("Preparing report images... please wait a moment and try again.");
+            return;
+        }
         printCurrentPage('Valgus Stress Report');
     };
 
@@ -57,10 +62,48 @@ const ValgusStressReportPage: React.FC = () => {
         else recommendedTibialRecut = '0° Neutral';
     }
 
+    // Base64 conversion state for app printing
+    const [base64TibiaBg, setBase64TibiaBg] = React.useState<string>(tibiaCutBg);
+
+    React.useEffect(() => {
+        const convertToBase64 = () => {
+            // Only convert if it's a path (not already data url)
+            if (typeof tibiaCutBg === 'string' && !tibiaCutBg.startsWith('data:')) {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.drawImage(img, 0, 0);
+                        try {
+                            const dataURL = canvas.toDataURL('image/jpeg');
+                            setBase64TibiaBg(dataURL);
+                        } catch (e) {
+                            console.warn("Canvas toDataURL failed (tainted?)", e);
+                        }
+                    }
+                };
+                img.onerror = (e) => {
+                    console.error("Image load failed for conversion", e);
+                };
+                img.src = tibiaCutBg;
+            }
+        };
+        convertToBase64();
+    }, []);
+
     const selectedDegree = valgusFunctionalCutDegree || 0;
     const lateralGapValue = lateralGap || '--';
     const baseMedialGap = selectedSeries || 0;
     const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
+
+    // Determine the image source for print safety
+    // Priority: User's functional cut (if base64) > Converted Base64 Background > Default Asset (Web only)
+    const functionalCutImageSrc = valgusFunctionalTibialCutImage && valgusFunctionalTibialCutImage.startsWith('data:')
+        ? valgusFunctionalTibialCutImage
+        : base64TibiaBg;
 
     return (
         <div className="min-h-full pb-8 flex flex-col">
@@ -94,7 +137,7 @@ const ValgusStressReportPage: React.FC = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4">
                             <div>
                                 <p className="text-gray-500 text-sm uppercase font-bold tracking-wider">Patient Name</p>
-                                <p className="text-3xl font-bold text-white mt-1">{patient.firstName} {patient.lastName}</p>
+                                <p className="text-3xl font-bold text-white mt-1 print-text-black">{patient.firstName} {patient.lastName}</p>
                             </div>
                             <div>
                                 <p className="text-gray-500 text-sm uppercase font-bold tracking-wider">ID / Case Number</p>
@@ -162,7 +205,7 @@ const ValgusStressReportPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print-grid-2">
                     <ReportCard title="Annotated X-Ray Analysis" className="border-t-4 border-t-blue-500 h-full">
                         {valgusCanvasDataUrl ? (
-                            <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[400px]">
+                            <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[400px] print-image-container">
                                 <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="w-full h-full object-contain" />
                             </div>
                         ) : (
@@ -174,8 +217,8 @@ const ValgusStressReportPage: React.FC = () => {
 
                     <ReportCard title="Functional Tibial Planning" className="border-t-4 border-t-green-500 h-full">
                         {/* Always show the section if we have the static image fallback */}
-                        <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[400px] w-full mx-auto">
-                            <img src={valgusFunctionalTibialCutImage && valgusFunctionalTibialCutImage !== '/tibiacut.jpeg' ? valgusFunctionalTibialCutImage : tibiaCutBg} alt="Functional Cut Plan" className="w-full h-full object-contain" />
+                        <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[400px] w-full mx-auto print-image-container">
+                            <img src={functionalCutImageSrc} alt="Functional Cut Plan" className="w-full h-full object-contain" />
 
                             {/* Red Lines Overlay */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
