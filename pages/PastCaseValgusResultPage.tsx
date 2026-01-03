@@ -87,6 +87,17 @@ const PostOpValgusPlanner: React.FC = () => {
     const localResultsRef = useRef(results);
     useEffect(() => { localResultsRef.current = results; }, [results]);
 
+    // Restore visibleLandmarkSets from existing landmarks
+    useEffect(() => {
+        const newSets = new Set<string>();
+        if (landmarks.medialJointSpace || landmarks.lateralJointSpace) newSets.add('jointLine');
+        if (landmarks.femurAxisPoint) newSets.add('femurAnatomicAxis');
+        if (landmarks.tibiaAxisPoint) newSets.add('tibiaAnatomicAxis');
+        if (newSets.size > 0) {
+            setVisibleLandmarkSets(newSets);
+        }
+    }, []); // Run only on mount to restore state
+
     const resetLandmarks = useCallback((canvas: HTMLCanvasElement) => {
         const w = canvas.width; const h = canvas.height;
         setLandmarks({
@@ -259,11 +270,20 @@ const PostOpValgusPlanner: React.FC = () => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
         // Larger hit radius
         const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2;
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
         for (const key in landmarks) {
             const point = landmarks[key];
-            if (point && (point.x - pos.x) ** 2 + (point.y - pos.y) ** 2 < hitRadiusSq) {
-                draggingPointRef.current = key; break;
+            if (point) {
+                const distSq = (point.x - pos.x) ** 2 + (point.y - pos.y) ** 2;
+                if (distSq < minDistSq) {
+                    minDistSq = distSq;
+                    closestKey = key;
+                }
             }
+        }
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
         }
     };
     const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -283,13 +303,21 @@ const PostOpValgusPlanner: React.FC = () => {
 
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
         const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2;
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
 
         for (const key in landmarks) {
             const point = landmarks[key];
-            if (point && (point.x - pos.x) ** 2 + (point.y - pos.y) ** 2 < hitRadiusSq) {
-                draggingPointRef.current = key;
-                break;
+            if (point) {
+                const distSq = (point.x - pos.x) ** 2 + (point.y - pos.y) ** 2;
+                if (distSq < minDistSq) {
+                    minDistSq = distSq;
+                    closestKey = key;
+                }
             }
+        }
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
         }
     };
 

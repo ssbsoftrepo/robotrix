@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { Patient, Page, LongLegResults, ValgusResults, LegSide, Landmarks, FunctionalPlannerMode, KneeType } from '../types';
-import { savePatients, getPatients, saveCaseData, loadCaseData } from '../utils/storage';
+import { savePatients, getPatients, saveCaseData, loadCaseData, updatePlanLegSide } from '../utils/storage';
 
 export interface CoronalBalancingResults {
     selectedSeries: number | null;
@@ -88,7 +88,7 @@ interface AppContextType extends CaseData {
     currentPatientId: string | null;
     setCurrentPatientId: (id: string | null) => void;
     currentPlanId: string | null;
-    setCurrentPlanId: (id: string | null, overridePatient?: Patient) => void;
+    setCurrentPlanId: (id: string | null, overridePatient?: Patient, initialLegSide?: LegSide) => void;
 
     // Setters for all case data properties
     setLegSide: (side: LegSide) => void;
@@ -223,22 +223,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         getPatients().then(setPatients);
     }, []);
 
-    // Reactively sync legSide with the current patient record
-    // This fixes race conditions where setCurrentPatientId runs before patients list update (e.g. new patient creation)
-    useEffect(() => {
-        if (currentPatientId) {
-            const patient = patients.find(p => p.id === currentPatientId);
-            if (patient) {
-                setCaseData(prev => {
-                    const targetSide = patient.legSide.toLowerCase() as LegSide;
-                    if (prev.legSide !== targetSide) {
-                        return { ...prev, legSide: targetSide };
-                    }
-                    return prev;
-                });
-            }
-        }
-    }, [currentPatientId, patients]);
+    // Reactively sync legSide logic REMOVED. Leg Side is now Plan-specific.
 
     // Persist case data to IDB whenever it changes for the current patient/plan
     useEffect(() => {
@@ -289,7 +274,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 const updatedCaseData = {
                     ...initialCaseData, // Ensure defaults
                     ...currentData,
-                    legSide: patientToSave.legSide.toLowerCase() as LegSide,
+                    // legSide: patientToSave.legSide.toLowerCase() as LegSide, // REMOVED: Patient no longer has legSide
                 };
                 await saveCaseData(patientToSave.id, updatedCaseData);
             })();
@@ -310,7 +295,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             // Initialize with patient's leg side instead of generic default
             setCaseData({
                 ...initialCaseData,
-                legSide: patient ? (patient.legSide.toLowerCase() as LegSide) : 'left'
+                legSide: 'left' // Default to left, or whatever was previously there. Real override happens in setPlanAndLoad if needed.
             });
         } else {
             setCaseData(initialCaseData);
@@ -363,7 +348,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // Wait, the previous implementation of `setCurrentPatientId` (lines 257+) did exactly this: set ID, then load.
     // So if we make `setCurrentPlanId` do the loading, we are good.
 
-    const setPlanAndLoad = async (planId: string | null, overridePatient?: Patient) => {
+    const setPlanAndLoad = async (planId: string | null, overridePatient?: Patient, initialLegSide?: LegSide) => {
         setCurrentPlanId(planId);
         if (planId) {
             setIsLoading(true);
@@ -373,18 +358,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 // Determine base data (stored or fresh)
                 let nextCaseData = storedData ? { ...initialCaseData, ...storedData } : initialCaseData;
 
-                // CRITICAL: Always enforce the Patient's Leg Side as the Source of Truth
-                // This fixes issues where old plans or defaults override the Patient's setting.
+                // CRITICAL: Leg Side is now PLAN specific.
+                // If we are creating a new plan (passed initialLegSide), set it.
+                // Otherwise use the stored one (from nextCaseData).
 
-                // Fix: Check overridePatient FIRST, because currentPatientId state might be stale (null) immediately after setting it in the same event loop
-                const effectivePatient = overridePatient || (currentPatientId ? patients.find(p => p.id === currentPatientId) : null);
-
-                if (effectivePatient) {
+                if (initialLegSide) {
                     nextCaseData = {
                         ...nextCaseData,
-                        legSide: effectivePatient.legSide.toLowerCase() as LegSide
+                        legSide: initialLegSide
                     };
                 }
+
+                // REMOVED: Logic that forced patient.legSide overwrite
 
                 setCaseData(nextCaseData);
 
@@ -406,27 +391,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             });
         }, []);
 
-    // Special setter for LegSide that syncs with Patient record
+    // Special setter for LegSide - just updates case data now
     const handleSetLegSide = useCallback((side: LegSide) => {
         setCaseData(prev => ({ ...prev, legSide: side }));
-
-        // Update patient record if we have a current patient
-        if (currentPatientId) {
-            setPatients(currentPatients => {
-                const index = currentPatients.findIndex(p => p.id === currentPatientId);
-                if (index !== -1) {
-                    const updatedPatient = { ...currentPatients[index], legSide: side };
-                    const newPatientsList = [...currentPatients];
-                    newPatientsList[index] = updatedPatient;
-
-                    // Persist to storage
-                    savePatients(newPatientsList);
-                    return newPatientsList;
-                }
-                return currentPatients;
-            });
+        // Sync to plan metadata for list display
+        if (currentPatientId && currentPlanId && currentPlanId.startsWith('plan_')) {
+            updatePlanLegSide(currentPatientId, currentPlanId, side);
         }
-    }, [currentPatientId]);
+    }, [currentPatientId, currentPlanId]);
 
     const value: AppContextType = {
         page,

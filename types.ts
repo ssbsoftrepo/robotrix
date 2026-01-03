@@ -8,7 +8,6 @@ export interface Patient {
     lastName: string;
     age: string;
     gender: 'Male' | 'Female' | 'Other';
-    legSide: 'Left' | 'Right';
 }
 
 export type LegSide = 'left' | 'right';
@@ -48,9 +47,9 @@ export type FunctionalPlannerMode = 'tibial_check' | 'alignment_check';
 export type KneeType = 'varus' | 'valgus';
 
 
-export type Page = 
-    'case-management' | 
-    'planner-long-leg' | 
+export type Page =
+    'case-management' |
+    'planner-long-leg' |
     'planner-valgus-stress' |
     'planner-valgus-stress-results' |
     'planner-valgus-stress-coronal-balancing' |

@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Landmarks, Point } from '../types';
 
-// --- Helper Functions ---
+
 const landmarkInstructions = {
     jointLine: ["Mark the center of the medial M joint space.", "Mark the center of the lateral L joint space."],
     femurAnatomicAxis: ["Mark mid femur axis."],
@@ -12,9 +12,9 @@ const landmarkInstructions = {
 
 
 const LANDMARK_COLORS = {
-    jointLine: '#800000',       // Maroon
-    femurAnatomicAxis: '#9400D3', // Dark Violet
-    tibiaAnatomicAxis: '#008080', // Teal Green
+    jointLine: '#800000',
+    femurAnatomicAxis: '#9400D3',
+    tibiaAnatomicAxis: '#008080',
 };
 
 const HANDLE_RADIUS = 6;
@@ -85,7 +85,7 @@ const getValgusStressCPAK = (
     if (obliquity >= 3) return 'CPAK 2';
     if (obliquity >= 1) return 'CPAK 1';
 
-    // Neutral obliquity
+
     if (Math.abs(ldfa - 90) < 1 && Math.abs(mpta - 90) < 1) {
         return 'CPAK 5';
     }
@@ -93,35 +93,33 @@ const getValgusStressCPAK = (
 };
 
 
-// --- Camera Modal Component ---
+
 const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (dataUrl: string) => void; }> = ({ isOpen, onClose, onCapture }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const overlayRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-    // Crop state
-    const [cropRect, setCropRect] = useState({ x: 10, y: 10, width: 80, height: 80 }); // Percentages
+
+    const [cropRect, setCropRect] = useState({ x: 10, y: 10, width: 80, height: 80 });
     const cropBoxRef = useRef<HTMLDivElement>(null);
-    const [activeInteraction, setActiveInteraction] = useState<string | null>(null); // 'move', 'tl', 'tr', 'bl', 'br'
+    const [activeInteraction, setActiveInteraction] = useState<string | null>(null);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     const stopCamera = useCallback(() => {
         if (streamRef.current) {
-            console.log("Stopping camera tracks...");
             streamRef.current.getTracks().forEach(track => {
                 track.stop();
-                console.log(`Track ${track.label} stopped.`);
             });
             streamRef.current = null;
         }
         if (videoRef.current) {
             videoRef.current.srcObject = null;
-            videoRef.current.load(); // Force release
+            videoRef.current.load();
         }
     }, []);
 
-    // Cleanup Blob URLs
+
     useEffect(() => {
         return () => {
             if (capturedImage && capturedImage.startsWith('blob:')) {
@@ -132,7 +130,7 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
     }, [capturedImage, stopCamera]);
 
     const handleClose = useCallback(() => {
-        console.log("Closing CameraModal...");
+
         if (capturedImage && capturedImage.startsWith('blob:')) {
             URL.revokeObjectURL(capturedImage);
         }
@@ -143,10 +141,9 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
 
     useEffect(() => {
         if (isOpen && !capturedImage) {
-            console.log("Requesting camera access...");
+
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(stream => {
-                    console.log("Camera stream obtained.");
                     streamRef.current = stream;
                     if (videoRef.current) {
                         videoRef.current.srcObject = stream;
@@ -480,7 +477,7 @@ const ValgusStressPlannerPage: React.FC = () => {
             cut: '--',
         };
 
-        // Common calculation base: Joint Center
+
         let jointCenter: Point | null = null;
         if (medialJointSpace && lateralJointSpace) {
             jointCenter = {
@@ -622,7 +619,7 @@ const ValgusStressPlannerPage: React.FC = () => {
             ? { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 }
             : null;
 
-        // Draw Joint Line
+
         if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace && jointCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.jointLine;
             ctx.fillStyle = LANDMARK_COLORS.jointLine;
@@ -658,7 +655,7 @@ const ValgusStressPlannerPage: React.FC = () => {
             }
         }
 
-        // Draw Femur Axis
+
         if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis;
             ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis;
@@ -672,7 +669,7 @@ const ValgusStressPlannerPage: React.FC = () => {
             ctx.fill();
         }
 
-        // Draw Tibia Axis
+
         if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis;
             ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis;
@@ -710,7 +707,7 @@ const ValgusStressPlannerPage: React.FC = () => {
         draw();
     }, [draw]);
 
-    // Handle Resize (Moved here)
+
     useEffect(() => {
         const handleResize = () => {
             const now = Date.now();
@@ -773,7 +770,6 @@ const ValgusStressPlannerPage: React.FC = () => {
             clearInterval(interval);
         };
     }, [draw, setValgusLandmarks]);
-
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -902,13 +898,19 @@ const ValgusStressPlannerPage: React.FC = () => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
         // Generous hit radius for easier grabbing (~50px)
         const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2;
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
+
         for (const key in valgusLandmarks) {
             if (!valgusLandmarks[key]) continue;
             const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
-            if (distSq < hitRadiusSq) {
-                draggingPointRef.current = key;
-                break;
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                closestKey = key;
             }
+        }
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
         }
     };
 
@@ -985,14 +987,19 @@ const ValgusStressPlannerPage: React.FC = () => {
 
         // Generous hit radius for touch (using hardcoded calculation)
         const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2;
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
 
         for (const key in valgusLandmarks) {
             if (!valgusLandmarks[key]) continue;
             const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
-            if (distSq < hitRadiusSq) {
-                draggingPointRef.current = key;
-                break;
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                closestKey = key;
             }
+        }
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
         }
     };
 
@@ -1190,10 +1197,21 @@ const ValgusStressPlannerPage: React.FC = () => {
 
                     {/* STEP 2: Leg Side */}
                     <section>
-                        <h3 className="text-lg font-semibold mb-2 text-gray-300">Leg Side</h3>
-                        <div className="w-full">
-                            <div className="py-2 px-4 rounded bg-[#6D282C] text-center w-full font-bold text-white uppercase tracking-wider">
-                                {legSide} Leg
+                        <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between mb-4">
+                            <span className="text-gray-400 font-medium">Leg Side</span>
+                            <div className="flex bg-gray-700 rounded-lg p-1">
+                                <button
+                                    onClick={() => setLegSide('left')}
+                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                                >
+                                    LEFT
+                                </button>
+                                <button
+                                    onClick={() => setLegSide('right')}
+                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                                >
+                                    RIGHT
+                                </button>
                             </div>
                         </div>
                     </section>

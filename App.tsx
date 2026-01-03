@@ -1,5 +1,5 @@
 
-import React, { useState ,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from './context/AppContext';
 import CaseManagementPage from './pages/CaseManagementPage';
 import LongLegPlannerPage from './pages/LongLegPlannerPage';
@@ -29,8 +29,7 @@ async function requestAllPermissions() {
         const camPerm = await Camera.requestPermissions();
         const fsPerm = await Filesystem.requestPermissions();
 
-        console.log('Camera permission:', camPerm);
-        console.log('Filesystem permission:', fsPerm);
+
     } catch (err) {
         console.error('Permission request failed', err);
     }
@@ -42,7 +41,7 @@ const App: React.FC = () => {
     const { page, setPage, setCurrentPatientId, setPlannerMode } = useAppContext();
     const [showIntro, setShowIntro] = useState(true);
 
-useEffect(() => {
+    useEffect(() => {
         // Only run on native Android/iOS
         if (Capacitor.isNativePlatform()) {
             requestAllPermissions();
@@ -55,23 +54,23 @@ useEffect(() => {
             case 'planner-long-leg':
                 return <LongLegPlannerPage />;
             case 'planner-valgus-stress':
-                 return <ValgusStressPlannerPage />;
+                return <ValgusStressPlannerPage />;
             case 'planner-valgus-stress-results':
-                 return <ValgusStressAnalysisResultsPage />;
+                return <ValgusStressAnalysisResultsPage />;
             case 'planner-valgus-stress-coronal-balancing':
-                 return <ValgusStressCoronalBalancingPage />;
+                return <ValgusStressCoronalBalancingPage />;
             case 'planner-valgus-stress-laxity-check':
-                 return <ValgusStressLaxityCheckPage />;
+                return <ValgusStressLaxityCheckPage />;
             case 'planner-valgus-stress-report':
-                 return <ValgusStressReportPage />;
+                return <ValgusStressReportPage />;
             case 'planner-valgus-functional-tibial-cut':
-                 return <ValgusFunctionalTibialCutPage />;
+                return <ValgusFunctionalTibialCutPage />;
             case 'planner-long-leg-laxity-check':
-                 return <LongLegLaxityCheckPage />;
+                return <LongLegLaxityCheckPage />;
             case 'planner-long-leg-coronal-balancing':
-                 return <LongLegCoronalBalancingPage />;
+                return <LongLegCoronalBalancingPage />;
             case 'planner-long-leg-functional-tibial-cut':
-                 return <LongLegFunctionalTibialCutPage />;
+                return <LongLegFunctionalTibialCutPage />;
             case 'simulation':
                 return <SimulationPage />;
             case 'report':
@@ -86,7 +85,7 @@ useEffect(() => {
                 return <CaseManagementPage />;
         }
     };
-    
+
     const handleHomeClick = () => {
         setCurrentPatientId(null);
         setPlannerMode(null);
@@ -100,12 +99,12 @@ useEffect(() => {
     return (
         <div className="min-h-screen flex flex-col">
             <header className="relative flex items-center justify-center p-4 text-center border-b border-gray-700 shadow-md no-print">
-                 <h1 className="text-5xl font-bold text-gray-200">
+                <h1 className="text-5xl font-bold text-gray-200">
                     ROBOTRIX<span className="text-dark-maroon">+</span>
                 </h1>
                 {page !== 'case-management' && (
-                    <button 
-                        onClick={handleHomeClick} 
+                    <button
+                        onClick={handleHomeClick}
                         className="absolute top-1/2 right-6 transform -translate-y-1/2 w-14 h-14 rounded-full bg-[#6D282C] hover:bg-[#893338] flex items-center justify-center transition-colors shadow-lg"
                         title="Go to Home"
                         aria-label="Go to Home"

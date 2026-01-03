@@ -13,7 +13,7 @@ const PlannerOption: React.FC<{
     disabled: boolean,
     color: string
 }> = ({ onClick, title, icon, disabled, color }) => {
-    // Using CSS variables to dynamically set colors for Tailwind's JIT compiler
+
     const style = { '--planner-color': color } as React.CSSProperties;
 
     const disabledClasses = 'cursor-not-allowed opacity-50 bg-[#1e1f20]';
@@ -175,7 +175,13 @@ const PlanSelectionModal: React.FC<{
                                 >
                                     <div>
                                         <p className="font-bold text-white text-lg">{plan.name}</p>
-                                        <p className="text-sm text-gray-400">Created: {new Date(plan.createdAt).toLocaleDateString()}</p>
+                                        <div className="flex items-center space-x-2 text-sm text-gray-400">
+                                            <span>Created: {new Date(plan.createdAt).toLocaleDateString()}</span>
+                                            <span>•</span>
+                                            <span className="text-indigo-300 font-medium">
+                                                {plan.legSide === 'right' ? 'Right Leg' : 'Left Leg'}
+                                            </span>
+                                        </div>
                                     </div>
                                     <span className="text-indigo-400 opacity-0 group-hover:opacity-100 transition">Load &rarr;</span>
                                 </button>
@@ -194,6 +200,7 @@ const PlanSelectionModal: React.FC<{
                             placeholder="e.g. Pre-op Planning 1"
                             autoFocus
                         />
+
                         <div className="flex space-x-3">
                             <button onClick={handleCreate} disabled={!newPlanName.trim()} className="flex-1 gemini-dark-button font-bold py-3 rounded disabled:opacity-50">Create Plan</button>
                             <button onClick={() => setIsCreating(false)} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded">Cancel</button>
@@ -214,14 +221,14 @@ const CaseManagementPage: React.FC = () => {
     const { patients, savePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness } = useAppContext();
     const [view, setView] = useState<'main' | 'list'>('main');
 
-    // State for independent modals (legacy/other flows)
+
     const [isLdfaModalOpen, setIsLdfaModalOpen] = useState(false);
     const [implantModalConfig, setImplantModalConfig] = useState<{ isOpen: boolean, targetPage: Page | null }>({ isOpen: false, targetPage: null });
 
-    // Plan Selection Modal
+
     const [planModalConfig, setPlanModalConfig] = useState<{ isOpen: boolean, patientId: string | null, intent: 'load' | 'result' | 'report' }>({ isOpen: false, patientId: null, intent: 'load' });
 
-    // State for the combined Long Leg Varus Planner Modal
+
     const [isLongLegConfigOpen, setIsLongLegConfigOpen] = useState(false);
     const [tempLdfa, setTempLdfa] = useState<'native' | 'corrected' | null>(null);
     const [tempThickness, setTempThickness] = useState<number | null>(null);
@@ -238,7 +245,7 @@ const CaseManagementPage: React.FC = () => {
         lastName: '',
         age: '',
         gender: 'Male',
-        legSide: 'Left',
+
     });
 
     const [suggestedId, setSuggestedId] = useState<string>('Loading...');
@@ -247,7 +254,7 @@ const CaseManagementPage: React.FC = () => {
         if (!currentPatientId) {
             getNextPatientIdPreview().then(setSuggestedId);
         } else {
-            setSuggestedId(''); // Clear when editing existing
+            setSuggestedId('');
         }
     }, [currentPatientId]);
 
@@ -259,7 +266,7 @@ const CaseManagementPage: React.FC = () => {
         setImplantThickness(null);
     }, []);
 
-    // This effect syncs the form with the currently loaded patient.
+
     useEffect(() => {
         if (currentPatientId) {
             const patient = patients.find(p => p.id === currentPatientId);
@@ -275,7 +282,7 @@ const CaseManagementPage: React.FC = () => {
                 lastName: '',
                 age: '',
                 gender: 'Male',
-                legSide: 'Left',
+                // legSide: 'Left',
             });
         }
     }, [currentPatientId, patients]);
@@ -291,9 +298,9 @@ const CaseManagementPage: React.FC = () => {
         let patientId: string;
 
         if (currentPatientId) {
-            patientId = currentPatientId; // Update → keep old ID
+            patientId = currentPatientId;
         } else {
-            patientId = await getNextPatientId(); // New → actually increment
+            patientId = await getNextPatientId();
         }
 
         const patientToSave: Patient = {
@@ -333,19 +340,19 @@ const CaseManagementPage: React.FC = () => {
     };
 
     const handleResultClick = async (patientId: string) => {
-        // Check if patient has multiple plans
+
         const plans = await getPlansForPatient(patientId);
         if (plans.length > 1) {
             await setCurrentPatientId(patientId);
             setPlanModalConfig({ isOpen: true, patientId, intent: 'result' });
         } else if (plans.length === 1) {
-            // Auto load single plan and go to result
+
             await setCurrentPatientId(patientId);
             await setCurrentPlanId(plans[0].id);
             setIsResultTypeModalOpen(true);
             setSelectedPatientForResults(patientId);
         } else {
-            // No plans? Just select patient (legacy behavior)
+
             await setCurrentPatientId(patientId);
             setIsResultTypeModalOpen(true);
             setSelectedPatientForResults(patientId);
@@ -371,7 +378,7 @@ const CaseManagementPage: React.FC = () => {
         const pid = selectedPatientForResults || currentPatientId;
         if (!pid) return;
 
-        // Ensure we strictly set context if not already
+
         if (currentPatientId !== pid) await setCurrentPatientId(pid);
 
         if (type === 'long-leg') {
@@ -385,7 +392,7 @@ const CaseManagementPage: React.FC = () => {
 
     const handleLongLegVarusClick = () => {
         setKneeType('varus');
-        // Reset temps
+
         setTempLdfa(null);
         setTempThickness(null);
         setIsLongLegConfigOpen(true);
@@ -410,7 +417,7 @@ const CaseManagementPage: React.FC = () => {
     };
 
     const isPatientSelected = !!currentPatientId;
-    const isPlanSelected = !!currentPlanId; // Need plan to enable tools
+    const isPlanSelected = !!currentPlanId;
 
     const plannerColors = ['#3B82F6', '#A855F7', '#14B8A6', '#F59E0B', '#EC4899', '#64748B'];
 
@@ -485,7 +492,7 @@ const CaseManagementPage: React.FC = () => {
                         <div key={p.id} className="gemini-dark-card p-6 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center">
                             <div>
                                 <p className="font-semibold text-2xl">{p.firstName} {p.lastName} (ID: {p.id})</p>
-                                <p className="text-lg text-gray-400 mt-2">{p.date} | Side: {p.legSide}</p>
+                                <p className="text-lg text-gray-400 mt-2">{p.date}</p>
                             </div>
                             <div className="flex space-x-4 mt-4 md:mt-0">
                                 <button onClick={() => selectPatient(p.id)} className="gemini-dark-button font-bold text-lg py-3 px-6 rounded-lg">Load Case</button>
@@ -603,44 +610,70 @@ const CaseManagementPage: React.FC = () => {
             {view === 'list' ? renderListView() : (
                 <>
                     <h2 className="text-5xl font-bold mb-8 text-start">Surgical Planner</h2>
+                    <div className="flex justify-center">
+                        <div className="gemini-dark-card p-4 rounded-lg mb-10 w-full max-w-6xl">
+                            <h3 className="text-2xl font-semibold mb-2 text-gray-200 text-center">
+                                Patient Details
+                            </h3>
+                            <form
+                                onSubmit={handleSubmit}
+                                className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end 
+                       max-w-4xl mx-auto justify-items-center"
+                            >
+                                <div className="md:col-span-3 w-full">
+                                    <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                        Patient Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="firstName"
+                                        value={formData.firstName}
+                                        onChange={handleInputChange}
+                                        className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg"
+                                        placeholder="Enter full name"
+                                        required
+                                    />
+                                </div>
 
-                    <div className="gemini-dark-card p-6 rounded-lg mb-10">
-                        <h3 className="text-2xl font-semibold mb-4 text-gray-200">Patient Details</h3>
-                        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                            <div className="md:col-span-3">
-                                <label htmlFor="firstName" className="block mb-2 text-sm font-medium text-gray-400">Patient Name</label>
-                                <input type="text" id="firstName" value={formData.firstName} onChange={handleInputChange} className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg" required placeholder="Enter full name" />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label htmlFor="id" className="block mb-2 text-sm font-medium text-gray-400">Patient ID</label>
-                                <input
-                                    type="text"
-                                    id="id"
-                                    value={currentPatientId ? formData.id : suggestedId}
-                                    onChange={handleInputChange}
-                                    disabled={!!currentPatientId}
-                                    className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg bg-gray-800"
-                                    required
-                                    placeholder="Auto-generated ID"
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label htmlFor="legSide" className="block mb-2 text-sm font-medium text-gray-400">Leg Side</label>
-                                <select id="legSide" value={formData.legSide} onChange={handleInputChange} className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg">
-                                    <option>Left</option>
-                                    <option>Right</option>
-                                </select>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label htmlFor="date" className="block mb-2 text-sm font-medium text-gray-400">Date</label>
-                                <input type="date" id="date" value={formData.date} onChange={handleInputChange} className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg" />
-                            </div>
-                            <div className="md:col-span-3">
-                                <button type="submit" className="gemini-dark-button font-bold h-14 py-3 px-6 rounded-lg transition text-lg w-full">
-                                    {isPatientSelected ? 'Update Details' : 'Save Details'}
-                                </button>
-                            </div>
-                        </form>
+                                <div className="md:col-span-3 w-full">
+                                    <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                        Patient ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="id"
+                                        value={currentPatientId ? formData.id : suggestedId}
+                                        onChange={handleInputChange}
+                                        disabled={!!currentPatientId}
+                                        className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg bg-gray-800"
+                                        placeholder="Auto-generated ID"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="md:col-span-3 w-full">
+                                    <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                        Date
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="date"
+                                        value={formData.date}
+                                        onChange={handleInputChange}
+                                        className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg"
+                                    />
+                                </div>
+
+                                <div className="md:col-span-3 w-full">
+                                    <button
+                                        type="submit"
+                                        className="gemini-dark-button font-bold h-14 rounded-lg text-lg w-full"
+                                    >
+                                        {isPatientSelected ? 'Update Details' : 'Save Details'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     {!isPlanSelected && (

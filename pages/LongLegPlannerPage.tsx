@@ -10,17 +10,17 @@ const landmarkInstructions = {
     tibialJointLine: ["Mark the highest point of medial (M) tibial condyle.", "Mark the highest point of lateral (L) tibial condyle."],
 };
 
-const HANDLE_RADIUS = 6; // Reduced size
+const HANDLE_RADIUS = 6;
 
 const LANDMARK_COLORS = {
-    hkaLine: '#89CFF0',           // Baby Blue
-    femurAnatomicAxis: '#F08080',   // Light Coral
-    femoralJointLine: '#98FB98',      // Pale Green
-    tibialJointLine: '#FFD700',       // Gold
+    hkaLine: '#89CFF0',
+    femurAnatomicAxis: '#F08080',
+    femoralJointLine: '#98FB98',
+    tibialJointLine: '#FFD700',
 };
 
 
-// --- Helper Functions ---
+
 const angleBetweenVectors = (v1: Point, v2: Point) => {
     const dot = v1.x * v2.x + v1.y * v2.y;
     const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
@@ -77,35 +77,33 @@ const getRecommendedVarusCut = (mpta: number | null) => {
     return '--';
 };
 
-// --- Camera Modal Component ---
+
 const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (dataUrl: string) => void; }> = ({ isOpen, onClose, onCapture }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const overlayRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-    // Crop state
-    const [cropRect, setCropRect] = useState({ x: 10, y: 10, width: 80, height: 80 }); // Percentages
+
+    const [cropRect, setCropRect] = useState({ x: 10, y: 10, width: 80, height: 80 });
     const cropBoxRef = useRef<HTMLDivElement>(null);
-    const [activeInteraction, setActiveInteraction] = useState<string | null>(null); // 'move', 'tl', 'tr', 'bl', 'br'
+    const [activeInteraction, setActiveInteraction] = useState<string | null>(null);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     const stopCamera = useCallback(() => {
         if (streamRef.current) {
-            console.log("Stopping camera tracks...");
             streamRef.current.getTracks().forEach(track => {
                 track.stop();
-                console.log(`Track ${track.label} stopped.`);
             });
             streamRef.current = null;
         }
         if (videoRef.current) {
             videoRef.current.srcObject = null;
-            videoRef.current.load(); // Force release
+            videoRef.current.load();
         }
     }, []);
 
-    // Cleanup Blob URLs
+
     useEffect(() => {
         return () => {
             if (capturedImage && capturedImage.startsWith('blob:')) {
@@ -116,7 +114,7 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
     }, [capturedImage, stopCamera]);
 
     const handleClose = useCallback(() => {
-        console.log("Closing CameraModal...");
+
         if (capturedImage && capturedImage.startsWith('blob:')) {
             URL.revokeObjectURL(capturedImage);
         }
@@ -127,10 +125,9 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
 
     useEffect(() => {
         if (isOpen && !capturedImage) {
-            console.log("Requesting camera access...");
+
             navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(stream => {
-                    console.log("Camera stream obtained.");
                     streamRef.current = stream;
                     if (videoRef.current) {
                         videoRef.current.srcObject = stream;
@@ -441,7 +438,7 @@ const LongLegPlannerPage: React.FC = () => {
     }, []);
 
 
-    // Auto-adjust hip center for a 4-degree VCA when femur anatomic axis is marked (in corrected mode)
+
     useEffect(() => {
         if (ldfaMode !== 'corrected') return;
 
@@ -609,7 +606,7 @@ const LongLegPlannerPage: React.FC = () => {
 
     }, [longLegLandmarks, visibleLandmarkSets, legSide, setLongLegResults, ldfaMode]);
 
-    // Separate effect for calculations
+
     useEffect(() => {
         updateCalculations();
     }, [longLegLandmarks, visibleLandmarkSets, legSide, updateCalculations, ldfaMode]);
@@ -629,7 +626,7 @@ const LongLegPlannerPage: React.FC = () => {
         const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = longLegLandmarks;
 
         const drawTextWithBackground = (text: string, x: number, y: number) => {
-            ctx.fillStyle = 'rgba(29, 29, 31, 0.8)'; // Dark semi-transparent background
+            ctx.fillStyle = 'rgba(29, 29, 31, 0.8)';
             const textMetrics = ctx.measureText(text);
             const textWidth = textMetrics.width;
             const boxPadding = 8;
@@ -638,11 +635,11 @@ const LongLegPlannerPage: React.FC = () => {
             ctx.fillText(text, x - textWidth / 2, y);
         };
 
-        // Handle Resize (Moved here to be after draw definition)
 
-        // HKA Line
+
+
         if (visibleLandmarkSets.has('hkaLine')) {
-            // Draw lines if both points exist
+
             if (hipCenter && kneeCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.hkaLine;
                 ctx.lineWidth = 3;
@@ -969,13 +966,19 @@ const LongLegPlannerPage: React.FC = () => {
         // Generous hit radius for easier grabbing (~50px)
         // Note: 50 ** 2 = 2500. canvas coords are unzoomed (usually larger).
         const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2;
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
+
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
-            if (distSq < hitRadiusSq) {
-                draggingPointRef.current = key;
-                break;
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                closestKey = key;
             }
+        }
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
         }
     };
 
@@ -1050,14 +1053,19 @@ const LongLegPlannerPage: React.FC = () => {
 
         // Generous hit radius for touch
         const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2;
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
 
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
-            if (distSq < hitRadiusSq) {
-                draggingPointRef.current = key;
-                break;
+            if (distSq < minDistSq) {
+                minDistSq = distSq;
+                closestKey = key;
             }
+        }
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
         }
     };
 
@@ -1303,10 +1311,21 @@ const LongLegPlannerPage: React.FC = () => {
 
                     {/* STEP 2 */}
                     <section>
-                        <h3 className="text-lg font-semibold mb-2">Leg Side</h3>
-                        <div className="w-full">
-                            <div className="py-2 px-4 rounded bg-[#6D282C] text-center w-full font-bold text-white uppercase tracking-wider">
-                                {legSide} Leg
+                        <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between mb-4">
+                            <span className="text-gray-400 font-medium">Leg Side</span>
+                            <div className="flex bg-gray-700 rounded-lg p-1">
+                                <button
+                                    onClick={() => setLegSide('left')}
+                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                                >
+                                    LEFT
+                                </button>
+                                <button
+                                    onClick={() => setLegSide('right')}
+                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                                >
+                                    RIGHT
+                                </button>
                             </div>
                         </div>
                     </section>

@@ -19,9 +19,25 @@ export interface PlanMetadata {
     name: string;
     createdAt: string;
     updatedAt: string;
+    legSide?: 'left' | 'right';
 }
 
 const PLAN_INDEX_PREFIX = 'patientPlans_';
+
+// Helper to update a single plan's leg side in the index
+export const updatePlanLegSide = async (patientId: string, planId: string, legSide: 'left' | 'right') => {
+    try {
+        const plans = (await get<PlanMetadata[]>(`${PLAN_INDEX_PREFIX}${patientId}`)) || [];
+        const planIndex = plans.findIndex(p => p.id === planId);
+        if (planIndex !== -1) {
+            plans[planIndex].legSide = legSide;
+            plans[planIndex].updatedAt = new Date().toISOString();
+            await set(`${PLAN_INDEX_PREFIX}${patientId}`, plans);
+        }
+    } catch (e) {
+        console.error(`Failed to update leg side for plan ${planId}`, e);
+    }
+};
 
 export const getNextPatientId = async (): Promise<string> => {
     try {
@@ -81,7 +97,8 @@ export const createNewPlan = async (patientId: string, name: string): Promise<st
         patientId,
         name,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        legSide: 'left'
     };
 
     try {
