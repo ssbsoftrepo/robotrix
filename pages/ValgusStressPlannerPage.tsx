@@ -391,9 +391,9 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
 };
 
 const MetricItem: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-    <div className="flex flex-col justify-center items-center bg-gray-800/80 p-3 rounded-lg text-center h-full">
-        <p className="text-lg text-gray-400">{label}</p>
-        <p className="font-extrabold text-3xl text-gray-100 mt-1">{value}</p>
+    <div className="flex flex-col justify-center items-center bg-gray-800/80 p-1 rounded-lg text-center h-full">
+        <p className="text-xs text-gray-400">{label}</p>
+        <p className="font-bold text-lg text-gray-100">{value}</p>
     </div>
 );
 
@@ -413,6 +413,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
     const [activeInstruction, setActiveInstruction] = useState<string[] | null>(null);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const [showMetrics, setShowMetrics] = useState(false);
     const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
 
     const imageRef = useRef<HTMLImageElement>(null);
@@ -1197,18 +1198,18 @@ const ValgusStressPlannerPage: React.FC = () => {
 
                     {/* STEP 2: Leg Side */}
                     <section>
-                        <div className="bg-gray-800 p-4 rounded-lg flex items-center justify-between mb-4">
-                            <span className="text-gray-400 font-medium">Leg Side</span>
-                            <div className="flex bg-gray-700 rounded-lg p-1">
+                        <div className="bg-gray-800 p-2 rounded-lg flex items-center justify-between mb-2">
+                            <span className="text-gray-400 font-medium text-xs">Leg Side</span>
+                            <div className="flex bg-gray-700 rounded-lg p-0.5">
                                 <button
                                     onClick={() => setLegSide('left')}
-                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
                                 >
                                     LEFT
                                 </button>
                                 <button
                                     onClick={() => setLegSide('right')}
-                                    className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
                                 >
                                     RIGHT
                                 </button>
@@ -1220,25 +1221,54 @@ const ValgusStressPlannerPage: React.FC = () => {
 
                     {/* STEP 3: Landmarks */}
                     <section>
-                        <h3 className="text-lg font-semibold mb-2 text-gray-300">Landmarks</h3>
-                        <div className="space-y-2">
+                        <div className="flex justify-between items-center mb-1">
+                            <h3 className="text-sm font-semibold text-gray-300">Landmarks</h3>
+                            <button
+                                onClick={() => setShowMetrics(!showMetrics)}
+                                className={`flex items-center gap-1.5 px-2 py-1 rounded border transition-all duration-300 ${showMetrics
+                                    ? 'bg-[#6D282C] border-[#8a3338] text-white shadow-[0_0_8px_rgba(109,40,44,0.4)]'
+                                    : 'bg-transparent border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300'
+                                    }`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Metrics</span>
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
                             {Object.entries(landmarkInstructions).map(([key, value]) => {
                                 const isSelected = visibleLandmarkSets.has(key);
                                 return (
                                     <button
                                         key={key}
                                         onClick={() => toggleLandmarkSet(key as any)}
-                                        className={`w-full py-2 rounded border ${isSelected ? 'bg-[#6D282C]' : 'border-gray-600 hover:bg-gray-700'}`}
+                                        className={`w-full py-1.5 text-xs rounded border ${isSelected ? 'bg-[#6D282C]' : 'border-gray-600 hover:bg-gray-700'}`}
                                     >
                                         {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                     </button>
                                 )
                             })}
                         </div>
-                        <button onClick={handleResetAll} className="mt-3 w-full py-2 rounded bg-gray-600 hover:bg-gray-700">
+                        <button onClick={handleResetAll} className="mt-2 w-full py-1.5 text-xs rounded bg-gray-600 hover:bg-gray-700">
                             Reset All
                         </button>
                     </section>
+
+                    {/* METRICS (Toggled) */}
+                    {showMetrics && (
+                        <section>
+                            <h4 className="text-md font-semibold mb-2">Metrics</h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                <MetricItem label="Obliquity" value={`${valgusResults.obliquity?.toFixed(1) ?? '--'}°`} />
+                                <MetricItem label="LDFA" value={`${valgusResults.ldfa?.toFixed(1) ?? '--'}°`} />
+                                <MetricItem label="MPTA" value={`${valgusResults.mpta?.toFixed(1) ?? '--'}°`} />
+                                <MetricItem label="aHKA" value={`${valgusResults.ahka?.toFixed(1) ?? '--'}°`} />
+                                <MetricItem label="JLO" value={`${valgusResults.jlo?.toFixed(1) ?? '--'}°`} />
+                                <MetricItem label="CPAK" value={valgusResults.cpak} />
+                            </div>
+                        </section>
+                    )}
 
                     {/* INSTRUCTIONS */}
                     <section className="bg-gray-900/50 p-3 rounded border border-gray-700">
@@ -1252,19 +1282,6 @@ const ValgusStressPlannerPage: React.FC = () => {
                         ) : (
                             <p className="text-sm text-gray-400">Select a landmark to begin</p>
                         )}
-                    </section>
-
-                    {/* METRICS */}
-                    <section>
-                        <h4 className="text-md font-semibold mb-2">Metrics</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            <MetricItem label="Obliquity" value={`${valgusResults.obliquity?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="LDFA" value={`${valgusResults.ldfa?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="MPTA" value={`${valgusResults.mpta?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="aHKA" value={`${valgusResults.ahka?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="JLO" value={`${valgusResults.jlo?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="CPAK" value={valgusResults.cpak} />
-                        </div>
                     </section>
                 </div>
             </div>

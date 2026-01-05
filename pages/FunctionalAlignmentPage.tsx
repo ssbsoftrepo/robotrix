@@ -8,14 +8,14 @@ const KneeJointDrawing: React.FC = () => (
         <svg viewBox="0 0 200 150" className="w-full h-auto max-w-[250px]" aria-label="Diagram of a knee joint with medial and lateral spaces indicated.">
             {/* Distal Femur */}
             <path d="M 40 10 C 20 10, 10 30, 10 50 L 10 60 L 190 60 L 190 50 C 190 30, 180 10, 160 10 Z" fill="#e3e3e3" />
-            
+
             {/* Proximal Tibia */}
             <path d="M 10 90 L 10 110 C 10 130, 20 140, 40 140 L 160 140 C 180 140, 190 130, 190 110 L 190 90 Z" fill="#e3e3e3" />
-            
+
             {/* Labels and Lines for Gaps */}
             <text x="45" y="80" fill="#89CFF0" fontSize="16" fontWeight="bold" textAnchor="middle">Medial</text>
             <line x1="10" y1="75" x2="80" y2="75" stroke="#89CFF0" strokeWidth="3" />
-            
+
             <text x="155" y="80" fill="#F08080" fontSize="16" fontWeight="bold" textAnchor="middle">Lateral</text>
             <line x1="120" y1="75" x2="190" y2="75" stroke="#F08080" strokeWidth="3" />
         </svg>
@@ -56,7 +56,7 @@ const LaxityCheckModal: React.FC<{
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-             <div className="gemini-dark-card p-8 rounded-lg max-w-2xl text-center shadow-xl w-full flex flex-col relative">
+            <div className="gemini-dark-card p-8 rounded-lg max-w-2xl text-center shadow-xl w-full flex flex-col relative">
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -66,9 +66,9 @@ const LaxityCheckModal: React.FC<{
                 <div className="h-96 w-full flex items-center justify-center bg-black rounded-md mb-6 overflow-hidden">
                     {previewImage ? (
                         <img src={previewImage} alt="X-ray Preview" className="object-contain max-w-full max-h-full" />
-                    ) : ( <p className="text-gray-500">Select an image to view</p> )}
+                    ) : (<p className="text-gray-500">Select an image to view</p>)}
                 </div>
-                 <div className="flex justify-center space-x-4 mb-6">
+                <div className="flex justify-center space-x-4 mb-6">
                     <button onClick={() => setPreviewImage(longLegImageSrc)} disabled={!longLegImageSrc} className="gemini-dark-button font-semibold py-3 px-6 rounded-md transition text-lg disabled:opacity-50 disabled:cursor-not-allowed">
                         View Long Film
                     </button>
@@ -94,7 +94,7 @@ const TibialCutAccuracyCheck = () => {
     const [medialSpace, setMedialSpace] = useState<string>('');
     const [lateralSpace, setLateralSpace] = useState<string>('');
 
-    const getRecommendedTibialCut = () => { 
+    const getRecommendedTibialCut = () => {
         const mpta = longLegResults.mpta;
         if (mpta === null) return '--';
         let varusCut = 0;
@@ -106,10 +106,10 @@ const TibialCutAccuracyCheck = () => {
         if (tibiaBoundary === 'basic' && varusCut > 2) {
             varusCut = 2;
         }
-        
+
         if (varusCut === 0) return '0° (neutral cut)';
         return `${varusCut}° varus cut`;
-     };
+    };
     const anticipatedTightness = useMemo(() => {
         const mpta = longLegResults.mpta ?? 86;
         return Math.round(Math.max(0, 86 - mpta));
@@ -119,16 +119,16 @@ const TibialCutAccuracyCheck = () => {
         const lateralVal = parseFloat(lateralSpace);
         return (!isNaN(medialVal) && !isNaN(lateralVal)) ? Math.abs(medialVal - lateralVal) : null;
     }, [medialSpace, lateralSpace]);
-    
+
     const isMatch = measuredDifference !== null && anticipatedTightness === Math.round(measuredDifference);
 
     const renderConclusion = () => {
         if (measuredDifference === null) {
             return <p className="text-gray-500 text-center text-lg italic">Enter spacer block values to see verification.</p>
         }
-        
+
         const matchMessage = isMatch ? (
-             <div className="p-4 bg-green-900/50 border border-green-700 rounded-lg text-center">
+            <div className="p-4 bg-green-900/50 border border-green-700 rounded-lg text-center">
                 <p className="font-semibold text-xl text-green-300">The medial gap matches the tightness anticipated.</p>
             </div>
         ) : (
@@ -140,8 +140,8 @@ const TibialCutAccuracyCheck = () => {
 
         const warningMessage = hasLateralLaxity ? (
             <div className="mt-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-center">
-                 <p className="font-semibold text-md text-yellow-300">Warning:</p>
-                 <p className="text-sm text-yellow-400 mt-1">The more medial to lateral difference, the more the need for medial release & adjust Varus cut as appropriate.</p>
+                <p className="font-semibold text-md text-yellow-300">Warning:</p>
+                <p className="text-sm text-yellow-400 mt-1">The more medial to lateral difference, the more the need for medial release & adjust Varus cut as appropriate.</p>
             </div>
         ) : null;
 
@@ -181,12 +181,12 @@ const TibialCutAccuracyCheck = () => {
                             <label className="block text-center text-lg mb-2">Medial (mm)</label>
                             <input type="number" value={medialSpace} onChange={e => setMedialSpace(e.target.value)} className="gemini-dark-input w-28 p-2 text-xl text-center rounded-md" />
                         </div>
-                         <div>
+                        <div>
                             <label className="block text-center text-lg mb-2">Lateral (mm)</label>
                             <input type="number" value={lateralSpace} onChange={e => setLateralSpace(e.target.value)} className="gemini-dark-input w-28 p-2 text-xl text-center rounded-md" />
                         </div>
                     </div>
-                     {measuredDifference !== null && (
+                    {measuredDifference !== null && (
                         <div className="mt-6 text-center bg-gray-900 p-3 rounded-md">
                             <p className="text-lg text-gray-400">Measured Difference</p>
                             <p className="text-3xl font-bold text-white">{measuredDifference.toFixed(1)} mm</p>
@@ -196,9 +196,9 @@ const TibialCutAccuracyCheck = () => {
                 <div className="gemini-dark-card p-6 rounded-lg flex flex-col justify-between">
                     <div>
                         <h3 className="text-xl font-semibold mb-4 text-center">3. Verification</h3>
-                         <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg mb-4">Check Lateral Laxity</button>
+                        <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg mb-4">Check Lateral Laxity</button>
                         <div className="text-center bg-gray-900 p-3 rounded-md mb-6">
-                             <p className="text-lg text-gray-400">Lateral Laxity Status:</p>
+                            <p className="text-lg text-gray-400">Lateral Laxity Status:</p>
                             <p className={`text-2xl font-bold ${hasLateralLaxity ? 'text-red-400' : hasLateralLaxity === false ? 'text-green-400' : 'text-gray-500'}`}>{hasLateralLaxity ? 'Present' : hasLateralLaxity === false ? 'Absent' : 'Not Set'}</p>
                         </div>
                     </div>
@@ -206,7 +206,7 @@ const TibialCutAccuracyCheck = () => {
                 </div>
             </div>
             <div className="mt-8 flex justify-between">
-                 <button onClick={() => setPage('results-analysis')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition text-xl">&larr; Back to Results</button>
+                <button onClick={() => setPage('results-analysis')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition text-xl">&larr; Back to Results</button>
                 <button onClick={() => setPage('simulation')} className="gemini-dark-button font-bold py-3 px-8 rounded-lg transition text-xl">Go to Simulation &rarr;</button>
             </div>
         </>
@@ -220,7 +220,7 @@ const FunctionalAlignmentPlanner = () => {
     const [isLaxityModalOpen, setIsLaxityModalOpen] = useState(true);
     const [medialSpace, setMedialSpace] = useState<string>('');
     const [lateralSpace, setLateralSpace] = useState<string>('');
-    
+
     const measuredDifference = useMemo(() => {
         const medialVal = parseFloat(medialSpace);
         const lateralVal = parseFloat(lateralSpace);
@@ -257,12 +257,12 @@ const FunctionalAlignmentPlanner = () => {
                             <label className="block text-center text-lg mb-2">Medial (mm)</label>
                             <input type="number" value={medialSpace} onChange={e => setMedialSpace(e.target.value)} className="gemini-dark-input w-28 p-2 text-xl text-center rounded-md" />
                         </div>
-                         <div>
+                        <div>
                             <label className="block text-center text-lg mb-2">Lateral (mm)</label>
                             <input type="number" value={lateralSpace} onChange={e => setLateralSpace(e.target.value)} className="gemini-dark-input w-28 p-2 text-xl text-center rounded-md" />
                         </div>
                     </div>
-                     {measuredDifference !== null && (
+                    {measuredDifference !== null && (
                         <div className="mt-6 text-center bg-gray-900 p-3 rounded-md">
                             <p className="text-lg text-gray-400">Measured Difference</p>
                             <p className="text-3xl font-bold text-white">{measuredDifference.toFixed(1)} mm</p>
@@ -279,7 +279,7 @@ const FunctionalAlignmentPlanner = () => {
                         </div>
                         <p className="text-center text-md text-gray-400 mt-4 p-2 bg-gray-900/50 rounded-md">Note: The recommended tibial varus cut is 0 to 3 degree.</p>
                         {hasLateralLaxity && (
-                             <div className="mt-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-center">
+                            <div className="mt-4 p-3 bg-yellow-900/50 border border-yellow-700 rounded-lg text-center">
                                 <p className="font-semibold text-md text-yellow-300">Warning:</p>
                                 <p className="text-sm text-yellow-400 mt-1">The more medial to lateral difference, the more the need for medial release & adjust Varus cut as appropriate.</p>
                             </div>
@@ -288,7 +288,7 @@ const FunctionalAlignmentPlanner = () => {
                 </div>
             </div>
             <div className="mt-8 flex justify-start">
-                 <button onClick={() => setPage('planner-valgus-stress')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition text-xl">&larr; Back to Valgus Planner</button>
+                <button onClick={() => setPage('planner-valgus-stress')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition text-xl">&larr; Back to Valgus Planner</button>
             </div>
         </>
     );

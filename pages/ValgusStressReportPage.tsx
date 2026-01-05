@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
 import tibiaCutBg from '../assets/tibiacut.jpeg';
+import { formatDate } from '../utils/date';
 
 // Reusable Label-Value component matching ReportPage
 const ReportItem: React.FC<{ label: string; value: string | number | undefined | null; highlight?: boolean }> = ({ label, value, highlight }) => (
@@ -146,7 +147,7 @@ const ValgusStressReportPage: React.FC = () => {
                             </div>
                             <div>
                                 <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">Date</p>
-                                <p className="text-base text-gray-200 mt-0.5">{patient.date}</p>
+                                <p className="text-base text-gray-200 mt-0.5">{formatDate(patient.date)}</p>
                             </div>
                             <div>
                                 <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">Surgical Side</p>

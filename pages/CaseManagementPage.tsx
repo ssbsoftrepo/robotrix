@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Patient, Page } from '../types';
 import { getPlansForPatient, createNewPlan, PlanMetadata, getNextPatientId, getNextPatientIdPreview } from '../utils/storage';
+import { formatDate } from '../utils/date';
 import LdfaModeModal from '../components/LdfaModeModal';
 import ImplantThicknessModal from '../components/ImplantThicknessModal';
 
@@ -175,8 +176,10 @@ const PlanSelectionModal: React.FC<{
                                 >
                                     <div>
                                         <p className="font-bold text-white text-lg">{plan.name}</p>
+
+
                                         <div className="flex items-center space-x-2 text-sm text-gray-400">
-                                            <span>Created: {new Date(plan.createdAt).toLocaleDateString()}</span>
+                                            <span>Created: {formatDate(plan.createdAt)}</span>
                                             <span>•</span>
                                             <span className="text-indigo-300 font-medium">
                                                 {plan.legSide === 'right' ? 'Right Leg' : 'Left Leg'}
@@ -492,7 +495,7 @@ const CaseManagementPage: React.FC = () => {
                         <div key={p.id} className="gemini-dark-card p-6 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center">
                             <div>
                                 <p className="font-semibold text-2xl">{p.firstName} {p.lastName} (ID: {p.id})</p>
-                                <p className="text-lg text-gray-400 mt-2">{p.date}</p>
+                                <p className="text-lg text-gray-400 mt-2">{formatDate(p.date)}</p>
                             </div>
                             <div className="flex space-x-4 mt-4 md:mt-0">
                                 <button onClick={() => selectPatient(p.id)} className="gemini-dark-button font-bold text-lg py-3 px-6 rounded-lg">Load Case</button>
