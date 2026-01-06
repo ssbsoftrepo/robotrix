@@ -14,7 +14,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
                         ROBOTRIX<span className="text-[#6D282C]">+</span>
                     </h1>
                 </div>
-                
+
                 <div className="max-w-4xl mx-auto space-y-1 mb-16">
                     <p className="text-xl md:text-3xl text-gray-400 font-light leading-relaxed">
                         Safe & personalized TKR Functional Alignment execution platform
@@ -24,16 +24,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
                     </p>
                 </div>
 
-                <button 
+                <button
                     onClick={onEnter}
-                    className="px-14 py-5 bg-[#6D282C] hover:bg-[#893338] text-white font-bold text-2xl rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_30px_rgba(109,40,44,0.4)] hover:shadow-[0_0_50px_rgba(109,40,44,0.6)] focus:outline-none focus:ring-4 focus:ring-[#6D282C]/50"
+                    className="px-14 py-5 bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-2xl rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_30px_rgba(109,40,44,0.4)] hover:shadow-[0_0_50px_rgba(109,40,44,0.6)] focus:outline-none focus:ring-4 focus:ring-[#6D282C]/50"
                 >
                     ENTER
                 </button>
             </div>
 
             <div className="pb-6">
-                 <p className="text-gray-500 text-lg font-medium">Powered by PLUS Orthopedics</p>
+                <p className="text-gray-500 text-lg font-medium">Powered by PLUS Orthopedics</p>
             </div>
         </div>
     );

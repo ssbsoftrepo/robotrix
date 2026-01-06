@@ -166,10 +166,10 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
         'Severe lateral laxity': '/severe.jpeg',
     };
 
-    const laxityColors = ['#22C55E', '#3B82F6', '#F97316', '#EF4444']; // Green, Blue, Orange, Red
+    const laxityColors = ['#EF4444', '#EF4444', '#EF4444', '#EF4444']; // Green, Blue, Orange, Red
 
     return (
-        <div className="flex flex-col h-full p-2">
+        <div className="flex flex-col h-full p-2 overflow-hidden">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-3xl font-bold text-gray-100">Check for lateral laxity ( Valgus stress film)</h2>
                 <div className="flex space-x-4">

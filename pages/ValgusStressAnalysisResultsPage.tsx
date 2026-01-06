@@ -182,7 +182,14 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
         <div className="h-full flex flex-col overflow-hidden">
             <div className="flex justify-between items-center mb-2 no-print">
                 <h2 className="text-4xl font-bold">Valgus Stress Analysis</h2>
-                <button onClick={() => setPage('planner-valgus-stress')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-4 rounded-lg transition text-base">&larr; Back</button>
+                <button onClick={() => setPage('planner-valgus-stress')} className="gemini-dark-button font-bold py-2 px-4 rounded-md transition text-sm flex items-center space-x-2">
+                    <span className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                        Back
+                    </span>
+                </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-grow min-h-0">
@@ -252,8 +259,8 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                             step={1}
                             title="Recommended Foundational distal femoral cut"
                             value={recommendedFemoralCut}
-                            colorTheme="yellow"
-                            imageSrc="/valguscut.jpeg"
+                            colorTheme="pink"
+                            imageSrc="/valguscut.png"
                             className="flex-1"
                             seamlessImage={true}
                         />
@@ -264,7 +271,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                             title="Provisional 90 deg tibial cut"
                             value="90°"
                             colorTheme="pink"
-                            imageSrc="/tibialcut.jpeg"
+                            imageSrc="/tibialcut.png"
                             className="flex-1"
                             transparentImage={true}
                         />
@@ -274,7 +281,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                             step={3}
                             title="Anticipated tibial cut"
                             value={anticipatedTibiaCut}
-                            colorTheme="blue"
+                            colorTheme="pink"
                             className="flex-1"
                             hideStepBadge={true}
                         />
@@ -287,7 +294,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                 <div className="flex justify-end w-full">
                     <button
                         onClick={() => setPage('planner-valgus-stress-coronal-balancing')}
-                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-2.5 px-8 rounded-full shadow-xl transition transform hover:scale-105"
+                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105"
                         disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
                     >
                         Proceed to Coronal Balancing

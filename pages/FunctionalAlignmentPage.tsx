@@ -149,67 +149,80 @@ const TibialCutAccuracyCheck = () => {
     };
 
     return (
-        <>
+        <div className="flex flex-col h-full overflow-hidden">
             <LaxityCheckModal isOpen={isLaxityModalOpen} onClose={() => setIsLaxityModalOpen(false)} onSetLaxity={setHasLateralLaxity} />
-            <h2 className="text-5xl font-bold mb-6 text-center">Tibial Cut Accuracy Check</h2>
-            <div className="gemini-dark-card p-6 rounded-lg mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+            <h2 className="text-4xl font-bold mb-2 text-center shrink-0">Tibial Cut Accuracy Check</h2>
+            <div className="gemini-dark-card p-4 rounded-lg mb-2 grid grid-cols-1 md:grid-cols-2 gap-4 text-center shrink-0">
                 <div>
-                    <p className="text-xl text-yellow-500">Long Leg Film CPAK Type</p>
-                    <p className="font-bold text-5xl text-yellow-400">CPAK {longLegResults.cpak}</p>
+                    <p className="text-lg text-yellow-500">Long Leg Film CPAK Type</p>
+                    <p className="font-bold text-3xl text-yellow-400">CPAK {longLegResults.cpak}</p>
                 </div>
-                <div className="border-t md:border-t-0 md:border-l border-gray-700 pt-4 md:pt-0">
-                    <p className="text-xl text-yellow-500">Recommended Tibial Varus Cut</p>
-                    <p className="font-bold text-5xl text-yellow-400">{getRecommendedTibialCut()}</p>
+                <div className="border-t md:border-t-0 md:border-l border-gray-700 pt-2 md:pt-0">
+                    <p className="text-lg text-yellow-500">Recommended Tibial Varus Cut</p>
+                    <p className="font-bold text-3xl text-yellow-400">{getRecommendedTibialCut()}</p>
                 </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="gemini-dark-card p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold mb-4 text-center">1. Anticipated Medial Tightness</h3>
-                    <div className="space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-grow min-h-0 overflow-y-auto">
+                <div className="gemini-dark-card p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-2 text-center">1. Anticipated Medial Tightness</h3>
+                    <div className="space-y-2">
                         {["No medial tightness", "1 mm", "2 mm", "3 mm", "4 mm+"].map((text, index) => (
-                            <div key={index} className={`p-3 text-lg rounded-md text-center transition ${((index === 4) ? (anticipatedTightness >= 4) : (anticipatedTightness === index)) ? 'bg-green-800 text-white font-bold ring-2 ring-green-500' : 'bg-gray-800 text-gray-300'}`}>
+                            <div key={index} className={`p-2 text-base rounded-md text-center transition ${((index === 4) ? (anticipatedTightness >= 4) : (anticipatedTightness === index)) ? 'bg-green-800 text-white font-bold ring-2 ring-green-500' : 'bg-gray-800 text-gray-300'}`}>
                                 {text}
                             </div>
                         ))}
                     </div>
                 </div>
-                <div className="gemini-dark-card p-6 rounded-lg flex flex-col justify-center">
-                    <h3 className="text-xl font-semibold mb-4 text-center">2. Assess Medial & Lateral Spaces</h3>
-                    <p className="text-center text-gray-400 text-sm mb-4">Use the Robotrix+ asymetric incremental blocks.</p>
-                    <div className="flex justify-around items-center mt-4 space-x-4">
+                <div className="gemini-dark-card p-4 rounded-lg flex flex-col justify-center">
+                    <h3 className="text-lg font-semibold mb-2 text-center">2. Assess Medial & Lateral Spaces</h3>
+                    <p className="text-center text-gray-400 text-sm mb-2">Use the Robotrix+ asymetric incremental blocks.</p>
+                    <div className="flex justify-around items-center mt-2 space-x-2">
                         <div>
-                            <label className="block text-center text-lg mb-2">Medial (mm)</label>
-                            <input type="number" value={medialSpace} onChange={e => setMedialSpace(e.target.value)} className="gemini-dark-input w-28 p-2 text-xl text-center rounded-md" />
+                            <label className="block text-center text-base mb-1">Medial (mm)</label>
+                            <input type="number" value={medialSpace} onChange={e => setMedialSpace(e.target.value)} className="gemini-dark-input w-24 p-2 text-lg text-center rounded-md" />
                         </div>
                         <div>
-                            <label className="block text-center text-lg mb-2">Lateral (mm)</label>
-                            <input type="number" value={lateralSpace} onChange={e => setLateralSpace(e.target.value)} className="gemini-dark-input w-28 p-2 text-xl text-center rounded-md" />
+                            <label className="block text-center text-base mb-1">Lateral (mm)</label>
+                            <input type="number" value={lateralSpace} onChange={e => setLateralSpace(e.target.value)} className="gemini-dark-input w-24 p-2 text-lg text-center rounded-md" />
                         </div>
                     </div>
                     {measuredDifference !== null && (
-                        <div className="mt-6 text-center bg-gray-900 p-3 rounded-md">
-                            <p className="text-lg text-gray-400">Measured Difference</p>
-                            <p className="text-3xl font-bold text-white">{measuredDifference.toFixed(1)} mm</p>
+                        <div className="mt-4 text-center bg-gray-900 p-2 rounded-md">
+                            <p className="text-base text-gray-400">Measured Difference</p>
+                            <p className="text-2xl font-bold text-white">{measuredDifference.toFixed(1)} mm</p>
                         </div>
                     )}
                 </div>
-                <div className="gemini-dark-card p-6 rounded-lg flex flex-col justify-between">
+                <div className="gemini-dark-card p-4 rounded-lg flex flex-col justify-between">
                     <div>
-                        <h3 className="text-xl font-semibold mb-4 text-center">3. Verification</h3>
-                        <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg mb-4">Check Lateral Laxity</button>
-                        <div className="text-center bg-gray-900 p-3 rounded-md mb-6">
-                            <p className="text-lg text-gray-400">Lateral Laxity Status:</p>
-                            <p className={`text-2xl font-bold ${hasLateralLaxity ? 'text-red-400' : hasLateralLaxity === false ? 'text-green-400' : 'text-gray-500'}`}>{hasLateralLaxity ? 'Present' : hasLateralLaxity === false ? 'Absent' : 'Not Set'}</p>
+                        <h3 className="text-lg font-semibold mb-2 text-center">3. Verification</h3>
+                        <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold py-2 px-4 rounded-lg text-base mb-2">Check Lateral Laxity</button>
+                        <div className="text-center bg-gray-900 p-2 rounded-md mb-4">
+                            <p className="text-base text-gray-400">Lateral Laxity Status:</p>
+                            <p className={`text-xl font-bold ${hasLateralLaxity ? 'text-red-400' : hasLateralLaxity === false ? 'text-green-400' : 'text-gray-500'}`}>{hasLateralLaxity ? 'Present' : hasLateralLaxity === false ? 'Absent' : 'Not Set'}</p>
                         </div>
                     </div>
-                    <div className="mt-4">{renderConclusion()}</div>
+                    <div className="mt-2">{renderConclusion()}</div>
                 </div>
             </div>
-            <div className="mt-8 flex justify-between">
-                <button onClick={() => setPage('results-analysis')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition text-xl">&larr; Back to Results</button>
-                <button onClick={() => setPage('simulation')} className="gemini-dark-button font-bold py-3 px-8 rounded-lg transition text-xl">Go to Simulation &rarr;</button>
+            <div className="mt-2 text-xs text-gray-500 text-center shrink-0">
+                Ensure medial and lateral spaces are assessed accurately.
             </div>
-        </>
+            <div className="mt-4 flex justify-between shrink-0">
+                <button onClick={() => setPage('results-analysis')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition text-lg flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                    </svg>
+                    Back to Results
+                </button>
+                <button onClick={() => setPage('simulation')} className="gemini-dark-button font-bold py-2 px-6 rounded-lg transition text-lg flex items-center gap-2">
+                    Go to Simulation
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
     );
 };
 
@@ -235,20 +248,20 @@ const FunctionalAlignmentPlanner = () => {
     }, [measuredDifference]);
 
     return (
-        <>
+        <div className="flex flex-col h-full overflow-hidden">
             <LaxityCheckModal isOpen={isLaxityModalOpen} onClose={() => setIsLaxityModalOpen(false)} onSetLaxity={setHasLateralLaxity} />
-            <h2 className="text-5xl font-bold mb-6 text-center">Functional Alignment Planner</h2>
-            <div className="gemini-dark-card p-6 rounded-lg mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+            <h2 className="text-4xl font-bold mb-4 text-center shrink-0">Functional Alignment Planner</h2>
+            <div className="gemini-dark-card p-4 rounded-lg mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-center shrink-0">
                 <div>
-                    <p className="text-xl text-yellow-500">Valgus Stress Film CPAK Type</p>
-                    <p className="font-bold text-5xl text-yellow-400">CPAK {valgusResults.cpak}</p>
+                    <p className="text-lg text-yellow-500">Valgus Stress Film CPAK Type</p>
+                    <p className="font-bold text-3xl text-yellow-400">CPAK {valgusResults.cpak}</p>
                 </div>
-                <div className="border-t md:border-t-0 md:border-l border-gray-700 pt-4 md:pt-0">
-                    <p className="text-xl text-yellow-500">Recommended Femoral Valgus Cut</p>
-                    <p className="font-bold text-5xl text-yellow-400">{valgusResults.cut}</p>
+                <div className="border-t md:border-t-0 md:border-l border-gray-700 pt-2 md:pt-0">
+                    <p className="text-lg text-yellow-500">Recommended Femoral Valgus Cut</p>
+                    <p className="font-bold text-3xl text-yellow-400">{valgusResults.cut}</p>
                 </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-grow min-h-0 overflow-y-auto">
                 <div className="gemini-dark-card p-6 rounded-lg">
                     <h3 className="text-xl font-semibold mb-4 text-center">1. Assess Medial & Lateral Spaces</h3>
                     <p className="text-center text-gray-400 text-sm mb-4">Use the Robotrix+ asymetric incremental blocks.</p>
@@ -272,7 +285,7 @@ const FunctionalAlignmentPlanner = () => {
                 <div className="gemini-dark-card p-6 rounded-lg flex flex-col justify-between">
                     <div>
                         <h3 className="text-xl font-semibold mb-4 text-center">2. Determine Functional Recut</h3>
-                        <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg mb-4">Check Lateral Laxity</button>
+                        <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold py-3 px-4 rounded-lg text-lg mb-4">Check Lateral Laxity</button>
                         <div className="text-center bg-gray-800/80 p-4 rounded-lg">
                             <p className="text-2xl text-yellow-500">Functional Tibia Recut</p>
                             <p className="font-bold text-6xl text-yellow-400">{functionalRecut}</p>
@@ -287,10 +300,15 @@ const FunctionalAlignmentPlanner = () => {
                     </div>
                 </div>
             </div>
-            <div className="mt-8 flex justify-start">
-                <button onClick={() => setPage('planner-valgus-stress')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition text-xl">&larr; Back to Valgus Planner</button>
+            <div className="mt-8 flex justify-start shrink-0">
+                <button onClick={() => setPage('planner-valgus-stress')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition text-xl flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                    </svg>
+                    Back to Valgus Planner
+                </button>
             </div>
-        </>
+        </div>
     );
 }
 

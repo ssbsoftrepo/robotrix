@@ -54,15 +54,15 @@ const ResultTypeModal: React.FC<{
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
-                        className="p-4 rounded-lg border-2 border-blue-500 hover:bg-blue-900/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border-2 border-[#6D282C] hover:bg-[#6D282C]/30 transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-blue-300">Long Leg Film Result Verification</span>
+                        <span className="text-xl font-bold text-white group-hover:text-red-200">Long Leg Film Result Verification</span>
                     </button>
                     <button
                         onClick={() => onSelect('valgus-stress')}
-                        className="p-4 rounded-lg border-2 border-purple-500 hover:bg-purple-900/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border-2 border-[#8B0000] hover:bg-[#8B0000]/30 transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-purple-300">Valgus Stress Film Result Verification</span>
+                        <span className="text-xl font-bold text-white group-hover:text-red-200">Valgus Stress Film Result Verification</span>
                     </button>
                 </div>
             </div>
@@ -88,16 +88,16 @@ const ReportSelectionModal: React.FC<{
                 <div className="grid grid-cols-1 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
-                        className="p-4 rounded-lg border-2 border-blue-500 hover:bg-blue-900/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border-2 border-[#6D282C] hover:bg-[#6D282C]/30 transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-blue-300">Long Leg Film Report</span>
+                        <span className="text-xl font-bold text-white group-hover:text-red-200">Long Leg Film Report</span>
                         <span className="text-sm text-gray-400">Standard varus knee analysis</span>
                     </button>
                     <button
                         onClick={() => onSelect('valgus-stress')}
-                        className="p-4 rounded-lg border-2 border-purple-500 hover:bg-purple-900/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border-2 border-[#8B0000] hover:bg-[#8B0000]/30 transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-purple-300">Valgus Stress Film Report</span>
+                        <span className="text-xl font-bold text-white group-hover:text-red-200">Valgus Stress Film Report</span>
                         <span className="text-sm text-gray-400">Valgus knee specific planning</span>
                     </button>
                 </div>
@@ -186,7 +186,12 @@ const PlanSelectionModal: React.FC<{
                                             </span>
                                         </div>
                                     </div>
-                                    <span className="text-indigo-400 opacity-0 group-hover:opacity-100 transition">Load &rarr;</span>
+                                    <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+                                        Load
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </span>
                                 </button>
                             ))
                         )}
@@ -205,14 +210,14 @@ const PlanSelectionModal: React.FC<{
                         />
 
                         <div className="flex space-x-3">
-                            <button onClick={handleCreate} disabled={!newPlanName.trim()} className="flex-1 gemini-dark-button font-bold py-3 rounded disabled:opacity-50">Create Plan</button>
+                            <button onClick={handleCreate} disabled={!newPlanName.trim()} className="flex-1 bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold py-3 rounded disabled:opacity-50">Create Plan</button>
                             <button onClick={() => setIsCreating(false)} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded">Cancel</button>
                         </div>
                     </div>
                 )}
 
                 {!isCreating && !loading && intent === 'load' && (
-                    <button onClick={() => setIsCreating(true)} className="w-full gemini-dark-button font-bold py-3 px-6 rounded-lg">+ Create New Plan</button>
+                    <button onClick={() => setIsCreating(true)} className="w-full bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105">+ Create New Plan</button>
                 )}
             </div>
         </div>
@@ -422,7 +427,8 @@ const CaseManagementPage: React.FC = () => {
     const isPatientSelected = !!currentPatientId;
     const isPlanSelected = !!currentPlanId;
 
-    const plannerColors = ['#3B82F6', '#A855F7', '#14B8A6', '#F59E0B', '#EC4899', '#64748B'];
+    // Standardized to Maroon palettes
+    const plannerColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C'];
 
     const planners: {
         page: string;
@@ -485,7 +491,14 @@ const CaseManagementPage: React.FC = () => {
         <div className="mt-10">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-3xl font-semibold">Past Cases</h3>
-                <button onClick={() => setView('main')} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition text-lg">&larr; Back to Planner</button>
+                <button onClick={() => setView('main')} className="gemini-dark-button font-bold py-2 px-4 rounded-md transition text-sm flex items-center space-x-2">
+                    <span className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                        Back to Planner
+                    </span>
+                </button>
             </div>
             <div className="space-y-4">
                 {patients.length === 0 ? (
@@ -500,7 +513,7 @@ const CaseManagementPage: React.FC = () => {
                             <div className="flex space-x-4 mt-4 md:mt-0">
                                 <button onClick={() => selectPatient(p.id)} className="gemini-dark-button font-bold text-lg py-3 px-6 rounded-lg">Load Case</button>
                                 <button onClick={() => handleResultClick(p.id)} className="bg-gray-600 hover:bg-gray-700 font-bold text-lg py-3 px-6 rounded-lg">Result</button>
-                                <button onClick={() => handleReportClick(p.id)} className="bg-indigo-600 hover:bg-indigo-700 font-bold text-lg py-3 px-6 rounded-lg">Report</button>
+                                <button onClick={() => handleReportClick(p.id)} className="bg-gray-600 hover:bg-gray-700 font-bold text-lg py-3 px-6 rounded-lg">Report</button>
                             </div>
                         </div>
                     ))
@@ -510,7 +523,7 @@ const CaseManagementPage: React.FC = () => {
     );
 
     return (
-        <div>
+        <div className="h-full overflow-y-auto">
             {/* Modal for Legacy Flows */}
             <LdfaModeModal
                 isOpen={isLdfaModalOpen}
@@ -581,17 +594,17 @@ const CaseManagementPage: React.FC = () => {
                         </div>
 
                         {/* Box 2: Implant Thickness */}
-                        <div className="bg-[#1e293b] p-4 rounded-xl border border-indigo-500 w-full shadow-2xl">
-                            <h3 className="text-xl font-bold text-indigo-200 mb-4 text-center">2. Select minimum composite thickness</h3>
+                        <div className="bg-[#1e1e1e] p-4 rounded-xl border border-gray-600 w-full shadow-2xl">
+                            <h3 className="text-xl font-bold text-gray-200 mb-4 text-center">2. Select minimum composite thickness</h3>
                             <div className="grid grid-cols-4 gap-4">
                                 {[18, 19, 20, 21].map(thickness => (
                                     <button
                                         key={thickness}
                                         onClick={() => setTempThickness(thickness)}
-                                        className={`h-20 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${tempThickness === thickness ? 'border-indigo-400 bg-indigo-500/30 ring-1 ring-indigo-400' : 'border-indigo-800 bg-indigo-900/20 hover:bg-indigo-800/40'}`}
+                                        className={`h-20 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${tempThickness === thickness ? 'border-[#6D282C] bg-[#6D282C]/30 ring-1 ring-[#6D282C]' : 'border-gray-600 bg-gray-800/20 hover:bg-gray-800/40'}`}
                                     >
                                         <span className="text-3xl font-bold text-white">{thickness}</span>
-                                        <span className="text-sm text-indigo-300">mm</span>
+                                        <span className="text-sm text-red-400">mm</span>
                                     </button>
                                 ))}
                             </div>
@@ -601,7 +614,7 @@ const CaseManagementPage: React.FC = () => {
                             <button
                                 disabled={!tempLdfa || !tempThickness}
                                 onClick={handleLongLegConfigConfirm}
-                                className="gemini-dark-button font-bold text-2xl py-5 px-20 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:scale-105"
+                                className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Start Planning
                             </button>
@@ -670,7 +683,7 @@ const CaseManagementPage: React.FC = () => {
                                 <div className="md:col-span-3 w-full">
                                     <button
                                         type="submit"
-                                        className="gemini-dark-button font-bold h-14 rounded-lg text-lg w-full"
+                                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105 w-full"
                                     >
                                         {isPatientSelected ? 'Update Details' : 'Save Details'}
                                     </button>

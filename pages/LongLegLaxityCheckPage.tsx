@@ -163,14 +163,14 @@ const LongLegLaxityCheckPage: React.FC = () => {
         'Severe lateral laxity',
     ];
 
-    const laxityColors = ['#22C55E', '#3B82F6', '#F97316', '#EF4444']; // Green, Blue, Orange, Red
+    const laxityColors = ['#EF4444', '#EF4444', '#EF4444', '#EF4444']; // Green, Blue, Orange, Red
 
     return (
-        <div className="flex flex-col h-full p-2">
+        <div className="flex flex-col h-full p-2 overflow-hidden">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-3xl font-bold text-gray-100">Check for Lateral Laxity (Long Leg)</h2>
                 <div className="flex space-x-4">
-                    <button onClick={handleSkip} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg text-md flex items-center transition shadow">
+                    <button onClick={handleSkip} className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-semibold py-2 px-5 rounded-lg text-md flex items-center transition shadow">
                         <span>Skip to Planner</span>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />

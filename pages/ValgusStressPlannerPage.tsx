@@ -12,9 +12,9 @@ const landmarkInstructions = {
 
 
 const LANDMARK_COLORS = {
-    jointLine: '#800000',
-    femurAnatomicAxis: '#9400D3',
-    tibiaAnatomicAxis: '#008080',
+    jointLine: '#6D282C',      // Maroon
+    femurAnatomicAxis: '#6D282C', // Brown/Red
+    tibiaAnatomicAxis: '#6D282C', // Firebrick
 };
 
 const HANDLE_RADIUS = 6;
@@ -381,7 +381,7 @@ const CameraModal: React.FC<{ isOpen: boolean; onClose: () => void; onCapture: (
                         <div className="mt-4 flex justify-center space-x-4">
                             <button onClick={handleCropSave} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Finalize Crop</button>
                             <button onClick={() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); }} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Retake</button>
-                            <button onClick={handleClose} className="bg-red-900 hover:bg-red-800 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
+                            <button onClick={handleClose} className="bg-[#5D4037] hover:bg-[#3E2723] text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
                         </div>
                     </>
                 )}
@@ -413,7 +413,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
     const [activeInstruction, setActiveInstruction] = useState<string[] | null>(null);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
-    const [showMetrics, setShowMetrics] = useState(false);
+    // const [showMetrics, setShowMetrics] = useState(false); // REMOVED: Metrics always visible
     const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
 
     const imageRef = useRef<HTMLImageElement>(null);
@@ -1055,7 +1055,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     }, [handleMouseMove, handleMouseUp, handlePipMove, handlePipEnd, handleTouchMove, handleTouchEnd]);
 
     return (
-        <div className="flex flex-col h-full gap-4">
+        <div className="flex flex-col h-full gap-4 overflow-y-auto">
             {isCameraOpen && (
                 <CameraModal
                     isOpen={isCameraOpen}
@@ -1113,7 +1113,7 @@ const ValgusStressPlannerPage: React.FC = () => {
                                         ref={imageRef}
                                         src={valgusImageSrc}
                                         alt="Valgus Stress X-ray"
-                                        className="block"
+                                        className="block mix-blend-screen"
                                         onLoad={() => {
                                             const image = imageRef.current;
                                             const canvas = canvasRef.current;
@@ -1219,56 +1219,48 @@ const ValgusStressPlannerPage: React.FC = () => {
 
                     <hr className="border-gray-700" />
 
+                    {/* METRICS (Always Visible) */}
+                    <section>
+                        <h4 className="text-lg font-semibold mb-3 text-gray-200">Metrics</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                            <MetricItem label="Obliquity" value={`${valgusResults.obliquity?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="LDFA" value={`${valgusResults.ldfa?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="MPTA" value={`${valgusResults.mpta?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="aHKA" value={`${valgusResults.ahka?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="JLO" value={`${valgusResults.jlo?.toFixed(1) ?? '--'}°`} />
+                            <MetricItem label="CPAK" value={valgusResults.cpak} />
+                        </div>
+                    </section>
+
                     {/* STEP 3: Landmarks */}
                     <section>
-                        <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-sm font-semibold text-gray-300">Landmarks</h3>
-                            <button
-                                onClick={() => setShowMetrics(!showMetrics)}
-                                className={`flex items-center gap-1.5 px-2 py-1 rounded border transition-all duration-300 ${showMetrics
-                                    ? 'bg-[#6D282C] border-[#8a3338] text-white shadow-[0_0_8px_rgba(109,40,44,0.4)]'
-                                    : 'bg-transparent border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300'
-                                    }`}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                <span className="text-[10px] font-bold uppercase tracking-wider">Metrics</span>
-                            </button>
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-lg font-semibold text-gray-200">Landmarks</h3>
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3 mb-2">
                             {Object.entries(landmarkInstructions).map(([key, value]) => {
                                 const isSelected = visibleLandmarkSets.has(key);
                                 return (
                                     <button
                                         key={key}
                                         onClick={() => toggleLandmarkSet(key as any)}
-                                        className={`w-full py-1.5 text-xs rounded border ${isSelected ? 'bg-[#6D282C]' : 'border-gray-600 hover:bg-gray-700'}`}
+                                        className={`w-full py-2 px-2 text-sm font-semibold rounded-lg border transition-all ${isSelected
+                                            ? 'bg-[#6D282C] border-[#8a3338] text-white shadow-md transform scale-105'
+                                            : 'border-gray-600 hover:bg-gray-700 text-gray-300'
+                                            }`}
                                     >
                                         {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                     </button>
                                 )
                             })}
                         </div>
-                        <button onClick={handleResetAll} className="mt-2 w-full py-1.5 text-xs rounded bg-gray-600 hover:bg-gray-700">
+                        <button
+                            onClick={handleResetAll}
+                            className="mt-2 w-full py-2.5 text-sm font-bold rounded bg-gray-600 hover:bg-gray-700 transition"
+                        >
                             Reset All
                         </button>
                     </section>
-
-                    {/* METRICS (Toggled) */}
-                    {showMetrics && (
-                        <section>
-                            <h4 className="text-md font-semibold mb-2">Metrics</h4>
-                            <div className="grid grid-cols-2 gap-2">
-                                <MetricItem label="Obliquity" value={`${valgusResults.obliquity?.toFixed(1) ?? '--'}°`} />
-                                <MetricItem label="LDFA" value={`${valgusResults.ldfa?.toFixed(1) ?? '--'}°`} />
-                                <MetricItem label="MPTA" value={`${valgusResults.mpta?.toFixed(1) ?? '--'}°`} />
-                                <MetricItem label="aHKA" value={`${valgusResults.ahka?.toFixed(1) ?? '--'}°`} />
-                                <MetricItem label="JLO" value={`${valgusResults.jlo?.toFixed(1) ?? '--'}°`} />
-                                <MetricItem label="CPAK" value={valgusResults.cpak} />
-                            </div>
-                        </section>
-                    )}
 
                     {/* INSTRUCTIONS */}
                     <section className="bg-gray-900/50 p-3 rounded border border-gray-700">

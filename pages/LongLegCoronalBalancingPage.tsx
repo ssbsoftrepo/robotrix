@@ -34,48 +34,45 @@ const LongLegCoronalBalancingPage: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}
             <div className="flex justify-between items-center mb-2 no-print shrink-0">
                 <h2 className="text-4xl font-bold text-gray-100">Coronal Balancing screen (Long Leg)</h2>
-                <button onClick={() => setPage('results-analysis')} className="gemini-dark-button font-bold py-1 px-3 rounded-md transition text-sm flex items-center space-x-2">
+                <button onClick={() => setPage('results-analysis')} className="gemini-dark-button font-bold py-2 px-4 rounded-md transition text-sm flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     <span>Back</span>
                 </button>
             </div>
 
-            <div className="flex flex-col lg:flex-row flex-grow gap-2 min-h-0">
-                {/* Column 1: Instructions & Block Upload (1/4 Width) */}
-                <div className="w-full lg:w-1/4 gemini-dark-card p-3 rounded-lg flex flex-col items-start text-left overflow-y-auto">
-                    <div className="w-full">
-                        <span className="inline-block px-3 py-1 rounded-full text-sm font-bold mb-4 bg-yellow-600 text-black shadow-lg shadow-yellow-900/50 float-left">STEP 4 &gt;</span>
-                    </div>
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
+                {/* Column 1: Instructions & Block Upload (Span 1) */}
+                <div className="h-full flex flex-col overflow-hidden">
+                    <div className="gemini-dark-card p-3 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
+                        <div className="w-full shrink-0">
+                            <span className="inline-block px-3 py-1 rounded-full text-sm font-bold mb-4 bg-[#6D282C] text-white shadow-lg shadow-maroon-900/50 float-left">STEP 4 &gt;</span>
+                        </div>
 
-                    <p className="font-bold text-gray-100 mb-4 text-lg leading-snug w-full text-center">
-                        Use <span className="text-cyan-400">Robotrix+ AI blocks</span> (Asymmetrical Incremental blocks) To guage lateral and medial extension gaps
-                    </p>
+                        <p className="font-bold text-gray-100 mb-4 text-lg leading-snug w-full text-center shrink-0">
+                            Use <span className="text-cyan-400">Robotrix+ AI blocks</span> (Asymmetrical Incremental blocks) To guage lateral and medial extension gaps
+                        </p>
 
-                    <div
-                        className="w-full aspect-square max-h-[300px] rounded-lg flex items-center justify-center relative overflow-hidden mb-4 self-center border border-gray-700 bg-black"
-                    >
-                        <img src="/leftside.jpeg" alt="AI Block Reference" className="w-full h-full object-contain" />
-                    </div>
+                        <div className="w-full aspect-square max-h-[300px] rounded-lg flex items-center justify-center relative overflow-hidden mb-4 self-center border border-gray-700 bg-black shrink-0">
+                            <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain" />
+                        </div>
 
-                    <div className="mt-auto bg-gray-800/80 p-3 rounded-xl w-full border border-gray-700 shadow-lg text-center">
-                        <p className="text-gray-400 text-xs mb-1 uppercase tracking-wider font-semibold">Implant Thickness Chosen</p>
-                        <p className="text-3xl font-extrabold text-white">{thickness} <span className="text-sm text-gray-500">mm</span></p>
+                        <div className="mt-auto bg-gray-800/80 p-3 rounded-xl w-full border border-gray-700 shadow-lg text-center shrink-0">
+                            <p className="text-gray-400 text-xs mb-1 uppercase tracking-wider font-semibold">Implant Thickness Chosen</p>
+                            <p className="text-3xl font-extrabold text-white">{thickness} <span className="text-sm text-gray-500">mm</span></p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Column 2: Image & Overlays (2/4 Width) */}
-                <div className="w-full lg:w-2/4 flex flex-col gap-4">
-                    <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-transparent overflow-hidden">
-                        <div
-                            className="absolute inset-0 flex items-center justify-center z-0"
-                        >
-                            <img src="/center.jpeg" alt="Knee View Reference" className="w-full h-full object-contain" />
+                {/* Column 2: Image & Overlays (Span 1) */}
+                <div className="h-full flex flex-col gap-2 overflow-hidden">
+                    <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-transparent overflow-hidden rounded-xl border border-gray-800">
+                        <div className="absolute inset-0 flex items-center justify-center z-0">
+                            <img src="/center.png" alt="Knee View Reference" className="w-full h-full object-contain" />
                         </div>
-
 
                         {/* Overlay Container - Centered Vertically */}
                         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-4 flex justify-between pointer-events-none z-10 w-full items-center">
@@ -108,9 +105,9 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                                 <p className="text-lg text-gray-100 font-bold mb-2 shadow-black drop-shadow-lg">
                                     Medial Gap
                                 </p>
-                                <div className="w-24 h-24 rounded-full border-4 border-yellow-500 bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.6)] backdrop-blur-sm mr-2">
-                                    <span className="text-3xl font-bold text-yellow-400">{anticipatedMedialGap}</span>
-                                    <span className="text-xs text-yellow-600 font-bold mt-[-2px]">mm</span>
+                                <div className="w-24 h-24 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm ml-2">
+                                    <span className="text-3xl font-bold text-gray-100">{anticipatedMedialGap}</span>
+                                    <span className="text-xs text-gray-300 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
 
@@ -121,7 +118,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     <div className="gemini-dark-card p-2 rounded-lg flex items-center justify-between border border-gray-700 shrink-0">
                         <button
                             onClick={() => setPage('planner-long-leg-laxity-check')}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm shadow-lg"
+                            className="bg-[#6D282C] hover:bg-[#5a2023] text-white font-bold py-2 px-4 rounded-lg transition text-sm shadow-lg"
                         >
                             Check Lateral Laxity
                         </button>
@@ -134,35 +131,35 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Column 3: Flowchart Logic (1/4 Width) */}
-                <div className="w-full lg:w-1/4 flex flex-col gap-2 min-h-0">
-                    {/* Right Path (Green) */}
-                    <div className="bg-[#064e3b]/30 border-2 border-[#059669]/50 rounded-xl p-3 flex flex-col items-center text-center relative overflow-hidden shadow-lg hover:bg-[#064e3b]/40 transition-colors flex-1 min-h-0 shrink">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-[#10b981]"></div>
-                        <div className="w-8 h-8 rounded-full bg-[#10b981] text-black flex items-center justify-center font-bold text-lg mb-2 shadow-[0_0_10px_#10b981] shrink-0">✓</div>
-                        <h4 className="text-lg font-extrabold text-[#6ee7b7] mb-2 leading-tight">Medial gap matches anticipated gap</h4>
+                {/* Column 3: Flowchart Logic (Span 1) */}
+                <div className="h-full flex flex-col gap-2 min-h-0">
+                    {/* Right Path (Verification Success) */}
+                    <div className="bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-3 flex flex-col items-center text-center relative overflow-hidden shadow-lg hover:bg-[#2a2a2a] transition-colors flex-1 min-h-0 shrink">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
+                        <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-lg mb-2 shadow-[0_0_10px_#6D282C] shrink-0">✓</div>
+                        <h4 className="text-lg font-extrabold text-red-100 mb-2 leading-tight">Medial gap matches anticipated gap</h4>
                         <div className="flex-grow flex items-center justify-center w-full min-h-0">
-                            <div className="bg-black/40 p-3 rounded-lg border border-[#10b981]/30 w-full backdrop-blur-md">
-                                <p className="text-base text-white font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
+                            <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md">
+                                <p className="text-base text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Wrong Path (Red) */}
-                    <div className="bg-[#7f1d1d]/30 border-2 border-[#dc2626]/50 rounded-xl p-3 flex flex-col items-center text-center relative overflow-hidden shadow-lg hover:bg-[#7f1d1d]/40 transition-colors flex-1 min-h-0 shrink">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-[#ef4444]"></div>
-                        <div className="w-8 h-8 rounded-full bg-[#ef4444] text-white flex items-center justify-center font-bold text-lg mb-2 shadow-[0_0_10px_#ef4444] shrink-0">✕</div>
-                        <h4 className="text-lg font-extrabold text-[#fca5a5] mb-2 leading-tight">Medial gap does not match anticipated gap</h4>
+                    {/* Wrong Path (Red/Maroon) */}
+                    <div className="bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-3 flex flex-col items-center text-center relative overflow-hidden shadow-lg hover:bg-[#2a2a2a] transition-colors flex-1 min-h-0 shrink">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
+                        <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-lg mb-2 shadow-[0_0_10px_#6D282C] shrink-0">✕</div>
+                        <h4 className="text-lg font-extrabold text-red-100 mb-2 leading-tight">Medial gap does not match anticipated gap</h4>
                         <div className="flex-grow flex flex-col gap-2 justify-center w-full min-h-0">
-                            <div className="bg-black/40 p-2 rounded-lg border border-[#ef4444]/30 backdrop-blur-md hover:border-[#ef4444]/60 transition-colors">
+                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
                                 <p className="text-red-100 text-sm font-bold">Consider error on 90 deg tibial cut</p>
                             </div>
                             <div className="flex items-center justify-center gap-2 shrink-0">
-                                <div className="h-px bg-gray-500 flex-grow"></div>
+                                <div className="h-px bg-gray-600 flex-grow"></div>
                                 <div className="text-gray-400 font-bold text-xs uppercase">OR</div>
-                                <div className="h-px bg-gray-500 flex-grow"></div>
+                                <div className="h-px bg-gray-600 flex-grow"></div>
                             </div>
-                            <div className="bg-black/40 p-2 rounded-lg border border-[#ef4444]/30 backdrop-blur-md hover:border-[#ef4444]/60 transition-colors">
+                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
                                 <p className="text-red-100 text-sm font-bold">Consider Pre op lateral laxity</p>
                             </div>
                         </div>
@@ -173,7 +170,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
             <div className="mt-2 flex justify-end pb-2 shrink-0">
                 <button
                     onClick={handleProceed}
-                    className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-xl py-2 px-8 rounded-full shadow-xl transition transform hover:scale-105"
+                    className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105"
                 >
                     Proceed Functional Tibial Cut
                 </button>

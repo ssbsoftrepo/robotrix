@@ -114,7 +114,7 @@ const App: React.FC = () => {
                 )}
             </header>
             <div className="flex flex-grow">
-                <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+                <main className="flex-1 p-4 md:p-8 overflow-hidden relative flex flex-col">
                     {renderPage()}
                 </main>
             </div>
