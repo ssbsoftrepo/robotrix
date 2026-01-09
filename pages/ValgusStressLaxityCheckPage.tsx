@@ -42,7 +42,7 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, i
                     <img src={imageSrc} alt={`Reference for ${level}`} className="absolute inset-0 w-full h-full object-contain" />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <p className="text-gray-600 italic text-sm px-4 text-center">No Reference Image</p>
+                        <p className="text-gray-500 italic text-sm px-4 text-center">No Reference Image</p>
                     </div>
                 )}
             </div>

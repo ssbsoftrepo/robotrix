@@ -332,7 +332,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                                 </h3>
                             </div>
                             <div className="p-1 flex-grow flex flex-col justify-evenly items-center h-full overflow-hidden relative z-10">
-                                <p className="text-center text-gray-600 text-[10px] mb-0 shrink-0">Click block to simulate</p>
+                                <p className="text-center text-gray-500 text-[10px] mb-0 shrink-0">Click block to simulate</p>
 
                                 {/* 0 Degree Neutral Cut Button */}
                                 <div className="flex-1 w-full flex items-center justify-center mb-1">

@@ -463,24 +463,24 @@ const SimulationPage: React.FC = () => {
                         </label>
                     </div>
                     <div className="bg-black/40 p-3 rounded-md text-center border border-[#333333] relative z-10">
-                        <p className="text-sm text-gray-500">Pre-Op mHKA</p>
+                        <p className="text-sm text-gray-400">Pre-Op mHKA</p>
                         <p className="font-bold text-2xl text-gray-100">{longLegResults.mhka?.toFixed(1) ?? '--'}°</p>
                     </div>
                     <div className="relative z-10">
                         <label className="block text-sm font-semibold mb-2 text-gray-400">Femoral Valgus Cut</label>
                         <div className="flex items-center space-x-2">
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">-</button>
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">-</button>
                             <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => setFemoralCutSim(parseFloat(e.target.value))} className="w-full p-1.5 rounded-md text-center text-xl font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">+</button>
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">+</button>
                         </div>
                         <button onClick={() => setAppliedFemoralCutSim(femoralCutSim)} className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-2 px-4 rounded-lg w-full text-base mt-2 transition">Apply Femoral Cut</button>
                     </div>
                     <div className="relative z-10">
                         <label className="block text-sm font-semibold mb-2 text-gray-400">Tibial Varus Cut</label>
                         <div className="flex items-center space-x-2">
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">-</button>
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">-</button>
                             <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => setTibialCutSim(parseFloat(e.target.value))} className="w-full p-1.5 rounded-md text-center text-xl font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">+</button>
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">+</button>
                         </div>
                         <button onClick={() => setAppliedTibialCutSim(tibialCutSim)} className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-2 px-4 rounded-lg w-full text-base mt-2 transition">Apply Tibial Cut</button>
                     </div>

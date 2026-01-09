@@ -55,7 +55,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
             </div>
 
             {/* Footer */}
-            <div className="absolute bottom-8 text-gray-600 text-sm font-medium tracking-wider uppercase">
+            <div className="absolute bottom-8 text-gray-500 text-sm font-medium tracking-wider uppercase">
                 Powered by PLUS Orthopedics
             </div>
 
