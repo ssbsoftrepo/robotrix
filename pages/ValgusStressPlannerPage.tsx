@@ -323,10 +323,14 @@ const CameraModal: React.FC<{
   );
 };
 
-const MetricItem: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-  <div className="flex flex-col justify-center items-center bg-gray-800/80 p-1 rounded-lg text-center h-full">
-    <p className="text-xs text-gray-400">{label}</p>
-    <p className="font-bold text-lg text-gray-100">{value}</p>
+const MetricItem: React.FC<{ label: string; value: string | number; highlight?: boolean }> = ({ label, value, highlight }) => (
+  <div className={`relative flex flex-col justify-center items-center p-2 rounded-lg text-center h-full overflow-hidden transition-all
+      ${highlight
+      ? 'bg-[#6D282C]/20 border-2 border-[#6D282C]'
+      : 'bg-[#1a1a1a] border border-[#333333]'}`}>
+    <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
+    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-medium relative z-10">{label}</p>
+    <p className={`font-bold text-xl relative z-10 font-mono ${highlight ? 'text-[#ff8fa3]' : 'text-gray-100'}`}>{value}</p>
   </div>
 );
 
@@ -980,7 +984,11 @@ const ValgusStressPlannerPage: React.FC = () => {
   }, [handleMouseMove, handleMouseUp, handlePipMove, handlePipEnd, handleTouchMove, handleTouchEnd]);
 
   return (
-    <div className="flex flex-col h-full gap-4 overflow-y-auto">
+    <div className="relative flex flex-col h-full gap-4 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+      {/* Cinematic Lighting */}
+      <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
+
       {isCameraOpen && (
         <CameraModal
           isOpen={isCameraOpen}
@@ -989,22 +997,30 @@ const ValgusStressPlannerPage: React.FC = () => {
         />
       )}
 
-      <h2 className="text-4xl font-bold text-start">Valgus Stress Film CPAK Planner</h2>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pt-4 relative z-10">
+        <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tight">Valgus Stress Film CPAK Planner</h2>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span className="w-2 h-2 rounded-full bg-[#6D282C] animate-pulse" />
+          <span>Active Workspace</span>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-4 flex-grow min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-4 flex-grow min-h-0 px-4 relative z-10">
 
-        {/* ================= LEFT : XRAY VIEWER (70%) ================= */}
-        <div className="gemini-dark-card rounded-lg relative overflow-hidden h-[calc(100vh-180px)] flex items-center justify-center">
+        {/* LEFT: X-Ray Canvas (75%) */}
+        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-200px)] flex items-center justify-center">
+          <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
           {zoom > 1 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg animate-pulse">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg animate-pulse">
               Reset zoom to mark the markings
             </div>
           )}
 
           <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-            <button onClick={zoomIn} className="bg-black/70 px-3 py-1 rounded"> ＋ </button>
-            <button onClick={zoomOut} className="bg-black/70 px-3 py-1 rounded"> － </button>
-            <button onClick={resetZoom} className="bg-black/70 px-2 py-1 rounded text-xs">
+            <button onClick={zoomIn} className="bg-[#252525] border border-[#333333] hover:bg-[#333333] px-3 py-1 rounded text-gray-300"> ＋ </button>
+            <button onClick={zoomOut} className="bg-[#252525] border border-[#333333] hover:bg-[#333333] px-3 py-1 rounded text-gray-300"> － </button>
+            <button onClick={resetZoom} className="bg-[#252525] border border-[#333333] hover:bg-[#333333] px-2 py-1 rounded text-xs text-gray-300">
               Reset
             </button>
           </div>
@@ -1077,55 +1093,55 @@ const ValgusStressPlannerPage: React.FC = () => {
                   ref={pipViewerRef}
                   onMouseDown={handlePipStart}
                   onTouchStart={handlePipStart}
-                  className="absolute w-40 h-40 rounded-full border-2 border-dark-maroon bg-black shadow-lg cursor-grab touch-none"
+                  className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none"
                   style={{ top: pipPosition.y, left: pipPosition.x }}
                 >
                   <canvas
                     ref={pipCanvasRef}
-                    width={160}
-                    height={160}
+                    width={176}
+                    height={176}
                     className="rounded-full"
                   />
+                  <div className="absolute inset-0 rounded-full border-2 border-cyan-400/30 pointer-events-none" />
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* ================= RIGHT : CONTROLS + INSTRUCTIONS + METRICS (30%) ================= */}
-        <div className="gemini-dark-card rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-180px)]">
+        {/* RIGHT: Control & Instrument Panel (25%) */}
+        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-200px)]">
+          <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
-          {/* STEP 1: Upload */}
-          <section>
-            <h3 className="text-lg font-semibold mb-2 text-gray-300">Upload X-ray</h3>
+          {/* Upload Section */}
+          <section className="relative z-10">
+            <h3 className="text-sm font-semibold mb-2 text-gray-400 uppercase tracking-wider">Upload X-ray</h3>
             <div className="grid grid-cols-2 gap-2">
-              <label htmlFor="xray-upload" className="cursor-pointer text-center py-2 rounded bg-gray-700 hover:bg-[#6D282C]">
-                File
+              <label htmlFor="xray-upload" className="cursor-pointer text-center py-3 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-sm font-medium text-gray-300">
+                <span>📁 File</span>
               </label>
               <input type="file" id="xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
-              <button onClick={() => setIsCameraOpen(true)} className="py-2 rounded bg-gray-700 hover:bg-[#6D282C]">
-                Camera
+              <button onClick={() => setIsCameraOpen(true)} className="py-3 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-sm font-medium text-gray-300">
+                📷 Camera
               </button>
             </div>
-            <p className="text-xs text-gray-400 mt-1 truncate">{fileName}</p>
+            <p className="text-xs text-gray-500 mt-2 truncate">{fileName}</p>
           </section>
 
-          <hr className="border-gray-700" />
-
-          {/* STEP 2: Leg Side */}
-          <section>
-            <div className="bg-gray-800 p-2 rounded-lg flex items-center justify-between mb-2">
-              <span className="text-gray-400 font-medium text-xs">Leg Side</span>
-              <div className="flex bg-gray-700 rounded-lg p-0.5">
+          {/* Leg Side Toggle */}
+          <section className="relative z-10">
+            <div className="bg-[#252525] p-3 rounded-lg border border-[#333333] flex items-center justify-between">
+              <span className="text-gray-400 font-medium text-xs uppercase tracking-wider">Leg Side</span>
+              <div className="flex bg-[#1a1a1a] rounded-lg p-0.5 border border-[#333333]">
                 <button
                   onClick={() => setLegSide('left')}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                  className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
                 >
                   LEFT
                 </button>
                 <button
                   onClick={() => setLegSide('right')}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
+                  className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}
                 >
                   RIGHT
                 </button>
@@ -1133,62 +1149,67 @@ const ValgusStressPlannerPage: React.FC = () => {
             </div>
           </section>
 
-          <hr className="border-gray-700" />
-
-          {/* METRICS (Always Visible) */}
-          <section>
-            <h4 className="text-lg font-semibold mb-3 text-gray-200">Metrics</h4>
-            <div className="grid grid-cols-2 gap-3">
+          {/* Metrics Grid */}
+          <section className="relative z-10">
+            <h4 className="text-sm font-semibold mb-3 text-gray-400 uppercase tracking-wider">Calculated Metrics</h4>
+            <div className="grid grid-cols-2 gap-2">
               <MetricItem label="Obliquity" value={`${valgusResults.obliquity?.toFixed(1) ?? '--'}°`} />
               <MetricItem label="LDFA" value={`${valgusResults.ldfa?.toFixed(1) ?? '--'}°`} />
               <MetricItem label="MPTA" value={`${valgusResults.mpta?.toFixed(1) ?? '--'}°`} />
-              <MetricItem label="aHKA" value={`${valgusResults.ahka?.toFixed(1) ?? '--'}°`} />
-              <MetricItem label="JLO (Sum)" value={`${valgusResults.jlo?.toFixed(1) ?? '--'}°`} />
-              <MetricItem label="CPAK" value={valgusResults.cpak} />
+              <MetricItem label="aHKA" value={`${valgusResults.ahka?.toFixed(1) ?? '--'}°`} highlight />
+              <MetricItem label="JLO" value={`${valgusResults.jlo?.toFixed(1) ?? '--'}°`} />
+              <MetricItem label="CPAK" value={valgusResults.cpak} highlight />
             </div>
           </section>
 
-          {/* STEP 3: Landmarks */}
-          <section>
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold text-gray-200">Landmarks</h3>
+          {/* Landmark Stepper Cards */}
+          <section className="relative z-10">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Workflow Steps</h3>
             </div>
-            <div className="grid grid-cols-2 gap-3 mb-2">
-              {Object.entries(landmarkInstructions).map(([key, value]) => {
+            <div className="flex flex-col gap-2 mb-3">
+              {Object.entries(landmarkInstructions).map(([key, value], idx) => {
                 const isSelected = visibleLandmarkSets.has(key);
                 return (
                   <button
                     key={key}
                     onClick={() => toggleLandmarkSet(key as any)}
-                    className={`w-full py-2 px-2 text-sm font-semibold rounded-lg border transition-all ${isSelected
-                      ? 'bg-[#6D282C] border-[#8a3338] text-white shadow-md transform scale-105'
-                      : 'border-gray-600 hover:bg-gray-700 text-gray-300'
-                      }`}
+                    className={`group relative w-full py-3 px-4 text-sm font-semibold rounded-lg border transition-all text-left flex items-center gap-3
+                      ${isSelected
+                        ? 'bg-gradient-to-r from-[#6D282C] to-[#893338] border-[#a04046] text-white shadow-[0_0_20px_rgba(109,40,44,0.3)]'
+                        : 'bg-[#252525] border-[#333333] hover:bg-[#333333] hover:border-[#6D282C]/50 text-gray-300'}`}
                   >
-                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all
+                      ${isSelected ? 'bg-white text-[#6D282C] border-white' : 'bg-transparent border-gray-500 text-gray-500'}`}>
+                      {isSelected ? '✓' : idx + 1}
+                    </span>
+                    <span>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
                   </button>
                 )
               })}
             </div>
             <button
               onClick={handleResetAll}
-              className="mt-2 w-full py-2.5 text-sm font-bold rounded bg-gray-600 hover:bg-gray-700 transition"
+              className="w-full py-2.5 text-sm font-bold rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] text-gray-400 hover:text-white transition-all"
             >
               Reset All
             </button>
           </section>
 
-          {/* INSTRUCTIONS */}
-          <section className="bg-gray-900/50 p-3 rounded border border-gray-700">
-            <h4 className="text-md font-semibold text-yellow-300 mb-1">Instructions</h4>
+          {/* Instructions Panel */}
+          <section className="relative z-10 bg-[#252525]/50 p-3 rounded-lg border border-[#333333]">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-1 h-4 bg-cyan-400 rounded-full" />
+              <h4 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
+            </div>
             {activeInstruction ? (
-              <ul className="list-disc list-inside space-y-1 text-sm">
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
                 {activeInstruction.map((i, idx) => (
                   <li key={idx}>{i}</li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-400">Select a landmark to begin</p>
+              <p className="text-sm text-gray-500">Select a workflow step to begin</p>
             )}
           </section>
 
@@ -1217,14 +1238,28 @@ const ValgusStressPlannerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* FOOTER ACTION */}
-      <div className="flex justify-end">
+      {/* Footer Action */}
+      <div className="flex justify-end px-4 pb-4 relative z-10">
         <button
           onClick={() => setPage('planner-valgus-stress-results')}
           disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
-          className="gemini-dark-button px-8 py-3 text-lg"
-        >
-          Go to Analysis & Results
+          className={`group relative py-3 px-8 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
+            ${(!valgusResults.cpak || valgusResults.cpak === '--')
+              ? 'bg-[#252525] border border-[#333333] text-gray-500 cursor-not-allowed'
+              : 'bg-[#6D282C] border border-[#893338] shadow-[0_4px_20px_rgba(109,40,44,0.4)] hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98]'}`}>
+          <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+          <span className={`relative text-lg font-bold tracking-wider ${(!valgusResults.cpak || valgusResults.cpak === '--') ? 'text-gray-500' : 'text-white'}`}>
+            GO TO ANALYSIS & RESULTS
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" className="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+          {(!valgusResults.cpak || valgusResults.cpak === '--') ? null : (
+            <>
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+            </>
+          )}
         </button>
       </div>
     </div>
