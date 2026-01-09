@@ -37,17 +37,17 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
 
     // Determine CPAK type from the 3x3 grid
     if (jloClass === 'distal') {
-        if (ahkaClass === 'varus') return 'I';
-        if (ahkaClass === 'neutral') return 'II';
-        if (ahkaClass === 'valgus') return 'III';
+        if (ahkaClass === 'varus') return '1';
+        if (ahkaClass === 'neutral') return '2';
+        if (ahkaClass === 'valgus') return '3';
     } else if (jloClass === 'neutral') {
-        if (ahkaClass === 'varus') return 'IV';
-        if (ahkaClass === 'neutral') return 'V';
-        if (ahkaClass === 'valgus') return 'VI';
+        if (ahkaClass === 'varus') return '4';
+        if (ahkaClass === 'neutral') return '5';
+        if (ahkaClass === 'valgus') return '6';
     } else if (jloClass === 'proximal') {
-        if (ahkaClass === 'varus') return 'VII';
-        if (ahkaClass === 'neutral') return 'VIII';
-        if (ahkaClass === 'valgus') return 'IX';
+        if (ahkaClass === 'varus') return '7';
+        if (ahkaClass === 'neutral') return '8';
+        if (ahkaClass === 'valgus') return '9';
     }
 
     return '--';
@@ -68,10 +68,18 @@ const landmarkInstructions = {
 };
 
 
+const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
+    const vec1 = { x: p2.x - p1.x, y: p2.y - p1.y };
+    const vec2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+
+    const angle = angleBetweenVectors(vec1, vec2);
+    return angle;
+};
+
 const PostOpPlanner: React.FC = () => {
     const {
         ldfaMode,
-        legSide: preOpLegSide,
+        legSide, // Use global legSide
         postOpLongLegImage,
         setPostOpLongLegImage,
         postOpLongLegLandmarks: landmarks,
@@ -81,7 +89,6 @@ const PostOpPlanner: React.FC = () => {
     } = useAppContext();
 
     const [fileName, setFileName] = useState('No file chosen');
-    const [legSide, setLegSide] = useState<LegSide>(preOpLegSide);
 
     // Removed local state definitions for landmarks and results as they are now mapped to context
     const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
@@ -97,6 +104,7 @@ const PostOpPlanner: React.FC = () => {
     const pipDragOffset = useRef({ x: 0, y: 0 });
     const localResultsRef = useRef(results);
     const justAdjustedHipRef = useRef(false);
+    const prevLegSideRef = useRef(legSide);
 
     useEffect(() => { localResultsRef.current = results; }, [results]);
 
@@ -111,6 +119,13 @@ const PostOpPlanner: React.FC = () => {
             setVisibleLandmarkSets(newSets);
         }
     }, []); // Run only on mount to restore state
+
+    // Sync landmarks if legSide changes
+    useEffect(() => {
+        if (prevLegSideRef.current !== legSide) {
+            prevLegSideRef.current = legSide;
+        }
+    }, [legSide]);
 
     useEffect(() => {
         if (ldfaMode !== 'corrected') return;
@@ -150,7 +165,7 @@ const PostOpPlanner: React.FC = () => {
             tibialLateral: { x: isLeft ? w * 0.55 : w * 0.45, y: h * 0.6 },
         };
         setLandmarks(initialLandmarks);
-    }, [legSide]);
+    }, [legSide, setLandmarks]);
 
     const updateCalculations = useCallback(() => {
         const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = landmarks;
@@ -170,24 +185,29 @@ const PostOpPlanner: React.FC = () => {
         }
         if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femoralJointLine') && femoralMedial && femoralLateral) {
             const isLeftKnee = legSide === 'left';
-            const medialFemoralCondyle = (isLeftKnee ? femoralMedial.x < femoralLateral.x : femoralMedial.x > femoralLateral.x) ? femoralMedial : femoralLateral;
-            const lateralFemoralCondyle = (isLeftKnee ? femoralMedial.x > femoralLateral.x : femoralMedial.x < femoralLateral.x) ? femoralMedial : femoralLateral;
-            const femoralAxisVec = { x: kneeCenter.x - hipCenter.x, y: kneeCenter.y - hipCenter.y };
-            let femoralJointLineVec;
-            if (legSide === 'left') {
-                femoralJointLineVec = { x: lateralFemoralCondyle.x - medialFemoralCondyle.x, y: lateralFemoralCondyle.y - medialFemoralCondyle.y };
-            } else {
-                femoralJointLineVec = { x: medialFemoralCondyle.x - lateralFemoralCondyle.x, y: medialFemoralCondyle.y - lateralFemoralCondyle.y };
-            }
-            newResults.ldfa = angleBetweenVectors(femoralAxisVec, femoralJointLineVec);
+            const sortedFemoral = [femoralMedial, femoralLateral].sort((a, b) => a.x - b.x);
+            const leftFemoral = sortedFemoral[0];
+            const rightFemoral = sortedFemoral[1];
+
+            // Left Leg: Medial is Right (Inner). Right Leg: Medial is Left (Inner).
+            const medialFemoralCondyle = isLeftKnee ? rightFemoral : leftFemoral;
+            const lateralFemoralCondyle = isLeftKnee ? leftFemoral : rightFemoral;
+
+            // For LDFA
+            newResults.ldfa = calculateLineAngle(hipCenter, kneeCenter, medialFemoralCondyle, lateralFemoralCondyle);
         }
         if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('tibialJointLine') && tibialMedial && tibialLateral) {
             const isLeftKnee = legSide === 'left';
-            const medialTibialCondyle = (isLeftKnee ? tibialMedial.x < tibialLateral.x : tibialMedial.x > tibialLateral.x) ? tibialMedial : tibialLateral;
-            const lateralTibialCondyle = (isLeftKnee ? tibialMedial.x > tibialLateral.x : tibialMedial.x < tibialLateral.x) ? tibialMedial : tibialLateral;
-            const tibialAxisVec = { x: ankleCenter.x - kneeCenter.x, y: ankleCenter.y - kneeCenter.y };
-            const tibialJointLineVec = { x: medialTibialCondyle.x - lateralTibialCondyle.x, y: medialTibialCondyle.y - lateralTibialCondyle.y };
-            newResults.mpta = angleBetweenVectors(tibialAxisVec, tibialJointLineVec);
+            const sortedTibial = [tibialMedial, tibialLateral].sort((a, b) => a.x - b.x);
+            const leftTibial = sortedTibial[0];
+            const rightTibial = sortedTibial[1];
+
+            // Left Leg: Medial is Right (Inner). Right Leg: Medial is Left (Inner).
+            const medialTibialCondyle = isLeftKnee ? rightTibial : leftTibial;
+            const lateralTibialCondyle = isLeftKnee ? leftTibial : rightTibial;
+
+            // For MPTA
+            newResults.mpta = calculateLineAngle(ankleCenter, kneeCenter, lateralTibialCondyle, medialTibialCondyle);
         }
 
         if (newResults.ldfa != null && newResults.mpta != null) {
@@ -238,13 +258,25 @@ const PostOpPlanner: React.FC = () => {
             ctx.strokeStyle = LANDMARK_COLORS.femoralJointLine; ctx.fillStyle = LANDMARK_COLORS.femoralJointLine; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(femoralMedial.x, femoralMedial.y); ctx.lineTo(femoralLateral.x, femoralLateral.y); ctx.stroke();
             [femoralMedial, femoralLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
-            if (visibleLandmarkSets.has('hkaLine') && localResultsRef.current.ldfa != null) drawTextWithBackground(`LDFA: ${localResultsRef.current.ldfa.toFixed(1)}°`, kneeCenter.x, kneeCenter.y - 60);
+
+            ctx.fillStyle = "#e3e3e3";
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.fillText('M', femoralMedial.x, femoralMedial.y - 10);
+            ctx.fillText('L', femoralLateral.x, femoralLateral.y - 10);
+
+            if (visibleLandmarkSets.has('hkaLine') && localResultsRef.current.ldfa != null && kneeCenter) drawTextWithBackground(`LDFA: ${localResultsRef.current.ldfa.toFixed(1)}°`, kneeCenter.x, kneeCenter.y - 60);
         }
         if (visibleLandmarkSets.has('tibialJointLine') && tibialMedial && tibialLateral) {
             ctx.strokeStyle = LANDMARK_COLORS.tibialJointLine; ctx.fillStyle = LANDMARK_COLORS.tibialJointLine; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(tibialMedial.x, tibialMedial.y); ctx.lineTo(tibialLateral.x, tibialLateral.y); ctx.stroke();
             [tibialMedial, tibialLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
-            if (visibleLandmarkSets.has('hkaLine') && localResultsRef.current.mpta != null) drawTextWithBackground(`MPTA: ${localResultsRef.current.mpta.toFixed(1)}°`, kneeCenter.x, kneeCenter.y + 40);
+
+            ctx.fillStyle = "#e3e3e3";
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.fillText('M', tibialMedial.x, tibialMedial.y + 20);
+            ctx.fillText('L', tibialLateral.x, tibialLateral.y + 20);
+
+            if (visibleLandmarkSets.has('hkaLine') && localResultsRef.current.mpta != null && kneeCenter) drawTextWithBackground(`MPTA: ${localResultsRef.current.mpta.toFixed(1)}°`, kneeCenter.x, kneeCenter.y + 40);
         }
         updateCalculations();
     }, [landmarks, visibleLandmarkSets, ldfaMode, legSide, updateCalculations]);
@@ -483,14 +515,9 @@ const PostOpPlanner: React.FC = () => {
                         </label>
                         <input type="file" id="postop-xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
                         <span className="text-xs text-gray-400 truncate mt-1 inline-block">{fileName}</span>
+                        <p className="text-gray-400 text-xs mt-1">Leg Side: <span className="text-gray-200 font-bold uppercase">{legSide}</span></p>
                     </div>
-                    <div>
-                        <h4 className="text-lg font-semibold text-gray-300 mb-1">Leg Side</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button onClick={() => setLegSide('left')} className={`py-2 px-2 rounded-lg font-semibold text-sm border ${legSide === 'left' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368]'}`}>Left</button>
-                            <button onClick={() => setLegSide('right')} className={`py-2 px-2 rounded-lg font-semibold text-sm border ${legSide === 'right' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368]'}`}>Right</button>
-                        </div>
-                    </div>
+
                     <div>
                         <h4 className="text-lg font-semibold text-gray-300 mb-1">Mark Landmarks</h4>
                         <div className="grid grid-cols-1 gap-2">

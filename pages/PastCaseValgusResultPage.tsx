@@ -48,20 +48,28 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
 
     // Determine CPAK type from the 3x3 grid
     if (jloClass === 'distal') {
-        if (ahkaClass === 'varus') return 'I';
-        if (ahkaClass === 'neutral') return 'II';
-        if (ahkaClass === 'valgus') return 'III';
+        if (ahkaClass === 'varus') return '1';
+        if (ahkaClass === 'neutral') return '2';
+        if (ahkaClass === 'valgus') return '3';
     } else if (jloClass === 'neutral') {
-        if (ahkaClass === 'varus') return 'IV';
-        if (ahkaClass === 'neutral') return 'V';
-        if (ahkaClass === 'valgus') return 'VI';
+        if (ahkaClass === 'varus') return '4';
+        if (ahkaClass === 'neutral') return '5';
+        if (ahkaClass === 'valgus') return '6';
     } else if (jloClass === 'proximal') {
-        if (ahkaClass === 'varus') return 'VII';
-        if (ahkaClass === 'neutral') return 'VIII';
-        if (ahkaClass === 'valgus') return 'IX';
+        if (ahkaClass === 'varus') return '7';
+        if (ahkaClass === 'neutral') return '8';
+        if (ahkaClass === 'valgus') return '9';
     }
 
     return '--';
+};
+
+const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
+    const vec1 = { x: p2.x - p1.x, y: p2.y - p1.y };
+    const vec2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+
+    const angle = angleBetweenVectors(vec1, vec2);
+    return angle;
 };
 
 const PostOpValgusPlanner: React.FC = () => {
@@ -71,10 +79,10 @@ const PostOpValgusPlanner: React.FC = () => {
         postOpValgusLandmarks: landmarks,
         setPostOpValgusLandmarks: setLandmarks,
         postOpValgusResults: results,
-        setPostOpValgusResults: setResults
+        setPostOpValgusResults: setResults,
+        legSide
     } = useAppContext();
     const [fileName, setFileName] = useState('No file chosen');
-    const [legSide, setLegSide] = useState<LegSide>('left');
 
     // removed local landmarks and results state
     const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
@@ -86,6 +94,7 @@ const PostOpValgusPlanner: React.FC = () => {
     const draggingPointRef = useRef<string | null>(null);
     const localResultsRef = useRef(results);
     useEffect(() => { localResultsRef.current = results; }, [results]);
+    const prevLegSideRef = useRef(legSide);
 
     // Restore visibleLandmarkSets from existing landmarks
     useEffect(() => {
@@ -100,40 +109,72 @@ const PostOpValgusPlanner: React.FC = () => {
 
     const resetLandmarks = useCallback((canvas: HTMLCanvasElement) => {
         const w = canvas.width; const h = canvas.height;
+        const isLeft = legSide === 'left';
         setLandmarks({
-            medialJointSpace: { x: w * 0.45, y: h * 0.5 },
-            lateralJointSpace: { x: w * 0.55, y: h * 0.5 },
+            medialJointSpace: { x: isLeft ? w * 0.45 : w * 0.55, y: h * 0.5 },
+            lateralJointSpace: { x: isLeft ? w * 0.55 : w * 0.45, y: h * 0.5 },
             femurAxisPoint: { x: w * 0.5, y: h * 0.2 },
             tibiaAxisPoint: { x: w * 0.5, y: h * 0.8 },
         });
-    }, []);
+    }, [legSide, setLandmarks]);
+
+    // Sync landmarks if legSide changes
+    useEffect(() => {
+        if (prevLegSideRef.current !== legSide) {
+            setLandmarks(prev => {
+                if (!prev.medialJointSpace || !prev.lateralJointSpace) return prev;
+                return {
+                    ...prev,
+                    medialJointSpace: prev.lateralJointSpace,
+                    lateralJointSpace: prev.medialJointSpace
+                };
+            });
+            prevLegSideRef.current = legSide;
+        }
+    }, [legSide, setLandmarks]);
 
     const updateCalculations = useCallback(() => {
         const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = landmarks;
         let newResults: Partial<ValgusResults> = { obliquity: null, ldfa: null, mpta: null, femurType: '--', cpak: '--' };
 
-        if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace) {
-            let angleRad = Math.atan2(medialJointSpace.y - lateralJointSpace.y, medialJointSpace.x - lateralJointSpace.x);
-            let angleDeg = Math.abs(angleRad * (180 / Math.PI));
-            if (angleDeg > 90) angleDeg = 180 - angleDeg;
-            newResults.obliquity = angleDeg;
-            const jointCenter = { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 };
-            const onScreenLeftPoint = medialJointSpace.x < lateralJointSpace.x ? medialJointSpace : lateralJointSpace;
-            const onScreenRightPoint = medialJointSpace.x > lateralJointSpace.x ? medialJointSpace : lateralJointSpace;
-            const medialPoint = legSide === 'left' ? onScreenLeftPoint : onScreenRightPoint;
-            const lateralPoint = legSide === 'left' ? onScreenRightPoint : onScreenLeftPoint;
+        let jointCenter: Point | null = null;
+        if (medialJointSpace && lateralJointSpace) {
+            jointCenter = { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 };
 
-            if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint) {
-                const femurAxisVec = { x: femurAxisPoint.x - jointCenter.x, y: femurAxisPoint.y - jointCenter.y };
-                const femoralJointLineVec = legSide === 'left' ? { x: lateralPoint.x - medialPoint.x, y: lateralPoint.y - medialPoint.y } : { x: medialPoint.x - lateralPoint.x, y: medialPoint.y - lateralPoint.y };
-                newResults.ldfa = angleBetweenVectors(femurAxisVec, femoralJointLineVec);
-            }
-            if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint) {
-                const tibiaAxisVec = { x: tibiaAxisPoint.x - jointCenter.x, y: tibiaAxisPoint.y - jointCenter.y };
-                const tibialJointLineVec = { x: medialPoint.x - lateralPoint.x, y: medialPoint.y - lateralPoint.y };
-                newResults.mpta = angleBetweenVectors(tibiaAxisVec, tibialJointLineVec);
+            if (visibleLandmarkSets.has('jointLine')) {
+                const dy = medialJointSpace.y - lateralJointSpace.y;
+                const dx = medialJointSpace.x - lateralJointSpace.x;
+                let angleDeg = Math.abs(Math.atan2(dy, dx) * (180 / Math.PI));
+                if (angleDeg > 180) angleDeg = 360 - angleDeg;
+                if (angleDeg > 90) angleDeg = 180 - angleDeg;
+                newResults.obliquity = angleDeg;
             }
         }
+
+        if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter && lateralJointSpace && medialJointSpace) {
+            const isLeftKnee = legSide === 'left';
+            const sortedPoints = [medialJointSpace, lateralJointSpace].sort((a, b) => a.x - b.x);
+            const leftPoint = sortedPoints[0];
+            const rightPoint = sortedPoints[1];
+
+            // Left Leg: Medial is Right (Inner). Right Leg: Medial is Left (Inner).
+            const trueMedial = isLeftKnee ? rightPoint : leftPoint;
+            const trueLateral = isLeftKnee ? leftPoint : rightPoint;
+
+            newResults.ldfa = calculateLineAngle(femurAxisPoint, jointCenter, trueMedial, trueLateral);
+        }
+        if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter && medialJointSpace && lateralJointSpace) {
+            const isLeftKnee = legSide === 'left';
+            const sortedPoints = [medialJointSpace, lateralJointSpace].sort((a, b) => a.x - b.x);
+            const leftPoint = sortedPoints[0];
+            const rightPoint = sortedPoints[1];
+
+            const trueMedial = isLeftKnee ? rightPoint : leftPoint;
+            const trueLateral = isLeftKnee ? leftPoint : rightPoint;
+
+            newResults.mpta = calculateLineAngle(tibiaAxisPoint, jointCenter, trueLateral, trueMedial);
+        }
+
         if (newResults.ldfa !== null && newResults.mpta !== null) {
             newResults.cpak = getLongLegCpakType(newResults.mpta - newResults.ldfa, newResults.mpta + newResults.ldfa);
             if (newResults.obliquity !== null) {
@@ -147,7 +188,8 @@ const PostOpValgusPlanner: React.FC = () => {
             }
         }
         setResults(newResults);
-    }, [landmarks, visibleLandmarkSets, legSide]);
+        return newResults;
+    }, [landmarks, visibleLandmarkSets, legSide, setResults]);
 
     const draw = useCallback(() => {
         const canvas = canvasRef.current;
@@ -155,13 +197,48 @@ const PostOpValgusPlanner: React.FC = () => {
         const ctx = canvas.getContext('2d');
         if (!ctx || Object.keys(landmarks).length === 0) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const currentResults = updateCalculations();
+
         const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = landmarks;
-        if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace) {
+
+        const drawTextWithBackground = (text: string, x: number, y: number, color: string = '#fdd835') => {
+            ctx.font = 'bold 20px Inter, sans-serif';
+            ctx.fillStyle = 'rgba(29, 29, 31, 0.8)';
+            const textMetrics = ctx.measureText(text);
+            const textWidth = textMetrics.width;
+            ctx.fillRect(x - textWidth / 2 - 8, y - 20, textWidth + 16, 30);
+            ctx.fillStyle = color;
+            ctx.fillText(text, x - textWidth / 2, y);
+        };
+
+        const jointCenter = (medialJointSpace && lateralJointSpace) ? { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 } : null;
+
+        if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace && jointCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.jointLine; ctx.fillStyle = LANDMARK_COLORS.jointLine; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(medialJointSpace.x, medialJointSpace.y); ctx.lineTo(lateralJointSpace.x, lateralJointSpace.y); ctx.stroke();
             [medialJointSpace, lateralJointSpace].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
+
+            // Draw M and L labels
+            const mOffset = medialJointSpace.x < lateralJointSpace.x ? -25 : 25;
+            const lOffset = lateralJointSpace.x < medialJointSpace.x ? -25 : 25;
+
+            ctx.fillStyle = "#e3e3e3";
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 5);
+            ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 5);
+
+            if (currentResults.obliquity !== null) {
+                drawTextWithBackground(`Obliquity: ${currentResults.obliquity.toFixed(1)}°`, jointCenter.x, jointCenter.y - 20);
+            }
+            if (currentResults.ldfa !== null) {
+                drawTextWithBackground(`LDFA: ${currentResults.ldfa.toFixed(1)}°`, jointCenter.x, jointCenter.y - 55);
+            }
+            if (currentResults.mpta !== null) {
+                drawTextWithBackground(`MPTA: ${currentResults.mpta.toFixed(1)}°`, jointCenter.x, jointCenter.y + 55);
+            }
         }
-        const jointCenter = (medialJointSpace && lateralJointSpace) ? { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 } : null;
+
         if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(femurAxisPoint.x, femurAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
@@ -172,7 +249,6 @@ const PostOpValgusPlanner: React.FC = () => {
             ctx.beginPath(); ctx.moveTo(tibiaAxisPoint.x, tibiaAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
             ctx.beginPath(); ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
         }
-        updateCalculations();
     }, [landmarks, visibleLandmarkSets, updateCalculations]);
 
     useEffect(() => { draw(); }, [draw]);
@@ -394,14 +470,9 @@ const PostOpValgusPlanner: React.FC = () => {
                         </label>
                         <input type="file" id="postop-xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
                         <span className="text-xs text-gray-400 truncate mt-1 inline-block">{fileName}</span>
+                        <p className="text-gray-400 text-xs mt-1">Leg Side: <span className="text-gray-200 font-bold uppercase">{legSide}</span></p>
                     </div>
-                    <div>
-                        <h4 className="text-md font-semibold text-gray-300 mb-1">Leg Side</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button onClick={() => setLegSide('left')} className={`py-2 px-2 rounded-lg font-semibold text-sm border ${legSide === 'left' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368]'}`}>Left</button>
-                            <button onClick={() => setLegSide('right')} className={`py-2 px-2 rounded-lg font-semibold text-sm border ${legSide === 'right' ? 'bg-[#6D282C] text-white border-[#893338]' : 'bg-[#2a2b2c] border-[#5f6368]'}`}>Right</button>
-                        </div>
-                    </div>
+
                     <div>
                         <h4 className="text-md font-semibold text-gray-300 mb-1">Mark Landmarks</h4>
                         <div className="grid grid-cols-1 gap-2">
