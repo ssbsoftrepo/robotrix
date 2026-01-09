@@ -6,19 +6,20 @@ import { formatDate } from '../utils/date';
 
 // Reusable Label-Value component with enhanced styling
 const ReportItem: React.FC<{ label: string; value: string | number | undefined | null; highlight?: boolean }> = ({ label, value, highlight }) => (
-    <div className={`flex justify-between items-center py-0.5 border-b border-gray-700 last:border-0 ${highlight ? 'bg-white/5 px-2 rounded -mx-2' : ''}`}>
-        <span className="text-gray-400 font-medium text-sm">{label}</span>
-        <span className={`text-base font-bold ${highlight ? 'text-yellow-400' : 'text-gray-100'}`}>{value ?? '--'}</span>
+    <div className={`flex justify-between items-center py-0.5 border-b border-[#333333] last:border-0 ${highlight ? 'bg-[#6D282C]/10 px-2 rounded -mx-2' : ''}`}>
+        <span className="text-gray-500 font-medium text-sm">{label}</span>
+        <span className={`text-base font-bold ${highlight ? 'text-[#ff8fa3]' : 'text-gray-100'}`}>{value ?? '--'}</span>
     </div>
 );
 
 // Reusable Card component for sections
 const ReportCard: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-    <div className={`gemini-dark-card rounded-xl overflow-hidden border border-gray-700 shadow-xl print-break-inside-avoid ${className}`}>
-        <div className="bg-gray-800/50 px-3 py-2 border-b border-gray-700">
-            <h3 className="text-lg font-bold text-gray-200 uppercase tracking-wide">{title}</h3>
+    <div className={`relative bg-[#1a1a1a] border border-[#333333] rounded-xl overflow-hidden shadow-xl print-break-inside-avoid ${className}`}>
+        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
+        <div className="bg-[#252525] px-3 py-2 border-b border-[#333333] relative z-10">
+            <h3 className="text-lg font-bold text-[#E0E0E0] uppercase tracking-wide">{title}</h3>
         </div>
-        <div className="p-3">
+        <div className="p-3 relative z-10">
             {children}
         </div>
     </div>
@@ -77,31 +78,48 @@ const ReportPage: React.FC = () => {
     const { lateralGap, selectedSeries } = longLegCoronalBalancingResults;
 
     return (
-        <div className="h-full overflow-y-auto pb-8 flex flex-col">
+        <div className="relative h-full overflow-y-auto pb-8 flex flex-col bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+            {/* Cinematic Lighting */}
+            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+            <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
+
             {/* Header */}
-            <div className="flex justify-between items-center mb-4 no-print px-2">
-                <h2 className="text-2xl font-extrabold text-white tracking-tight">Surgical Case Report</h2>
+            <div className="flex justify-between items-center mb-4 no-print px-4 pt-4 relative z-10">
+                <h2 className="text-2xl font-extrabold text-[#E0E0E0] tracking-tight">Surgical Case Report</h2>
                 <div className="flex space-x-2">
                     <button
                         onClick={() => setPage('results-analysis')}
-                        className="gemini-dark-button font-bold py-2 px-4 rounded-md transition text-sm flex items-center space-x-2"
+                        className="group relative py-2 px-4 bg-[#252525] border border-[#333333] rounded-sm 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#333333] hover:border-[#6D282C]/50
+                                   active:scale-[0.98] flex items-center"
                     >
-                        <span>Result Analysis</span>
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <span className="relative text-sm font-bold text-gray-300 tracking-wider">RESULT ANALYSIS</span>
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
                     </button>
                     <button
                         id="print-report-btn"
                         onClick={handlePrint}
-                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105 flex items-center space-x-2"
+                        className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                   active:scale-[0.98] flex items-center space-x-2"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                        <span>Print Report</span>
+                        <span className="relative text-lg font-bold text-white tracking-widest">PRINT REPORT</span>
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>
                 </div>
             </div>
 
-            <div id="report-content" className="space-y-8 flex-grow">
+            <div id="report-content" className="space-y-8 flex-grow px-4 relative z-10">
 
                 {/* Patient Info Card - Full Width */}
                 {patient && (
@@ -149,22 +167,22 @@ const ReportPage: React.FC = () => {
                     {/* Right Col: Surgical Plan */}
                     <ReportCard title="Surgical Decision Matrix" className="h-full border-t-4 border-t-[#6D282C]">
                         <div className="space-y-2">
-                            <div className="bg-gray-800/50 p-2 rounded-lg border border-gray-700">
-                                <p className="text-xs text-gray-400 font-bold uppercase mb-1">Matrix Selection</p>
+                            <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
+                                <p className="text-xs text-gray-500 font-bold uppercase mb-1">Matrix Selection</p>
                                 <div className="flex justify-between gap-2">
                                     <div className="flex-1 text-center bg-black/30 p-1 rounded">
                                         <p className="text-[10px] text-gray-500">Femur</p>
-                                        <p className="text-sm text-cyan-300 font-bold capitalize">{femurBoundary ?? 'Expanded'} Matrix</p>
+                                        <p className="text-sm text-[#ff8fa3] font-bold capitalize">{femurBoundary ?? 'Expanded'} Matrix</p>
                                     </div>
                                     <div className="flex-1 text-center bg-black/30 p-1 rounded">
                                         <p className="text-[10px] text-gray-500">Tibia</p>
-                                        <p className="text-sm text-cyan-300 font-bold capitalize">{tibiaBoundary ?? 'Expanded'} Matrix</p>
+                                        <p className="text-sm text-[#ff8fa3] font-bold capitalize">{tibiaBoundary ?? 'Expanded'} Matrix</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-800/50 p-2 rounded-lg border border-gray-700">
-                                <p className="text-xs text-gray-400 font-bold uppercase mb-1">Coronal Balancing Data</p>
+                            <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
+                                <p className="text-xs text-gray-500 font-bold uppercase mb-1">Coronal Balancing Data</p>
                                 <div className="space-y-1">
                                     <ReportItem label="Implant Thickness (Lateral Gap)" value={`${lateralGap || '--'} mm`} />
                                     <ReportItem label="Anticipated Medial Gap" value={`${selectedSeries ?? '--'} mm`} />
@@ -172,13 +190,13 @@ const ReportPage: React.FC = () => {
                             </div>
 
                             <div className="space-y-2 mt-1">
-                                <div className="flex items-center justify-between p-2 bg-yellow-900/20 border border-yellow-600/50 rounded-lg">
-                                    <span className="text-gray-300 text-sm font-medium">Rec. Femoral Cut</span>
-                                    <span className="text-xl font-extrabold text-yellow-400">{displayFemoralCut}</span>
+                                <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                                    <span className="text-gray-400 text-sm font-medium">Rec. Femoral Cut</span>
+                                    <span className="text-xl font-extrabold text-[#ff8fa3]">{displayFemoralCut}</span>
                                 </div>
-                                <div className="flex items-center justify-between p-2 bg-yellow-900/20 border border-yellow-600/50 rounded-lg">
-                                    <span className="text-gray-300 text-sm font-medium">Rec. Tibial Cut</span>
-                                    <span className="text-xl font-extrabold text-yellow-400">{displayTibialCut}</span>
+                                <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                                    <span className="text-gray-400 text-sm font-medium">Rec. Tibial Cut</span>
+                                    <span className="text-xl font-extrabold text-[#ff8fa3]">{displayTibialCut}</span>
                                 </div>
                             </div>
                         </div>
@@ -193,8 +211,8 @@ const ReportPage: React.FC = () => {
                     <ReportCard title="Surgical Simulation" className="border-t-4 border-t-[#6D282C]">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
                             <div className="flex flex-col">
-                                <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
-                                    <span className="absolute top-2 left-2 bg-black/70 text-white px-2 py-0.5 rounded text-xs font-bold border border-gray-600 z-10 print-badge">PRE-OP</span>
+                                <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
+                                    <span className="absolute top-2 left-2 bg-black/70 text-white px-2 py-0.5 rounded text-xs font-bold border border-[#333333] z-10 print-badge">PRE-OP</span>
                                     {longLegCanvasDataUrl ? (
                                         <img src={longLegCanvasDataUrl} className="w-full h-full object-contain" alt="Pre-Op Xray" />
                                     ) : <p className="text-gray-500 text-sm">No Image</p>}
@@ -202,7 +220,7 @@ const ReportPage: React.FC = () => {
                             </div>
                             <div className="flex flex-col">
                                 <div className="bg-black border-2 border-[#6D282C] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
-                                    <span className="absolute top-2 left-2 bg-[#6D282C] text-white px-2 py-0.5 rounded text-xs font-bold border border-red-400 z-10 print-badge">SIMULATION</span>
+                                    <span className="absolute top-2 left-2 bg-[#6D282C] text-white px-2 py-0.5 rounded text-xs font-bold border border-[#893338] z-10 print-badge">SIMULATION</span>
                                     {simAfterImage ? (
                                         <img src={simAfterImage} className="w-full h-full object-contain" alt="Post-Op Simulation" />
                                     ) : <p className="text-gray-500 text-sm">No Simulation</p>}

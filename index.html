@@ -87,12 +87,56 @@
         page-break-inside: avoid !important;
       }
 
+      /* Override new Dark Mode Radiology theme backgrounds */
+      .bg-gradient-to-br,
+      .from-\[\#1E1E1E\],
+      .to-\[\#121212\],
+      .bg-\[\#1a1a1a\],
+      .bg-\[\#1E1E1E\],
+      .bg-\[\#121212\],
+      .bg-\[\#252525\],
+      .bg-\[\#2a2a2a\],
+      .bg-\[\#333333\] {
+        background-color: white !important;
+        background-image: none !important;
+      }
+
+      /* Hide cinematic lighting overlays in print */
+      .blur-\[150px\],
+      .blur-\[100px\],
+      .bg-cyan-900\/5,
+      .bg-white\/3 {
+        display: none !important;
+      }
+
+      /* Override noise texture overlay */
+      .bg-noise {
+        background-image: none !important;
+        opacity: 0 !important;
+      }
+
       /* Inner cards adjustments */
       .bg-gray-800\/50,
       .bg-black\/30 {
         background-color: #f9fafb !important;
         /* light gray for inner cards */
         border: 1px solid #ddd !important;
+        color: black !important;
+      }
+
+      /* Report Cards - Dark theme overrides */
+      .border-\[\#333333\],
+      .border-\[\#6D282C\] {
+        border-color: #ccc !important;
+      }
+
+      /* Maroon accent text - use darker color for print */
+      .text-\[\#ff8fa3\] {
+        color: #8B0000 !important;
+        /* Dark red for print contrast */
+      }
+
+      .text-\[\#E0E0E0\] {
         color: black !important;
       }
 
@@ -197,6 +241,10 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+    }
+
+    .bg-noise {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E");
     }
   </style>
   <script type="importmap">

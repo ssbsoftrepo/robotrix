@@ -6,19 +6,20 @@ import { formatDate } from '../utils/date';
 
 // Reusable Label-Value component matching ReportPage
 const ReportItem: React.FC<{ label: string; value: string | number | undefined | null; highlight?: boolean }> = ({ label, value, highlight }) => (
-    <div className={`flex justify-between items-center py-0.5 border-b border-gray-700 last:border-0 ${highlight ? 'bg-white/5 px-2 rounded -mx-2' : ''}`}>
-        <span className="text-gray-400 font-medium text-sm">{label}</span>
-        <span className={`text-base font-bold ${highlight ? 'text-yellow-400' : 'text-gray-100'}`}>{value ?? '--'}</span>
+    <div className={`flex justify-between items-center py-0.5 border-b border-[#333333] last:border-0 ${highlight ? 'bg-[#6D282C]/10 px-2 rounded -mx-2' : ''}`}>
+        <span className="text-gray-500 font-medium text-sm">{label}</span>
+        <span className={`text-base font-bold ${highlight ? 'text-[#ff8fa3]' : 'text-gray-100'}`}>{value ?? '--'}</span>
     </div>
 );
 
 // Reusable Card component matching ReportPage
 const ReportCard: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-    <div className={`gemini-dark-card rounded-xl overflow-hidden border border-gray-700 shadow-xl print-break-inside-avoid ${className}`}>
-        <div className="bg-gray-800/50 px-3 py-2 border-b border-gray-700">
-            <h3 className="text-lg font-bold text-gray-200 uppercase tracking-wide">{title}</h3>
+    <div className={`relative bg-[#1a1a1a] border border-[#333333] rounded-xl overflow-hidden shadow-xl print-break-inside-avoid ${className}`}>
+        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
+        <div className="bg-[#252525] px-3 py-2 border-b border-[#333333] relative z-10">
+            <h3 className="text-lg font-bold text-[#E0E0E0] uppercase tracking-wide">{title}</h3>
         </div>
-        <div className="p-3">
+        <div className="p-3 relative z-10">
             {children}
         </div>
     </div>
@@ -108,31 +109,48 @@ const ValgusStressReportPage: React.FC = () => {
         : base64TibiaBg;
 
     return (
-        <div className="h-full overflow-y-auto pb-8 flex flex-col">
+        <div className="relative h-full overflow-y-auto pb-8 flex flex-col bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+            {/* Cinematic Lighting */}
+            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+            <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
+
             {/* Header */}
-            <div className="flex justify-between items-center mb-4 no-print px-2">
-                <h2 className="text-2xl font-extrabold text-white tracking-tight">Valgus Surgical Case Report</h2>
+            <div className="flex justify-between items-center mb-4 no-print px-4 pt-4 relative z-10">
+                <h2 className="text-2xl font-extrabold text-[#E0E0E0] tracking-tight">Valgus Surgical Case Report</h2>
                 <div className="flex space-x-2">
                     <button
                         onClick={() => setPage('planner-valgus-stress-results')}
-                        className="gemini-dark-button font-bold py-2 px-4 rounded-md transition text-sm flex items-center space-x-2"
+                        className="group relative py-2 px-4 bg-[#252525] border border-[#333333] rounded-sm 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#333333] hover:border-[#6D282C]/50
+                                   active:scale-[0.98] flex items-center"
                     >
-                        <span>Result Analysis</span>
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <span className="relative text-sm font-bold text-gray-300 tracking-wider">RESULT ANALYSIS</span>
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
                     </button>
                     <button
                         id="print-report-btn"
                         onClick={handlePrint}
-                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105 flex items-center space-x-2"
+                        className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                   active:scale-[0.98] flex items-center space-x-2"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                        <span>Print Report</span>
+                        <span className="relative text-lg font-bold text-white tracking-widest">PRINT REPORT</span>
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>
                 </div>
             </div>
 
-            <div id="report-content" className="space-y-8 flex-grow">
+            <div id="report-content" className="space-y-8 flex-grow px-4 relative z-10">
                 {/* Patient Info Card - Full Width */}
                 {patient && (
                     <ReportCard title="Patient Details" className="border-t-4 border-t-[#6D282C]">
@@ -178,8 +196,8 @@ const ValgusStressReportPage: React.FC = () => {
                     {/* Right Col: Surgical Plan */}
                     <ReportCard title="Surgical Decision Matrix" className="h-full border-t-4 border-t-[#6D282C]">
                         <div className="space-y-2">
-                            <div className="bg-gray-800/50 p-2 rounded-lg border border-gray-700">
-                                <p className="text-xs text-gray-400 font-bold uppercase mb-1">Coronal Balancing Data</p>
+                            <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
+                                <p className="text-xs text-gray-500 font-bold uppercase mb-1">Coronal Balancing Data</p>
                                 <div className="space-y-1">
                                     <ReportItem label="Implant Thickness (Lateral Gap)" value={`${lateralGap || '--'} mm`} />
                                     <ReportItem label="Anticipated Medial Gap" value={`${selectedSeries ?? '--'} mm`} />
@@ -187,13 +205,13 @@ const ValgusStressReportPage: React.FC = () => {
                             </div>
 
                             <div className="space-y-2 mt-2">
-                                <div className="flex items-center justify-between p-2 bg-yellow-900/20 border border-yellow-600/50 rounded-lg">
-                                    <span className="text-gray-300 text-sm font-medium">Initial Femoral Cut</span>
-                                    <span className="text-xl font-extrabold text-yellow-400">{cut}</span>
+                                <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                                    <span className="text-gray-400 text-sm font-medium">Initial Femoral Cut</span>
+                                    <span className="text-xl font-extrabold text-[#ff8fa3]">{cut}</span>
                                 </div>
-                                <div className="flex items-center justify-between p-2 bg-yellow-900/20 border border-yellow-600/50 rounded-lg">
-                                    <span className="text-gray-300 text-sm font-medium">Rec. Tibial Recut</span>
-                                    <span className="text-xl font-extrabold text-yellow-400">{recommendedTibialRecut}</span>
+                                <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                                    <span className="text-gray-400 text-sm font-medium">Rec. Tibial Recut</span>
+                                    <span className="text-xl font-extrabold text-[#ff8fa3]">{recommendedTibialRecut}</span>
                                 </div>
                             </div>
                         </div>
@@ -207,11 +225,11 @@ const ValgusStressReportPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
                     <ReportCard title="Annotated X-Ray Analysis" className="border-t-4 border-t-[#6D282C] h-full">
                         {valgusCanvasDataUrl ? (
-                            <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
+                            <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
                                 <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="w-full h-full object-contain" />
                             </div>
                         ) : (
-                            <div className="h-[300px] flex items-center justify-center bg-black border-2 border-gray-700 rounded-lg">
+                            <div className="h-[300px] flex items-center justify-center bg-black border-2 border-[#333333] rounded-lg">
                                 <p className="text-gray-500 text-sm">No analysis image available.</p>
                             </div>
                         )}
@@ -219,7 +237,7 @@ const ValgusStressReportPage: React.FC = () => {
 
                     <ReportCard title="Functional Tibial Planning" className="border-t-4 border-t-[#6D282C] h-full">
                         {/* Always show the section if we have the static image fallback */}
-                        <div className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[300px] w-full mx-auto print-image-container">
+                        <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[300px] w-full mx-auto print-image-container">
                             <img src={functionalCutImageSrc} alt="Functional Cut Plan" className="w-full h-full object-contain" />
 
                             {/* Red Lines Overlay */}
@@ -235,7 +253,7 @@ const ValgusStressReportPage: React.FC = () => {
                                                 y1={`${startYPercent}%`}
                                                 x2="100%"
                                                 y2={`${startYPercent + yOffsetPercent}%`}
-                                                stroke={isTarget ? "#ef4444" : "#7f1d1d"}
+                                                stroke={isTarget ? "#6D282C" : "#333333"}
                                                 strokeWidth={isTarget ? "4" : "1.5"}
                                                 strokeDasharray={isTarget ? "0" : "5,2"}
                                                 opacity={isTarget ? 1 : 0.6}
@@ -244,7 +262,7 @@ const ValgusStressReportPage: React.FC = () => {
                                                 <text
                                                     x="95%"
                                                     y={`${startYPercent + yOffsetPercent - 2}%`}
-                                                    fill="#ef4444"
+                                                    fill="#6D282C"
                                                     fontSize="14"
                                                     fontWeight="bold"
                                                     textAnchor="end"
@@ -255,23 +273,23 @@ const ValgusStressReportPage: React.FC = () => {
                                         </g>
                                     );
                                 })}
-                                <circle cx="0" cy={`${valgusFunctionalLinesY || 30}%`} r="6" fill="#ef4444" />
+                                <circle cx="0" cy={`${valgusFunctionalLinesY || 30}%`} r="6" fill="#6D282C" />
                             </svg>
 
                             {/* Gap Info Overlays - Scaled Down slightly for report */}
-                            <div className="absolute top-4 left-4 z-40 bg-gray-900/90 backdrop-blur-sm border-2 border-gray-500 rounded-xl px-4 py-2 text-center shadow-lg">
-                                <p className="text-[10px] text-gray-300 uppercase font-bold tracking-widest mb-0.5">Lateral Gap</p>
+                            <div className="absolute top-4 left-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#333333] rounded-xl px-4 py-2 text-center shadow-lg">
+                                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-0.5">Lateral Gap</p>
                                 <p className="text-2xl font-black text-white leading-none">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
                             </div>
 
-                            <div className="absolute top-4 right-4 z-40 bg-gray-900/90 backdrop-blur-sm border-2 border-yellow-500 rounded-xl px-4 py-2 text-center shadow-lg">
-                                <p className="text-[10px] text-yellow-500 uppercase font-bold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
-                                <p className="text-2xl font-black text-yellow-400 leading-none">{medialGapValue} <span className="text-sm text-yellow-700 font-bold">mm</span></p>
+                            <div className="absolute top-4 right-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#6D282C] rounded-xl px-4 py-2 text-center shadow-lg">
+                                <p className="text-[10px] text-[#ff8fa3] uppercase font-bold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
+                                <p className="text-2xl font-black text-[#ff8fa3] leading-none">{medialGapValue} <span className="text-sm text-[#ff8fa3]/70 font-bold">mm</span></p>
                             </div>
 
                             {/* Corrected Varus Overlay */}
-                            <div className="absolute top-[65%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-gray-600 shadow-lg text-center">
-                                <p className="text-gray-400 text-[10px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
+                            <div className="absolute top-[65%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-[#333333] shadow-lg text-center">
+                                <p className="text-gray-500 text-[10px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
                                 <p className="text-2xl font-extrabold text-white">{selectedDegree}°</p>
                             </div>
                         </div>

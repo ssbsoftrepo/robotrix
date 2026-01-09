@@ -14,34 +14,30 @@ interface LaxityOptionProps {
 }
 
 const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, isSelected, isSuggested, color }) => {
-    let bgClass = 'bg-[#1e1f20]';
-
-    if (isSelected) {
-        bgClass = 'bg-[#252629]';
-    }
-
     return (
         <div
             onClick={onClick}
-            className={`relative flex flex-col p-3 rounded-xl border-4 cursor-pointer transition-all duration-200 h-full hover:scale-[1.02] ${bgClass}`}
+            className={`group relative flex flex-col p-3 rounded-lg cursor-pointer transition-all duration-300 h-full
+                        ${isSelected ? 'bg-[#252525] border-2' : 'bg-[#1a1a1a] border border-[#333333] hover:border-[#6D282C]/50'}
+                        hover:shadow-[0_0_20px_rgba(109,40,44,0.15)]`}
             style={{
-                borderColor: color,
-                boxShadow: isSelected ? `0 0 20px ${color}60` : 'none'
+                borderColor: isSelected ? color : undefined,
+                boxShadow: isSelected ? `0 0 25px ${color}40` : undefined
             }}
         >
+            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+
             {isSuggested && !isSelected && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold z-20 shadow-md whitespace-nowrap">
-                    AI Suggestion
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white px-3 py-1 rounded-sm text-xs font-bold z-20 shadow-md whitespace-nowrap tracking-wider">
+                    AI SUGGESTION
                 </div>
             )}
 
-            <div className="text-center mb-3 min-h-[3rem] flex items-center justify-center">
-                <p className="font-bold text-lg leading-tight text-gray-100">{level}</p>
+            <div className="text-center mb-3 min-h-[3rem] flex items-center justify-center relative z-10">
+                <p className="font-bold text-lg leading-tight text-[#E0E0E0]">{level}</p>
             </div>
 
-            <div
-                className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-gray-800 group"
-            >
+            <div className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-[#333333] group-hover:border-[#444444]">
                 {imageSrc ? (
                     <img src={imageSrc} alt={`Reference for ${level}`} className="absolute inset-0 w-full h-full object-contain" />
                 ) : (
@@ -52,8 +48,8 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, i
             </div>
 
             <div
-                className="mt-3 h-3 rounded-full w-full transition-colors duration-300"
-                style={{ backgroundColor: isSelected ? color : '#374151' }}
+                className="mt-3 h-2 rounded-full w-full transition-colors duration-300"
+                style={{ backgroundColor: isSelected ? color : '#333333' }}
             ></div>
         </div>
     );
@@ -130,7 +126,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
             reader.onload = (event) => {
                 const result = event.target?.result as string;
                 setPreviewImage(result);
-                setValgusImageSrc(result); // Persist to Valgus Planner context
+                setValgusImageSrc(result);
                 analyzeLaxity(result);
             };
             reader.readAsDataURL(e.target.files[0]);
@@ -166,48 +162,76 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
         'Severe lateral laxity': '/severe.jpeg',
     };
 
-    const laxityColors = ['#EF4444', '#EF4444', '#EF4444', '#EF4444']; // Green, Blue, Orange, Red
+    const laxityColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C'];
 
     return (
-        <div className="flex flex-col h-full p-2 overflow-hidden">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-3xl font-bold text-gray-100">Check for lateral laxity ( Valgus stress film)</h2>
+        <div className="relative flex flex-col h-full p-4 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+            {/* Cinematic Overhead Surgical Lamp Effect */}
+            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+            <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
+
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4 relative z-10">
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Check for Lateral Laxity (Valgus Stress Film)</h2>
                 <div className="flex space-x-4">
-                    <button onClick={handleSkip} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-5 rounded-lg text-md flex items-center transition shadow">
-                        <span>Skip to Planner</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
+                    {/* Skip Button */}
+                    <button
+                        onClick={handleSkip}
+                        className="group relative py-2 px-5 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                   shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                                   active:scale-[0.98] flex items-center"
+                    >
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <span className="relative font-bold text-white tracking-wider flex items-center">
+                            SKIP TO PLANNER
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                            </svg>
+                        </span>
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>
-                    <button onClick={goBack} className="bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold py-2 px-5 rounded-lg transition">
-                        Cancel
+                    {/* Cancel Button */}
+                    <button
+                        onClick={goBack}
+                        className="group relative py-2 px-5 bg-[#252525] border border-[#444444] rounded-sm 
+                                   shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                   active:scale-[0.98]"
+                    >
+                        <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                        <span className="relative font-bold text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                     </button>
                 </div>
             </div>
 
-            {/* Main Layout: Reference Group vs Patient X-ray */}
-            <div className="flex flex-col lg:flex-row gap-6 flex-grow min-h-[65vh]">
+            {/* Main Layout */}
+            <div className="flex flex-col lg:flex-row gap-6 flex-grow min-h-[65vh] relative z-10">
 
                 {/* Left Side: Reference Images Group */}
                 <div className="flex-grow-[3] flex flex-col min-w-0">
-                    <div className="bg-gray-800/50 p-2 rounded-t-lg border-b border-gray-700 mb-4">
-                        <h3 className="text-xl font-bold text-gray-300 text-center">Laxity Level Reference Images</h3>
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg mb-4">
+                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                        <h3 className="text-xl font-bold text-[#E0E0E0] text-center relative z-10">Laxity Level Reference Images</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
                         {laxityLevels.map((level, index) => {
                             const currentImage = laxityImages[level];
-
                             return (
-                                <React.Fragment key={level}>
-                                    <LaxityOption
-                                        level={level}
-                                        onClick={() => setUserSelection(level)}
-                                        imageSrc={currentImage}
-                                        isSelected={userSelection === level}
-                                        isSuggested={aiSuggestion === level}
-                                        color={laxityColors[index]}
-                                    />
-                                </React.Fragment>
+                                <LaxityOption
+                                    key={level}
+                                    level={level}
+                                    onClick={() => setUserSelection(level)}
+                                    imageSrc={currentImage}
+                                    isSelected={userSelection === level}
+                                    isSuggested={aiSuggestion === level}
+                                    color={laxityColors[index]}
+                                />
                             );
                         })}
                     </div>
@@ -215,18 +239,21 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
 
                 {/* Right Side: Patient Upload */}
                 <div className="flex-grow-[2] flex flex-col min-w-[300px]">
-                    <div className="bg-gray-800/50 p-2 rounded-t-lg border-b border-gray-700 mb-4">
-                        <h3 className="text-xl font-bold text-yellow-400 text-center">Patient X-ray</h3>
+                    <div className="relative bg-[#1a1a1a] border border-[#6D282C]/50 p-2 rounded-lg mb-4">
+                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                        <h3 className="text-xl font-bold text-[#ff8fa3] text-center relative z-10">Patient X-ray</h3>
                     </div>
-                    <div className="relative flex flex-col p-3 rounded-xl border-4 border-gray-600 bg-[#1e1f20] h-full hover:border-gray-500 transition-all flex-grow">
+                    <div className="relative flex flex-col p-3 rounded-lg border border-[#333333] bg-[#1a1a1a] h-full hover:border-[#6D282C]/50 transition-all flex-grow">
+                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+
                         {isLoading && (
-                            <div className="absolute inset-0 bg-black/70 z-20 flex flex-col items-center justify-center rounded-lg backdrop-blur-sm">
-                                <div className="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-                                <p className="mt-4 text-lg text-cyan-300 font-semibold">AI Analyzing...</p>
+                            <div className="absolute inset-0 bg-black/80 z-20 flex flex-col items-center justify-center rounded-lg backdrop-blur-sm">
+                                <div className="w-12 h-12 border-4 border-[#6D282C] border-t-transparent rounded-full animate-spin"></div>
+                                <p className="mt-4 text-lg text-[#ff8fa3] font-semibold tracking-wider">AI ANALYZING...</p>
                             </div>
                         )}
 
-                        <div className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-gray-700 group cursor-pointer" onClick={() => patientFileInputRef.current?.click()}>
+                        <div className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-[#333333] group cursor-pointer" onClick={() => patientFileInputRef.current?.click()}>
                             {previewImage ? (
                                 <img src={previewImage} alt="Patient X-ray" className="absolute inset-0 w-full h-full object-contain" />
                             ) : (
@@ -239,36 +266,45 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                             )}
 
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span className="bg-gray-800 text-white px-4 py-2 rounded-full font-semibold text-sm shadow-lg">
-                                    {previewImage ? 'Change Image' : 'Upload Image'}
+                                <span className="bg-[#6D282C] text-white px-4 py-2 rounded-sm font-semibold text-sm shadow-lg tracking-wider">
+                                    {previewImage ? 'CHANGE IMAGE' : 'UPLOAD IMAGE'}
                                 </span>
                             </div>
                         </div>
                         <input type="file" ref={patientFileInputRef} onChange={handlePatientFileChange} accept="image/*" className="hidden" />
-                        <div className="mt-3 h-3 rounded-full w-full bg-gray-700"></div>
+                        <div className="mt-3 h-2 rounded-full w-full bg-[#333333]"></div>
                     </div>
                 </div>
             </div>
 
-            {/* Footer: Controls & Disclaimer */}
-            <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start bg-[#1e1f20] p-4 rounded-lg border border-gray-700">
-                <div className="lg:col-span-2 text-sm text-gray-400">
-                    <p className="font-bold text-gray-300 mb-1">Important Note:</p>
+            {/* Footer */}
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start relative z-10 bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg">
+                <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                <div className="lg:col-span-2 text-sm text-gray-500 relative z-10">
+                    <p className="font-bold text-[#E0E0E0] mb-1">Important Note:</p>
                     <ul className="list-disc list-inside space-y-1">
                         <li>Lateral laxity is best made out in a varus stress film or a one-leg standing film.</li>
                         <li>Lateral laxity must not be compensated for by altering bony cuts. Suitable releases must be performed on the medial side to match the stretched lateral side.</li>
                     </ul>
                 </div>
-                <div className="lg:col-span-1 flex flex-col items-end justify-center h-full">
-                    <p className="text-gray-300 text-sm mb-2 self-center lg:self-end">
-                        Selected: <span className="font-bold text-white">{userSelection || 'None'}</span>
+                <div className="lg:col-span-1 flex flex-col items-end justify-center h-full relative z-10">
+                    <p className="text-gray-400 text-sm mb-2 self-center lg:self-end">
+                        Selected: <span className="font-bold text-[#E0E0E0]">{userSelection || 'None'}</span>
                     </p>
+                    {/* Confirm Button */}
                     <button
                         onClick={handleConfirmSelection}
                         disabled={!userSelection}
-                        className="w-full lg:w-auto bg-[#6D282C] hover:bg-[#893338] disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold text-xl py-3 px-8 rounded-lg shadow-lg transition-all transform active:scale-95"
+                        className="group relative w-full lg:w-auto py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                   active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#6D282C] disabled:hover:shadow-none"
                     >
-                        Confirm Selection
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <span className="relative text-xl font-bold text-white tracking-widest">CONFIRM SELECTION</span>
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>
                 </div>
             </div>

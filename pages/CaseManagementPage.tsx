@@ -17,21 +17,22 @@ const PlannerOption: React.FC<{
 
     const style = { '--planner-color': color } as React.CSSProperties;
 
-    const disabledClasses = 'cursor-not-allowed opacity-50 bg-[#1e1f20]';
-    const enabledClasses = `cursor-pointer group gemini-dark-card hover:shadow-lg hover:shadow-[var(--planner-color)]/20 border-2 border-[var(--planner-color)] hover:scale-105`;
+    const disabledClasses = 'cursor-not-allowed opacity-40 bg-[#1a1a1a] border-gray-700';
+    const enabledClasses = `cursor-pointer group bg-[#1a1a1a] hover:bg-[#252525] border-2 border-[#333333] hover:border-[var(--planner-color)]/70 hover:shadow-[0_0_25px_rgba(109,40,44,0.15)]`;
 
     return (
         <div
             onClick={!disabled ? onClick : undefined}
-            className={`flex flex-col items-center space-y-4 p-6 rounded-xl transition-all duration-300 ${disabled ? disabledClasses : enabledClasses} h-full justify-center`}
+            className={`relative flex flex-col items-center space-y-4 p-6 rounded-lg transition-all duration-300 ${disabled ? disabledClasses : enabledClasses} h-full justify-center`}
             style={style}
         >
+            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
             <div
-                className={`h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center border-4 transition-all duration-300 ${disabled ? 'border-gray-600' : 'border-gray-700 group-hover:border-[var(--planner-color)] group-hover:bg-[var(--planner-color)]/20'}`}
+                className={`h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${disabled ? 'border-gray-700' : 'border-[#333333] group-hover:border-[var(--planner-color)] group-hover:bg-[var(--planner-color)]/10'}`}
             >
-                {React.cloneElement(icon, { className: 'h-12 w-12 md:h-20 md:w-20 text-gray-200 group-hover:text-white transition-colors duration-300' })}
+                {React.cloneElement(icon, { className: 'h-12 w-12 md:h-20 md:w-20 text-gray-300 group-hover:text-[var(--planner-color)] transition-colors duration-300' })}
             </div>
-            <p className="text-lg md:text-xl font-semibold text-center text-gray-200 transition-colors duration-300 group-hover:text-[var(--planner-color)]">{title.map(t => <span key={t} className="block">{t}</span>)}</p>
+            <p className="text-lg md:text-xl font-semibold text-center text-gray-300 transition-colors duration-300 group-hover:text-[var(--planner-color)]">{title.map(t => <span key={t} className="block">{t}</span>)}</p>
         </div>
     );
 };
@@ -43,26 +44,27 @@ const ResultTypeModal: React.FC<{
 }> = ({ isOpen, onClose, onSelect }) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div className="gemini-dark-card p-8 rounded-lg max-w-2xl text-center shadow-xl w-full relative">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-2xl text-center shadow-2xl w-full border border-[#333333]">
+                <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-bold text-gray-200 mb-8">Select Verification Type</h3>
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8">Select Verification Type</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
-                        className="p-4 rounded-lg border-2 border-[#6D282C] hover:bg-[#6D282C]/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-red-200">Long Leg Film Result Verification</span>
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Long Leg Film Result Verification</span>
                     </button>
                     <button
                         onClick={() => onSelect('valgus-stress')}
-                        className="p-4 rounded-lg border-2 border-[#8B0000] hover:bg-[#8B0000]/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-red-200">Valgus Stress Film Result Verification</span>
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Valgus Stress Film Result Verification</span>
                     </button>
                 </div>
             </div>
@@ -77,28 +79,29 @@ const ReportSelectionModal: React.FC<{
 }> = ({ isOpen, onClose, onSelect }) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div className="gemini-dark-card p-8 rounded-lg max-w-lg text-center shadow-xl w-full relative border border-gray-600">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-lg text-center shadow-2xl w-full border border-[#333333]">
+                <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-bold text-gray-200 mb-8">Select Report Type</h3>
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8">Select Report Type</h3>
                 <div className="grid grid-cols-1 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
-                        className="p-4 rounded-lg border-2 border-[#6D282C] hover:bg-[#6D282C]/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-red-200">Long Leg Film Report</span>
-                        <span className="text-sm text-gray-400">Standard varus knee analysis</span>
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Long Leg Film Report</span>
+                        <span className="text-sm text-gray-500">Standard varus knee analysis</span>
                     </button>
                     <button
                         onClick={() => onSelect('valgus-stress')}
-                        className="p-4 rounded-lg border-2 border-[#8B0000] hover:bg-[#8B0000]/30 transition flex flex-col items-center group"
+                        className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-white group-hover:text-red-200">Valgus Stress Film Report</span>
-                        <span className="text-sm text-gray-400">Valgus knee specific planning</span>
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Valgus Stress Film Report</span>
+                        <span className="text-sm text-gray-500">Valgus knee specific planning</span>
                     </button>
                 </div>
             </div>
@@ -150,43 +153,42 @@ const PlanSelectionModal: React.FC<{
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div className="gemini-dark-card p-6 rounded-lg max-w-2xl w-full relative max-h-[80vh] flex flex-col">
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-6 rounded-lg max-w-2xl w-full max-h-[80vh] flex flex-col border border-[#333333] shadow-2xl">
+                <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-bold text-gray-200 mb-6">
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-6 relative z-10">
                     {intent === 'load' ? 'Select or Create a Plan' : 'Select a Plan'}
                 </h3>
 
-                {loading && <p className="text-center text-gray-400">Loading...</p>}
+                {loading && <p className="text-center text-gray-500">Loading...</p>}
 
                 {!loading && !isCreating && (
-                    <div className="flex-grow overflow-y-auto space-y-3 mb-6">
+                    <div className="flex-grow overflow-y-auto space-y-3 mb-6 relative z-10">
                         {plans.length === 0 ? (
-                            <p className="text-gray-400 text-center">No plans found. Create one to start.</p>
+                            <p className="text-gray-500 text-center">No plans found. Create one to start.</p>
                         ) : (
                             plans.map(plan => (
                                 <button
                                     key={plan.id}
                                     onClick={() => onSelectPlan(plan.id)}
-                                    className="w-full text-left p-4 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-600 transition flex justify-between items-center group"
+                                    className="w-full text-left p-4 rounded-lg bg-[#1a1a1a] hover:bg-[#252525] border border-[#333333] hover:border-[#6D282C]/70 transition flex justify-between items-center group"
                                 >
                                     <div>
-                                        <p className="font-bold text-white text-lg">{plan.name}</p>
-
-
-                                        <div className="flex items-center space-x-2 text-sm text-gray-400">
+                                        <p className="font-bold text-gray-200 text-lg">{plan.name}</p>
+                                        <div className="flex items-center space-x-2 text-sm text-gray-500">
                                             <span>Created: {formatDate(plan.createdAt)}</span>
                                             <span>•</span>
-                                            <span className="text-indigo-300 font-medium">
+                                            <span className="text-[#6D282C] font-medium">
                                                 {plan.legSide === 'right' ? 'Right Leg' : 'Left Leg'}
                                             </span>
                                         </div>
                                     </div>
-                                    <span className="text-gray-400 opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+                                    <span className="text-gray-500 opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
                                         Load
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -199,25 +201,63 @@ const PlanSelectionModal: React.FC<{
                 )}
 
                 {isCreating && (
-                    <div className="mb-6">
-                        <label className="block text-gray-300 mb-2">Plan Name</label>
+                    <div className="mb-6 relative z-10">
+                        <label className="block text-gray-400 mb-2">Plan Name</label>
                         <input
                             value={newPlanName}
                             onChange={(e) => setNewPlanName(e.target.value)}
-                            className="gemini-dark-input w-full p-3 rounded mb-4"
+                            className="w-full p-3 rounded bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C] mb-4"
                             placeholder="e.g. Pre-op Planning 1"
                             autoFocus
                         />
-
                         <div className="flex space-x-3">
-                            <button onClick={handleCreate} disabled={!newPlanName.trim()} className="flex-1 bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold py-3 rounded disabled:opacity-50">Create Plan</button>
-                            <button onClick={() => setIsCreating(false)} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 rounded">Cancel</button>
+                            {/* Create Plan - Primary Button */}
+                            <button
+                                onClick={handleCreate}
+                                disabled={!newPlanName.trim()}
+                                className="group relative flex-1 py-3 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                           shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                                           transition-all duration-300 ease-out
+                                           hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                                           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                <span className="relative font-bold text-white tracking-wider">CREATE PLAN</span>
+                                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                            </button>
+                            {/* Cancel - Secondary Button */}
+                            <button
+                                onClick={() => setIsCreating(false)}
+                                className="group relative flex-1 py-3 bg-[#252525] border border-[#444444] rounded-sm 
+                                           shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                           transition-all duration-300 ease-out
+                                           hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                           active:scale-[0.98]"
+                            >
+                                <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                <span className="relative font-bold text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
+                                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                            </button>
                         </div>
                     </div>
                 )}
 
                 {!isCreating && !loading && intent === 'load' && (
-                    <button onClick={() => setIsCreating(true)} className="w-full bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105">+ Create New Plan</button>
+                    <button
+                        onClick={() => setIsCreating(true)}
+                        className="group relative z-10 w-full py-4 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                   active:scale-[0.98]"
+                    >
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <span className="relative text-lg font-bold text-white tracking-widest">+ CREATE NEW PLAN</span>
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    </button>
                 )}
             </div>
         </div>
@@ -488,32 +528,82 @@ const CaseManagementPage: React.FC = () => {
         ];
 
     const renderListView = () => (
-        <div className="mt-10">
+        <div className="mt-10 p-6 relative z-10">
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-3xl font-semibold">Past Cases</h3>
-                <button onClick={() => setView('main')} className="gemini-dark-button font-bold py-2 px-4 rounded-md transition text-sm flex items-center space-x-2">
-                    <span className="flex items-center gap-2">
+                <h3 className="text-3xl font-semibold text-[#E0E0E0]">Past Cases</h3>
+                <button
+                    onClick={() => setView('main')}
+                    className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
+                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                               transition-all duration-300 ease-out
+                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                               active:scale-[0.98] flex items-center"
+                >
+                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
                         </svg>
-                        Back to Planner
+                        BACK TO PLANNER
                     </span>
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                 </button>
             </div>
             <div className="space-y-4">
                 {patients.length === 0 ? (
-                    <p className="text-gray-400 text-lg">No past cases found.</p>
+                    <p className="text-gray-500 text-lg">No past cases found.</p>
                 ) : (
                     patients.map(p => (
-                        <div key={p.id} className="gemini-dark-card p-6 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center">
-                            <div>
-                                <p className="font-semibold text-2xl">{p.firstName} {p.lastName} (ID: {p.id})</p>
-                                <p className="text-lg text-gray-400 mt-2">{formatDate(p.date)}</p>
+                        <div key={p.id} className="relative bg-[#1a1a1a] border border-[#333333] p-6 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center hover:border-[#6D282C]/50 transition">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                            <div className="relative z-10">
+                                <p className="font-semibold text-2xl text-gray-200">{p.firstName} {p.lastName} (ID: {p.id})</p>
+                                <p className="text-lg text-gray-500 mt-2">{formatDate(p.date)}</p>
                             </div>
-                            <div className="flex space-x-4 mt-4 md:mt-0">
-                                <button onClick={() => selectPatient(p.id)} className="gemini-dark-button font-bold text-lg py-3 px-6 rounded-lg">Load Case</button>
-                                <button onClick={() => handleResultClick(p.id)} className="bg-gray-600 hover:bg-gray-700 font-bold text-lg py-3 px-6 rounded-lg">Result</button>
-                                <button onClick={() => handleReportClick(p.id)} className="bg-gray-600 hover:bg-gray-700 font-bold text-lg py-3 px-6 rounded-lg">Report</button>
+                            <div className="flex space-x-4 mt-4 md:mt-0 relative z-10">
+                                {/* Load Case - Primary Button */}
+                                <button
+                                    onClick={() => selectPatient(p.id)}
+                                    className="group relative py-3 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                                               transition-all duration-300 ease-out
+                                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                                               active:scale-[0.98]"
+                                >
+                                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                    <span className="relative text-lg font-bold text-white tracking-wider">LOAD CASE</span>
+                                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                </button>
+                                {/* Result - Secondary Button */}
+                                <button
+                                    onClick={() => handleResultClick(p.id)}
+                                    className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
+                                               shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                               transition-all duration-300 ease-out
+                                               hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                               active:scale-[0.98]"
+                                >
+                                    <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                    <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-white">RESULT</span>
+                                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                </button>
+                                {/* Report - Secondary Button */}
+                                <button
+                                    onClick={() => handleReportClick(p.id)}
+                                    className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
+                                               shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                               transition-all duration-300 ease-out
+                                               hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                               active:scale-[0.98]"
+                                >
+                                    <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                    <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-white">REPORT</span>
+                                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                </button>
                             </div>
                         </div>
                     ))
@@ -523,7 +613,10 @@ const CaseManagementPage: React.FC = () => {
     );
 
     return (
-        <div className="h-full overflow-y-auto">
+        <div className="relative h-full overflow-y-auto bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+            {/* Cinematic Overhead Surgical Lamp Effect */}
+            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+            <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
             {/* Modal for Legacy Flows */}
             <LdfaModeModal
                 isOpen={isLdfaModalOpen}
@@ -561,11 +654,11 @@ const CaseManagementPage: React.FC = () => {
 
             {/* Combined Long Leg Config Modal */}
             {isLongLegConfigOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="flex flex-col items-center w-full max-w-5xl space-y-6">
                         {/* Close Button */}
                         <div className="w-full flex justify-end">
-                            <button onClick={() => setIsLongLegConfigOpen(false)} className="text-gray-400 hover:text-white p-2">
+                            <button onClick={() => setIsLongLegConfigOpen(false)} className="text-gray-500 hover:text-white p-2 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -573,38 +666,40 @@ const CaseManagementPage: React.FC = () => {
                         </div>
 
                         {/* Box 1: LDFA Mode */}
-                        <div className="bg-[#2b0e10] p-6 rounded-xl border-2 border-[#6D282C] w-full shadow-2xl">
-                            <h3 className="text-2xl font-bold text-red-100 mb-6 text-center">1. Select LDFA Calculation Method</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-6 rounded-lg border border-[#6D282C]/50 w-full shadow-2xl">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                            <h3 className="text-2xl font-bold text-[#E0E0E0] mb-6 text-center relative z-10">1. Select LDFA Calculation Method</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                                 <button
                                     onClick={() => setTempLdfa('native')}
-                                    className={`p-6 rounded-lg border-2 text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'native' ? 'border-white bg-[#6D282C] text-white shadow-lg scale-[1.02]' : 'border-red-900/50 hover:bg-[#4a1a1c] text-red-200'}`}
+                                    className={`p-6 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'native' ? 'border-[#6D282C] bg-[#6D282C]/30 text-white shadow-lg' : 'border-[#333333] hover:bg-[#6D282C]/10 hover:border-[#6D282C]/50 text-gray-300'}`}
                                 >
                                     <span className="block font-bold text-2xl mb-3">Native (Uncorrected)</span>
-                                    <span className="block text-lg leading-relaxed whitespace-normal">You take the actual mechanical axis from the real hip center including coxa vara/valga.</span>
+                                    <span className="block text-lg leading-relaxed whitespace-normal text-gray-400">You take the actual mechanical axis from the real hip center including coxa vara/valga.</span>
                                 </button>
                                 <button
                                     onClick={() => setTempLdfa('corrected')}
-                                    className={`p-6 rounded-lg border-2 text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'corrected' ? 'border-white bg-[#6D282C] text-white shadow-lg scale-[1.02]' : 'border-red-900/50 hover:bg-[#4a1a1c] text-red-200'}`}
+                                    className={`p-6 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'corrected' ? 'border-[#6D282C] bg-[#6D282C]/30 text-white shadow-lg' : 'border-[#333333] hover:bg-[#6D282C]/10 hover:border-[#6D282C]/50 text-gray-300'}`}
                                 >
                                     <span className="block font-bold text-2xl mb-3">Corrected</span>
-                                    <span className="block text-lg leading-relaxed whitespace-normal">You normalize the femoral head center to eliminate coxa vara/valga effect.</span>
+                                    <span className="block text-lg leading-relaxed whitespace-normal text-gray-400">You normalize the femoral head center to eliminate coxa vara/valga effect.</span>
                                 </button>
                             </div>
                         </div>
 
                         {/* Box 2: Implant Thickness */}
-                        <div className="bg-[#1e1e1e] p-4 rounded-xl border border-gray-600 w-full shadow-2xl">
-                            <h3 className="text-xl font-bold text-gray-200 mb-4 text-center">2. Select minimum composite thickness</h3>
-                            <div className="grid grid-cols-4 gap-4">
+                        <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-4 rounded-lg border border-[#333333] w-full shadow-2xl">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10">2. Select minimum composite thickness</h3>
+                            <div className="grid grid-cols-4 gap-4 relative z-10">
                                 {[18, 19, 20, 21].map(thickness => (
                                     <button
                                         key={thickness}
                                         onClick={() => setTempThickness(thickness)}
-                                        className={`h-20 rounded-lg border-2 flex flex-col items-center justify-center transition-all ${tempThickness === thickness ? 'border-[#6D282C] bg-[#6D282C]/30 ring-1 ring-[#6D282C]' : 'border-gray-600 bg-gray-800/20 hover:bg-gray-800/40'}`}
+                                        className={`h-20 rounded-lg border flex flex-col items-center justify-center transition-all ${tempThickness === thickness ? 'border-[#6D282C] bg-[#6D282C]/30' : 'border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] hover:border-[#6D282C]/50'}`}
                                     >
-                                        <span className="text-3xl font-bold text-white">{thickness}</span>
-                                        <span className="text-sm text-red-400">mm</span>
+                                        <span className="text-3xl font-bold text-gray-200">{thickness}</span>
+                                        <span className="text-sm text-[#6D282C]">mm</span>
                                     </button>
                                 ))}
                             </div>
@@ -614,7 +709,7 @@ const CaseManagementPage: React.FC = () => {
                             <button
                                 disabled={!tempLdfa || !tempThickness}
                                 onClick={handleLongLegConfigConfirm}
-                                className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold text-lg py-3 px-8 rounded-lg shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Start Planning
                             </button>
@@ -624,17 +719,17 @@ const CaseManagementPage: React.FC = () => {
             )}
 
             {view === 'list' ? renderListView() : (
-                <>
-                    <h2 className="text-5xl font-bold mb-8 text-start">Surgical Planner</h2>
+                <div className="p-6 relative z-10">
+                    <h2 className="text-5xl font-bold mb-8 text-start text-[#E0E0E0]">Surgical Planner</h2>
                     <div className="flex justify-center">
-                        <div className="gemini-dark-card p-4 rounded-lg mb-10 w-full max-w-6xl">
-                            <h3 className="text-2xl font-semibold mb-2 text-gray-200 text-center">
+                        <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg mb-10 w-full max-w-6xl">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                            <h3 className="text-2xl font-semibold mb-2 text-[#E0E0E0] text-center relative z-10">
                                 Patient Details
                             </h3>
                             <form
                                 onSubmit={handleSubmit}
-                                className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end 
-                       max-w-4xl mx-auto justify-items-center"
+                                className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end max-w-4xl mx-auto justify-items-center relative z-10"
                             >
                                 <div className="md:col-span-3 w-full">
                                     <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
@@ -645,7 +740,7 @@ const CaseManagementPage: React.FC = () => {
                                         id="firstName"
                                         value={formData.firstName}
                                         onChange={handleInputChange}
-                                        className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg"
+                                        className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]"
                                         placeholder="Enter full name"
                                         required
                                     />
@@ -661,7 +756,7 @@ const CaseManagementPage: React.FC = () => {
                                         value={currentPatientId ? formData.id : suggestedId}
                                         onChange={handleInputChange}
                                         disabled={!!currentPatientId}
-                                        className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg bg-gray-800"
+                                        className="w-full h-14 p-3 rounded-md text-lg bg-[#1a1a1a] border border-[#333333] text-gray-400"
                                         placeholder="Auto-generated ID"
                                         required
                                     />
@@ -676,16 +771,26 @@ const CaseManagementPage: React.FC = () => {
                                         id="date"
                                         value={formData.date}
                                         onChange={handleInputChange}
-                                        className="gemini-dark-input w-full h-14 p-3 rounded-md text-lg"
+                                        className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]"
                                     />
                                 </div>
 
                                 <div className="md:col-span-3 w-full">
                                     <button
                                         type="submit"
-                                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105 w-full"
+                                        className="group relative w-full py-4 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                                   transition-all duration-300 ease-out
+                                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                                   active:scale-[0.98]"
                                     >
-                                        {isPatientSelected ? 'Update Details' : 'Save Details'}
+                                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                        <span className="relative text-lg font-bold text-white tracking-widest transition-colors">
+                                            {isPatientSelected ? 'UPDATE DETAILS' : 'SAVE DETAILS'}
+                                        </span>
+                                        {/* Corner Accents for Technical Feel */}
+                                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                     </button>
                                 </div>
                             </form>
@@ -693,8 +798,8 @@ const CaseManagementPage: React.FC = () => {
                     </div>
 
                     {!isPlanSelected && (
-                        <div className="text-center p-4 mb-6 bg-yellow-900/50 border border-yellow-700 rounded-lg">
-                            <p className="text-yellow-300 text-lg">
+                        <div className="text-center p-4 mb-6 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                            <p className="text-[#ff8fa3] text-lg">
                                 {currentPatientId ? 'Please select a plan to continue.' : 'Please enter and save patient details to begin planning.'}
                             </p>
                         </div>
@@ -712,7 +817,7 @@ const CaseManagementPage: React.FC = () => {
                             />
                         ))}
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
