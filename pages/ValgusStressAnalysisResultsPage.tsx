@@ -7,13 +7,13 @@ const BoundarySelector: React.FC<{
     title: string;
     range: string;
 }> = ({ title, range }) => (
-    <div className="p-2 border-2 rounded-lg flex items-center justify-between border-cyan-400 bg-cyan-900/30 ring-2 ring-cyan-400/50">
+    <div className="p-2 border-2 rounded-lg flex items-center justify-between border-[#6D282C] bg-[#6D282C]/20 ring-2 ring-[#6D282C]/50">
         <div>
             <p className="font-semibold text-sm text-gray-100">{title}</p>
-            <p className="text-gray-300 text-xs">{range}</p>
+            <p className="text-gray-400 text-xs">{range}</p>
         </div>
-        <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 bg-cyan-400 border-cyan-300">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-black" viewBox="0 0 20 20" fill="currentColor">
+        <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 bg-[#6D282C] border-[#893338]">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
         </div>
@@ -33,7 +33,7 @@ const CpakDiagram: React.FC<{ cpakType: string | null }> = ({ cpakType }) => {
         'VIII': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 15 60 M 10 32 L 20 28" /><path d="M 45 0 L 45 60 M 50 32 L 40 28" /></g></svg>,
         'IX': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 32 L 20 28" /><path d="M 40 0 L 45 30 L 40 60 M 50 32 L 40 28" /></g></svg>,
     };
-    return <div className="h-20 w-20 md:h-24 md:w-24 text-yellow-400">{diagrams[cpakType] || null}</div>;
+    return <div className="h-20 w-20 md:h-24 md:w-24 text-[#ff8fa3]">{diagrams[cpakType] || null}</div>;
 };
 
 
@@ -60,7 +60,7 @@ const ImageUploadBox: React.FC<{
     } else if (transparent) {
         containerClasses += "hover:bg-white/5";
     } else {
-        containerClasses += "border-2 border-dashed border-gray-500 bg-black/40 hover:bg-black/60 hover:border-gray-300";
+        containerClasses += "border-2 border-dashed border-[#333333] bg-black/40 hover:bg-black/60 hover:border-[#6D282C]/50";
     }
 
     return (
@@ -73,10 +73,10 @@ const ImageUploadBox: React.FC<{
                 <img src={imageSrc} className="w-full h-full object-contain rounded-xl" alt="Step Upload" />
             ) : (
                 <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-12 w-12 mb-2 ${transparent || seamless ? 'text-gray-300 opacity-50' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-12 w-12 mb-2 ${transparent || seamless ? 'text-gray-300 opacity-50' : 'text-gray-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span className={`text-sm text-center px-2 ${transparent || seamless ? 'text-gray-300 opacity-70' : 'text-gray-400'}`}>Upload Reference</span>
+                    <span className={`text-sm text-center px-2 ${transparent || seamless ? 'text-gray-300 opacity-70' : 'text-gray-500'}`}>Upload Reference</span>
                 </>
             )}
             {imageSrc && onImageChange && (
@@ -102,35 +102,13 @@ const StepCard: React.FC<{
     transparentImage?: boolean;
     seamlessImage?: boolean;
 }> = ({ step, title, value, subTitle, subValue, colorTheme, imageSrc, setImageSrc, className = "", hideStepBadge, transparentImage, seamlessImage }) => {
-    let theme;
-    switch (colorTheme) {
-        case 'yellow':
-            theme = {
-                bg: 'bg-yellow-600/10',
-                border: 'border-yellow-600/30',
-                text: 'text-yellow-200',
-                badge: 'bg-yellow-900/40 text-yellow-100 border border-yellow-700/50'
-            };
-            break;
-        case 'pink':
-            theme = {
-                bg: 'bg-rose-600/10',
-                border: 'border-rose-600/30',
-                text: 'text-rose-200',
-                badge: 'bg-rose-900/40 text-rose-100 border border-rose-700/50'
-            };
-            break;
-        case 'blue':
-            theme = {
-                bg: 'bg-sky-600/10',
-                border: 'border-sky-600/30',
-                text: 'text-sky-200',
-                badge: 'bg-sky-900/40 text-sky-100 border border-sky-700/50'
-            };
-            break;
-        default:
-            theme = { bg: 'bg-gray-800/30', border: 'border-gray-700', text: 'text-gray-300', badge: 'bg-gray-700 text-gray-200' };
-    }
+    // Using maroon theme for all cards (matching ResultAnalysisPage)
+    const theme = {
+        bg: 'bg-[#6D282C]/10',
+        border: 'border-[#6D282C]/30',
+        text: 'text-[#ff8fa3]',
+        badge: 'bg-[#6D282C]/40 text-[#ff8fa3] border border-[#6D282C]/50'
+    };
 
     return (
         <div className={`${theme.bg} border-2 ${theme.border} rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3 ${className}`}>
@@ -139,8 +117,8 @@ const StepCard: React.FC<{
                 <h4 className="text-base text-gray-200 font-bold mb-1 leading-tight">{title}</h4>
                 <div className={`text-xl font-extrabold ${theme.text} mb-1`}>{value}</div>
 
-                {subTitle && <p className="text-xs text-gray-300 mt-0.5 font-medium">{subTitle}</p>}
-                {subValue && <div className={`text-xl font-extrabold ${theme.text} mt-1 border-2 border-dashed border-gray-600 inline-block px-2 py-1 rounded-lg shadow-md bg-black/20`}>{subValue}</div>}
+                {subTitle && <p className="text-xs text-gray-400 mt-0.5 font-medium">{subTitle}</p>}
+                {subValue && <div className={`text-xl font-extrabold ${theme.text} mt-1 border-2 border-dashed border-[#333333] inline-block px-2 py-1 rounded-lg shadow-md bg-black/20`}>{subValue}</div>}
             </div>
             {(imageSrc || setImageSrc) && (
                 <div className="flex flex-col justify-center">
@@ -179,41 +157,58 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
     const recommendedFemoralCut = valgusResults.cut || '--';
 
     return (
-        <div className="h-full flex flex-col overflow-hidden">
-            <div className="flex justify-between items-center mb-2 no-print">
-                <h2 className="text-4xl font-bold">Valgus Stress Analysis</h2>
-                <button onClick={() => setPage('planner-valgus-stress')} className="gemini-dark-button font-bold py-2 px-4 rounded-md transition text-sm flex items-center space-x-2">
-                    <span className="flex items-center gap-2">
+        <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+            {/* Cinematic Lighting */}
+            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+            <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
+
+            <div className="flex justify-between items-center mb-2 no-print p-4 relative z-10">
+                <h2 className="text-4xl font-bold text-[#E0E0E0]">Valgus Stress Analysis</h2>
+                {/* Back Button */}
+                <button
+                    onClick={() => setPage('planner-valgus-stress')}
+                    className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
+                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                               transition-all duration-300 ease-out
+                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                               active:scale-[0.98] flex items-center"
+                >
+                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
                         </svg>
-                        Back
+                        BACK
                     </span>
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-grow min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-grow min-h-0 px-4 relative z-10">
 
                 {/* Column 1: Image (Reduced Width ~25%) */}
-                <div className="lg:col-span-3 gemini-dark-card p-2 rounded-lg flex items-center justify-center min-h-[300px] lg:min-h-0 bg-black text-center">
+                <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center min-h-[300px] lg:min-h-0 bg-black text-center">
+                    <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     {valgusCanvasDataUrl ?
-                        <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="max-w-full max-h-full object-contain rounded-md" /> :
-                        <p className="text-gray-500 text-lg">No analysis image.</p>
+                        <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="max-w-full max-h-full object-contain rounded-md relative z-10" /> :
+                        <p className="text-gray-500 text-lg relative z-10">No analysis image.</p>
                     }
                 </div>
 
                 {/* Column 2: Data & Matrix (Medium Width ~33%) */}
                 <div className="lg:col-span-4 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     {/* Results Box - Compact Horizontal */}
-                    <div className="gemini-dark-card p-2 rounded-lg flex flex-row items-center justify-around min-h-0 shrink-0">
-                        <div className="text-center border-r border-gray-700 pr-4">
-                            <p className="text-gray-400 text-xs uppercase tracking-wider mb-0.5">Femur Type</p>
-                            <p className="font-bold text-lg text-yellow-400">{valgusResults.femurType}</p>
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-row items-center justify-around min-h-0 shrink-0">
+                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                        <div className="text-center border-r border-[#333333] pr-4 relative z-10">
+                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Femur Type</p>
+                            <p className="font-bold text-lg text-[#ff8fa3]">{valgusResults.femurType}</p>
                         </div>
-                        <div className="text-center flex flex-col items-center pl-4">
-                            <p className="text-gray-400 text-xs uppercase tracking-wider mb-0.5">CPAK Type</p>
+                        <div className="text-center flex flex-col items-center pl-4 relative z-10">
+                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">CPAK Type</p>
                             <div className="flex flex-row items-center gap-2">
-                                <p className="font-bold text-xl text-yellow-400 leading-none">CPAK {valgusResults.cpak}</p>
+                                <p className="font-bold text-xl text-[#ff8fa3] leading-none">CPAK {valgusResults.cpak}</p>
                                 <div className="scale-50 transform origin-center -my-2">
                                     <CpakDiagram cpakType={valgusResults.cpak} />
                                 </div>
@@ -223,13 +218,14 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
                     {/* Matrix Selectors - STATIC FOR VALGUS */}
                     <div className="flex-grow flex flex-col gap-2 min-h-0">
-                        <div className="bg-yellow-900/40 border border-yellow-700/50 rounded-lg p-1.5 text-center shrink-0">
-                            <p className="text-yellow-300 text-xs font-bold uppercase tracking-wider">Only Basic Matrix is possible</p>
+                        <div className="bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg p-1.5 text-center shrink-0">
+                            <p className="text-[#ff8fa3] text-xs font-bold uppercase tracking-wider">Only Basic Matrix is possible</p>
                         </div>
 
-                        <div className="gemini-dark-card p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
-                            <h3 className="text-center font-bold text-lg text-gray-200 mb-2">Distal Femur cut</h3>
-                            <div className="mt-1">
+                        <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10">Distal Femur cut</h3>
+                            <div className="mt-1 relative z-10">
                                 <BoundarySelector
                                     title="Basic matrix"
                                     range="3-5 deg"
@@ -237,9 +233,10 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="gemini-dark-card p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
-                            <h3 className="text-center font-bold text-lg text-gray-200 mb-2">Proximal tibial cut</h3>
-                            <div className="mt-1">
+                        <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10">Proximal tibial cut</h3>
+                            <div className="mt-1 relative z-10">
                                 <BoundarySelector
                                     title="Basic matrix"
                                     range="0-3 deg varus"
@@ -251,7 +248,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
                 {/* Column 3: Steps & Recommendations (Widest ~42%) */}
                 <div className="lg:col-span-5 flex flex-col gap-3 min-h-0 overflow-y-auto">
-                    <div className="gemini-dark-card p-1 rounded-lg bg-transparent flex-grow flex flex-col gap-3 min-h-0">
+                    <div className="p-1 rounded-lg bg-transparent flex-grow flex flex-col gap-3 min-h-0">
                         <h3 className="text-2xl font-bold text-gray-100 text-center hidden">Recommendations</h3>
 
                         {/* STEP 1 */}
@@ -290,14 +287,22 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
             </div>
 
             {/* Footer Section */}
-            <div className="mt-auto pt-3 space-y-2 pb-4">
+            <div className="mt-auto pt-3 space-y-2 pb-4 px-4 relative z-10">
                 <div className="flex justify-end w-full">
+                    {/* Proceed Button */}
                     <button
                         onClick={() => setPage('planner-valgus-stress-coronal-balancing')}
-                        className="bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold text-lg py-3 px-8 rounded-full shadow-xl transition transform hover:scale-105"
                         disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
+                        className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                   active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Proceed to Coronal Balancing
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <span className="relative text-lg font-bold text-white tracking-widest">PROCEED TO CORONAL BALANCING</span>
+                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>
                 </div>
             </div>
