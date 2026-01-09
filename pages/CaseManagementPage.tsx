@@ -80,7 +80,7 @@ const ReportSelectionModal: React.FC<{
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-lg text-center shadow-2xl w-full border border-[#333333]">
+            <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-2xl text-center shadow-2xl w-full border border-[#333333]">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,20 +88,18 @@ const ReportSelectionModal: React.FC<{
                     </svg>
                 </button>
                 <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8">Select Report Type</h3>
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
                         className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
                         <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Long Leg Film Report</span>
-                        <span className="text-sm text-gray-500">Standard varus knee analysis</span>
                     </button>
                     <button
                         onClick={() => onSelect('valgus-stress')}
                         className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
                         <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Valgus Stress Film Report</span>
-                        <span className="text-sm text-gray-500">Valgus knee specific planning</span>
                     </button>
                 </div>
             </div>
@@ -778,7 +776,7 @@ const CaseManagementPage: React.FC = () => {
                                 <div className="md:col-span-3 w-full">
                                     <button
                                         type="submit"
-                                        className="group relative w-full py-4 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                        className="group relative w-full h-14 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
                                                    shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                                    transition-all duration-300 ease-out
                                                    hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
