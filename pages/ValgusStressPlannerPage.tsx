@@ -58,7 +58,7 @@ const getFemurClassification = (ldfa: number) => {
   if (ldfa > 86) return { type: 'Significant valgoid femur', cut: '6° valgus cut' };
   return {
     type: 'Significant valgoid femur',
-    cut: '6° valgus cut (Warning: Native LDFA out of boundary)'
+    cut: '6° valgus cut (Native LDFA out of boundary)'
   };
 };
 
@@ -70,7 +70,7 @@ const getTibiaClassification = (mpta: number) => {
   if (mpta > 84) return { type: 'Significant varoid tibia', cut: '4° varus cut' };
   return {
     type: 'Significant varoid tibia',
-    cut: '4° varus cut (Warning: Native MPTA out of boundary)'
+    cut: '4° varus cut (Native MPTA out of boundary)'
   };
 };
 
@@ -269,24 +269,24 @@ const CameraModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-800 p-4 rounded-lg relative w-full max-w-3xl text-center">
+      <div className="bg-[#1e1f20] border border-[#6D282C] p-4 rounded-lg relative w-full max-w-3xl text-center">
         {!capturedImage ? (
           <>
             <h3 className="text-xl font-semibold mb-4">Live Capture with Alignment Grid</h3>
-            <div className="relative inline-block border-2 border-gray-600">
+            <div className="relative inline-block border-2 border-[#6D282C]">
               <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto rounded"></video>
               <canvas ref={overlayRef} className="absolute top-0 left-0 w-full h-full"></canvas>
             </div>
             <div className="mt-4 flex justify-center space-x-4">
-              <button onClick={handleCapture} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Capture</button>
-              <button onClick={handleClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
+              <button onClick={handleCapture} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Capture</button>
+              <button onClick={handleClose} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
             </div>
           </>
         ) : (
           <>
             <h3 className="text-xl font-semibold mb-4">Crop Captured Image</h3>
             <div
-              className="relative inline-block border-2 border-yellow-500 overflow-hidden select-none touch-none"
+              className="relative inline-block border-2 border-[#893338] overflow-hidden select-none touch-none"
               onMouseMove={handleCropMouseMove}
               onTouchMove={handleCropMouseMove}
               onMouseUp={() => setActiveInteraction(null)}
@@ -305,16 +305,16 @@ const CameraModal: React.FC<{
                   height: `${cropRect.height}%`
                 }}
               >
-                <div className="absolute -top-3 -left-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-nw-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'tl')} onTouchStart={(e) => handleCropMouseDown(e, 'tl')} />
-                <div className="absolute -top-3 -right-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-ne-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'tr')} onTouchStart={(e) => handleCropMouseDown(e, 'tr')} />
-                <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-sw-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'bl')} onTouchStart={(e) => handleCropMouseDown(e, 'bl')} />
-                <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-yellow-400 border-2 border-white rounded-full cursor-se-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'br')} onTouchStart={(e) => handleCropMouseDown(e, 'br')} />
+                <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-nw-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'tl')} onTouchStart={(e) => handleCropMouseDown(e, 'tl')} />
+                <div className="absolute -top-3 -right-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-ne-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'tr')} onTouchStart={(e) => handleCropMouseDown(e, 'tr')} />
+                <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-sw-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'bl')} onTouchStart={(e) => handleCropMouseDown(e, 'bl')} />
+                <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-se-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'br')} onTouchStart={(e) => handleCropMouseDown(e, 'br')} />
               </div>
             </div>
             <div className="mt-4 flex justify-center space-x-4">
-              <button onClick={handleCropSave} className="gemini-dark-button font-bold py-3 px-8 rounded-lg">Finalize Crop</button>
-              <button onClick={() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); }} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg">Retake</button>
-              <button onClick={handleClose} className="bg-[#5D4037] hover:bg-[#3E2723] text-white font-bold py-3 px-8 rounded-lg">Cancel</button>
+              <button onClick={handleCropSave} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Finalize Crop</button>
+              <button onClick={() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); }} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Retake</button>
+              <button onClick={handleClose} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
             </div>
           </>
         )}

@@ -80,7 +80,7 @@ const getFemurClassification = (ldfa: number) => {
     if (ldfa > 86) return { type: 'Significant valgoid femur', cut: '6° valgus cut' };
     return {
         type: 'Significant valgoid femur',
-        cut: '6° valgus cut (Warning: Native LDFA out of boundary)'
+        cut: '6° valgus cut (Native LDFA out of boundary)'
     };
 };
 

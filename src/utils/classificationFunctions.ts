@@ -67,7 +67,7 @@ export const getLongLegValgusCut = (ldfa: number | null): string => {
     if (ldfa > 88) return '4° valgus cut';
     if (ldfa > 87) return '5° valgus cut';
     if (ldfa > 86) return '6° valgus cut';
-    return '6° valgus cut (Warning: Native LDFA out of boundary)';
+    return '6° valgus cut (Native LDFA out of boundary)';
 };
 
 /**
@@ -83,7 +83,7 @@ export const getRecommendedVarusCut = (mpta: number | null): string => {
     if (mpta > 87) return '2° varus cut';
     if (mpta > 85) return '3° varus cut';
     if (mpta > 84) return '4° varus cut';
-    return '4° varus cut (Warning: Native MPTA out of boundary)';
+    return '4° varus cut (Native MPTA out of boundary)';
 };
 
 /**

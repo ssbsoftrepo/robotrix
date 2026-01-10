@@ -123,7 +123,7 @@ describe('Valgus Cut Recommendation', () => {
             { id: 'TC-CUT-08', ldfa: 87.5, condition: '> 87', expected: '5° valgus cut' },
             { id: 'TC-CUT-09', ldfa: 87, condition: '= 87 (becomes 6°)', expected: '6° valgus cut' },
             { id: 'TC-CUT-10', ldfa: 86.5, condition: '> 86', expected: '6° valgus cut' },
-            { id: 'TC-CUT-11', ldfa: 86, condition: '<= 86 (warning)', expected: '6° valgus cut (Warning: Native LDFA out of boundary)' },
+            { id: 'TC-CUT-11', ldfa: 86, condition: '<= 86 (warning)', expected: '6° valgus cut (Native LDFA out of boundary)' },
         ];
 
         test.each(valgusCutTestCases)(
@@ -171,7 +171,7 @@ describe('Varus Cut Recommendation', () => {
             { id: 'TC-VAR-08', mpta: 86.9, condition: '> 85', expected: '3° varus cut' },
             { id: 'TC-VAR-09', mpta: 85, condition: '= 85 (becomes 4°)', expected: '4° varus cut' },
             { id: 'TC-VAR-10', mpta: 84.5, condition: '> 84', expected: '4° varus cut' },
-            { id: 'TC-VAR-11', mpta: 84, condition: '<= 84 (warning)', expected: '4° varus cut (Warning: Native MPTA out of boundary)' },
+            { id: 'TC-VAR-11', mpta: 84, condition: '<= 84 (warning)', expected: '4° varus cut (Native MPTA out of boundary)' },
         ];
 
         test.each(varusCutTestCases)(

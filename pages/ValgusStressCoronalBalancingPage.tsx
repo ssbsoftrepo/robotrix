@@ -139,9 +139,16 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <button
                             onClick={() => setPage('planner-valgus-stress-laxity-check')}
-                            className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-2 px-4 rounded-sm transition text-sm shadow-lg relative z-10 tracking-wider"
+                            className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                       shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                                       transition-all duration-300 ease-out
+                                       hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                                       active:scale-[0.98] z-10"
                         >
-                            CHECK LATERAL LAXITY
+                            <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                            <span className="relative text-sm font-bold text-white tracking-wider">CHECK LATERAL LAXITY</span>
+                            <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                            <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                         </button>
                         <div className="text-right relative z-10">
                             <span className="text-gray-500 text-xs uppercase font-bold tracking-wider mr-2">Laxity Level:</span>

@@ -236,9 +236,16 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 <p className="text-gray-500 text-xs text-center">Laxity Status: <span className="text-white font-bold">{lateralLaxity || 'Unknown'}</span></p>
                                 <button
                                     onClick={applyLateralLaxity}
-                                    className="w-full bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-2 rounded-lg shadow-lg transition-colors text-sm tracking-wider"
+                                    className="group relative w-full py-2 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                                               transition-all duration-300 ease-out
+                                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                                               active:scale-[0.98]"
                                 >
-                                    APPLY LATERAL LAXITY
+                                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                    <span className="relative text-sm font-bold text-white tracking-wider">APPLY LATERAL LAXITY</span>
+                                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                 </button>
                             </div>
                         </div>
