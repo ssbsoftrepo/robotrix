@@ -62,11 +62,12 @@ export const getLongLegCpakType = (ahka: number, jlo: number): string => {
  */
 export const getLongLegValgusCut = (ldfa: number | null): string => {
     if (ldfa === null) return '--';
-    if (ldfa >= 92) return '2° valgus cut';
-    if (ldfa >= 91) return '3° valgus cut';
-    if (ldfa >= 88) return '4° valgus cut';
-    if (ldfa >= 87) return '5° valgus cut';
-    return '6° valgus cut';
+    if (ldfa > 92) return '2° valgus cut';
+    if (ldfa > 91) return '3° valgus cut';
+    if (ldfa > 88) return '4° valgus cut';
+    if (ldfa > 87) return '5° valgus cut';
+    if (ldfa > 86) return '6° valgus cut';
+    return '6° valgus cut (Warning: Native LDFA out of boundary)';
 };
 
 /**
@@ -77,12 +78,12 @@ export const getLongLegValgusCut = (ldfa: number | null): string => {
  */
 export const getRecommendedVarusCut = (mpta: number | null): string => {
     if (mpta === null) return '--';
-    if (mpta >= 89) return '0° (neutral cut)';
-    if (mpta >= 88 && mpta < 89) return '1° varus cut';
-    if (mpta >= 87 && mpta < 88) return '2° varus cut';
-    if (mpta >= 85 && mpta < 87) return '3° varus cut';
-    if (mpta < 85) return '4° varus cut';
-    return '--';
+    if (mpta > 89) return '0° (neutral cut)';
+    if (mpta > 88) return '1° varus cut';
+    if (mpta > 87) return '2° varus cut';
+    if (mpta > 85) return '3° varus cut';
+    if (mpta > 84) return '4° varus cut';
+    return '4° varus cut (Warning: Native MPTA out of boundary)';
 };
 
 /**

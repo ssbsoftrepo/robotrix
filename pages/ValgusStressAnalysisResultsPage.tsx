@@ -202,8 +202,12 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-row items-center justify-around min-h-0 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <div className="text-center border-r border-[#333333] pr-4 relative z-10">
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Femur Type</p>
-                            <p className="font-bold text-lg text-[#ff8fa3]">{valgusResults.femurType}</p>
+                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Femur Type (LDFA)</p>
+                            <p className="font-bold text-sm text-[#ff8fa3]">{valgusResults.femurType}</p>
+                        </div>
+                        <div className="text-center border-r border-[#333333] px-4 relative z-10">
+                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Femur Type (Obliquity)</p>
+                            <p className="font-bold text-lg text-[#ff8fa3]">{valgusResults.femurTypeByObliquity}</p>
                         </div>
                         <div className="text-center flex flex-col items-center pl-4 relative z-10">
                             <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">CPAK Type</p>

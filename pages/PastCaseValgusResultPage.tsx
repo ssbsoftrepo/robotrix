@@ -72,6 +72,18 @@ const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
     return angle;
 };
 
+const getFemurClassification = (ldfa: number) => {
+    if (ldfa > 92) return { type: 'Significant varoid femur', cut: '2° valgus cut' };
+    if (ldfa > 91) return { type: 'Mild varoid femur', cut: '3° valgus cut' };
+    if (ldfa > 88) return { type: 'Median (neutral) femur', cut: '4° valgus cut' };
+    if (ldfa > 87) return { type: 'Mild valgoid femur', cut: '5° valgus cut' };
+    if (ldfa > 86) return { type: 'Significant valgoid femur', cut: '6° valgus cut' };
+    return {
+        type: 'Significant valgoid femur',
+        cut: '6° valgus cut (Warning: Native LDFA out of boundary)'
+    };
+};
+
 const PostOpValgusPlanner: React.FC = () => {
     const {
         postOpValgusImage,
@@ -135,7 +147,7 @@ const PostOpValgusPlanner: React.FC = () => {
 
     const updateCalculations = useCallback(() => {
         const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = landmarks;
-        let newResults: Partial<ValgusResults> = { obliquity: null, ldfa: null, mpta: null, femurType: '--', cpak: '--' };
+        let newResults: Partial<ValgusResults> = { obliquity: null, ldfa: null, mpta: null, femurType: '--', femurTypeByObliquity: '--', cpak: '--', cut: '--' };
 
         let jointCenter: Point | null = null;
         if (medialJointSpace && lateralJointSpace) {
@@ -177,13 +189,20 @@ const PostOpValgusPlanner: React.FC = () => {
 
         if (newResults.ldfa !== null && newResults.mpta !== null) {
             newResults.cpak = getLongLegCpakType(newResults.mpta - newResults.ldfa, newResults.mpta + newResults.ldfa);
+
+            // LDFA-based classification
+            const femurClass = getFemurClassification(newResults.ldfa);
+            newResults.femurType = femurClass.type;
+            newResults.cut = femurClass.cut;
+
+            // Obliquity-based classification
             if (newResults.obliquity !== null) {
                 if (newResults.obliquity >= 3) {
-                    newResults.femurType = 'Valgoid';
+                    newResults.femurTypeByObliquity = 'Valgoid';
                 } else if (newResults.obliquity >= 1) {
-                    newResults.femurType = 'Median';
+                    newResults.femurTypeByObliquity = 'Median';
                 } else {
-                    newResults.femurType = 'Varoid';
+                    newResults.femurTypeByObliquity = 'Varoid';
                 }
             }
         }
@@ -486,18 +505,22 @@ const PostOpValgusPlanner: React.FC = () => {
                 </div>
             </div>
             {/* Results */}
-            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+            <div className="mt-4 grid grid-cols-4 gap-2 text-center">
                 <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
-                    <p className="text-sm text-[#ff8fa3] font-bold uppercase">Distal Obliquity</p>
-                    <p className="font-bold text-2xl text-[#ff8fa3]">{results.obliquity?.toFixed(1) ?? '--'}°</p>
+                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">Obliquity</p>
+                    <p className="font-bold text-xl text-[#ff8fa3]">{results.obliquity?.toFixed(1) ?? '--'}°</p>
                 </div>
                 <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
-                    <p className="text-sm text-[#ff8fa3] font-bold uppercase">Femur Type</p>
-                    <p className="font-bold text-2xl text-[#ff8fa3]">{results.femurType ?? '--'}</p>
+                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">Femur (LDFA)</p>
+                    <p className="font-bold text-sm text-[#ff8fa3]">{results.femurType ?? '--'}</p>
                 </div>
                 <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
-                    <p className="text-sm text-[#ff8fa3] font-bold uppercase">CPAK Type</p>
-                    <p className="font-bold text-2xl text-[#ff8fa3]">{results.cpak ?? '--'}</p>
+                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">Femur (Obliq)</p>
+                    <p className="font-bold text-xl text-[#ff8fa3]">{results.femurTypeByObliquity ?? '--'}</p>
+                </div>
+                <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
+                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">CPAK Type</p>
+                    <p className="font-bold text-xl text-[#ff8fa3]">{results.cpak ?? '--'}</p>
                 </div>
             </div>
         </div>
@@ -553,9 +576,10 @@ const PastCaseValgusResultPage: React.FC = () => {
                             <p className="text-gray-500 italic">No pre-op image available.</p>
                         }
                     </div>
-                    <div className="mt-auto grid grid-cols-3 gap-3 text-center relative z-10">
-                        <ResultItem label="Distal Obliquity" value={valgusResults.obliquity?.toFixed(1) + '°'} />
-                        <ResultItem label="Femur Type" value={valgusResults.femurType} />
+                    <div className="mt-auto grid grid-cols-4 gap-2 text-center relative z-10">
+                        <ResultItem label="Obliquity" value={valgusResults.obliquity?.toFixed(1) + '°'} />
+                        <ResultItem label="Femur (LDFA)" value={valgusResults.femurType} />
+                        <ResultItem label="Femur (Obliq)" value={valgusResults.femurTypeByObliquity} />
                         <ResultItem label="CPAK Type" value={valgusResults.cpak} />
                     </div>
                 </div>

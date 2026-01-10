@@ -471,6 +471,7 @@ const ValgusStressPlannerPage: React.FC = () => {
       ldfa: null as number | null,
       mpta: null as number | null,
       femurType: '--',
+      femurTypeByObliquity: '--',
       tibiaType: '--',
       cpak: '--',
       ahka: null as number | null,
@@ -556,10 +557,19 @@ const ValgusStressPlannerPage: React.FC = () => {
       const calculatedJlo = newResults.mpta + newResults.ldfa;
       newResults.jlo = calculatedJlo;
 
-      // Femur Classification
+      // Femur Classification (LDFA-based)
       const femurClass = getFemurClassification(newResults.ldfa);
       newResults.femurType = femurClass.type;
       newResults.cut = femurClass.cut;
+
+      // Femur Classification (Obliquity-based)
+      if (newResults.obliquity >= 3) {
+        newResults.femurTypeByObliquity = 'Valgoid';
+      } else if (newResults.obliquity >= 1) {
+        newResults.femurTypeByObliquity = 'Median';
+      } else {
+        newResults.femurTypeByObliquity = 'Varoid';
+      }
 
       // Tibia Classification
       const tibiaClass = getTibiaClassification(newResults.mpta);
@@ -1216,22 +1226,49 @@ const ValgusStressPlannerPage: React.FC = () => {
           {/* VALIDATION MESSAGE */}
           {(() => {
             const { ldfa, mpta } = valgusResults;
+            const warnings: string[] = [];
+
+            // Check for out-of-boundary LDFA
+            if (ldfa !== null && ldfa <= 86) {
+              warnings.push('Native LDFA out of boundary – some release anticipated.');
+            }
+
+            // Check for out-of-boundary MPTA
+            if (mpta !== null && mpta <= 84) {
+              warnings.push('Native MPTA out of boundary – some release anticipated.');
+            }
+
+            // Check for high-risk anatomy
             if (ldfa !== null && mpta !== null) {
               const validation = validateMeasurements(ldfa, mpta);
-              if (validation.status !== 'success') {
+              if (validation.status === 'error') {
                 return (
-                  <div className={`p-3 rounded border flex items-start gap-3 ${validation.status === 'error'
-                    ? 'bg-red-900/40 border-red-500/50 text-red-100'
-                    : 'bg-amber-900/40 border-amber-500/50 text-amber-100'
-                    }`}>
-                    <span className="text-xl">{validation.status === 'error' ? '⛔' : '⚠️'}</span>
+                  <div className="p-3 rounded border flex items-start gap-3 bg-red-900/40 border-red-500/50 text-red-100">
+                    <span className="text-xl">⛔</span>
                     <div>
-                      <p className="font-bold uppercase text-sm tracking-wide">{validation.status === 'error' ? 'Critical Error' : 'Warning'}</p>
+                      <p className="font-bold uppercase text-sm tracking-wide">Critical Error</p>
                       <p className="text-sm font-medium opacity-90">{validation.msg}</p>
                     </div>
                   </div>
                 );
               }
+              if (validation.status === 'warning') {
+                warnings.push(validation.msg);
+              }
+            }
+
+            if (warnings.length > 0) {
+              return (
+                <div className="p-3 rounded border flex items-start gap-3 bg-amber-900/40 border-amber-500/50 text-amber-100">
+                  <span className="text-xl">⚠️</span>
+                  <div className="space-y-1">
+                    <p className="font-bold uppercase text-sm tracking-wide">Warning</p>
+                    {warnings.map((msg, idx) => (
+                      <p key={idx} className="text-sm font-medium opacity-90">{msg}</p>
+                    ))}
+                  </div>
+                </div>
+              );
             }
             return null;
           })()}

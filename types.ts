@@ -36,7 +36,8 @@ export interface LongLegResults {
 
 export interface ValgusResults {
     obliquity: number | null;
-    femurType: string;
+    femurType: string;           // LDFA-based classification
+    femurTypeByObliquity: string; // Obliquity-based classification (Valgoid/Median/Varoid)
     cpak: string;
     cut: string;
     ldfa: number | null;

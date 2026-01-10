@@ -97,21 +97,22 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
 
 const getLongLegValgusCut = (ldfa: number | null): string => {
     if (ldfa === null) return '--';
-    if (ldfa >= 92) return '2° valgus cut';
-    if (ldfa >= 91) return '3° valgus cut';
-    if (ldfa >= 88) return '4° valgus cut';
-    if (ldfa >= 87) return '5° valgus cut';
-    return '6° valgus cut';
+    if (ldfa > 92) return '2° valgus cut';
+    if (ldfa > 91) return '3° valgus cut';
+    if (ldfa > 88) return '4° valgus cut';
+    if (ldfa > 87) return '5° valgus cut';
+    if (ldfa > 86) return '6° valgus cut';
+    return '6° valgus cut (Warning: Native LDFA out of boundary)';
 };
 
 const getRecommendedVarusCut = (mpta: number | null) => {
     if (mpta === null) return '--';
-    if (mpta >= 89) return '0° (neutral cut)';
-    if (mpta >= 88 && mpta < 89) return '1° varus cut';
-    if (mpta >= 87 && mpta < 88) return '2° varus cut';
-    if (mpta >= 85 && mpta < 87) return '3° varus cut';
-    if (mpta < 85) return '4° varus cut';
-    return '--';
+    if (mpta > 89) return '0° (neutral cut)';
+    if (mpta > 88) return '1° varus cut';
+    if (mpta > 87) return '2° varus cut';
+    if (mpta > 85) return '3° varus cut';
+    if (mpta > 84) return '4° varus cut';
+    return '4° varus cut (Warning: Native MPTA out of boundary)';
 };
 
 // --- CAMERA MODAL (Unchanged) ---
@@ -368,6 +369,24 @@ const LongLegPlannerPage: React.FC = () => {
             setVisibleLandmarkSets(newSets);
         }
     }, []);
+
+    // Swap medial/lateral landmarks when leg side changes
+    useEffect(() => {
+        if (prevLegSideRef.current !== legSide) {
+            setLongLegLandmarks(prev => {
+                if (!prev.femoralMedial || !prev.femoralLateral || !prev.tibialMedial || !prev.tibialLateral) return prev;
+                return {
+                    ...prev,
+                    femoralMedial: prev.femoralLateral,
+                    femoralLateral: prev.femoralMedial,
+                    tibialMedial: prev.tibialLateral,
+                    tibialLateral: prev.tibialMedial
+                };
+            });
+            prevLegSideRef.current = legSide;
+        }
+    }, [legSide, setLongLegLandmarks]);
+
 
     useEffect(() => {
         if (ldfaMode !== 'corrected') return;
@@ -1010,22 +1029,49 @@ const LongLegPlannerPage: React.FC = () => {
                     {/* Warning Banner */}
                     {(() => {
                         const { ldfa, mpta } = longLegResults;
+                        const warnings: string[] = [];
+
+                        // Check for out-of-boundary LDFA
+                        if (ldfa !== null && ldfa <= 86) {
+                            warnings.push('Native LDFA out of boundary – some release anticipated.');
+                        }
+
+                        // Check for out-of-boundary MPTA
+                        if (mpta !== null && mpta <= 84) {
+                            warnings.push('Native MPTA out of boundary – some release anticipated.');
+                        }
+
+                        // Check for high-risk anatomy
                         if (ldfa !== null && mpta !== null) {
                             const validation = validateMeasurements(ldfa, mpta);
-                            if (validation.status !== 'success') {
+                            if (validation.status === 'error') {
                                 return (
-                                    <div className={`p-3 rounded border flex items-start gap-3 ${validation.status === 'error'
-                                        ? 'bg-red-900/40 border-red-500/50 text-red-100'
-                                        : 'bg-amber-900/40 border-amber-500/50 text-amber-100'
-                                        }`}>
-                                        <span className="text-xl">{validation.status === 'error' ? '⛔' : '⚠️'}</span>
+                                    <div className="p-3 rounded border flex items-start gap-3 bg-red-900/40 border-red-500/50 text-red-100">
+                                        <span className="text-xl">⛔</span>
                                         <div>
-                                            <p className="font-bold uppercase text-sm tracking-wide">{validation.status === 'error' ? 'Critical Error' : 'Warning'}</p>
+                                            <p className="font-bold uppercase text-sm tracking-wide">Critical Error</p>
                                             <p className="text-sm font-medium opacity-90">{validation.msg}</p>
                                         </div>
                                     </div>
                                 );
                             }
+                            if (validation.status === 'warning') {
+                                warnings.push(validation.msg);
+                            }
+                        }
+
+                        if (warnings.length > 0) {
+                            return (
+                                <div className="p-3 rounded border flex items-start gap-3 bg-amber-900/40 border-amber-500/50 text-amber-100">
+                                    <span className="text-xl">⚠️</span>
+                                    <div className="space-y-1">
+                                        <p className="font-bold uppercase text-sm tracking-wide">Warning</p>
+                                        {warnings.map((msg, idx) => (
+                                            <p key={idx} className="text-sm font-medium opacity-90">{msg}</p>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
                         }
                         return null;
                     })()}
