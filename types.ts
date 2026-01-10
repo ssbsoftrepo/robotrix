@@ -1,5 +1,5 @@
 
-import { Page as Page_2 } from './types';
+
 
 export interface Patient {
     id: string;

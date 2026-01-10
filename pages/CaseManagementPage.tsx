@@ -703,15 +703,26 @@ const CaseManagementPage: React.FC = () => {
                             </div>
                         </div>
 
+
                         <div className="pt-4">
                             <button
                                 disabled={!tempLdfa || !tempThickness}
                                 onClick={handleLongLegConfigConfirm}
-                                className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold text-lg py-3 px-8 rounded-lg shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="group relative py-3 px-10 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                           shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                           transition-all duration-300 ease-out
+                                           hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:bg-[#6D282C]"
                             >
-                                Start Planning
+                                <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                <span className="relative text-xl font-bold text-white tracking-widest">
+                                    START PLANNING
+                                </span>
+                                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                             </button>
                         </div>
+
                     </div>
                 </div>
             )}
