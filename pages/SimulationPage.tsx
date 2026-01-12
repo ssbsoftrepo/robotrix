@@ -37,13 +37,23 @@ const HKAView: React.FC = () => {
                 if (!parent) return;
 
                 const width = parent.clientWidth;
-                const height = width * (xrayImg.naturalHeight / xrayImg.naturalWidth);
-                canvas.width = width;
-                canvas.height = height;
+                const height = parent.clientHeight;
+                const aspect = xrayImg.naturalWidth / xrayImg.naturalHeight;
 
-                ctx.drawImage(xrayImg, 0, 0, width, height);
+                let drawWidth = width;
+                let drawHeight = width / aspect;
 
-                const scale = width / refImg.width;
+                if (drawHeight > height) {
+                    drawHeight = height;
+                    drawWidth = height * aspect;
+                }
+
+                canvas.width = drawWidth;
+                canvas.height = drawHeight;
+
+                ctx.drawImage(xrayImg, 0, 0, drawWidth, drawHeight);
+
+                const scale = drawWidth / refImg.width;
 
                 const { hipCenter, kneeCenter, ankleCenter } = longLegLandmarks;
                 if (hipCenter && kneeCenter && ankleCenter) {
@@ -298,7 +308,7 @@ const SimulationPage: React.FC = () => {
             let newWidth = container.clientWidth;
             let newHeight = newWidth / ar;
 
-            const maxHeight = Math.max(container.clientHeight, 600);
+            const maxHeight = container.clientHeight;
             if (newHeight > maxHeight) {
                 newHeight = maxHeight; newWidth = newHeight * ar;
             }
@@ -445,57 +455,57 @@ const SimulationPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <h2 className="text-4xl font-bold mb-4 p-4 text-[#E0E0E0] relative z-10">Resection Simulation</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 flex-grow min-h-0 px-4 relative z-10 overflow-hidden">
-                {/* Column 1: Pre-Op HKA View - 30% */}
-                <div className="lg:col-span-3 hidden lg:flex flex-col min-h-0 max-h-full overflow-hidden">
+            <h2 className="text-2xl font-bold mb-2 px-2 pt-2 text-[#E0E0E0] relative z-10">Resection Simulation</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow min-h-0 px-2 mb-2 relative z-10 overflow-hidden">
+                {/* Column 1: Pre-Op HKA View - 25% */}
+                <div className="lg:col-span-1 hidden lg:flex flex-col min-h-0 max-h-full overflow-hidden">
                     <HKAView />
                 </div>
 
-                {/* Column 2: Controls - 30% */}
-                <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg space-y-3 flex flex-col min-h-0 max-h-full overflow-y-auto">
+                {/* Column 2: Controls - 25% */}
+                <div className="lg:col-span-1 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg space-y-2 flex flex-col min-h-0 max-h-full overflow-y-auto">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <div className="flex items-center justify-between relative z-10">
-                        <label htmlFor="split-view-toggle" className="text-base font-semibold text-gray-400">Split View</label>
+                        <label htmlFor="split-view-toggle" className="text-sm font-semibold text-gray-400">Split View</label>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="split-view-toggle" className="sr-only peer" checked={isSplitView} onChange={() => setIsSplitView(!isSplitView)} />
-                            <div className="w-12 h-6 bg-[#333333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#6D282C]"></div>
+                            <div className="w-10 h-5 bg-[#333333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#6D282C]"></div>
                         </label>
                     </div>
-                    <div className="bg-black/40 p-3 rounded-md text-center border border-[#333333] relative z-10">
-                        <p className="text-sm text-gray-400">Pre-Op mHKA</p>
-                        <p className="font-bold text-2xl text-gray-100">{longLegResults.mhka?.toFixed(1) ?? '--'}°</p>
+                    <div className="bg-black/40 p-2 rounded-md text-center border border-[#333333] relative z-10">
+                        <p className="text-xs text-gray-400">Pre-Op mHKA</p>
+                        <p className="font-bold text-xl text-gray-100">{longLegResults.mhka?.toFixed(1) ?? '--'}°</p>
                     </div>
                     <div className="relative z-10">
-                        <label className="block text-sm font-semibold mb-2 text-gray-400">Femoral Valgus Cut</label>
-                        <div className="flex items-center space-x-2">
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">-</button>
-                            <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => setFemoralCutSim(parseFloat(e.target.value))} className="w-full p-1.5 rounded-md text-center text-xl font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">+</button>
+                        <label className="block text-xs font-semibold mb-1 text-gray-400">Femoral Valgus Cut</label>
+                        <div className="flex items-center space-x-1">
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">-</button>
+                            <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => setFemoralCutSim(parseFloat(e.target.value))} className="w-full p-1 rounded-md text-center text-lg font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">+</button>
                         </div>
-                        <button onClick={() => setAppliedFemoralCutSim(femoralCutSim)} className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-2 px-4 rounded-lg w-full text-base mt-2 transition">Apply Femoral Cut</button>
+                        <button onClick={() => setAppliedFemoralCutSim(femoralCutSim)} className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-1.5 px-3 rounded-lg w-full text-sm mt-1.5 transition">Apply Femoral Cut</button>
                     </div>
                     <div className="relative z-10">
-                        <label className="block text-sm font-semibold mb-2 text-gray-400">Tibial Varus Cut</label>
-                        <div className="flex items-center space-x-2">
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">-</button>
-                            <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => setTibialCutSim(parseFloat(e.target.value))} className="w-full p-1.5 rounded-md text-center text-xl font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-12 h-12 text-2xl rounded-md transition">+</button>
+                        <label className="block text-xs font-semibold mb-1 text-gray-400">Tibial Varus Cut</label>
+                        <div className="flex items-center space-x-1">
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">-</button>
+                            <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => setTibialCutSim(parseFloat(e.target.value))} className="w-full p-1 rounded-md text-center text-lg font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444444] text-white font-bold w-10 h-10 text-xl rounded-md transition">+</button>
                         </div>
-                        <button onClick={() => setAppliedTibialCutSim(tibialCutSim)} className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-2 px-4 rounded-lg w-full text-base mt-2 transition">Apply Tibial Cut</button>
+                        <button onClick={() => setAppliedTibialCutSim(tibialCutSim)} className="bg-[#6D282C] hover:bg-[#893338] text-white font-bold py-1.5 px-3 rounded-lg w-full text-sm mt-1.5 transition">Apply Tibial Cut</button>
                     </div>
-                    <div className="bg-[#6D282C]/20 border-2 border-[#6D282C] p-3 rounded-md text-center relative z-10">
-                        <p className="text-base text-[#ff8fa3]">Post-Simulation mHKA</p>
-                        <p className="font-bold text-3xl text-[#ff8fa3]">{postOpMHKA?.toFixed(1) ?? '--'}°</p>
+                    <div className="bg-[#6D282C]/20 border-2 border-[#6D282C] p-2 rounded-md text-center relative z-10">
+                        <p className="text-sm text-[#ff8fa3]">Post-Simulation mHKA</p>
+                        <p className="font-bold text-2xl text-[#ff8fa3]">{postOpMHKA?.toFixed(1) ?? '--'}°</p>
                     </div>
                     <div className="flex-grow"></div>
                     <div className="relative z-10">
-                        <button onClick={resetSimulation} className="w-full bg-[#333333] hover:bg-[#444444] text-gray-200 font-bold py-2 px-4 rounded-lg transition text-base">Reset Simulation</button>
+                        <button onClick={resetSimulation} className="w-full bg-[#333333] hover:bg-[#444444] text-gray-200 font-bold py-1.5 px-3 rounded-lg transition text-sm">Reset Simulation</button>
                     </div>
                 </div>
 
-                {/* Simulation View - 40% */}
-                <div className="lg:col-span-4 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center bg-black min-h-0 max-h-full overflow-hidden">
+                {/* Simulation View - 50% */}
+                <div className="lg:col-span-2 relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg flex items-center justify-center bg-black min-h-0 max-h-full overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     {!isLoaded && !longLegImageSrc && <p className="text-gray-500 p-4 text-center relative z-10">Load a Long Leg X-ray in the planner to begin simulation.</p>}
                     {!isLoaded && longLegImageSrc && <p className="text-gray-400 relative z-10">Loading Simulation...</p>}
@@ -511,18 +521,18 @@ const SimulationPage: React.FC = () => {
                     />
                 </div>
             </div>
-            <div className="mt-4 flex justify-between px-4 pb-4 relative z-10">
+            <div className="mt-1 flex justify-between px-2 pb-2 relative z-10">
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('results-analysis')}
-                    className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
+                    className="group relative py-1.5 px-3 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                transition-all duration-300 ease-out
                                hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
                                active:scale-[0.98] flex items-center"
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
+                    <span className="relative flex items-center gap-2 text-xs font-bold text-white tracking-wider">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
                         </svg>
@@ -534,14 +544,14 @@ const SimulationPage: React.FC = () => {
                 {/* View Report Button */}
                 <button
                     onClick={() => setPage('report')}
-                    className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                    className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                transition-all duration-300 ease-out
                                hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
                                active:scale-[0.98] flex items-center"
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative flex items-center gap-2 text-lg font-bold text-white tracking-widest">
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-widest">
                         VIEW REPORT
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />

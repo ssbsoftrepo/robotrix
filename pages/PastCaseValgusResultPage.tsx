@@ -4,7 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { Landmarks, Point, ValgusResults, LegSide } from '../types';
 
 // --- Helper Functions ---
-const HANDLE_RADIUS = 3.5; // Reduced from 6
+const HANDLE_RADIUS = 6; // Matching Planner sensitivity6
 const LANDMARK_COLORS = {
     jointLine: '#6D282C',
     femurAnatomicAxis: '#6D282C',
@@ -145,6 +145,63 @@ const PostOpValgusPlanner: React.FC = () => {
         }
     }, [legSide, setLandmarks]);
 
+    // PIP State & Refs
+    const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
+    const pipCanvasRef = useRef<HTMLCanvasElement>(null);
+    const pipViewerRef = useRef<HTMLDivElement>(null);
+    const isDraggingPipRef = useRef(false);
+    const pipDragOffset = useRef({ x: 0, y: 0 });
+
+    const updatePip = useCallback(() => {
+        const key = draggingPointRef.current;
+        const image = imageRef.current;
+        const canvas = canvasRef.current;
+        const pipCanvas = pipCanvasRef.current;
+        if (!key || !landmarks[key] || !image || !canvas || !pipCanvas) return;
+
+        const pos = landmarks[key];
+        const pipCtx = pipCanvas.getContext('2d');
+        if (!pipCtx) return;
+
+        const zoomLevel = 4;
+        const sourceSize = pipCanvas.width / zoomLevel;
+        pipCtx.fillStyle = 'black';
+        pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
+        const imgScaleX = image.naturalWidth / canvas.width;
+        const imgScaleY = image.naturalHeight / canvas.height;
+
+        pipCtx.drawImage(image, (pos.x * imgScaleX) - (sourceSize / 2), (pos.y * imgScaleY) - (sourceSize / 2), sourceSize, sourceSize, 0, 0, pipCanvas.width, pipCanvas.height);
+        pipCtx.strokeStyle = '#fdd835'; pipCtx.lineWidth = 1; pipCtx.beginPath();
+        pipCtx.moveTo(pipCanvas.width / 2, 0); pipCtx.lineTo(pipCanvas.width / 2, pipCanvas.height);
+        pipCtx.moveTo(0, pipCanvas.height / 2); pipCtx.lineTo(pipCanvas.width, pipCanvas.height / 2);
+        pipCtx.stroke();
+    }, [landmarks]);
+
+    // PIP Interaction
+    const handlePipStart = (e: React.MouseEvent | React.TouchEvent) => {
+        e.preventDefault();
+        isDraggingPipRef.current = true;
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        pipDragOffset.current = { x: clientX - rect.left, y: clientY - rect.top };
+    };
+
+    const handlePipMove = useCallback((e: MouseEvent | TouchEvent) => {
+        if (!isDraggingPipRef.current) return;
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const viewer = pipViewerRef.current?.parentElement;
+        if (!viewer) return;
+        const viewerRect = viewer.getBoundingClientRect();
+        const pipSize = 128;
+        let newX = clientX - viewerRect.left - pipDragOffset.current.x;
+        let newY = clientY - viewerRect.top - pipDragOffset.current.y;
+        newX = Math.max(10, Math.min(newX, viewerRect.width - pipSize - 10));
+        newY = Math.max(10, Math.min(newY, viewerRect.height - pipSize - 10));
+        setPipPosition({ x: newX, y: newY });
+    }, []);
+
     const updateCalculations = useCallback(() => {
         const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = landmarks;
         let newResults: Partial<ValgusResults> = { obliquity: null, ldfa: null, mpta: null, femurType: '--', femurTypeByObliquity: '--', cpak: '--', cut: '--' };
@@ -188,7 +245,11 @@ const PostOpValgusPlanner: React.FC = () => {
         }
 
         if (newResults.ldfa !== null && newResults.mpta !== null) {
-            newResults.cpak = getLongLegCpakType(newResults.mpta - newResults.ldfa, newResults.mpta + newResults.ldfa);
+            // Calculate aHKA and JLO
+            newResults.ahka = newResults.mpta - newResults.ldfa;
+            newResults.jlo = newResults.mpta + newResults.ldfa;
+
+            newResults.cpak = getLongLegCpakType(newResults.ahka, newResults.jlo);
 
             // LDFA-based classification
             const femurClass = getFemurClassification(newResults.ldfa);
@@ -259,12 +320,12 @@ const PostOpValgusPlanner: React.FC = () => {
         }
 
         if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
-            ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = 2;
+            ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(femurAxisPoint.x, femurAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
             ctx.beginPath(); ctx.arc(femurAxisPoint.x, femurAxisPoint.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
         }
         if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter) {
-            ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.lineWidth = 2;
+            ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(tibiaAxisPoint.x, tibiaAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
             ctx.beginPath(); ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
         }
@@ -282,7 +343,6 @@ const PostOpValgusPlanner: React.FC = () => {
         }
     };
 
-    // Reverted resize logic to onLoad, removed DPR
     useEffect(() => {
         const imgElement = imageRef.current;
         const canvasElement = canvasRef.current;
@@ -330,7 +390,6 @@ const PostOpValgusPlanner: React.FC = () => {
 
         if (imgElement) {
             imgElement.addEventListener('load', handleImageLoad);
-            // If image is already loaded (e.g., from cache or initial render), trigger resize
             if (imgElement.complete && imgElement.naturalWidth > 0) {
                 handleImageLoad();
             }
@@ -343,19 +402,17 @@ const PostOpValgusPlanner: React.FC = () => {
         };
     }, [draw, postOpValgusImage, resetLandmarks]);
 
+    // Handle Reset
+    const handleResetAll = () => {
+        if (canvasRef.current) resetLandmarks(canvasRef.current);
+        setVisibleLandmarkSets(new Set());
+        setResults({ obliquity: null, ldfa: null, mpta: null, femurType: '--', femurTypeByObliquity: '--', cpak: '--', cut: '--' }); // Reset results
+    };
+
 
     // Update getCanvasPos to account for DPR and Scale
     const getCanvasPos = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
         const rect = canvas.getBoundingClientRect();
-        // rect is Visual Size
-        // canvas.width is Visual Size * DPR
-        // Internal coordinate system (for drawing) is scaled by DPR via ctx.scale
-        // BUT, our LANDMARKS are stored in "Display Space" (e.g. 0-400).
-        // If we draw at x=100 with ctx.scale(2,2), it draws at internal pixel 200. Correct.
-        // This means landmarks should be stored in CSS Pixel Space.
-
-        // clientX - rect.left gives the coordinate in CSS Pixel Space relative to the canvas.
-        // This is the desired coordinate system for storing landmarks.
         return {
             x: clientX - rect.left,
             y: clientY - rect.top
@@ -363,7 +420,6 @@ const PostOpValgusPlanner: React.FC = () => {
     };
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-        // Larger hit radius
         const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2;
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
@@ -385,22 +441,21 @@ const PostOpValgusPlanner: React.FC = () => {
         if (!draggingPointRef.current || !canvasRef.current) return;
         const pos = getCanvasPos(canvasRef.current, e.clientX, e.clientY);
         setLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
-    }, []);
+        updatePip();
+    }, [updatePip]);
+
     const handleMouseUp = useCallback(() => { draggingPointRef.current = null; }, []);
-    // TOUCH SUPPORT — ADD THESE
+
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-        e.preventDefault(); // Prevent scrolling
+        e.preventDefault();
         const touch = e.touches[0];
         if (!touch) return;
-
         const canvas = canvasRef.current;
         if (!canvas) return;
-
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
         const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2;
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
-
         for (const key in landmarks) {
             const point = landmarks[key];
             if (point) {
@@ -419,38 +474,42 @@ const PostOpValgusPlanner: React.FC = () => {
     const handleTouchMove = useCallback((e: TouchEvent) => {
         if (!draggingPointRef.current || !canvasRef.current) return;
         e.preventDefault(); // Critical: stops scrolling
-
         const touch = e.touches[0];
         if (!touch) return;
-
         const pos = getCanvasPos(canvasRef.current, touch.clientX, touch.clientY);
         setLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
-    }, []);
+        updatePip();
+    }, [updatePip]);
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
     }, []);
 
-
     useEffect(() => {
         // Mouse
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('mousemove', handlePipMove);
+        window.addEventListener('mouseup', () => { isDraggingPipRef.current = false; });
 
-        // Touch — ADD THESE
+        // Touch
         window.addEventListener('touchmove', handleTouchMove, { passive: false });
         window.addEventListener('touchend', handleTouchEnd);
         window.addEventListener('touchcancel', handleTouchEnd);
+        window.addEventListener('touchmove', handlePipMove, { passive: false });
+        window.addEventListener('touchend', () => { isDraggingPipRef.current = false; });
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('mousemove', handlePipMove);
 
             window.removeEventListener('touchmove', handleTouchMove);
             window.removeEventListener('touchend', handleTouchEnd);
             window.removeEventListener('touchcancel', handleTouchEnd);
+            window.removeEventListener('touchmove', handlePipMove);
         };
-    }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
+    }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd, handlePipMove]);
 
     const toggleLandmarkSet = (setName: keyof typeof landmarkInstructions) => {
         const newSets = new Set(visibleLandmarkSets);
@@ -459,80 +518,96 @@ const PostOpValgusPlanner: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col h-full bg-gradient-to-br from-[#1E1E1E] to-[#121212] rounded-lg p-2">
-            <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-4 flex-grow min-h-0">
-                {/* Viewer (Left 70%) - Swapped to match LongLeg Page Layout */}
-                <div className="lg:col-span-1 relative w-full h-full bg-black rounded-lg flex items-center justify-center overflow-hidden min-h-[400px]">
+        <div className="relative flex flex-col h-full rounded-lg">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0">
+                {/* Viewer - Left side (75%) */}
+                <div className="lg:col-span-3 relative w-full h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     {postOpValgusImage ? (<>
-                        <img
-                            ref={imageRef}
-                            src={postOpValgusImage}
-                            className="block max-w-full max-h-full object-contain"
-                            alt=""
-                        />
-                        <canvas
-                            ref={canvasRef}
-                            className="absolute cursor-crosshair touch-none"
-                            style={{ touchAction: 'none' }}
-                            onMouseDown={handleMouseDown}
-                            onTouchStart={handleTouchStart}
-                        />
-                    </>) : <p className="text-gray-500 text-center p-2 text-sm">Upload post-op X-ray.</p>}
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <img
+                                ref={imageRef}
+                                src={postOpValgusImage}
+                                className="block max-w-full max-h-full object-contain"
+                                alt=""
+                            />
+                            <canvas
+                                ref={canvasRef}
+                                className="absolute cursor-crosshair touch-none inset-0 m-auto"
+                                style={{ touchAction: 'none' }}
+                                onMouseDown={handleMouseDown}
+                                onTouchStart={handleTouchStart}
+                            />
+                        </div>
+                        <div ref={pipViewerRef} onMouseDown={handlePipStart}
+                            onTouchStart={handlePipStart} className="absolute w-24 h-24 border-2 border-dark-maroon bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg top-2 right-2 z-10" style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px` }}>
+                            <canvas ref={pipCanvasRef} width="128" height="128" className="rounded-full w-full h-full"></canvas>
+                        </div>
+                    </>) : <div className="flex flex-col items-center justify-center text-gray-500 opacity-60">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-sm">Upload Post-Op X-Ray</p>
+                    </div>}
                 </div>
 
-                {/* Controls (Right 30%) */}
-                <div className="lg:col-span-1 flex flex-col space-y-3 overflow-y-auto">
-                    <div>
-                        <h4 className="text-md font-semibold text-[#E0E0E0] mb-1">Upload Post-Op</h4>
-                        <label htmlFor="postop-xray-upload" className="cursor-pointer text-center p-2 rounded-sm font-semibold text-sm bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider block transition">
-                            CHOOSE FILE
+                {/* Controls - Right side (25%) */}
+                <div className="lg:col-span-1 flex flex-col space-y-2 h-full overflow-y-auto pr-1 order-2 lg:order-none">
+                    <div className="shrink-0">
+                        <h4 className="text-sm font-semibold text-[#E0E0E0] mb-1">Post-Op Image</h4>
+                        <label htmlFor="postop-xray-upload" className="cursor-pointer text-center p-1.5 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider block transition shadow-sm">
+                            UPLOAD X-RAY
                         </label>
                         <input type="file" id="postop-xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                        <span className="text-xs text-gray-500 truncate mt-1 inline-block">{fileName}</span>
-                        <p className="text-gray-500 text-xs mt-1">Leg Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
+                        <span className="text-[10px] text-gray-500 truncate mt-0.5 inline-block w-full">{fileName}</span>
+                        <p className="text-gray-500 text-[10px]">Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
                     </div>
 
-                    <div>
-                        <h4 className="text-md font-semibold text-[#E0E0E0] mb-1">Mark Landmarks</h4>
-                        <div className="grid grid-cols-1 gap-2">
+                    <div className="flex-grow flex flex-col min-h-0">
+                        <div className="flex justify-between items-center mb-1">
+                            <h4 className="text-sm font-semibold text-[#E0E0E0]">Markings</h4>
+                            <button onClick={handleResetAll} className="text-[10px] text-red-400 hover:text-red-300 uppercase font-bold tracking-wider">Reset</button>
+                        </div>
+                        <div className="overflow-y-auto space-y-1 pr-1 custom-scrollbar">
                             {Object.keys(landmarkInstructions).map((key) => (
-                                <button key={key} onClick={() => toggleLandmarkSet(key as any)} className={`w-full text-left py-2 px-3 rounded-sm font-semibold text-sm border ${visibleLandmarkSets.has(key) ? 'bg-[#6D282C] border-[#893338] text-white' : 'bg-[#252525] border-[#333333] text-gray-300 hover:bg-[#333333]'}`}>
+                                <button key={key} onClick={() => toggleLandmarkSet(key as any)} className={`w-full text-left py-1.5 px-2 rounded-sm font-semibold text-xs border ${visibleLandmarkSets.has(key) ? 'bg-[#6D282C] border-[#893338] text-white shadow-sm' : 'bg-[#252525] border-[#333333] text-gray-400 hover:bg-[#333333]'}`}>
                                     {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                 </button>
                             ))}
                         </div>
                     </div>
-                </div>
-            </div>
-            {/* Results */}
-            <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-                <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
-                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">Obliquity</p>
-                    <p className="font-bold text-xl text-[#ff8fa3]">{results.obliquity?.toFixed(1) ?? '--'}°</p>
-                </div>
-                <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
-                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">Femur (LDFA)</p>
-                    <p className="font-bold text-sm text-[#ff8fa3]">{results.femurType ?? '--'}</p>
-                </div>
-                <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
-                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">Femur (Obliq)</p>
-                    <p className="font-bold text-xl text-[#ff8fa3]">{results.femurTypeByObliquity ?? '--'}</p>
-                </div>
-                <div className="bg-[#1a1a1a] p-2 rounded-lg border border-[#6D282C]/50">
-                    <p className="text-xs text-[#ff8fa3] font-bold uppercase">CPAK Type</p>
-                    <p className="font-bold text-xl text-[#ff8fa3]">{results.cpak ?? '--'}</p>
+
+                    <div className="shrink-0 grid grid-cols-2 gap-1 mt-2 pt-2 border-t border-[#333333]">
+                        <ResultItem label="Obliquity" value={results.obliquity != null ? results.obliquity.toFixed(1) + '°' : '--'} />
+                        <ResultItem label="LDFA" value={results.ldfa != null ? results.ldfa.toFixed(1) + '°' : '--'} />
+                        <ResultItem label="MPTA" value={results.mpta != null ? results.mpta.toFixed(1) + '°' : '--'} />
+                        <ResultItem label="aHKA" value={results.ahka != null ? results.ahka.toFixed(1) + '°' : '--'} />
+                        <ResultItem label="JLO" value={results.jlo != null ? results.jlo.toFixed(1) + '°' : '--'} />
+                        <ResultItem label="CPAK" value={results.cpak ?? '--'} />
+                        <div className="col-span-2 space-y-1">
+                            <ResultItem label="Femur (LDFA)" value={results.femurType ?? '--'} />
+                            <ResultItem label="Femur (Obliquity)" value={results.femurTypeByObliquity ?? '--'} />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
 
-const ResultItem: React.FC<{ label: string; value: string | number | null; large?: boolean }> = ({ label, value, large = false }) => (
-    <div className="bg-[#252525] p-3 rounded-lg border border-[#6D282C]/50">
-        <p className="text-sm text-[#ff8fa3] font-bold uppercase">{label}</p>
-        <p className={`font-bold text-[#ff8fa3] ${large ? 'text-4xl' : 'text-2xl'}`}>{value ?? '--'}</p>
-    </div>
-);
+const ResultItem: React.FC<{ label: string; value: string | number | null; large?: boolean }> = ({ label, value, large = false }) => {
+    const displayValue = String(value ?? '--');
+    const isLong = displayValue.length > 10;
+    const isVeryLong = displayValue.length > 20;
+
+    return (
+        <div className="bg-[#252525] p-2 rounded-lg border border-[#6D282C]/50">
+            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase whitespace-nowrap overflow-hidden text-ellipsis">{label}</p>
+            <p className={`font-bold text-[#ff8fa3] ${large ? 'text-2xl' : (isVeryLong ? 'text-[10px] leading-tight' : (isLong ? 'text-xs' : 'text-lg'))} truncate`} title={displayValue}>
+                {displayValue}
+            </p>
+        </div>
+    );
+};
 
 const PastCaseValgusResultPage: React.FC = () => {
     const { setPage, valgusCanvasDataUrl, valgusResults } = useAppContext();
@@ -565,30 +640,30 @@ const PastCaseValgusResultPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow px-4 relative z-10">
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-4 min-h-0 px-4 pb-4 relative z-10">
                 {/* Column 1: Pre-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg flex flex-col h-full">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-0 overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-2xl font-bold text-center mb-4 text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-2 rounded relative z-10">Pre-Op Analysis</h3>
-                    <div className="w-full flex-grow bg-black rounded-lg mb-4 flex items-center justify-center overflow-hidden border border-[#333333] relative z-10">
+                    <h3 className="text-xl font-bold text-center mb-2 text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-1 rounded relative z-10">Pre-Op Analysis</h3>
+                    <div className="w-full flex-grow bg-black rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-[#333333] relative z-10">
                         {valgusCanvasDataUrl ?
                             <img src={valgusCanvasDataUrl} alt="Pre-op Analysis" className="max-w-full max-h-full object-contain" /> :
-                            <p className="text-gray-500 italic">No pre-op image available.</p>
+                            <p className="text-sm text-gray-500 italic">No pre-op image available.</p>
                         }
                     </div>
-                    <div className="mt-auto grid grid-cols-4 gap-2 text-center relative z-10">
-                        <ResultItem label="Obliquity" value={valgusResults.obliquity?.toFixed(1) + '°'} />
+                    <div className="mt-auto grid grid-cols-2 gap-2 text-center relative z-10 shrink-0">
+                        <ResultItem label="Obliquity" value={valgusResults.obliquity != null ? valgusResults.obliquity.toFixed(1) + '°' : '--'} />
+                        <ResultItem label="CPAK" value={valgusResults.cpak} />
                         <ResultItem label="Femur (LDFA)" value={valgusResults.femurType} />
-                        <ResultItem label="Femur (Obliq)" value={valgusResults.femurTypeByObliquity} />
-                        <ResultItem label="CPAK Type" value={valgusResults.cpak} />
+                        <ResultItem label="Femur (Obliquity)" value={valgusResults.femurTypeByObliquity} />
                     </div>
                 </div>
 
                 {/* Column 2: Post-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg flex flex-col h-full">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-0 overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-2xl font-bold text-center mb-4 text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-2 rounded relative z-10">Post-Op Verification</h3>
-                    <div className="flex-grow">
+                    <h3 className="text-xl font-bold text-center mb-2 text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-1 rounded relative z-10">Post-Op Verification</h3>
+                    <div className="flex-grow min-h-0 relative">
                         <PostOpValgusPlanner />
                     </div>
                 </div>

@@ -42,6 +42,10 @@ export interface ValgusResults {
     cut: string;
     ldfa: number | null;
     mpta: number | null;
+    ahka?: number | null;
+    jlo?: number | null;
+    tibiaType?: string;
+    tibialCut?: string;
 }
 
 export type FunctionalPlannerMode = 'tibial_check' | 'alignment_check';

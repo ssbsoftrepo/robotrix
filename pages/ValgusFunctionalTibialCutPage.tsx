@@ -100,7 +100,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
 
     // Line Position (Static)
-    const [linesYPercent, setLinesYPercent] = useState<number>(34); // Vertical position as %
+    const [linesYPercent, setLinesYPercent] = useState<number>(32); // Vertical position as %
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut based on Valgus results

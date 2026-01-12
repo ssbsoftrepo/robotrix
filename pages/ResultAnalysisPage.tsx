@@ -171,6 +171,17 @@ const ResultAnalysisPage: React.FC = () => {
         if (femurBoundary === null) setFemurBoundary('expanded');
         if (tibiaBoundary === null) setTibiaBoundary('expanded');
     }, [femurBoundary, tibiaBoundary, setFemurBoundary, setTibiaBoundary]);
+    const getFemurClassification = (ldfa: number) => {
+        if (ldfa > 92) return { type: 'Significant varoid femur', cut: '2° valgus cut' };
+        if (ldfa > 91) return { type: 'Mild varoid femur', cut: '3° valgus cut' };
+        if (ldfa > 88) return { type: 'Median (neutral) femur', cut: '4° valgus cut' };
+        if (ldfa > 87) return { type: 'Mild valgoid femur', cut: '5° valgus cut' };
+        if (ldfa > 86) return { type: 'Significant valgoid femur', cut: '6° valgus cut' };
+        return {
+            type: 'Significant valgoid femur',
+            cut: '6° valgus cut (Native LDFA out of boundary)'
+        };
+    };
 
     const getFemoralCut = () => {
         const originalCut = longLegResults.cut;
@@ -245,17 +256,34 @@ const ResultAnalysisPage: React.FC = () => {
                 {/* Column 2: Data & Matrix */}
                 <div className="lg:col-span-4 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     {/* Results Box */}
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-row items-center justify-around min-h-0 shrink-0">
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg grid grid-cols-3 gap-2 min-h-0 shrink-0 text-center">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <div className="text-center border-r border-[#333333] pr-4 relative z-10">
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">JLO Type</p>
+
+                        {/* Column 1: Femur Type (LDFA) */}
+                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333]">
+                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">Femur Type (LDFA)</p>
+                            <p className="font-bold text-base text-[#ff8fa3] leading-tight px-1">
+                                {longLegResults.ldfa !== null
+                                    ? getFemurClassification(longLegResults.ldfa).type.replace(' femur', '')
+                                    : '--'}
+                            </p>
+                            <p className="text-[10px] text-gray-400 font-medium mt-1">
+                                {longLegResults.ldfa !== null ? `(${getFemurClassification(longLegResults.ldfa).cut})` : ''}
+                            </p>
+                        </div>
+
+                        {/* Column 2: JLO / Obliquity */}
+                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333]">
+                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">Femur Type (Obliquity)</p>
                             <p className="font-bold text-lg text-[#ff8fa3]">{longLegResults.jloType}</p>
                         </div>
-                        <div className="text-center flex flex-col items-center pl-4 relative z-10">
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">CPAK Type</p>
-                            <div className="flex flex-row items-center gap-2">
-                                <p className="font-bold text-xl text-[#ff8fa3] leading-none">CPAK {longLegResults.cpak}</p>
-                                <div className="scale-50 transform origin-center -my-2">
+
+                        {/* Column 3: CPAK */}
+                        <div className="flex flex-col justify-center items-center py-2">
+                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">CPAK Type</p>
+                            <div className="flex flex-col items-center">
+                                <p className="font-bold text-3xl text-[#ff8fa3] leading-none mb-1">CPAK {longLegResults.cpak}</p>
+                                <div className="scale-75 transform origin-top">
                                     <CpakDiagram cpakType={longLegResults.cpak} />
                                 </div>
                             </div>

@@ -200,21 +200,29 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                 {/* Column 2: Data & Matrix (Medium Width ~33%) */}
                 <div className="lg:col-span-4 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     {/* Results Box - Compact Horizontal */}
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-row items-center justify-around min-h-0 shrink-0">
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg grid grid-cols-3 gap-2 min-h-0 shrink-0 text-center">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <div className="text-center border-r border-[#333333] pr-4 relative z-10">
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Femur Type (LDFA)</p>
-                            <p className="font-bold text-sm text-[#ff8fa3]">{valgusResults.femurType}</p>
+
+                        {/* Column 1: Femur Type (LDFA) */}
+                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333]">
+                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">Femur Type (LDFA)</p>
+                            <p className="font-bold text-base text-[#ff8fa3] leading-tight px-1">
+                                {valgusResults.femurType}
+                            </p>
                         </div>
-                        <div className="text-center border-r border-[#333333] px-4 relative z-10">
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">Femur Type (Obliquity)</p>
+
+                        {/* Column 2: Femur Type (Obliquity) */}
+                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333]">
+                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">Femur Type (Obliquity)</p>
                             <p className="font-bold text-lg text-[#ff8fa3]">{valgusResults.femurTypeByObliquity}</p>
                         </div>
-                        <div className="text-center flex flex-col items-center pl-4 relative z-10">
-                            <p className="text-gray-500 text-xs uppercase tracking-wider mb-0.5">CPAK Type</p>
-                            <div className="flex flex-row items-center gap-2">
-                                <p className="font-bold text-xl text-[#ff8fa3] leading-none">CPAK {valgusResults.cpak}</p>
-                                <div className="scale-50 transform origin-center -my-2">
+
+                        {/* Column 3: CPAK Type */}
+                        <div className="flex flex-col justify-center items-center py-2">
+                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">CPAK Type</p>
+                            <div className="flex flex-col items-center">
+                                <p className="font-bold text-3xl text-[#ff8fa3] leading-none mb-1">CPAK {valgusResults.cpak}</p>
+                                <div className="scale-75 transform origin-top">
                                     <CpakDiagram cpakType={valgusResults.cpak} />
                                 </div>
                             </div>

@@ -63,7 +63,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-2 min-h-0 px-2 mb-2 relative z-10">
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-2 min-h-0 px-2 mb-6 relative z-10">
                 {/* Column 1: Instructions & Block Upload */}
                 <div className="h-full flex flex-col overflow-hidden">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
