@@ -456,7 +456,7 @@ const SimulationPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <h2 className="text-2xl font-bold mb-2 px-2 pt-2 text-[#E0E0E0] relative z-10">Resection Simulation</h2>
+            <h2 className="text-2xl font-bold mb-2 px-2 text-[#E0E0E0] relative z-10">Resection Simulation</h2>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow min-h-0 px-2 mb-2 relative z-10 overflow-hidden">
                 {/* Column 1: Pre-Op HKA View - 25% */}
                 <div className="lg:col-span-1 hidden lg:flex flex-col min-h-0 max-h-full overflow-hidden">

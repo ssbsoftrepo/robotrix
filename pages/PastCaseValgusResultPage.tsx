@@ -551,41 +551,42 @@ const PostOpValgusPlanner: React.FC = () => {
                 </div>
 
                 {/* Controls - Right side (25%) */}
-                <div className="lg:col-span-1 flex flex-col space-y-2 h-full overflow-y-auto pr-1 order-2 lg:order-none">
+                <div className="lg:col-span-1 flex flex-col space-y-1.5 h-full overflow-y-auto pr-1 order-2 lg:order-none">
                     <div className="shrink-0">
                         <h4 className="text-sm font-semibold text-[#E0E0E0] mb-1">Post-Op Image</h4>
-                        <label htmlFor="postop-xray-upload" className="cursor-pointer text-center p-1.5 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider block transition shadow-sm">
+                        <label htmlFor="postop-xray-upload" className="cursor-pointer text-center py-3 px-3 rounded-sm font-bold text-sm bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider block transition shadow-sm">
                             UPLOAD X-RAY
                         </label>
                         <input type="file" id="postop-xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                        <span className="text-[10px] text-gray-500 truncate mt-0.5 inline-block w-full">{fileName}</span>
+                        <span className="text-[10px] text-gray-500 truncate inline-block w-full mt-1.5">{fileName}</span>
                         <p className="text-gray-500 text-[10px]">Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
                     </div>
 
-                    <div className="flex-grow flex flex-col min-h-0">
+                    <div className="shrink-0 flex flex-col mt-2">
                         <div className="flex justify-between items-center mb-1">
                             <h4 className="text-sm font-semibold text-[#E0E0E0]">Markings</h4>
                             <button onClick={handleResetAll} className="text-[10px] text-red-400 hover:text-red-300 uppercase font-bold tracking-wider">Reset</button>
                         </div>
-                        <div className="overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                        <div className="space-y-1">
                             {Object.keys(landmarkInstructions).map((key) => (
-                                <button key={key} onClick={() => toggleLandmarkSet(key as any)} className={`w-full text-left py-1.5 px-2 rounded-sm font-semibold text-xs border ${visibleLandmarkSets.has(key) ? 'bg-[#6D282C] border-[#893338] text-white shadow-sm' : 'bg-[#252525] border-[#333333] text-gray-400 hover:bg-[#333333]'}`}>
+                                <button key={key} onClick={() => toggleLandmarkSet(key as any)} className={`w-full text-left py-3 px-3 rounded-sm font-semibold text-sm border ${visibleLandmarkSets.has(key) ? 'bg-[#6D282C] border-[#893338] text-white shadow-sm' : 'bg-[#252525] border-[#333333] text-gray-400 hover:bg-[#333333]'}`}>
                                     {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="shrink-0 grid grid-cols-2 gap-1 mt-2 pt-2 border-t border-[#333333]">
-                        <ResultItem label="Obliquity" value={results.obliquity != null ? results.obliquity.toFixed(1) + '°' : '--'} />
+                    <div className="shrink-0 grid grid-cols-2 gap-0.5 pt-2 border-t border-[#333333] mt-auto">
+                        <div className="col-span-2">
+                            <ResultItem label="Obliquity" value={results.obliquity != null ? results.obliquity.toFixed(1) + '°' : '--'} />
+                        </div>
                         <ResultItem label="LDFA" value={results.ldfa != null ? results.ldfa.toFixed(1) + '°' : '--'} />
                         <ResultItem label="MPTA" value={results.mpta != null ? results.mpta.toFixed(1) + '°' : '--'} />
-                        <ResultItem label="aHKA" value={results.ahka != null ? results.ahka.toFixed(1) + '°' : '--'} />
-                        <ResultItem label="JLO" value={results.jlo != null ? results.jlo.toFixed(1) + '°' : '--'} />
-                        <ResultItem label="CPAK" value={results.cpak ?? '--'} />
-                        <div className="col-span-2 space-y-1">
-                            <ResultItem label="Femur (LDFA)" value={results.femurType ?? '--'} />
-                            <ResultItem label="Femur (Obliquity)" value={results.femurTypeByObliquity ?? '--'} />
+                        <div className="col-span-2">
+                            <ResultItem label="CPAK" value={results.cpak ? `CPAK ${results.cpak}` : '--'} large={true} />
+                        </div>
+                        <div className="col-span-2">
+                            <ResultItem label="Femur (Obliquity)" value={results.femurTypeByObliquity ?? '--'} large={true} />
                         </div>
                     </div>
                 </div>
@@ -596,13 +597,11 @@ const PostOpValgusPlanner: React.FC = () => {
 
 const ResultItem: React.FC<{ label: string; value: string | number | null; large?: boolean }> = ({ label, value, large = false }) => {
     const displayValue = String(value ?? '--');
-    const isLong = displayValue.length > 10;
-    const isVeryLong = displayValue.length > 20;
 
     return (
-        <div className="bg-[#252525] p-2 rounded-lg border border-[#6D282C]/50">
-            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase whitespace-nowrap overflow-hidden text-ellipsis">{label}</p>
-            <p className={`font-bold text-[#ff8fa3] ${large ? 'text-2xl' : (isVeryLong ? 'text-[10px] leading-tight' : (isLong ? 'text-xs' : 'text-lg'))} truncate`} title={displayValue}>
+        <div className={`bg-[#252525] rounded-lg border border-[#6D282C]/50 ${large ? 'p-1.5' : 'p-1'}`}>
+            <p className="text-[9px] text-[#ff8fa3] font-bold uppercase whitespace-nowrap overflow-hidden text-ellipsis">{label}</p>
+            <p className={`font-bold text-[#ff8fa3] ${large ? 'text-xl' : 'text-xs'} truncate`} title={displayValue}>
                 {displayValue}
             </p>
         </div>
@@ -613,13 +612,13 @@ const PastCaseValgusResultPage: React.FC = () => {
     const { setPage, valgusCanvasDataUrl, valgusResults } = useAppContext();
 
     return (
-        <div className="relative flex flex-col h-full overflow-y-auto bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="flex justify-between items-center mb-4 no-print p-4 relative z-10">
-                <h2 className="text-4xl font-bold text-[#E0E0E0]">Valgus Stress Result Verification</h2>
+            <div className="flex justify-between items-center mb-0 no-print px-2 relative z-10">
+                <h2 className="text-2xl font-bold text-[#E0E0E0]">Valgus Stress Result Verification</h2>
                 <button
                     onClick={() => setPage('case-management')}
                     className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
@@ -640,30 +639,28 @@ const PastCaseValgusResultPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-4 min-h-0 px-4 pb-4 relative z-10">
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-0.5 min-h-0 px-0.5 pb-0 relative z-10 overflow-hidden">
                 {/* Column 1: Pre-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-0 overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-xl font-bold text-center mb-2 text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-1 rounded relative z-10">Pre-Op Analysis</h3>
-                    <div className="w-full flex-grow bg-black rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-[#333333] relative z-10">
+                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10">Pre-Op Analysis</h3>
+                    <div className="w-full flex-grow min-h-0 bg-black rounded-lg border border-[#333333] relative z-10 my-0.5">
                         {valgusCanvasDataUrl ?
-                            <img src={valgusCanvasDataUrl} alt="Pre-op Analysis" className="max-w-full max-h-full object-contain" /> :
+                            <img src={valgusCanvasDataUrl} alt="Pre-op Analysis" className="absolute inset-0 m-auto max-w-full max-h-full object-contain" /> :
                             <p className="text-sm text-gray-500 italic">No pre-op image available.</p>
                         }
                     </div>
-                    <div className="mt-auto grid grid-cols-2 gap-2 text-center relative z-10 shrink-0">
-                        <ResultItem label="Obliquity" value={valgusResults.obliquity != null ? valgusResults.obliquity.toFixed(1) + '°' : '--'} />
-                        <ResultItem label="CPAK" value={valgusResults.cpak} />
-                        <ResultItem label="Femur (LDFA)" value={valgusResults.femurType} />
-                        <ResultItem label="Femur (Obliquity)" value={valgusResults.femurTypeByObliquity} />
+                    <div className="mt-auto grid grid-cols-1 gap-0.5 text-center relative z-10 shrink-0">
+                        <ResultItem label="Pre-Op CPAK" value={valgusResults.cpak ? `CPAK ${valgusResults.cpak}` : '--'} large={true} />
+                        <ResultItem label="Femur Type" value={valgusResults.femurTypeByObliquity ?? '--'} large={true} />
                     </div>
                 </div>
 
                 {/* Column 2: Post-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-0 overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-xl font-bold text-center mb-2 text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-1 rounded relative z-10">Post-Op Verification</h3>
-                    <div className="flex-grow min-h-0 relative">
+                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10">Post-Op Verification</h3>
+                    <div className="flex-grow min-h-0 relative mt-0.5 mb-2">
                         <PostOpValgusPlanner />
                     </div>
                 </div>

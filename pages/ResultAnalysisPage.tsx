@@ -219,8 +219,8 @@ const ResultAnalysisPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="flex justify-between items-center mb-2 no-print p-4 relative z-10">
-                <h2 className="text-4xl font-bold text-[#E0E0E0]">Long Leg Film Analysis</h2>
+            <div className="flex justify-between items-center mb-1 no-print px-2 relative z-10">
+                <h2 className="text-2xl font-bold text-[#E0E0E0]">Long Leg Film Analysis</h2>
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('planner-long-leg')}
@@ -242,7 +242,7 @@ const ResultAnalysisPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-grow min-h-0 px-4 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-grow min-h-0 px-2 relative z-10 overflow-hidden">
 
                 {/* Column 1: Image */}
                 <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center min-h-[300px] lg:min-h-0 bg-black text-center">
@@ -256,34 +256,21 @@ const ResultAnalysisPage: React.FC = () => {
                 {/* Column 2: Data & Matrix */}
                 <div className="lg:col-span-4 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     {/* Results Box */}
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg grid grid-cols-3 gap-2 min-h-0 shrink-0 text-center">
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg grid grid-cols-2 gap-4 min-h-0 shrink-0 text-center">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
-                        {/* Column 1: Femur Type (LDFA) */}
-                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333]">
-                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">Femur Type (LDFA)</p>
-                            <p className="font-bold text-base text-[#ff8fa3] leading-tight px-1">
-                                {longLegResults.ldfa !== null
-                                    ? getFemurClassification(longLegResults.ldfa).type.replace(' femur', '')
-                                    : '--'}
-                            </p>
-                            <p className="text-[10px] text-gray-400 font-medium mt-1">
-                                {longLegResults.ldfa !== null ? `(${getFemurClassification(longLegResults.ldfa).cut})` : ''}
-                            </p>
+                        {/* Column 1: Femur Type (JLO) */}
+                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333] relative z-10">
+                            <p className="text-xs text-white font-bold uppercase mb-2 tracking-wider">Femur Type</p>
+                            <p className="font-bold text-xl text-[#ff8fa3] leading-tight">{longLegResults.jloType}</p>
                         </div>
 
-                        {/* Column 2: JLO / Obliquity */}
-                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333]">
-                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">Femur Type (Obliquity)</p>
-                            <p className="font-bold text-lg text-[#ff8fa3]">{longLegResults.jloType}</p>
-                        </div>
-
-                        {/* Column 3: CPAK */}
-                        <div className="flex flex-col justify-center items-center py-2">
-                            <p className="text-[10px] text-[#ff8fa3] font-bold uppercase mb-1">CPAK Type</p>
-                            <div className="flex flex-col items-center">
-                                <p className="font-bold text-3xl text-[#ff8fa3] leading-none mb-1">CPAK {longLegResults.cpak}</p>
-                                <div className="scale-75 transform origin-top">
+                        {/* Column 2: CPAK */}
+                        <div className="flex flex-col justify-center items-center py-2 relative z-10">
+                            <p className="text-xs text-white font-bold uppercase mb-2 tracking-wider">CPAK Type</p>
+                            <div className="flex items-center gap-3">
+                                <p className="font-bold text-2xl text-[#ff8fa3] leading-none">CPAK {longLegResults.cpak}</p>
+                                <div className="scale-90 transform">
                                     <CpakDiagram cpakType={longLegResults.cpak} />
                                 </div>
                             </div>
@@ -345,7 +332,7 @@ const ResultAnalysisPage: React.FC = () => {
             </div>
 
             {/* Footer / Warning Section */}
-            <div className="mt-auto pt-2 space-y-2 pb-4 px-4 relative z-10">
+            <div className="mt-auto pt-1 space-y-1 pb-2 px-2 relative z-10 shrink-0">
                 {(showLdfaWarning || showMptaWarning) && (
                     <div className="space-y-1">
                         {showLdfaWarning && <WarningMessage message="Native LDFA Out of boundary – release anticipated." />}
@@ -358,14 +345,14 @@ const ResultAnalysisPage: React.FC = () => {
                     <button
                         onClick={() => setPage('planner-long-leg-coronal-balancing')}
                         disabled={!longLegResults.cpak || longLegResults.cpak === '--'}
-                        className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                        className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                    shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                    transition-all duration-300 ease-out
                                    hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
                                    active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative text-lg font-bold text-white tracking-widest">PROCEED TO CORONAL BALANCING</span>
+                        <span className="relative text-sm font-bold text-white tracking-wider">CORONAL BALANCING</span>
                         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                         <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>

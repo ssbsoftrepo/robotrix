@@ -17,7 +17,7 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, i
     return (
         <div
             onClick={onClick}
-            className={`group relative flex flex-col p-3 rounded-lg cursor-pointer transition-all duration-300 h-full
+            className={`group relative flex flex-col p-1.5 rounded-lg cursor-pointer transition-all duration-300 h-full
                         ${isSelected ? 'bg-[#252525] border-2' : 'bg-[#1a1a1a] border border-[#333333] hover:border-[#6D282C]/50'}
                         hover:shadow-[0_0_20px_rgba(109,40,44,0.15)]`}
             style={{
@@ -33,8 +33,8 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, i
                 </div>
             )}
 
-            <div className="text-center mb-3 min-h-[3rem] flex items-center justify-center relative z-10">
-                <p className="font-bold text-lg leading-tight text-[#E0E0E0]">{level}</p>
+            <div className="text-center mb-1 min-h-[2rem] flex items-center justify-center relative z-10">
+                <p className="font-bold text-xs leading-tight text-[#E0E0E0]">{level}</p>
             </div>
 
             <div className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-[#333333] group-hover:border-[#444444]">
@@ -165,28 +165,28 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
     const laxityColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C'];
 
     return (
-        <div className="relative flex flex-col h-full p-4 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-full p-2 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Overhead Surgical Lamp Effect */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-4 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">Check for Lateral Laxity (Valgus Stress Film)</h2>
-                <div className="flex space-x-4">
+            <div className="flex justify-between items-center mb-1 relative z-10 shrink-0">
+                <h2 className="text-xl font-bold text-[#E0E0E0]">Check for Lateral Laxity (Valgus Stress)</h2>
+                <div className="flex space-x-2">
                     {/* Skip Button */}
                     <button
                         onClick={handleSkip}
-                        className="group relative py-2 px-5 bg-[#6D282C] border border-[#893338] rounded-sm 
+                        className="group relative py-1.5 px-3 bg-[#6D282C] border border-[#893338] rounded-sm 
                                    shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                    transition-all duration-300 ease-out
                                    hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
                                    active:scale-[0.98] flex items-center"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative font-bold text-white tracking-wider flex items-center">
+                        <span className="relative font-bold text-xs text-white tracking-wider flex items-center">
                             SKIP TO PLANNER
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                             </svg>
                         </span>
@@ -196,14 +196,14 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                     {/* Cancel Button */}
                     <button
                         onClick={goBack}
-                        className="group relative py-2 px-5 bg-[#252525] border border-[#444444] rounded-sm 
+                        className="group relative py-1.5 px-3 bg-[#252525] border border-[#444444] rounded-sm 
                                    shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
                                    transition-all duration-300 ease-out
                                    hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
                                    active:scale-[0.98]"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
-                        <span className="relative font-bold text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
+                        <span className="relative font-bold text-xs text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
                         <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                         <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                     </button>
@@ -211,15 +211,15 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
             </div>
 
             {/* Main Layout */}
-            <div className="flex flex-col lg:flex-row gap-6 flex-grow min-h-[65vh] relative z-10">
+            <div className="flex flex-col lg:flex-row gap-2 flex-grow min-h-0 relative z-10 overflow-hidden">
 
                 {/* Left Side: Reference Images Group */}
-                <div className="flex-grow-[3] flex flex-col min-w-0">
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg mb-4">
+                <div className="flex-grow-[3] flex flex-col min-w-0 h-full">
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <h3 className="text-xl font-bold text-[#E0E0E0] text-center relative z-10">Laxity Level Reference Images</h3>
+                        <h3 className="text-sm font-bold text-[#E0E0E0] text-center relative z-10">Laxity Level Reference Images</h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-grow">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-grow min-h-0">
                         {laxityLevels.map((level, index) => {
                             const currentImage = laxityImages[level];
                             return (
@@ -238,12 +238,12 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                 </div>
 
                 {/* Right Side: Patient Upload */}
-                <div className="flex-grow-[2] flex flex-col min-w-[300px]">
-                    <div className="relative bg-[#1a1a1a] border border-[#6D282C]/50 p-2 rounded-lg mb-4">
+                <div className="flex-grow-[2] flex flex-col min-w-[250px] h-full">
+                    <div className="relative bg-[#1a1a1a] border border-[#6D282C]/50 p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <h3 className="text-xl font-bold text-[#ff8fa3] text-center relative z-10">Patient X-ray</h3>
+                        <h3 className="text-sm font-bold text-[#ff8fa3] text-center relative z-10">Patient X-ray</h3>
                     </div>
-                    <div className="relative flex flex-col p-3 rounded-lg border border-[#333333] bg-[#1a1a1a] h-full hover:border-[#6D282C]/50 transition-all flex-grow">
+                    <div className="relative flex flex-col p-1 rounded-lg border border-[#333333] bg-[#1a1a1a] h-full hover:border-[#6D282C]/50 transition-all flex-grow min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
                         {isLoading && (
@@ -278,7 +278,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start relative z-10 bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg">
+            <div className="mt-1 grid grid-cols-1 lg:grid-cols-3 gap-2 items-start relative z-10 bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg shrink-0">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                 <div className="lg:col-span-2 text-sm text-gray-500 relative z-10">
                     <p className="font-bold text-[#E0E0E0] mb-1">Important Note:</p>

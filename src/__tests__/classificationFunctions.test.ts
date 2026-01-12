@@ -46,26 +46,66 @@ describe('CPAK Classification', () => {
         );
     });
 
-    describe('getCpakClassification (Valgus Stress Planner)', () => {
-        // Same logic as getLongLegCpakType - verify both functions are consistent
-        const cpakTestCases = [
-            { ahka: -3, jlo: 170, expected: '1' },
-            { ahka: -2, jlo: 176.9, expected: '2' },
-            { ahka: 2.1, jlo: 170, expected: '3' },
-            { ahka: -2.1, jlo: 180, expected: '4' },
-            { ahka: 0, jlo: 180, expected: '5' },
-            { ahka: 2.1, jlo: 180, expected: '6' },
-            { ahka: -3, jlo: 183.1, expected: '7' },
-            { ahka: -2, jlo: 185, expected: '8' },
-            { ahka: 3, jlo: 190, expected: '9' },
+    describe('getCpakClassification (Valgus Stress Planner - Obliquity Based)', () => {
+        // New Valgus-specific classification based on Distal Obliquity Angle:
+        // Angle ≥ 3° → CPAK 2 (Valgoid)
+        // 1 ≤ Angle < 3 → CPAK 1 (Median)
+        // 0 ≤ Angle < 1 → CPAK 4 (Varoid) or CPAK 5 (if LDFA = MPTA = 90°)
+
+        const valgusObliquityTestCases = [
+            // Significant obliquity (≥ 3°) → CPAK 2
+            { id: 'VS-CPAK-01', obliquity: 5, ldfa: 85, mpta: 87, expected: '2', desc: 'Angle 5° → Valgoid' },
+            { id: 'VS-CPAK-02', obliquity: 3, ldfa: 86, mpta: 88, expected: '2', desc: 'Angle 3° (boundary) → Valgoid' },
+            { id: 'VS-CPAK-03', obliquity: 4.5, ldfa: 84, mpta: 89, expected: '2', desc: 'Angle 4.5° → Valgoid' },
+
+            // Mild obliquity (1 ≤ Angle < 3) → CPAK 1
+            { id: 'VS-CPAK-04', obliquity: 2, ldfa: 87, mpta: 88, expected: '1', desc: 'Angle 2° → Median' },
+            { id: 'VS-CPAK-05', obliquity: 1, ldfa: 88, mpta: 89, expected: '1', desc: 'Angle 1° (boundary) → Median' },
+            { id: 'VS-CPAK-06', obliquity: 2.9, ldfa: 86, mpta: 87, expected: '1', desc: 'Angle 2.9° → Median' },
+
+            // Neutral obliquity (0 ≤ Angle < 1) → CPAK 4
+            { id: 'VS-CPAK-07', obliquity: 0.5, ldfa: 88, mpta: 87, expected: '4', desc: 'Angle 0.5° → Varoid' },
+            { id: 'VS-CPAK-08', obliquity: 0, ldfa: 89, mpta: 88, expected: '4', desc: 'Angle 0° (boundary) → Varoid' },
+            { id: 'VS-CPAK-09', obliquity: 0.9, ldfa: 87, mpta: 89, expected: '4', desc: 'Angle 0.9° → Varoid' },
+
+            // Special case: CPAK 5 (only if LDFA = MPTA = 90°)
+            { id: 'VS-CPAK-10', obliquity: 0.5, ldfa: 90, mpta: 90, expected: '5', desc: 'Angle 0.5° + LDFA=MPTA=90 → CPAK 5' },
+            { id: 'VS-CPAK-11', obliquity: 0, ldfa: 90, mpta: 90, expected: '5', desc: 'Angle 0° + LDFA=MPTA=90 → CPAK 5' },
         ];
 
-        test.each(cpakTestCases)(
-            'aHKA=$ahka, JLO=$jlo → CPAK $expected',
-            ({ ahka, jlo, expected }) => {
-                expect(getCpakClassification(ahka, jlo)).toBe(expected);
+        test.each(valgusObliquityTestCases)(
+            '$id: $desc (Obliquity=$obliquity, LDFA=$ldfa, MPTA=$mpta) → CPAK $expected',
+            ({ obliquity, ldfa, mpta, expected }) => {
+                // ahka and jlo are unused in new logic, passing dummy values
+                expect(getCpakClassification(0, 180, obliquity, ldfa, mpta)).toBe(expected);
             }
         );
+
+        describe('Boundary Conditions', () => {
+            it('Obliquity = 3 should be CPAK 2 (Valgoid)', () => {
+                expect(getCpakClassification(0, 180, 3, 88, 89)).toBe('2');
+            });
+
+            it('Obliquity = 2.99 should be CPAK 1 (Median)', () => {
+                expect(getCpakClassification(0, 180, 2.99, 88, 89)).toBe('1');
+            });
+
+            it('Obliquity = 1 should be CPAK 1 (Median)', () => {
+                expect(getCpakClassification(0, 180, 1, 88, 89)).toBe('1');
+            });
+
+            it('Obliquity = 0.99 should be CPAK 4 (Varoid)', () => {
+                expect(getCpakClassification(0, 180, 0.99, 88, 89)).toBe('4');
+            });
+
+            it('Obliquity = 0 with LDFA=MPTA=90 should be CPAK 5', () => {
+                expect(getCpakClassification(0, 180, 0, 90, 90)).toBe('5');
+            });
+
+            it('Obliquity undefined should return "--"', () => {
+                expect(getCpakClassification(0, 180)).toBe('--');
+            });
+        });
     });
 
     describe('Boundary Conditions - aHKA', () => {

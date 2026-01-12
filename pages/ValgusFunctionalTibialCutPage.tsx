@@ -21,7 +21,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* SVG Representation of a Metal Cutting Jig */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[120px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[80px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -176,8 +176,8 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-1 no-print shrink-0 p-4 relative z-10">
-                <h2 className="text-4xl font-bold text-[#E0E0E0]">Definitive Functional Tibia Cut (Valgus)</h2>
+            <div className="flex justify-between items-center mb-1 no-print shrink-0 px-2 relative z-10">
+                <h2 className="text-2xl font-bold text-[#E0E0E0]">Functional Tibia Cut (Valgus)</h2>
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('planner-valgus-stress-coronal-balancing')}
@@ -189,7 +189,9 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
                     <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
                         BACK
                     </span>
                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
@@ -197,54 +199,54 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex flex-col flex-grow relative min-h-0 px-4 relative z-10">
+            <div className="flex flex-col flex-grow relative min-h-0 px-2 relative z-10 overflow-hidden">
                 {/* Step Indicator */}
-                <div className="text-left mb-2 shrink-0">
-                    <span className="inline-block px-3 py-1 rounded-sm text-base font-bold bg-[#6D282C] text-white shadow-lg tracking-wider">STEP 5 &gt;</span>
+                <div className="text-left mb-1 shrink-0">
+                    <span className="inline-block px-2 py-0.5 rounded-sm text-xs font-bold bg-[#6D282C] text-white shadow-lg tracking-wider">STEP 5 &gt;</span>
                 </div>
 
-                <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0">
+                <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-2 min-h-0 overflow-hidden">
 
                     {/* Left Column: Instructions */}
                     <div className="h-full">
-                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col p-2 space-y-2 overflow-y-auto">
+                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col p-1.5 space-y-1 overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
-                            <div className="relative bg-[#252525] p-3 rounded-xl border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-2 z-10">
-                                <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-1 z-10">
+                                <div className="bg-[#6D282C] text-white w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div>
-                                <p className="text-sm text-gray-400 leading-snug">
-                                    Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
+                                <p className="text-base text-gray-400 leading-snug">
+                                    Choose <span className="text-white font-bold">Robotrix+ varus cutting jigs</span> to do a functional recut.
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#252525] p-3 rounded-xl border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-2 z-10">
-                                <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-lg font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-1 z-10">
+                                <div className="bg-[#6D282C] text-white w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     2
                                 </div>
-                                <p className="text-sm text-gray-400 leading-snug">
-                                    Changing the 90 deg cut by <span className="text-[#ff8fa3] font-bold">1° varus</span> will open the medial gap by <span className="text-[#ff8fa3] font-bold">~ 1.2 mms</span> in average-sized tibia (70 mms width).
+                                <p className="text-base text-gray-400 leading-snug">
+                                    <span className="text-[#ff8fa3] font-bold">1° varus</span> opens medial gap by <span className="text-[#ff8fa3] font-bold">~1.2mm</span>.
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-xl p-3 text-center shadow-lg mt-auto z-10">
-                                <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Anticipated Tibia Cut</p>
-                                <p className="text-3xl font-extrabold text-white">{anticipatedVarusCut}° <span className="text-base">Varus</span></p>
+                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-2 text-center shadow-lg z-10">
+                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-0.5">Anticipated Cut</p>
+                                <p className="text-xl font-extrabold text-white">{anticipatedVarusCut}° <span className="text-sm">Varus</span></p>
                             </div>
 
-                            <div className="relative bg-[#252525] border border-[#333333] rounded-xl p-3 flex flex-col items-center gap-2 z-10">
-                                <p className="text-gray-500 text-xs text-center">Laxity Status: <span className="text-white font-bold">{lateralLaxity || 'Unknown'}</span></p>
+                            <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-2 flex flex-col items-center gap-1 z-10">
+                                <p className="text-gray-500 text-[10px] text-center">Laxity: <span className="text-white font-bold">{lateralLaxity || 'Unknown'}</span></p>
                                 <button
                                     onClick={applyLateralLaxity}
-                                    className="group relative w-full py-2 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                    className="group relative w-full py-1.5 bg-[#6D282C] border border-[#893338] rounded-sm 
                                                shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                                transition-all duration-300 ease-out
                                                hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
                                                active:scale-[0.98]"
                                 >
                                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                                    <span className="relative text-sm font-bold text-white tracking-wider">APPLY LATERAL LAXITY</span>
+                                    <span className="relative text-xs font-bold text-white tracking-wider">APPLY LAXITY</span>
                                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                     <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                 </button>
@@ -374,24 +376,24 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
             </div>
 
             {/* Footer Action Button */}
-            <div className="flex justify-end pb-2 mt-2 shrink-0 px-4 relative z-10">
+            <div className="flex justify-end pb-1 mt-1 shrink-0 px-2 relative z-10">
                 <button
                     onClick={() => setPage('planner-valgus-stress-report')}
-                    className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                    className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                transition-all duration-300 ease-out
                                hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
                                active:scale-[0.98] flex items-center"
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative flex items-center gap-2 text-lg font-bold text-white tracking-widest">
-                        PROCEED TO SIMULATION
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
+                        SIMULATION
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                     </span>
-                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                 </button>
             </div>
         </div>

@@ -99,37 +99,48 @@ export const classifyJloType = (jlo: number): string => {
 };
 
 /**
- * CPAK classification for Valgus Stress planner (same logic as Long Leg).
+ * CPAK classification for Valgus Stress planner.
+ * Uses Distal Obliquity Angle for classification.
  * 
- * @param ahka - Arithmetic Hip-Knee-Ankle angle
- * @param jlo - Joint Line Orientation
- * @param obliquity - Optional obliquity value (not used in classification)
- * @returns CPAK type as string ('1' through '9')
+ * Classification based on Distal Obliquity Angle:
+ *   - Angle ≥ 3° → Valgoid → CPAK 2
+ *   - 1 ≤ Angle < 3 → Median → CPAK 1
+ *   - 0 ≤ Angle < 1 → Varoid → CPAK 4 (or CPAK 5 if LDFA = MPTA = 90°)
+ * 
+ * @param ahka - Arithmetic Hip-Knee-Ankle angle (unused in new logic)
+ * @param jlo - Joint Line Orientation (unused in new logic)
+ * @param obliquity - Distal Obliquity Angle (required for classification)
+ * @param ldfa - Lateral Distal Femoral Angle (optional, for CPAK 5 check)
+ * @param mpta - Medial Proximal Tibial Angle (optional, for CPAK 5 check)
+ * @returns CPAK type as string ('1', '2', '4', or '5')
  */
-export const getCpakClassification = (ahka: number, jlo: number, obliquity?: number): string => {
-    // Same logic as getLongLegCpakType
-    let alignment = 'neutral';
-    if (ahka < -2) alignment = 'varus';
-    else if (ahka > 2) alignment = 'valgus';
-    else alignment = 'neutral';
+export const getCpakClassification = (ahka: number, jlo: number, obliquity?: number, ldfa?: number | null, mpta?: number | null): string => {
+    // If obliquity is not provided, fall back to '--'
+    if (obliquity === undefined || obliquity === null) return '--';
 
-    let jointLine = 'neutral';
-    if (jlo < 177) jointLine = 'distal';
-    else if (jlo > 183) jointLine = 'proximal';
-    else jointLine = 'neutral';
+    // Classification based on Distal Obliquity Angle
+    if (obliquity >= 3) {
+        // Significant obliquity - Valgoid - CPAK 2
+        return '2';
+    } else if (obliquity >= 1 && obliquity < 3) {
+        // Mild obliquity - Median - CPAK 1
+        return '1';
+    } else if (obliquity >= 0 && obliquity < 1) {
+        // Neutral obliquity - Varoid - CPAK 4 or CPAK 5
+        // CPAK 5 only if LDFA = MPTA = 90 degrees
+        if (ldfa !== null && ldfa !== undefined && mpta !== null && mpta !== undefined &&
+            Math.round(ldfa) === 90 && Math.round(mpta) === 90) {
+            return '5';
+        }
+        return '4';
+    }
 
-    if (jointLine === 'distal') {
-        if (alignment === 'varus') return '1';
-        if (alignment === 'neutral') return '2';
-        return '3';
-    }
-    if (jointLine === 'neutral') {
-        if (alignment === 'varus') return '4';
-        if (alignment === 'neutral') return '5';
-        return '6';
-    }
-    // Proximal
-    if (alignment === 'varus') return '7';
-    if (alignment === 'neutral') return '8';
-    return '9';
+    // Default fallback for negative values or other edge cases
+    return '4';
 };
+
+/**
+ * Valgus Stress specific CPAK classification (same as getCpakClassification).
+ * This function is exported separately for clarity in tests.
+ */
+export const getValgusStressCpakClassification = getCpakClassification;

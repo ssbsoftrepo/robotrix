@@ -85,7 +85,7 @@ const ReportPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-4 no-print px-4 pt-4 relative z-10">
+            <div className="flex justify-between items-center mb-4 no-print px-4 pt-1 relative z-10">
                 <h2 className="text-2xl font-extrabold text-[#E0E0E0] tracking-tight">Surgical Case Report</h2>
                 <div className="flex space-x-2">
                     <button
