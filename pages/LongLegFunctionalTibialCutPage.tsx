@@ -108,9 +108,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
 
 
     // Line Dragging State
-    const [linesYPercent, setLinesYPercent] = useState<number>(
-        (longLegFunctionalLinesY && longLegFunctionalLinesY >= 35) ? longLegFunctionalLinesY : 40
-    );
+    const [linesYPercent, setLinesYPercent] = useState<number>(34);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut
