@@ -47,7 +47,7 @@ const ResultTypeModal: React.FC<{
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-2xl text-center shadow-2xl w-full border border-[#333333]">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+                <button type="button" onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-20">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -82,7 +82,7 @@ const ReportSelectionModal: React.FC<{
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-2xl text-center shadow-2xl w-full border border-[#333333]">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+                <button type="button" onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-20">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -154,7 +154,7 @@ const PlanSelectionModal: React.FC<{
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-6 rounded-lg max-w-2xl w-full max-h-[80vh] flex flex-col border border-[#333333] shadow-2xl">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-10">
+                <button type="button" onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-20">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -705,7 +705,7 @@ const CaseManagementPage: React.FC = () => {
                     <div className="flex flex-col items-center w-full max-w-5xl space-y-6">
                         {/* Close Button */}
                         <div className="w-full flex justify-end">
-                            <button onClick={() => setIsLongLegConfigOpen(false)} className="text-gray-500 hover:text-white p-2 transition-colors">
+                            <button type="button" onClick={() => setIsLongLegConfigOpen(false)} className="text-gray-500 hover:text-white p-2 transition-colors z-20">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -713,23 +713,23 @@ const CaseManagementPage: React.FC = () => {
                         </div>
 
                         {/* Box 1: LDFA Mode */}
-                        <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-6 rounded-lg border border-[#6D282C]/50 w-full shadow-2xl">
+                        <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-4 rounded-lg border border-[#333333] w-full shadow-2xl">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-2xl font-bold text-[#E0E0E0] mb-6 text-center relative z-10">1. Select LDFA Calculation Method</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10">1. Select LDFA Calculation Method</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                                 <button
                                     onClick={() => setTempLdfa('native')}
-                                    className={`p-6 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'native' ? 'border-[#6D282C] bg-[#6D282C]/30 text-white shadow-lg' : 'border-[#333333] hover:bg-[#6D282C]/10 hover:border-[#6D282C]/50 text-gray-300'}`}
+                                    className={`p-4 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'native' ? 'border-[#6D282C] bg-[#6D282C]/30' : 'border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] hover:border-[#6D282C]/50'}`}
                                 >
-                                    <span className="block font-bold text-2xl mb-3">Native (Uncorrected)</span>
-                                    <span className="block text-lg leading-relaxed whitespace-normal text-gray-400">You take the actual mechanical axis from the real hip center including coxa vara/valga.</span>
+                                    <span className="block font-bold text-xl mb-2 text-gray-200">Native (Uncorrected)</span>
+                                    <span className="block text-sm leading-relaxed whitespace-normal text-gray-400">You take the actual mechanical axis from the real hip center including coxa vara/valga.</span>
                                 </button>
                                 <button
                                     onClick={() => setTempLdfa('corrected')}
-                                    className={`p-6 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'corrected' ? 'border-[#6D282C] bg-[#6D282C]/30 text-white shadow-lg' : 'border-[#333333] hover:bg-[#6D282C]/10 hover:border-[#6D282C]/50 text-gray-300'}`}
+                                    className={`p-4 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'corrected' ? 'border-[#6D282C] bg-[#6D282C]/30' : 'border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] hover:border-[#6D282C]/50'}`}
                                 >
-                                    <span className="block font-bold text-2xl mb-3">Corrected</span>
-                                    <span className="block text-lg leading-relaxed whitespace-normal text-gray-400">You normalize the femoral head center to eliminate coxa vara/valga effect.</span>
+                                    <span className="block font-bold text-xl mb-2 text-gray-200">Corrected</span>
+                                    <span className="block text-sm leading-relaxed whitespace-normal text-gray-400">You normalize the femoral head center to eliminate coxa vara/valga effect.</span>
                                 </button>
                             </div>
                         </div>
