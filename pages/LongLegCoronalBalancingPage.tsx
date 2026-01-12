@@ -61,7 +61,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-0 px-4 relative z-10">
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[20fr_60fr_20fr] gap-4 min-h-0 px-4 relative z-10">
                 {/* Column 1: Instructions & Block Upload */}
                 <div className="h-full flex flex-col overflow-hidden">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
@@ -85,50 +85,45 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Column 2: Image & Overlays */}
+                {/* Column 2: Image with Side Panels */}
                 <div className="h-full flex flex-col gap-2 overflow-hidden">
                     <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-transparent overflow-hidden rounded-xl border border-[#333333]">
-                        <div className="absolute inset-0 flex items-center justify-center z-0">
-                            <img src="/center.png" alt="Knee View Reference" className="w-full h-full object-contain" />
-                        </div>
-
-                        {/* Overlay Container */}
-                        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-4 flex justify-between pointer-events-none z-10 w-full items-center">
-
-                            {/* Left Group */}
-                            <div className="flex flex-col items-start text-left max-w-[120px]">
-                                <div className="h-16 flex flex-col justify-end mb-1 w-full">
-                                    <p className="text-xs font-semibold text-gray-400 leading-snug drop-shadow-md">
-                                        Adjust the distal femoral<br />
-                                        and proximal tibial cut<br />
-                                        thickness to get
-                                    </p>
-                                </div>
-                                <p className="text-lg text-[#E0E0E0] font-bold mb-2 shadow-black drop-shadow-lg">
+                        {/* Horizontal layout: Left panel - Image - Right panel */}
+                        <div className="flex items-center justify-center w-full h-full gap-4 p-4">
+                            {/* Left Panel - Lateral Gap */}
+                            <div className="flex flex-col items-center text-center shrink-0">
+                                <p className="text-xs font-semibold text-gray-400 leading-snug mb-2">
+                                    Adjust the distal femoral<br />
+                                    and proximal tibial cut<br />
+                                    thickness to get
+                                </p>
+                                <p className="text-base text-[#E0E0E0] font-bold mb-2">
                                     Lateral Gap
                                 </p>
-                                <div className="w-24 h-24 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm ml-2">
-                                    <span className="text-3xl font-bold text-white">{thickness}</span>
+                                <div className="w-20 h-20 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
+                                    <span className="text-2xl font-bold text-white">{thickness}</span>
                                     <span className="text-xs text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
 
-                            {/* Right Group */}
-                            <div className="flex flex-col items-end text-right max-w-[120px]">
-                                <div className="h-16 flex flex-col justify-end mb-1 w-full">
-                                    <p className="text-xs font-semibold text-gray-400 leading-snug drop-shadow-md">
-                                        Anticipated
-                                    </p>
-                                </div>
-                                <p className="text-lg text-[#E0E0E0] font-bold mb-2 shadow-black drop-shadow-lg">
+                            {/* Center - Bone Image */}
+                            <div className="flex-grow h-full flex items-center justify-center min-w-0">
+                                <img src="/center.png" alt="Knee View Reference" className="max-w-full max-h-full object-contain" />
+                            </div>
+
+                            {/* Right Panel - Medial Gap */}
+                            <div className="flex flex-col items-center text-center shrink-0">
+                                <p className="text-xs font-semibold text-gray-400 leading-snug mb-2">
+                                    Anticipated
+                                </p>
+                                <p className="text-base text-[#E0E0E0] font-bold mb-2">
                                     Medial Gap
                                 </p>
-                                <div className="w-24 h-24 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm ml-2">
-                                    <span className="text-3xl font-bold text-gray-100">{anticipatedMedialGap}</span>
+                                <div className="w-20 h-20 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
+                                    <span className="text-2xl font-bold text-gray-100">{anticipatedMedialGap}</span>
                                     <span className="text-xs text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
@@ -163,7 +158,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-3 flex flex-col items-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0 shrink">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-lg mb-2 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✓</div>
+                        <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-lg mb-2 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
                         <h4 className="text-lg font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
                         <div className="flex-grow flex items-center justify-center w-full min-h-0 relative z-10">
                             <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md">

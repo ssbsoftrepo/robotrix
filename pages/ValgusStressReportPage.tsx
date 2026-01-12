@@ -236,15 +236,13 @@ const ValgusStressReportPage: React.FC = () => {
                     </ReportCard>
 
                     <ReportCard title="Functional Tibial Planning" className="border-t-4 border-t-[#6D282C] h-full">
-                        {/* Always show the section if we have the static image fallback */}
                         <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[300px] w-full mx-auto print-image-container">
                             <img src={functionalCutImageSrc} alt="Functional Cut Plan" className="w-full h-full object-contain" />
 
-                            {/* Red Lines Overlay */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
                                 {[0, 1, 2, 3].map(deg => {
                                     const isTarget = deg === selectedDegree;
-                                    const startYPercent = valgusFunctionalLinesY || 30;
+                                    const startYPercent = 21;
                                     const yOffsetPercent = deg * 2.5;
                                     return (
                                         <g key={deg}>
@@ -273,16 +271,16 @@ const ValgusStressReportPage: React.FC = () => {
                                         </g>
                                     );
                                 })}
-                                <circle cx="0" cy={`${valgusFunctionalLinesY || 30}%`} r="6" fill="#6D282C" />
+                                <circle cx="0" cy="25%" r="6" fill="#6D282C" />
                             </svg>
 
                             {/* Gap Info Overlays - Scaled Down slightly for report */}
-                            <div className="absolute top-4 left-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#333333] rounded-xl px-4 py-2 text-center shadow-lg">
+                            <div className="absolute bottom-4 left-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#333333] rounded-xl px-4 py-2 text-center shadow-lg">
                                 <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-0.5">Lateral Gap</p>
                                 <p className="text-2xl font-black text-white leading-none">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
                             </div>
 
-                            <div className="absolute top-4 right-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#6D282C] rounded-xl px-4 py-2 text-center shadow-lg">
+                            <div className="absolute bottom-4 right-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#6D282C] rounded-xl px-4 py-2 text-center shadow-lg">
                                 <p className="text-[10px] text-[#ff8fa3] uppercase font-bold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
                                 <p className="text-2xl font-black text-[#ff8fa3] leading-none">{medialGapValue} <span className="text-sm text-[#ff8fa3]/70 font-bold">mm</span></p>
                             </div>

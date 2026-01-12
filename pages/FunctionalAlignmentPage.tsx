@@ -98,10 +98,11 @@ const TibialCutAccuracyCheck = () => {
         const mpta = longLegResults.mpta;
         if (mpta === null) return '--';
         let varusCut = 0;
-        if (mpta < 85) varusCut = 4;
-        else if (mpta < 87) varusCut = 3;
-        else if (mpta < 88) varusCut = 2;
-        else if (mpta < 89) varusCut = 1;
+        if (mpta <= 85) varusCut = 4;  // Significant varoid (includes out of boundary ≤84)
+        else if (mpta <= 87) varusCut = 3;  // Moderate varoid: 85 < MPTA ≤ 87
+        else if (mpta <= 88) varusCut = 2;  // Mild varoid: 87 < MPTA ≤ 88
+        else if (mpta <= 90) varusCut = 1;  // Neutral tibia: 88 < MPTA ≤ 90
+        // MPTA > 90 = 0° (valgoid tibia / neutral cut)
 
         if (tibiaBoundary === 'basic' && varusCut > 2) {
             varusCut = 2;

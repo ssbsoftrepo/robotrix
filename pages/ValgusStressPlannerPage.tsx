@@ -366,13 +366,16 @@ const ValgusStressPlannerPage: React.FC = () => {
   const pipDragOffset = useRef({ x: 0, y: 0 });
   const localResultsRef = useRef(valgusResults);
   const [zoom, setZoom] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const isPanningRef = useRef(false);
+  const panStartRef = useRef({ x: 0, y: 0 });
   const MIN_ZOOM = 1;
   const MAX_ZOOM = 3;
   const lastResizeTimeRef = useRef(0);
 
   const zoomIn = () => setZoom(z => Math.min(z + 0.2, MAX_ZOOM));
   const zoomOut = () => setZoom(z => Math.max(z - 0.2, MIN_ZOOM));
-  const resetZoom = () => setZoom(1);
+  const resetZoom = () => { setZoom(1); setPanOffset({ x: 0, y: 0 }); };
 
   const viewerRef = useRef<HTMLDivElement>(null);
   const activeLandmarkRef = useRef<string | null>(null);
@@ -817,8 +820,15 @@ const ValgusStressPlannerPage: React.FC = () => {
     const rect = container.getBoundingClientRect();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const x = (clientX - rect.left) / zoom;
-    const y = (clientY - rect.top) / zoom;
+    // Calculate position relative to container center, accounting for zoom and pan
+    const containerCenterX = rect.width / 2;
+    const containerCenterY = rect.height / 2;
+    // Position from container top-left
+    const relX = clientX - rect.left;
+    const relY = clientY - rect.top;
+    // Adjust for pan offset and zoom - transform from screen coords to image coords
+    const x = (relX - containerCenterX - panOffset.x) / zoom + containerCenterX;
+    const y = (relY - containerCenterY - panOffset.y) / zoom + containerCenterY;
     return { x, y };
   };
 
@@ -1022,8 +1032,8 @@ const ValgusStressPlannerPage: React.FC = () => {
         <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-200px)] flex items-center justify-center">
           <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
           {zoom > 1 && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg animate-pulse">
-              Reset zoom to mark the markings
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">
+              Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%
             </div>
           )}
 
@@ -1048,15 +1058,52 @@ const ValgusStressPlannerPage: React.FC = () => {
               <div
                 ref={viewerRef}
                 onClick={handleViewerTap}
-                onTouchEnd={handleViewerTap}
-                onMouseDown={(e) => e.preventDefault()}
-                onTouchStart={(e) => { }}
+                onTouchEnd={(e) => {
+                  isPanningRef.current = false;
+                  handleViewerTap(e);
+                }}
+                onMouseDown={(e) => {
+                  // Only start panning if not dragging a landmark and zoomed in
+                  if (zoom > 1 && !draggingPointRef.current) {
+                    e.preventDefault();
+                    isPanningRef.current = true;
+                    panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
+                  }
+                }}
+                onMouseMove={(e) => {
+                  // Only pan if panning is active AND not dragging a landmark
+                  if (isPanningRef.current && zoom > 1 && !draggingPointRef.current) {
+                    setPanOffset({
+                      x: e.clientX - panStartRef.current.x,
+                      y: e.clientY - panStartRef.current.y
+                    });
+                  }
+                }}
+                onMouseUp={() => { isPanningRef.current = false; }}
+                onMouseLeave={() => { isPanningRef.current = false; }}
+                onTouchStart={(e) => {
+                  // Only start panning if not dragging a landmark
+                  if (zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
+                    isPanningRef.current = true;
+                    panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
+                  }
+                }}
+                onTouchMove={(e) => {
+                  // Only pan if panning is active AND not dragging a landmark
+                  if (isPanningRef.current && zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
+                    setPanOffset({
+                      x: e.touches[0].clientX - panStartRef.current.x,
+                      y: e.touches[0].clientY - panStartRef.current.y
+                    });
+                  }
+                }}
                 className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center nav-ignore"
+                style={{ cursor: zoom > 1 ? (isPanningRef.current ? 'grabbing' : 'grab') : 'default' }}
               >
                 <div
                   className="relative"
                   style={{
-                    transform: `scale(${zoom})`,
+                    transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
                     transformOrigin: 'center center'
                   }}
                 >
@@ -1223,55 +1270,6 @@ const ValgusStressPlannerPage: React.FC = () => {
             )}
           </section>
 
-          {/* VALIDATION MESSAGE */}
-          {(() => {
-            const { ldfa, mpta } = valgusResults;
-            const warnings: string[] = [];
-
-            // Check for out-of-boundary LDFA
-            if (ldfa !== null && ldfa <= 86) {
-              warnings.push('Native LDFA out of boundary – some release anticipated.');
-            }
-
-            // Check for out-of-boundary MPTA
-            if (mpta !== null && mpta <= 84) {
-              warnings.push('Native MPTA out of boundary – some release anticipated.');
-            }
-
-            // Check for high-risk anatomy
-            if (ldfa !== null && mpta !== null) {
-              const validation = validateMeasurements(ldfa, mpta);
-              if (validation.status === 'error') {
-                return (
-                  <div className="p-3 rounded border flex items-start gap-3 bg-red-900/40 border-red-500/50 text-red-100">
-                    <span className="text-xl">⛔</span>
-                    <div>
-                      <p className="font-bold uppercase text-sm tracking-wide">Critical Error</p>
-                      <p className="text-sm font-medium opacity-90">{validation.msg}</p>
-                    </div>
-                  </div>
-                );
-              }
-              if (validation.status === 'warning') {
-                warnings.push(validation.msg);
-              }
-            }
-
-            if (warnings.length > 0) {
-              return (
-                <div className="p-3 rounded border flex items-start gap-3 bg-amber-900/40 border-amber-500/50 text-amber-100">
-                  <span className="text-xl">⚠️</span>
-                  <div className="space-y-1">
-                    <p className="font-bold uppercase text-sm tracking-wide">Warning</p>
-                    {warnings.map((msg, idx) => (
-                      <p key={idx} className="text-sm font-medium opacity-90">{msg}</p>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-            return null;
-          })()}
         </div>
       </div>
 
