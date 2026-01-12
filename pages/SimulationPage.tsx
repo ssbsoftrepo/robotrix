@@ -126,10 +126,11 @@ const SimulationPage: React.FC = () => {
         const mpta = longLegResults.mpta;
         let tibialVarusCut = 0;
         if (mpta !== null) {
-            if (mpta < 85) tibialVarusCut = 4;
-            else if (mpta < 87) tibialVarusCut = 3;
-            else if (mpta < 88) tibialVarusCut = 2;
-            else if (mpta < 89) tibialVarusCut = 1;
+            if (mpta <= 85) tibialVarusCut = 4;
+            else if (mpta <= 87) tibialVarusCut = 3;
+            else if (mpta <= 88) tibialVarusCut = 2;
+            else if (mpta <= 90) tibialVarusCut = 1;
+            // > 90 implies 0 (neutral) which is default initialized
         }
         if (tibiaBoundary === 'basic' && tibialVarusCut > 2) {
             tibialVarusCut = 2;

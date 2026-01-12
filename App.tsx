@@ -99,7 +99,6 @@ const App: React.FC = () => {
     return (
         <div className="min-h-screen flex flex-col">
             <header className="relative flex items-center justify-center p-4 text-center border-b border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]">
-                {/* Noise texture overlay */}
                 <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
 
                 <h1 className="relative z-10 text-5xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg">
@@ -121,7 +120,6 @@ const App: React.FC = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" className="relative h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2l-7 7-7-7" />
                         </svg>
-                        {/* Corner accents */}
                         <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                         <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>
