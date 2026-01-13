@@ -101,14 +101,14 @@ const App: React.FC = () => {
             <header className="relative flex items-center justify-center p-4 text-center border-b border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]">
                 <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
 
-                <h1 className="relative z-10 text-5xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg">
+                <h1 className="relative z-10 text-4xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg">
                     ROBOTRIX<span className="text-[#6D282C]">+</span>
                 </h1>
 
                 {page !== 'case-management' && (
                     <button
                         onClick={handleHomeClick}
-                        className="group absolute top-1/2 right-6 transform -translate-y-1/2 w-14 h-14 rounded-sm 
+                        className="group absolute top-1/2 right-6 transform -translate-y-1/2 w-12 h-12 rounded-sm 
                                    bg-[#6D282C] border border-[#893338]
                                    shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                    hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]

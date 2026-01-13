@@ -23,45 +23,21 @@ const angleBetweenVectors = (v1: Point, v2: Point) => {
     const cosTheta = Math.max(-1, Math.min(1, dot / (mag1 * mag2)));
     return Math.acos(cosTheta) * (180 / Math.PI);
 };
-const getLongLegCpakType = (ahka: number, jlo: number): string => {
-    // Classification based on provided table:
-    // aHKA: Varus (< -2), Neutral (-2 to 2), Valgus (> 2)
-    // JLO: Apex Distal (< 177), Apex Neutral (177 to 183), Apex Proximal (> 183)
-
-    let ahkaClass: 'varus' | 'neutral' | 'valgus';
-    if (ahka < -2) {
-        ahkaClass = 'varus';
-    } else if (ahka > 2) {
-        ahkaClass = 'valgus';
+const getValgusCpakType = (obliquity: number, ldfa: number | null, mpta: number | null): string => {
+    if (obliquity >= 3) {
+        // Significant obliquity - Valgoid - CPAK 2
+        return '2';
+    } else if (obliquity >= 1) {
+        // Mild obliquity - Median - CPAK 1
+        return '1';
     } else {
-        ahkaClass = 'neutral';
+        // Neutral obliquity - Varoid - CPAK 4 or CPAK 5
+        // CPAK 5 only if LDFA = MPTA = 90 degrees
+        if (ldfa !== null && mpta !== null && Math.round(ldfa) === 90 && Math.round(mpta) === 90) {
+            return '5';
+        }
+        return '4';
     }
-
-    let jloClass: 'distal' | 'neutral' | 'proximal';
-    if (jlo < 177) {
-        jloClass = 'distal';
-    } else if (jlo > 183) {
-        jloClass = 'proximal';
-    } else {
-        jloClass = 'neutral';
-    }
-
-    // Determine CPAK type from the 3x3 grid
-    if (jloClass === 'distal') {
-        if (ahkaClass === 'varus') return '1';
-        if (ahkaClass === 'neutral') return '2';
-        if (ahkaClass === 'valgus') return '3';
-    } else if (jloClass === 'neutral') {
-        if (ahkaClass === 'varus') return '4';
-        if (ahkaClass === 'neutral') return '5';
-        if (ahkaClass === 'valgus') return '6';
-    } else if (jloClass === 'proximal') {
-        if (ahkaClass === 'varus') return '7';
-        if (ahkaClass === 'neutral') return '8';
-        if (ahkaClass === 'valgus') return '9';
-    }
-
-    return '--';
 };
 
 const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
@@ -244,12 +220,12 @@ const PostOpValgusPlanner: React.FC = () => {
             newResults.mpta = calculateLineAngle(tibiaAxisPoint, jointCenter, trueLateral, trueMedial);
         }
 
-        if (newResults.ldfa !== null && newResults.mpta !== null) {
+        if (newResults.ldfa !== null && newResults.mpta !== null && newResults.obliquity !== null) {
             // Calculate aHKA and JLO
             newResults.ahka = newResults.mpta - newResults.ldfa;
             newResults.jlo = newResults.mpta + newResults.ldfa;
 
-            newResults.cpak = getLongLegCpakType(newResults.ahka, newResults.jlo);
+            newResults.cpak = getValgusCpakType(newResults.obliquity, newResults.ldfa, newResults.mpta);
 
             // LDFA-based classification
             const femurClass = getFemurClassification(newResults.ldfa);
@@ -257,14 +233,12 @@ const PostOpValgusPlanner: React.FC = () => {
             newResults.cut = femurClass.cut;
 
             // Obliquity-based classification
-            if (newResults.obliquity !== null) {
-                if (newResults.obliquity >= 3) {
-                    newResults.femurTypeByObliquity = 'Valgoid';
-                } else if (newResults.obliquity >= 1) {
-                    newResults.femurTypeByObliquity = 'Median';
-                } else {
-                    newResults.femurTypeByObliquity = 'Varoid';
-                }
+            if (newResults.obliquity >= 3) {
+                newResults.femurTypeByObliquity = 'Valgoid';
+            } else if (newResults.obliquity >= 1) {
+                newResults.femurTypeByObliquity = 'Median';
+            } else {
+                newResults.femurTypeByObliquity = 'Varoid';
             }
         }
         setResults(newResults);
@@ -519,11 +493,11 @@ const PostOpValgusPlanner: React.FC = () => {
 
     return (
         <div className="relative flex flex-col h-full rounded-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0 max-h-full overflow-hidden">
                 {/* Viewer - Left side (75%) */}
-                <div className="lg:col-span-3 relative w-full h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
+                <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     {postOpValgusImage ? (<>
-                        <div className="relative w-full h-full flex items-center justify-center">
+                        <div className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
                             <img
                                 ref={imageRef}
                                 src={postOpValgusImage}
@@ -639,12 +613,12 @@ const PastCaseValgusResultPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-0.5 min-h-0 px-0.5 pb-0 relative z-10 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-0.5 h-[calc(100vh-160px)] px-0.5 pb-0 relative z-10 overflow-hidden">
                 {/* Column 1: Pre-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 max-h-full overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10">Pre-Op Analysis</h3>
-                    <div className="w-full flex-grow min-h-0 bg-black rounded-lg border border-[#333333] relative z-10 my-0.5">
+                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Pre-Op Analysis</h3>
+                    <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden">
                         {valgusCanvasDataUrl ?
                             <img src={valgusCanvasDataUrl} alt="Pre-op Analysis" className="absolute inset-0 m-auto max-w-full max-h-full object-contain" /> :
                             <p className="text-sm text-gray-500 italic">No pre-op image available.</p>
@@ -657,10 +631,10 @@ const PastCaseValgusResultPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Post-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 max-h-full overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10">Post-Op Verification</h3>
-                    <div className="flex-grow min-h-0 relative mt-0.5 mb-2">
+                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Post-Op Verification</h3>
+                    <div className="flex-grow min-h-0 max-h-full relative mt-0.5 mb-2 overflow-hidden">
                         <PostOpValgusPlanner />
                     </div>
                 </div>

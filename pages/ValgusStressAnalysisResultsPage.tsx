@@ -141,21 +141,35 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
         if (mpta === null) return '--';
 
         let varusCut = 0;
-        if (mpta <= 85) varusCut = 4;  // Significant varoid (includes out of boundary ≤84)
-        else if (mpta <= 87) varusCut = 3;  // Moderate varoid: 85 < MPTA ≤ 87
-        else if (mpta <= 88) varusCut = 2;  // Mild varoid: 87 < MPTA ≤ 88
-        else if (mpta <= 90) varusCut = 1;  // Neutral tibia: 88 < MPTA ≤ 90
-        // MPTA > 90 = 0° (valgoid tibia / neutral cut)
+        if (mpta > 89) varusCut = 0;
+        else if (mpta > 88) varusCut = 1;
+        else if (mpta > 87) varusCut = 2;
+        else if (mpta > 85) varusCut = 3;
+        else varusCut = 4;
 
         // Apply basic matrix constraint (0-3 for Valgus per logic)
-        varusCut = Math.min(varusCut, 3);
+        if (varusCut > 3) return "3° varus cut (clamped to Basic Matrix)";
 
         if (varusCut === 0) return '0° (neutral cut)';
         return `${varusCut}° varus`;
     };
 
+    const getClampedFemoralCut = () => {
+        const originalCut = valgusResults.cut;
+        if (!originalCut || originalCut === '--') return '--';
+
+        // Extract the degree number from strings like "4° valgus cut" or "6° valgus cut (Native...)"
+        const match = originalCut.match(/(\d+)°/);
+        if (!match) return originalCut;
+
+        const degrees = parseInt(match[1]);
+        if (degrees < 3) return "3° valgus cut (clamped to Basic Matrix)";
+        if (degrees > 5) return "5° valgus cut (clamped to Basic Matrix)";
+        return originalCut;
+    };
+
     const anticipatedTibiaCut = getAnticipatedTibiaCut();
-    const recommendedFemoralCut = valgusResults.cut || '--';
+    const recommendedFemoralCut = getClampedFemoralCut();
 
     return (
         <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">

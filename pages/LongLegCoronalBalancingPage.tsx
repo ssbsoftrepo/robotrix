@@ -70,7 +70,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                             <span className="inline-block px-2 py-0.5 rounded-sm text-xs font-bold mb-1 bg-[#6D282C] text-white shadow-lg float-left tracking-wider">STEP 4 &gt;</span>
                         </div>
 
-                        <p className="font-bold text-[#E0E0E0] mb-1 text-md leading-snug w-full text-center shrink-0 relative z-10">
+                        <p className="font-bold text-[#E0E0E0] mb-1.5 text-lg leading-snug w-full text-center shrink-0 relative z-10">
                             Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span> (Asymmetrical Incremental blocks) To gauge lateral and medial extension gaps
                         </p>
 
@@ -159,11 +159,11 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-1.5 flex flex-col items-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0 shrink">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-xs mb-0.5 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
-                        <h4 className="text-sm font-extrabold text-[#ff8fa3] mb-0.5 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
+                        <div className="w-9 h-9 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-xs mb-0.5 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
+                        <h4 className="text-md font-extrabold text-[#ff8fa3] mb-0.5 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
                         <div className="flex-grow flex items-center justify-center w-full min-h-0 relative z-10">
                             <div className="bg-black/40 p-1.5 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md">
-                                <p className="text-sm text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
+                                <p className="text-md text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
                             </div>
                         </div>
                     </div>
@@ -172,11 +172,11 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-1.5 flex flex-col items-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0 shrink">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-5 h-5 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-xs mb-0.5 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
-                        <h4 className="text-sm font-extrabold text-[#ff8fa3] mb-0.5 leading-tight relative z-10">Medial gap does not match anticipated gap</h4>
+                        <div className="w-9 h-9 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-xs mb-0.5 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
+                        <h4 className="text-md font-extrabold text-[#ff8fa3] mb-0.5 leading-tight relative z-10">Medial gap does not match anticipated gap</h4>
                         <div className="flex-grow flex flex-col gap-1 justify-center w-full min-h-0 relative z-10">
                             <div className="bg-black/40 p-1.5 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-xs font-bold">Consider error on 90 deg tibial cut</p>
+                                <p className="text-[#ff8fa3] text-md font-bold">Consider error on 90 deg tibial cut</p>
                             </div>
                             <div className="flex items-center justify-center gap-1 shrink-0">
                                 <div className="h-px bg-[#333333] flex-grow"></div>
@@ -184,7 +184,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                                 <div className="h-px bg-[#333333] flex-grow"></div>
                             </div>
                             <div className="bg-black/40 p-1.5 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-xs font-bold">Consider Pre op lateral laxity</p>
+                                <p className="text-[#ff8fa3] text-md font-bold">Consider Pre op lateral laxity</p>
                             </div>
                         </div>
                     </div>

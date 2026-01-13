@@ -205,38 +205,39 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     <span className="inline-block px-2 py-0.5 rounded-sm text-xs font-bold bg-[#6D282C] text-white shadow-lg tracking-wider">STEP 5 &gt;</span>
                 </div>
 
-                <div className="flex-grow grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-1 min-h-0 overflow-hidden mt-1">
+                <div className="flex-grow grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] min-h-0 overflow-hidden mt-1">
 
                     {/* Left Column: Instructions */}
                     <div className="h-full">
-                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-[calc(100%-4.5rem)] flex flex-col p-1 space-y-0.5 overflow-hidden">
+                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-[calc(100%-5rem)] flex flex-col p-1.5 space-y-1.5 overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
-                            <div className="relative bg-[#252525] p-1.5 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-0.5 z-10">
-                                <div className="bg-[#6D282C] text-white w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-0.5 z-10 min-h-0">
+                                <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div>
-                                <p className="text-md text-gray-400 leading-snug">
+                                <p className="text-sm text-gray-400 leading-snug">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#252525] p-1.5 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-0.5 z-10">
-                                <div className="bg-[#6D282C] text-white w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-0.5 z-10 min-h-0">
+                                <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
                                     2
                                 </div>
-                                <p className="text-md text-gray-400 leading-snug">
+                                <p className="text-sm text-gray-400 leading-snug">
                                     Changing the 90 deg cut by <span className="text-[#ff8fa3] font-bold">1° varus</span> will open the medial gap by <span className="text-[#ff8fa3] font-bold">~ 1.2 mms</span> in average-sized tibia (70 mms width).
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-1 text-center shadow-lg z-10">
-                                <p className="text-gray-500 text-[9px] font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
-                                <p className="text-base font-extrabold text-white">{anticipatedVarusCut}° <span className="text-xs">Varus</span></p>
+                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-1.5 text-center shadow-lg z-10 flex-[0.8] flex flex-col justify-center min-h-0">
+                                <p className="text-gray-400 text-[9px] font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
+                                <p className="text-xl font-black text-white">{anticipatedVarusCut}° <span className="text-xs">Varus</span></p>
                             </div>
 
-                            <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-1 flex flex-col items-center gap-0.5 z-10">
-                                <p className="text-gray-500 text-[9px] text-center">Laxity: <span className="text-white font-bold">{lateralLaxity || 'Unknown'}</span></p>
+                            <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-1.5 flex-[0.8] flex flex-col justify-center items-center gap-0.5 z-10 min-h-0">
+                                <p className="text-gray-400 text-[9px] font-bold uppercase tracking-wider mb-0">Laxity Status</p>
+                                <p className="text-base font-black text-white">{lateralLaxity || 'Unknown'}</p>
                                 <button
                                     onClick={applyLateralLaxity}
                                     className="group relative w-full py-1 bg-[#6D282C] border border-[#893338] rounded-sm 
@@ -255,7 +256,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     </div>
 
                     {/* Center Column: Image Upload & Red Lines */}
-                    <div className="flex flex-col h-[calc(100%-4.5rem)] items-center justify-center relative p-0 overflow-hidden">
+                    <div className="flex flex-col h-[calc(100%-5rem)] items-center justify-center relative p-0 overflow-hidden">
 
                         <div
                             ref={containerRef}
@@ -266,12 +267,12 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                             {/* Gap Info Overlays */}
                             <div className="absolute top-4 left-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#333333] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(0,0,0,0.8)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105">
                                 <p className="text-[10px] text-gray-400 uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Lateral Gap</p>
-                                <p className="text-3xl font-black text-white leading-none drop-shadow-xl">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
+                                <p className="text-2xl font-black text-white leading-none drop-shadow-xl">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
                             </div>
 
                             <div className="absolute top-4 right-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#6D282C] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(109,40,44,0.3)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105">
                                 <p className="text-[10px] text-[#ff8fa3] uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
-                                <p className="text-3xl font-black text-[#ff8fa3] leading-none drop-shadow-xl">{medialGapValue} <span className="text-sm text-[#ff8fa3]/70 font-bold">mm</span></p>
+                                <p className="text-2xl font-black text-[#ff8fa3] leading-none drop-shadow-xl">{medialGapValue} <span className="text-sm text-[#ff8fa3]/70 font-bold">mm</span></p>
                             </div>
 
                             {/* Corrected Varus Overlay */}
@@ -324,7 +325,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     </div>
 
                     {/* Right Column: Cutting Jigs */}
-                    <div className="h-[calc(100%-4.5rem)] flex flex-col min-h-0">
+                    <div className="h-[calc(100%-5rem)]  flex flex-col min-h-0">
                         <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                             <div className="p-1 bg-[#252525] border-b border-[#333333] text-center shrink-0 relative z-10">
@@ -376,7 +377,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
             </div>
 
             {/* Footer Action Button */}
-            <div className="flex justify-end mt-[calc(-3rem)] pb-1 shrink-0 px-2 relative z-10">
+            <div className="flex justify-end mt-[calc(-4rem)] pb-1 shrink-0 px-2 relative z-10">
                 <button
                     onClick={() => setPage('planner-valgus-stress-report')}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
@@ -387,7 +388,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
                     <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
-                        REPORT
+                        VIEW REPORT
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>

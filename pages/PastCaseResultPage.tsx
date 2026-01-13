@@ -525,12 +525,12 @@ const PostOpPlanner: React.FC = () => {
 
     return (
         <div className="relative flex flex-col h-full rounded-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0 max-h-full overflow-hidden">
                 {/* Viewer - Left side (75%) */}
-                <div className="lg:col-span-3 relative w-full h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
+                <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     {postOpLongLegImage ? (
                         <>
-                            <div className="relative w-full h-full flex items-center justify-center">
+                            <div className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
                                 <img ref={imageRef} src={postOpLongLegImage} alt="Post-op X-ray" className="block max-w-full max-h-full object-contain"
                                     onLoad={(e) => {
                                         const canvas = canvasRef.current;
@@ -657,12 +657,12 @@ const PastCaseResultPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-0.5 min-h-0 px-0.5 pb-0 relative z-10 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-0.5 h-[calc(100vh-160px)] px-0.5 pb-0 relative z-10 overflow-hidden">
                 {/* Column 1: Pre-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 max-h-full overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10">Pre-Op Analysis</h3>
-                    <div className="w-full flex-grow min-h-0 bg-black rounded-lg border border-[#333333] relative z-10 my-0.5">
+                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Pre-Op Analysis</h3>
+                    <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden">
                         {longLegCanvasDataUrl ?
                             <img src={longLegCanvasDataUrl} alt="Pre-op Analysis" className="absolute inset-0 m-auto max-w-full max-h-full object-contain" /> :
                             <p className="text-sm text-gray-500 italic">No pre-op image available.</p>
@@ -681,10 +681,10 @@ const PastCaseResultPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Post-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 max-h-full overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10">Post-Op Verification</h3>
-                    <div className="flex-grow min-h-0 relative mt-0.5">
+                    <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Post-Op Verification</h3>
+                    <div className="flex-grow min-h-0 max-h-full relative mt-0.5 overflow-hidden">
                         <PostOpPlanner />
                     </div>
                 </div>
