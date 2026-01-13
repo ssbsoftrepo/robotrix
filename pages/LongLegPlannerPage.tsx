@@ -107,12 +107,12 @@ const getLongLegValgusCut = (ldfa: number | null): string => {
 
 const getRecommendedVarusCut = (mpta: number | null) => {
     if (mpta === null) return '--';
-    if (mpta > 89) return '0° (neutral cut)';
-    if (mpta > 88) return '1° varus cut';
-    if (mpta > 87) return '2° varus cut';
-    if (mpta > 85) return '3° varus cut';
-    if (mpta > 84) return '4° varus cut';
-    return '4° varus cut (Native MPTA out of boundary)';
+    if (mpta > 90) return '0° (neutral cut)';  // Valgoid tibia: MPTA > 90°
+    if (mpta > 88) return '1° varus cut';      // Neutral tibia: 88 < MPTA ≤ 90°
+    if (mpta > 87) return '2° varus cut';      // Mild varoid tibia: 87 < MPTA ≤ 88°
+    if (mpta > 85) return '3° varus cut';      // Moderate varoid tibia: 85 < MPTA ≤ 87°
+    if (mpta > 84) return '4° varus cut';      // Significant varoid tibia: 84 < MPTA ≤ 85°
+    return '4° varus cut (Native MPTA out of boundary)'; // MPTA ≤ 84°
 };
 
 // --- CAMERA MODAL (Unchanged) ---
@@ -894,7 +894,7 @@ const LongLegPlannerPage: React.FC = () => {
     if (kneeType === 'valgus') {
         return (
             <div className="flex flex-col h-full items-center justify-center">
-                <h2 className="text-4xl font-bold mb-8 text-center">Long leg film Planner for VALGUS KNEE</h2>
+                <h2 className="text-3xl font-bold mb-8 text-center">Long leg film Planner for VALGUS KNEE</h2>
                 <div className="gemini-dark-card p-12 rounded-lg text-center">
                     <p className="text-3xl text-yellow-400">Updates Coming Soon</p>
                     <p className="text-xl text-gray-300 mt-4">This planner is currently under development. Please check back later.</p>

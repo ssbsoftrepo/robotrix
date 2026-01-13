@@ -220,7 +220,7 @@ const ResultAnalysisPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
-                <h2 className="text-2xl font-bold text-[#E0E0E0]">Long Leg Film Analysis</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Long Leg Film Analysis</h2>
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('planner-long-leg')}

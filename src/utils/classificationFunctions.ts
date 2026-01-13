@@ -78,7 +78,7 @@ export const getLongLegValgusCut = (ldfa: number | null): string => {
  */
 export const getRecommendedVarusCut = (mpta: number | null): string => {
     if (mpta === null) return '--';
-    if (mpta > 89) return '0° (neutral cut)';
+    if (mpta > 90) return '0° (neutral cut)';
     if (mpta > 88) return '1° varus cut';
     if (mpta > 87) return '2° varus cut';
     if (mpta > 85) return '3° varus cut';
@@ -115,19 +115,14 @@ export const classifyJloType = (jlo: number): string => {
  * @returns CPAK type as string ('1', '2', '4', or '5')
  */
 export const getCpakClassification = (ahka: number, jlo: number, obliquity?: number, ldfa?: number | null, mpta?: number | null): string => {
-    // If obliquity is not provided, fall back to '--'
     if (obliquity === undefined || obliquity === null) return '--';
 
-    // Classification based on Distal Obliquity Angle
     if (obliquity >= 3) {
-        // Significant obliquity - Valgoid - CPAK 2
         return '2';
     } else if (obliquity >= 1 && obliquity < 3) {
-        // Mild obliquity - Median - CPAK 1
         return '1';
     } else if (obliquity >= 0 && obliquity < 1) {
-        // Neutral obliquity - Varoid - CPAK 4 or CPAK 5
-        // CPAK 5 only if LDFA = MPTA = 90 degrees
+        
         if (ldfa !== null && ldfa !== undefined && mpta !== null && mpta !== undefined &&
             Math.round(ldfa) === 90 && Math.round(mpta) === 90) {
             return '5';
@@ -135,12 +130,7 @@ export const getCpakClassification = (ahka: number, jlo: number, obliquity?: num
         return '4';
     }
 
-    // Default fallback for negative values or other edge cases
     return '4';
 };
 
-/**
- * Valgus Stress specific CPAK classification (same as getCpakClassification).
- * This function is exported separately for clarity in tests.
- */
 export const getValgusStressCpakClassification = getCpakClassification;

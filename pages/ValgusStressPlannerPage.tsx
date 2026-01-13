@@ -63,14 +63,14 @@ const getFemurClassification = (ldfa: number) => {
 };
 
 const getTibiaClassification = (mpta: number) => {
-  if (mpta > 89) return { type: 'Valgoid tibia', cut: '0° (neutral cut)' };
+  if (mpta > 90) return { type: 'Valgoid tibia', cut: '0° (neutral cut)' };
   if (mpta > 88) return { type: 'Neutral tibia', cut: '1° varus cut' };
   if (mpta > 87) return { type: 'Mild varoid tibia', cut: '2° varus cut' };
-  if (mpta > 85) return { type: 'Moderate varoid tibia', cut: '3° varus cut' };
-  if (mpta > 84) return { type: 'Significant varoid tibia', cut: '4° varus cut' };
+  if (mpta > 85) return { type: 'Moderate varoid tibia', cut: '3° varus cut' }; // 85 < MPTA ≤ 87°
+  if (mpta > 84) return { type: 'Significant varoid tibia', cut: '4° varus cut' }; // 84 < MPTA ≤ 85°
   return {
     type: 'Significant varoid tibia',
-    cut: '4° varus cut (Native MPTA out of boundary)'
+    cut: '4° varus cut (Native MPTA out of boundary)' // MPTA ≤ 84°
   };
 };
 

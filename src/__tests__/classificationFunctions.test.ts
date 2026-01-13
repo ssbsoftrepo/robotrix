@@ -199,12 +199,12 @@ describe('Valgus Cut Recommendation', () => {
 
 describe('Varus Cut Recommendation', () => {
     describe('getRecommendedVarusCut', () => {
-        // Test data from User's Reference Table (using > instead of >=)
+        // Test data from User's Reference Table (updated to use > 90 for neutral cut)
         const varusCutTestCases = [
             { id: 'TC-VAR-01', mpta: null, condition: 'null check', expected: '--' },
-            { id: 'TC-VAR-02', mpta: 95, condition: '> 89', expected: '0° (neutral cut)' },
-            { id: 'TC-VAR-03', mpta: 89, condition: '= 89 (becomes 1°)', expected: '1° varus cut' },
-            { id: 'TC-VAR-04', mpta: 88.9, condition: '> 88', expected: '1° varus cut' },
+            { id: 'TC-VAR-02', mpta: 95, condition: '> 90', expected: '0° (neutral cut)' },
+            { id: 'TC-VAR-03', mpta: 90, condition: '= 90 (becomes 1°)', expected: '1° varus cut' },
+            { id: 'TC-VAR-04', mpta: 89.9, condition: '> 88', expected: '1° varus cut' },
             { id: 'TC-VAR-05', mpta: 88, condition: '= 88 (becomes 2°)', expected: '2° varus cut' },
             { id: 'TC-VAR-06', mpta: 87.9, condition: '> 87', expected: '2° varus cut' },
             { id: 'TC-VAR-07', mpta: 87, condition: '= 87 (becomes 3°)', expected: '3° varus cut' },
@@ -223,8 +223,8 @@ describe('Varus Cut Recommendation', () => {
     });
 
     describe('Boundary Edge Cases', () => {
-        it('MPTA just below 89 should give 1° varus cut', () => {
-            expect(getRecommendedVarusCut(88.999)).toBe('1° varus cut');
+        it('MPTA just below 90 should give 1° varus cut', () => {
+            expect(getRecommendedVarusCut(89.999)).toBe('1° varus cut');
         });
 
         it('MPTA just below 88 should give 2° varus cut', () => {

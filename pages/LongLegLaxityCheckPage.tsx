@@ -166,7 +166,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center mb-1 relative z-10 shrink-0">
-                <h2 className="text-xl font-bold text-[#E0E0E0]">Check for Lateral Laxity (Long Leg)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Check for Lateral Laxity (Long Leg)</h2>
                 <div className="flex space-x-2">
                     {/* Skip Button */}
                     <button

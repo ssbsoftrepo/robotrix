@@ -116,7 +116,7 @@ const ValgusStressReportPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center mb-4 no-print px-4 pt-1 relative z-10">
-                <h2 className="text-2xl font-extrabold text-[#E0E0E0] tracking-tight">Valgus Surgical Case Report</h2>
+                <h2 className="text-3xl font-extrabold text-[#E0E0E0] tracking-tight">Valgus Surgical Case Report</h2>
                 <div className="flex space-x-2">
                     <button
                         onClick={() => setPage('planner-valgus-stress-results')}

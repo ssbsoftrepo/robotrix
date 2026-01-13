@@ -43,19 +43,21 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-2xl font-bold text-[#E0E0E0]">Coronal Balancing Screen (Valgus Stress)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Coronal Balancing Screen (Valgus Stress)</h2>
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('planner-valgus-stress-results')}
-                    className="group relative py-1.5 px-3 bg-[#6D282C] border border-[#893338] rounded-sm 
+                    className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                transition-all duration-300 ease-out
                                hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
                                active:scale-[0.98] flex items-center"
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative flex items-center gap-2 text-xs font-bold text-white tracking-wider">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
                         BACK
                     </span>
                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
@@ -65,7 +67,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
 
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-0.5 min-h-0 px-2 relative z-10">
                 {/* Column 1: Instructions & Block Upload */}
-                <div className="h-full flex flex-col overflow-hidden">
+                <div className="h-[80%] flex flex-col overflow-hidden">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-1.5 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <div className="w-full shrink-0 relative z-10">
@@ -88,15 +90,16 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Image with Side Panels */}
-                <div className="h-full flex flex-col overflow-hidden">
+                <div className="h-[80%] flex flex-col overflow-hidden">
                     <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-transparent overflow-hidden rounded-xl border border-[#333333]">
                         {/* Horizontal layout: Left panel - Image - Right panel */}
-                        <div className="flex items-stretch justify-center w-full h-full">
+                        <div className="flex items-stretch justify-center w-full h-full gap-0">
                             {/* Left Panel - Lateral Gap */}
-                            <div className="flex flex-col items-center justify-center text-center shrink-0 mx-2">
+                            <div className="flex flex-col items-center justify-center text-center shrink-0 mr-[6px] z-10">
                                 <p className="text-xs font-semibold text-gray-400 leading-snug mb-0.5">
-                                    Adjust the distal femoral<br />
-                                    and proximal tibial cut<br />
+                                    Adjust the  <br />
+                                    distal femoral &<br />
+                                    proximal tibial cut<br />
                                     thickness to get
                                 </p>
                                 <p className="text-sm text-[#E0E0E0] font-bold mb-1">
@@ -109,12 +112,12 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Center - Bone Image */}
-                            <div className="flex-grow h-[100%] flex items-center justify-center min-w-0">
-                                <img src="/center.png" alt="Knee View Reference" className="max-w-[85%] max-h-[85%] object-contain" />
+                            <div className="shrink-0 h-[100%] flex items-center justify-center">
+                                <img src="/center.png" alt="Knee View Reference" className="max-h-[100%] object-contain" />
                             </div>
 
                             {/* Right Panel - Medial Gap */}
-                            <div className="flex flex-col items-center justify-center text-center shrink-0 mx-2">
+                            <div className="flex flex-col items-center justify-center text-center shrink-0 ml-[6px] z-10">
                                 <p className="text-xs font-semibold text-gray-400 leading-snug mb-0.5">
                                     <br /><br />
                                     Anticipated
@@ -156,44 +159,42 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 3: Flowchart Logic */}
-                <div className="h-full flex flex-col gap-0.5 min-h-0">
+                <div className="h-[80%] flex flex-col gap-2 min-h-0">
                     {/* Right Path (Verification Success) */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-1.5 flex flex-col items-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0 shrink">
+                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-3 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-9 h-9 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-xs mb-0.5 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
-                        <h4 className="text-md font-extrabold text-[#ff8fa3] mb-0.5 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
-                        <div className="flex-grow flex items-center justify-center w-full min-h-0 relative z-10">
-                            <div className="bg-black/40 p-1.5 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md">
-                                <p className="text-md text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
-                            </div>
+                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-sm mb-2 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
+                        <h4 className="text-base font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
+                        <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md relative z-10">
+                            <p className="text-base text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
                         </div>
                     </div>
 
                     {/* Wrong Path */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-1.5 flex flex-col items-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0 shrink">
+                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-3 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-9 h-9 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-xs mb-0.5 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
-                        <h4 className="text-md font-extrabold text-[#ff8fa3] mb-0.5 leading-tight relative z-10">Medial gap does not match anticipated gap</h4>
-                        <div className="flex-grow flex flex-col gap-1 justify-center w-full min-h-0 relative z-10">
-                            <div className="bg-black/40 p-1.5 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-md font-bold">Consider error on 90 deg tibial cut</p>
+                        <div className="w-6 h-6 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-sm mb-2 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
+                        <h4 className="text-base font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">Medial gap does not match anticipated gap</h4>
+                        <div className="flex flex-col gap-2 w-full relative z-10">
+                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
+                                <p className="text-[#ff8fa3] text-sm font-bold">Consider error on 90 deg tibial cut</p>
                             </div>
-                            <div className="flex items-center justify-center gap-1 shrink-0">
+                            <div className="flex items-center justify-center gap-2 shrink-0">
                                 <div className="h-px bg-[#333333] flex-grow"></div>
-                                <div className="text-gray-500 font-bold text-[10px] uppercase">OR</div>
+                                <div className="text-gray-500 font-bold text-xs uppercase">OR</div>
                                 <div className="h-px bg-[#333333] flex-grow"></div>
                             </div>
-                            <div className="bg-black/40 p-1.5 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-md font-bold">Consider Pre op lateral laxity</p>
+                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
+                                <p className="text-[#ff8fa3] text-sm font-bold">Consider Pre op lateral laxity</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-1 flex justify-end pb-1 shrink-0 px-2 relative z-10">
+            <div className="mt-[-8rem] flex justify-end pb-1 shrink-0 px-2 relative z-10">
                 {/* Proceed Button */}
                 <button
                     onClick={handleProceed}

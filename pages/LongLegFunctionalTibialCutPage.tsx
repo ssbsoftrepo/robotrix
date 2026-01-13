@@ -186,7 +186,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-2xl font-bold text-[#E0E0E0]">Functional Tibia Cut (Long Leg)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Functional Tibia Cut (Long Leg)</h2>
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('planner-long-leg-coronal-balancing')}

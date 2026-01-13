@@ -141,11 +141,11 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
         if (mpta === null) return '--';
 
         let varusCut = 0;
-        if (mpta > 89) varusCut = 0;
-        else if (mpta > 88) varusCut = 1;
-        else if (mpta > 87) varusCut = 2;
-        else if (mpta > 85) varusCut = 3;
-        else varusCut = 4;
+        if (mpta > 90) varusCut = 0;       // Valgoid tibia: MPTA > 90°
+        else if (mpta > 88) varusCut = 1;  // Neutral tibia: 88 < MPTA ≤ 90°
+        else if (mpta > 87) varusCut = 2;  // Mild varoid tibia: 87 < MPTA ≤ 88°
+        else if (mpta > 85) varusCut = 3;  // Moderate varoid tibia: 85 < MPTA ≤ 87°
+        else varusCut = 4;                 // Significant varoid tibia: ≤ 85°
 
         // Apply basic matrix constraint (0-3 for Valgus per logic)
         if (varusCut > 3) return "3° varus cut (clamped to Basic Matrix)";
@@ -178,7 +178,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
-                <h2 className="text-2xl font-bold text-[#E0E0E0]">Valgus Stress Analysis</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Valgus Stress Analysis</h2>
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('planner-valgus-stress')}
