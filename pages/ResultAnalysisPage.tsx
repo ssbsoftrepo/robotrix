@@ -219,7 +219,7 @@ const ResultAnalysisPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="flex justify-between items-center mb-1 no-print px-2 relative z-10">
+            <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
                 <h2 className="text-2xl font-bold text-[#E0E0E0]">Long Leg Film Analysis</h2>
                 {/* Back Button */}
                 <button
@@ -332,7 +332,7 @@ const ResultAnalysisPage: React.FC = () => {
             </div>
 
             {/* Footer / Warning Section */}
-            <div className="mt-auto pt-1 space-y-1 pb-2 px-2 relative z-10 shrink-0">
+            <div className="pt-1 space-y-1 pb-1 px-2 relative z-10 shrink-0">
                 {(showLdfaWarning || showMptaWarning) && (
                     <div className="space-y-1">
                         {showLdfaWarning && <WarningMessage message="Native LDFA Out of boundary – release anticipated." />}

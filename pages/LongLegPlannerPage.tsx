@@ -307,12 +307,13 @@ const CameraModal: React.FC<{
 };
 
 const MetricItem: React.FC<{ label: string; value: string | number; highlight?: boolean }> = ({ label, value, highlight }) => (
-    <div className={`relative flex flex-col justify-center items-center p-1 rounded-md text-center h-full overflow-hidden transition-all
+    <div className={`relative flex flex-col justify-center items-center p-2 rounded-lg text-center h-full overflow-hidden transition-all
         ${highlight
-            ? 'bg-[#6D282C]/20 border border-[#6D282C]'
+            ? 'bg-[#6D282C]/20 border-2 border-[#6D282C]'
             : 'bg-[#1a1a1a] border border-[#333333]'}`}>
-        <p className="text-[8px] text-gray-500 uppercase tracking-wider font-medium relative z-10">{label}</p>
-        <p className={`font-bold text-sm relative z-10 font-mono ${highlight ? 'text-[#ff8fa3]' : 'text-gray-100'}`}>{value}</p>
+        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
+        <p className="text-[10px] text-gray-500 uppercase tracking-wider font-medium relative z-10">{label}</p>
+        <p className={`font-bold text-xl relative z-10 font-mono ${highlight ? 'text-[#ff8fa3]' : 'text-gray-100'}`}>{value}</p>
     </div>
 );
 
@@ -455,18 +456,7 @@ const LongLegPlannerPage: React.FC = () => {
         // Basic check: need centers to do HKA
         if (!hipCenter || !kneeCenter || !ankleCenter) return;
 
-        let newResults = {
-            ldfa: null as number | null,
-            mpta: null as number | null,
-            ahka: null as number | null,
-            mhka: null as number | null,
-            jlo: null as number | null,
-            jloType: '--',
-            cpak: '--',
-            cut: '--',
-            recommendedVarusCut: '--',
-            vca: null as number | null
-        };
+        let newResults = { ...localResultsRef.current };
 
         // 1. mHKA (Mechanical Hip-Knee-Ankle Angle)
         if (visibleLandmarkSets.has('hkaLine')) {
@@ -476,7 +466,8 @@ const LongLegPlannerPage: React.FC = () => {
             // mHKA is deviation from 180
             // newResults.mhka = rawAngle - 180;
             newResults.mhka = 180 - rawAngle;
-
+        } else {
+            newResults.mhka = null;
         }
 
         // 2. LDFA (Lateral Distal Femoral Angle)
@@ -487,6 +478,8 @@ const LongLegPlannerPage: React.FC = () => {
             femoralLateral
         ) {
             newResults.ldfa = calculateLineAngle(hipCenter, kneeCenter, femoralMedial, femoralLateral);
+        } else {
+            newResults.ldfa = null;
         }
 
         // 3. MPTA (Medial Proximal Tibial Angle)
@@ -497,8 +490,11 @@ const LongLegPlannerPage: React.FC = () => {
             tibialLateral
         ) {
             newResults.mpta = calculateLineAngle(ankleCenter, kneeCenter, tibialLateral, tibialMedial);
+        } else {
+            newResults.mpta = null;
         }
 
+        // Calculate CPAK only if both LDFA and MPTA are available
         if (newResults.ldfa !== null && newResults.mpta !== null) {
             const ahka = newResults.mpta - newResults.ldfa;
             // const jlo = newResults.mpta + newResults.ldfa;
@@ -532,6 +528,17 @@ const LongLegPlannerPage: React.FC = () => {
                 cpak: cpakType,
                 cut: getLongLegValgusCut(newResults.ldfa),
                 recommendedVarusCut: getRecommendedVarusCut(newResults.mpta),
+            };
+        } else {
+            // Reset CPAK and related values when requirements are not met
+            newResults = {
+                ...newResults,
+                ahka: null,
+                jlo: null,
+                jloType: null,
+                cpak: '--',
+                cut: '--',
+                recommendedVarusCut: '--',
             };
         }
 
@@ -695,6 +702,9 @@ const LongLegPlannerPage: React.FC = () => {
 
     useEffect(() => {
         const handleResize = () => {
+            const now = Date.now();
+            if (now - lastResizeTimeRef.current < 100) return;
+            lastResizeTimeRef.current = now;
             const img = imageRef.current; const canvas = canvasRef.current;
             if (!img || !canvas || img.naturalWidth === 0) return;
             const viewer = canvas.parentElement?.parentElement;
@@ -716,21 +726,17 @@ const LongLegPlannerPage: React.FC = () => {
                 requestAnimationFrame(draw);
             }
         };
-
-        const observer = new ResizeObserver(handleResize);
-        if (viewerRef.current) observer.observe(viewerRef.current);
-
-        // Initial check
-        handleResize();
-
-        return () => observer.disconnect();
+        window.addEventListener('resize', handleResize);
+        const interval = setInterval(handleResize, 1000);
+        return () => { window.removeEventListener('resize', handleResize); clearInterval(interval); };
     }, [draw, setLongLegLandmarks]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            const url = URL.createObjectURL(file);
-            handleImageLoad(url, file.name, 'file');
+            const reader = new FileReader();
+            reader.onload = (event) => { if (event.target?.result) { handleImageLoad(event.target.result as string, file.name, 'file'); } };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -888,7 +894,7 @@ const LongLegPlannerPage: React.FC = () => {
     if (kneeType === 'valgus') {
         return (
             <div className="flex flex-col h-full items-center justify-center">
-                <h2 className="text-5xl font-bold mb-8 text-center">Long leg film Planner for VALGUS KNEE</h2>
+                <h2 className="text-4xl font-bold mb-8 text-center">Long leg film Planner for VALGUS KNEE</h2>
                 <div className="gemini-dark-card p-12 rounded-lg text-center">
                     <p className="text-3xl text-yellow-400">Updates Coming Soon</p>
                     <p className="text-xl text-gray-300 mt-4">This planner is currently under development. Please check back later.</p>
@@ -908,17 +914,17 @@ const LongLegPlannerPage: React.FC = () => {
             )}
 
             {/* Header */}
-            <div className="flex items-center justify-between px-2 relative z-10 shrink-0">
-                <h2 className="text-2xl font-bold text-[#E0E0E0] tracking-tight">Long Leg Functional Alignment</h2>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#6D282C] animate-pulse" />
-                    <span>Active</span>
+            <div className="flex items-center justify-between px-4 pt-4 relative z-10">
+                <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tight">Long Leg Functional Alignment</h2>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <span className="w-2 h-2 rounded-full bg-[#6D282C] animate-pulse" />
+                    <span>Active Workspace</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-2 flex-grow min-h-0 px-2 mb-1 relative z-10 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-4 flex-grow min-h-0 px-4 relative z-10">
                 {/* LEFT: X-Ray Canvas (75%) */}
-                <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden min-h-0 max-h-full flex items-center justify-center">
+                <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-200px)] flex items-center justify-center">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
                     {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
                     <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
@@ -977,7 +983,7 @@ const LongLegPlannerPage: React.FC = () => {
                                 style={{ cursor: zoom > 1 ? (isPanningRef.current ? 'grabbing' : 'grab') : 'default' }}
                             >
                                 <div className="relative" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
-                                    <img ref={imageRef} src={longLegImageSrc} alt="X-ray" className="block mix-blend-screen max-w-full max-h-full object-contain opacity-0 transition-opacity duration-500" onLoad={() => {
+                                    <img ref={imageRef} src={longLegImageSrc} alt="X-ray" className="block mix-blend-screen" onLoad={() => {
                                         const image = imageRef.current; const canvas = canvasRef.current;
                                         if (!image || !canvas) return;
                                         const viewer = canvas.parentElement?.parentElement; if (!viewer) return;
@@ -986,7 +992,6 @@ const LongLegPlannerPage: React.FC = () => {
                                         let h = availableHeight; let w = h * aspect;
                                         if (w > availableWidth) { w = availableWidth; h = w / aspect; }
                                         canvas.width = w; canvas.height = h; image.style.width = `${w}px`; image.style.height = `${h}px`;
-                                        image.classList.remove('opacity-0');
                                         if (Object.keys(longLegLandmarks).length === 0) resetLandmarks(canvas);
                                         requestAnimationFrame(draw);
                                     }} />
@@ -1003,18 +1008,18 @@ const LongLegPlannerPage: React.FC = () => {
                     )}
                 </div>
                 {/* RIGHT: Control & Instrument Panel (25%) */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-2 flex flex-col gap-2 overflow-y-auto min-h-0 max-h-full">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-200px)]">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
                     {/* Upload Section */}
                     <section className="relative z-10">
                         <h3 className="text-sm font-semibold mb-2 text-gray-400 uppercase tracking-wider">Upload X-ray</h3>
-                        <div className="grid grid-cols-2 gap-1">
-                            <label htmlFor="xray-upload" className="cursor-pointer text-center py-1.5 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-xs font-medium text-gray-300">
+                        <div className="grid grid-cols-2 gap-2">
+                            <label htmlFor="xray-upload" className="cursor-pointer text-center py-3 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-sm font-medium text-gray-300">
                                 <span>📁 File</span>
                             </label>
                             <input id="xray-upload" type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                            <button onClick={() => setIsCameraOpen(true)} className="py-1.5 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-xs font-medium text-gray-300">
+                            <button onClick={() => setIsCameraOpen(true)} className="py-3 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-sm font-medium text-gray-300">
                                 📷 Camera
                             </button>
                         </div>
@@ -1023,71 +1028,72 @@ const LongLegPlannerPage: React.FC = () => {
 
                     {/* Leg Side Toggle */}
                     <section className="relative z-10">
-                        <div className="bg-[#252525] p-2 rounded-lg border border-[#333333] flex items-center justify-between">
-                            <span className="text-gray-400 font-medium text-[10px] uppercase tracking-wider">Leg</span>
-                            <div className="flex bg-[#1a1a1a] rounded-md p-0.5 border border-[#333333]">
-                                <button onClick={() => setLegSide('left')} className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>L</button>
-                                <button onClick={() => setLegSide('right')} className={`px-3 py-1 rounded text-[10px] font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>R</button>
+                        <div className="bg-[#252525] p-3 rounded-lg border border-[#333333] flex items-center justify-between">
+                            <span className="text-gray-400 font-medium text-xs uppercase tracking-wider">Leg Side</span>
+                            <div className="flex bg-[#1a1a1a] rounded-lg p-0.5 border border-[#333333]">
+                                <button onClick={() => setLegSide('left')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>LEFT</button>
+                                <button onClick={() => setLegSide('right')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>RIGHT</button>
                             </div>
                         </div>
                     </section>
 
                     {/* Metrics Grid */}
                     <section className="relative z-10">
-                        <h4 className="text-xs font-semibold mb-1 text-gray-400 uppercase tracking-wider">Metrics</h4>
-                        <div className="grid grid-cols-3 gap-1">
+                        <h4 className="text-sm font-semibold mb-3 text-gray-400 uppercase tracking-wider">Calculated Metrics</h4>
+                        <div className="grid grid-cols-2 gap-2">
                             <MetricItem label="LDFA" value={`${longLegResults.ldfa?.toFixed(1) ?? '--'}°`} />
                             <MetricItem label="MPTA" value={`${longLegResults.mpta?.toFixed(1) ?? '--'}°`} />
                             <MetricItem label="aHKA" value={`${longLegResults.ahka?.toFixed(1) ?? '--'}°`} />
                             <MetricItem label="mHKA" value={`${longLegResults.mhka?.toFixed(1) ?? '--'}°`} highlight />
                             <MetricItem label="JLO" value={`${longLegResults.jlo?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="Mode" value={ldfaMode === 'corrected' ? 'Corr' : 'Nat'} highlight />
+                            <MetricItem label="LDFA Method" value={ldfaMode === 'corrected' ? 'Corrected' : 'Native'} highlight />
                         </div>
                     </section>
 
                     {/* Landmark Stepper Cards */}
                     <section className="relative z-10">
-                        <div className="flex justify-between items-center mb-1">
-                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Steps</h3>
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Workflow Steps</h3>
                         </div>
-                        <div className="flex flex-col gap-1 mb-1">
-                            {landmarkButtons.map((btn, idx) => {
-                                if (btn.mode && btn.mode !== ldfaMode) return null;
-                                const active = visibleLandmarkSets.has(btn.key);
-                                return (
-                                    <button
-                                        key={btn.key}
-                                        onClick={() => toggleLandmarkSet(btn.key as any)}
-                                        className={`group relative w-full py-2 px-3 text-xs font-semibold rounded-md border transition-all text-left flex items-center gap-2
+                        <div className="flex flex-col gap-2 mb-3">
+                            {landmarkButtons
+                                .filter(btn => !btn.mode || btn.mode === ldfaMode)
+                                .map((btn, idx) => {
+                                    const active = visibleLandmarkSets.has(btn.key);
+                                    return (
+                                        <button
+                                            key={btn.key}
+                                            onClick={() => toggleLandmarkSet(btn.key as any)}
+                                            className={`group relative w-full py-3 px-4 text-sm font-semibold rounded-lg border transition-all text-left flex items-center gap-3
                                             ${active
-                                                ? 'bg-gradient-to-r from-[#6D282C] to-[#893338] border-[#a04046] text-white shadow-sm'
-                                                : 'bg-[#252525] border-[#333333] hover:bg-[#333333] text-gray-300'}`}>
-                                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all
+                                                    ? 'bg-gradient-to-r from-[#6D282C] to-[#893338] border-[#a04046] text-white shadow-[0_0_20px_rgba(109,40,44,0.3)]'
+                                                    : 'bg-[#252525] border-[#333333] hover:bg-[#333333] hover:border-[#6D282C]/50 text-gray-300'}`}>
+                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all
                                             ${active ? 'bg-white text-[#6D282C] border-white' : 'bg-transparent border-gray-500 text-gray-500'}`}>
-                                            {active ? '✓' : idx + 1}
-                                        </span>
-                                        <span>{btn.text}</span>
-                                    </button>
-                                );
-                            })}
+                                                {active ? '✓' : idx + 1}
+                                            </span>
+                                            <span>{btn.text}</span>
+                                        </button>
+                                    );
+                                })}
                         </div>
-                        <button onClick={handleResetAll} className="w-full py-1.5 text-xs font-bold rounded-md bg-[#252525] border border-[#333333] hover:bg-[#333333] text-gray-400 hover:text-white transition-all">
-                            Reset
+                        <button onClick={handleResetAll} className="w-full py-2.5 text-sm font-bold rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] text-gray-400 hover:text-white transition-all">
+                            Reset All
                         </button>
                     </section>
 
                     {/* Instructions Panel */}
-                    <section className="relative z-10 bg-[#252525]/50 p-2 rounded-md border border-[#333333] h-24 overflow-y-auto">
-                        <div className="flex items-center gap-1 mb-1">
-                            <span className="w-0.5 h-3 bg-cyan-400 rounded-full" />
-                            <h4 className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
+                    <section className="relative z-10 bg-[#252525]/50 p-3 rounded-lg border border-[#333333]">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="w-1 h-4 bg-cyan-400 rounded-full" />
+                            <h4 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
                         </div>
                         {activeInstruction ? (
-                            <ul className="list-disc list-inside space-y-0.5 text-[10px] text-gray-300">
+                            <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
                                 {activeInstruction.map((i, idx) => (<li key={idx}>{i}</li>))}
                             </ul>
                         ) : (
-                            <p className="text-[10px] text-gray-500">Select a step</p>
+                            <p className="text-sm text-gray-500">Select a workflow step to begin</p>
                         )}
                     </section>
 
@@ -1095,17 +1101,17 @@ const LongLegPlannerPage: React.FC = () => {
             </div>
 
             {/* Footer Action */}
-            <div className="flex justify-end px-2 pb-2 relative z-10 shrink-0">
+            <div className="flex justify-end px-4 pb-4 relative z-10">
                 <button
                     onClick={() => setPage('results-analysis')}
                     disabled={!longLegResults.cpak || longLegResults.cpak === '--'}
-                    className={`group relative py-2 px-6 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
+                    className={`group relative py-3 px-8 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
                         ${(!longLegResults.cpak || longLegResults.cpak === '--')
                             ? 'bg-[#252525] border border-[#333333] text-gray-500 cursor-not-allowed'
                             : 'bg-[#6D282C] border border-[#893338] shadow-[0_4px_20px_rgba(109,40,44,0.4)] hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98]'}`}>
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
                     <span className={`relative text-sm font-bold tracking-wider ${(!longLegResults.cpak || longLegResults.cpak === '--') ? 'text-gray-500' : 'text-white'}`}>
-                        ANALYZE
+                        GO TO ANALYSIS
                     </span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
