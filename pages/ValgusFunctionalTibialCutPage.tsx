@@ -209,11 +209,11 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
                     {/* Left Column: Instructions */}
                     <div className="h-full">
-                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-[calc(100%-2rem)] flex flex-col p-1 space-y-0.5 overflow-hidden">
+                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-[calc(100%-4.5rem)] flex flex-col p-1 space-y-0.5 overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
-                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-1 z-10">
-                                <div className="bg-[#6D282C] text-white w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-1.5 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-0.5 z-10">
+                                <div className="bg-[#6D282C] text-white w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div>
                                 <p className="text-md text-gray-400 leading-snug">
@@ -221,8 +221,8 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-1 z-10">
-                                <div className="bg-[#6D282C] text-white w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-1.5 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-1 flex flex-col justify-center items-center text-center gap-0.5 z-10">
+                                <div className="bg-[#6D282C] text-white w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
                                     2
                                 </div>
                                 <p className="text-md text-gray-400 leading-snug">
@@ -230,16 +230,16 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-1.5 text-center shadow-lg z-10">
-                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
-                                <p className="text-lg font-extrabold text-white">{anticipatedVarusCut}° <span className="text-sm">Varus</span></p>
+                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-1 text-center shadow-lg z-10">
+                                <p className="text-gray-500 text-[9px] font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
+                                <p className="text-base font-extrabold text-white">{anticipatedVarusCut}° <span className="text-xs">Varus</span></p>
                             </div>
 
-                            <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-1.5 flex flex-col items-center gap-0.5 z-10">
-                                <p className="text-gray-500 text-[10px] text-center">Laxity: <span className="text-white font-bold">{lateralLaxity || 'Unknown'}</span></p>
+                            <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-1 flex flex-col items-center gap-0.5 z-10">
+                                <p className="text-gray-500 text-[9px] text-center">Laxity: <span className="text-white font-bold">{lateralLaxity || 'Unknown'}</span></p>
                                 <button
                                     onClick={applyLateralLaxity}
-                                    className="group relative w-full py-1.5 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                    className="group relative w-full py-1 bg-[#6D282C] border border-[#893338] rounded-sm 
                                                shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                                transition-all duration-300 ease-out
                                                hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
@@ -255,7 +255,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     </div>
 
                     {/* Center Column: Image Upload & Red Lines */}
-                    <div className="flex flex-col h-[calc(100%-2rem)] items-center justify-center relative p-0 overflow-hidden">
+                    <div className="flex flex-col h-[calc(100%-4.5rem)] items-center justify-center relative p-0 overflow-hidden">
 
                         <div
                             ref={containerRef}
@@ -324,7 +324,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     </div>
 
                     {/* Right Column: Cutting Jigs */}
-                    <div className="h-[calc(100%-2rem)] flex flex-col min-h-0">
+                    <div className="h-[calc(100%-4.5rem)] flex flex-col min-h-0">
                         <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                             <div className="p-1 bg-[#252525] border-b border-[#333333] text-center shrink-0 relative z-10">
@@ -376,7 +376,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
             </div>
 
             {/* Footer Action Button */}
-            <div className="flex justify-end pb-1 shrink-0 px-2 relative z-10">
+            <div className="flex justify-end mt-[calc(-3rem)] pb-1 shrink-0 px-2 relative z-10">
                 <button
                     onClick={() => setPage('planner-valgus-stress-report')}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 

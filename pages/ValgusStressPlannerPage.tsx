@@ -1022,7 +1022,7 @@ const ValgusStressPlannerPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-4 flex-grow min-h-0 px-4 relative z-10">
 
         {/* LEFT: X-Ray Canvas (75%) */}
-        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-200px)] flex items-center justify-center">
+        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-240px)] flex items-center justify-center">
           <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
           {zoom > 1 && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">
@@ -1160,7 +1160,7 @@ const ValgusStressPlannerPage: React.FC = () => {
         </div>
 
         {/* RIGHT: Control & Instrument Panel (25%) */}
-        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-200px)]">
+        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-240px)]">
           <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
           {/* Upload Section */}
