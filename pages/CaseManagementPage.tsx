@@ -264,9 +264,10 @@ const PlanSelectionModal: React.FC<{
 
 
 const CaseManagementPage: React.FC = () => {
-    const { patients, savePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness } = useAppContext();
+    const { patients, savePatient, deletePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness } = useAppContext();
     const [view, setView] = useState<'main' | 'list'>('main');
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
 
     const [isLdfaModalOpen, setIsLdfaModalOpen] = useState(false);
@@ -463,6 +464,11 @@ const CaseManagementPage: React.FC = () => {
         }
     };
 
+    const handleDeleteCase = (patientId: string) => {
+        deletePatient(patientId);
+        setDeleteConfirmId(null);
+    };
+
     const isPatientSelected = !!currentPatientId;
     const isPlanSelected = !!currentPlanId;
 
@@ -650,6 +656,25 @@ const CaseManagementPage: React.FC = () => {
                                         <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                                         <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                                     </button>
+                                    {/* Delete - Danger Button */}
+                                    <button
+                                        onClick={() => setDeleteConfirmId(p.id)}
+                                        className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
+                                                   shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                                   transition-all duration-300 ease-out
+                                                   hover:bg-red-900/30 hover:border-red-500/50 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]
+                                                   active:scale-[0.98]"
+                                    >
+                                        <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                        <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-red-400 flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            DELETE
+                                        </span>
+                                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-red-500/50" />
+                                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-red-500/50" />
+                                    </button>
                                 </div>
                             </div>
                         ))
@@ -698,6 +723,56 @@ const CaseManagementPage: React.FC = () => {
                 onSelectPlan={handlePlanSelected}
                 intent={planModalConfig.intent}
             />
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmId && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-md text-center shadow-2xl w-full border border-[#333333]">
+                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                        <div className="relative z-10">
+                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-900/30 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-bold text-[#E0E0E0] mb-4">Delete Case?</h3>
+                            <p className="text-gray-400 mb-6">
+                                Are you sure you want to delete this case? This action cannot be undone and all associated data will be permanently removed.
+                            </p>
+                            <div className="flex space-x-4">
+                                {/* Cancel Button */}
+                                <button
+                                    onClick={() => setDeleteConfirmId(null)}
+                                    className="group relative flex-1 py-3 bg-[#252525] border border-[#444444] rounded-sm 
+                                               shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                               transition-all duration-300 ease-out
+                                               hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                               active:scale-[0.98]"
+                                >
+                                    <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                    <span className="relative font-bold text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
+                                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                </button>
+                                {/* Delete Button */}
+                                <button
+                                    onClick={() => handleDeleteCase(deleteConfirmId)}
+                                    className="group relative flex-1 py-3 bg-red-900/50 border border-red-500/50 rounded-sm 
+                                               shadow-[0_4px_15px_rgba(239,68,68,0.3)] 
+                                               transition-all duration-300 ease-out
+                                               hover:bg-red-800/60 hover:border-red-400 hover:shadow-[0_0_20px_rgba(239,68,68,0.5)]
+                                               active:scale-[0.98]"
+                                >
+                                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                    <span className="relative font-bold text-white tracking-wider">DELETE</span>
+                                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-red-400/30 transition-colors group-hover:border-white/50" />
+                                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-red-400/30 transition-colors group-hover:border-white/50" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Combined Long Leg Config Modal */}
             {isLongLegConfigOpen && (

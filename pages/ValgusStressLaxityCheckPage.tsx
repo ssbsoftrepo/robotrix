@@ -34,12 +34,12 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, i
             )}
 
             <div className="text-center mb-1 min-h-[2rem] flex items-center justify-center relative z-10">
-                <p className="font-bold text-xs leading-tight text-[#E0E0E0]">{level}</p>
+                <p className="font-bold text-md leading-tight text-[#E0E0E0]">{level}</p>
             </div>
 
             <div className="flex-grow w-full bg-black rounded-lg relative overflow-hidden border border-[#333333] group-hover:border-[#444444]">
                 {imageSrc ? (
-                    <img src={imageSrc} alt={`Reference for ${level}`} className="absolute inset-0 w-full h-full object-contain" />
+                    <img src={imageSrc} alt={`Reference for ${level}`} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <p className="text-gray-500 italic text-sm px-4 text-center">No Reference Image</p>
@@ -156,10 +156,10 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
     ];
 
     const laxityImages: Record<string, string> = {
-        'No Lateral Laxity': '/nolaterl.jpeg',
-        'Mild lateral laxity': '/mildlaterl.jpeg',
-        'Moderate lateral laxity': '/moderate.jpeg',
-        'Severe lateral laxity': '/severe.jpeg',
+        'No Lateral Laxity': '/nolaterl.png',
+        'Mild lateral laxity': '/mildlaterl.png',
+        'Moderate lateral laxity': '/moderate.png',
+        'Severe lateral laxity': '/severe.png',
     };
 
     const laxityColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C'];
@@ -184,7 +184,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                                    active:scale-[0.98] flex items-center"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative font-bold text-xs text-white tracking-wider flex items-center">
+                        <span className="relative font-bold text-sm text-white tracking-wider flex items-center">
                             SKIP TO PLANNER
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -203,7 +203,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                                    active:scale-[0.98]"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
-                        <span className="relative font-bold text-xs text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
+                        <span className="relative font-bold text-sm text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
                         <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                         <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                     </button>
@@ -217,7 +217,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                 <div className="flex-grow-[3] flex flex-col min-w-0 h-full">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <h3 className="text-sm font-bold text-[#E0E0E0] text-center relative z-10">Laxity Level Reference Images</h3>
+                        <h3 className="text-md font-bold text-[#E0E0E0] text-center relative z-10">Laxity Level Reference Images</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-grow min-h-0">
                         {laxityLevels.map((level, index) => {
@@ -241,7 +241,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                 <div className="flex-grow-[2] flex flex-col min-w-[250px] h-full">
                     <div className="relative bg-[#1a1a1a] border border-[#6D282C]/50 p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <h3 className="text-sm font-bold text-[#ff8fa3] text-center relative z-10">Patient X-ray</h3>
+                        <h3 className="text-md font-bold text-[#ff8fa3] text-center relative z-10">Patient X-ray</h3>
                     </div>
                     <div className="relative flex flex-col p-1 rounded-lg border border-[#333333] bg-[#1a1a1a] h-full hover:border-[#6D282C]/50 transition-all flex-grow min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
@@ -280,7 +280,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
             {/* Footer */}
             <div className="mt-1 grid grid-cols-1 lg:grid-cols-3 gap-2 items-start relative z-10 bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg shrink-0">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                <div className="lg:col-span-2 text-sm text-gray-500 relative z-10">
+                <div className="lg:col-span-2 text-md text-gray-500 relative z-10">
                     <p className="font-bold text-[#E0E0E0] mb-1">Important Note:</p>
                     <ul className="list-disc list-inside space-y-1">
                         <li>Lateral laxity is best made out in a varus stress film or a one-leg standing film.</li>
@@ -288,7 +288,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                     </ul>
                 </div>
                 <div className="lg:col-span-1 flex flex-col items-end justify-center h-full relative z-10">
-                    <p className="text-gray-400 text-sm mb-2 self-center lg:self-end">
+                    <p className="text-gray-400 text-md mb-2 self-center lg:self-end">
                         Selected: <span className="font-bold text-[#E0E0E0]">{userSelection || 'None'}</span>
                     </p>
                     {/* Confirm Button */}

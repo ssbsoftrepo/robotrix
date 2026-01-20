@@ -85,6 +85,7 @@ interface AppContextType extends CaseData {
     setPage: (page: Page) => void;
     patients: Patient[];
     savePatient: (patient: Patient) => void;
+    deletePatient: (patientId: string) => void;
     currentPatientId: string | null;
     setCurrentPatientId: (id: string | null) => void;
     currentPlanId: string | null;
@@ -233,6 +234,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             // See note below about legacy saving behavior
         }
     }, [caseData, currentPlanId]);
+
+    const deletePatient = useCallback((patientId: string) => {
+        setPatients(currentPatients => {
+            const newPatientsList = currentPatients.filter(p => p.id !== patientId);
+            savePatients(newPatientsList);
+            return newPatientsList;
+        });
+        // Clear current patient if we're deleting it
+        if (currentPatientId === patientId) {
+            _setCurrentPatientId(null);
+            setCurrentPlanId(null);
+            setCaseData(initialCaseData);
+        }
+    }, [currentPatientId]);
 
     const savePatient = useCallback((patientToSave: Patient) => {
         setPatients(currentPatients => {
@@ -405,6 +420,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setPage,
         patients,
         savePatient,
+        deletePatient,
         currentPatientId,
         setCurrentPatientId,
         currentPlanId,
