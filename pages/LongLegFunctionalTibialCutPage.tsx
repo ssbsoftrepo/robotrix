@@ -20,7 +20,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* SVG Representation of a Metal Cutting Jig */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[120px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[85px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 {/* Metallic Surface Gradient */}
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -80,11 +80,11 @@ const CuttingBlock: React.FC<{
             <circle cx="280" cy="85" r="6" fill="url(#recessGrad)" stroke="#374151" />
 
             {/* Engraved Text */}
-            <text x="100" y="75" fontSize="14" fontFamily="Arial, sans-serif" fontWeight="900" fill="#111827" textAnchor="start" letterSpacing="0.5">
+            <text x="100" y="75" fontSize="16" fontFamily="Arial, sans-serif" fontWeight="900" fill="#111827" textAnchor="start" letterSpacing="0.5">
                 {degree} DEGREE VARUS
             </text>
 
-            <text x="100" y="92" fontSize="7" fontFamily="Arial, sans-serif" fontWeight="bold" fill="#4b5563" textAnchor="start" letterSpacing="1.5">
+            <text x="100" y="94" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="bold" fill="#4b5563" textAnchor="start" letterSpacing="1.5">
                 ROBOTRIX+
             </text>
 
@@ -108,7 +108,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
 
 
     // Line Dragging State
-    const [linesYPercent, setLinesYPercent] = useState<number>(32);
+    const [linesYPercent, setLinesYPercent] = useState<number>(25);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut
@@ -179,7 +179,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
     const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
 
     return (
-        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-[77%] overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -214,11 +214,11 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                     <span className="inline-block px-3 py-1 rounded-sm text-sm font-bold bg-[#6D282C] text-white shadow-lg tracking-wider">STEP 5 &gt;</span>
                 </div>
 
-                <div className="flex-grow grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] min-h-0 overflow-hidden mt-1">
+                <div className="flex-grow grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-0 min-h-0 overflow-hidden mt-1">
 
                     {/* Left Column: Instructions */}
                     <div className="h-full">
-                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-[calc(100%-5rem)] flex flex-col p-1.5 space-y-1.5 overflow-hidden">
+                        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col p-1.5 space-y-1 overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
                             <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
@@ -265,11 +265,11 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                     </div>
 
                     {/* Center Column: Image Upload & Red Lines */}
-                    <div className="flex flex-col h-[calc(100%-5rem)] items-center justify-center relative p-0 overflow-hidden">
+                    <div className="flex flex-col h-full items-center justify-center relative p-0 overflow-hidden">
 
                         <div
                             ref={containerRef}
-                            className="relative h-full w-auto max-w-full aspect-[3/4] mx-auto bg-black border-2 border-[#333333] rounded-xl overflow-hidden shadow-2xl group"
+                            className="relative h-full w-full max-w-full aspect-[3/4] mx-auto bg-black border-2 border-[#333333] rounded-xl overflow-hidden shadow-2xl group"
                             style={{ touchAction: 'none' }}
                         >
 
@@ -334,7 +334,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                     </div>
 
                     {/* Right Column: Cutting Jigs */}
-                    <div className="h-[calc(100%-5rem)] flex flex-col min-h-0">
+                    <div className="h-full flex flex-col min-h-0">
                         <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                             <div className="p-1.5 bg-[#252525] border-b border-[#333333] text-center shrink-0 relative z-10">
@@ -343,13 +343,13 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                                 </h3>
                             </div>
                             <div className="p-0.5 flex-grow flex flex-col justify-evenly items-center h-full overflow-hidden relative z-10">
-                                <p className="text-center text-gray-500 text-xs mb-0 shrink-0">Click block to simulate</p>
+                                <p className="text-center text-gray-500 text-[10px] mb-0 shrink-0">Click block to simulate</p>
 
                                 {/* 0 Degree Neutral Cut Button */}
                                 <div className="flex-1 w-full flex items-center justify-center mb-0">
                                     <button
                                         onClick={() => setSelectedDegree(0)}
-                                        className={`w-full py-2 rounded-lg border-2 font-bold text-lg transition-all shadow-lg flex flex-col items-center justify-center relative h-full ${selectedDegree === 0
+                                        className={`w-full py-1 rounded-lg border-2 font-bold text-base transition-all shadow-lg flex flex-col items-center justify-center relative h-full ${selectedDegree === 0
                                             ? 'bg-gray-200 text-black border-[#6D282C] shadow-[0_0_15px_rgba(109,40,44,0.5)] scale-95 z-10'
                                             : 'bg-[#252525] text-gray-400 border-[#333333] hover:bg-[#333333] hover:text-white scale-90'
                                             }`}
@@ -384,7 +384,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
             </div>
 
             {/* Footer Action Button */}
-            <div className="flex justify-end mt-[calc(-4rem)] pb-1 shrink-0 px-2 relative z-10">
+            <div className="flex justify-end mt-2 pb-1 shrink-0 px-2 relative z-10">
                 <button
                     onClick={() => setPage('simulation')}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 

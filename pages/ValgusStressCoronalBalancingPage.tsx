@@ -36,7 +36,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-[77%] overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -67,7 +67,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
 
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-0.5 min-h-0 px-2 relative z-10">
                 {/* Column 1: Instructions & Block Upload */}
-                <div className="h-[80%] flex flex-col overflow-hidden">
+                <div className="h-full flex flex-col overflow-hidden">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-1.5 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <div className="w-full shrink-0 relative z-10">
@@ -90,7 +90,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Image with Side Panels */}
-                <div className="h-[80%] flex flex-col overflow-hidden">
+                <div className="h-full flex flex-col overflow-hidden">
                     <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-transparent overflow-hidden rounded-xl border border-[#333333]">
                         {/* Horizontal layout: Left panel - Image - Right panel */}
                         <div className="flex items-stretch justify-center w-full h-full gap-0">
@@ -159,42 +159,52 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 3: Flowchart Logic */}
-                <div className="h-[80%] flex flex-col gap-2 min-h-0">
+                <div className="h-full flex flex-col gap-1 min-h-0">
                     {/* Right Path (Verification Success) */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
+                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-2 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-base mb-3 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
-                        <h4 className="text-xl font-extrabold text-[#ff8fa3] mb-3 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
-                        <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md relative z-10">
-                            <p className="text-lg text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
+                        <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-base mb-2 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
+                        <h4 className="text-xl font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">
+                            Medial gap matches<br />anticipated gap
+                        </h4>
+                        <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md relative z-10">
+                            <p className="text-lg text-gray-200 font-bold tracking-wide leading-tight">
+                                Proceed with<br />Functional Tibia Cut
+                            </p>
                         </div>
                     </div>
 
                     {/* Wrong Path */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
+                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-2 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-base mb-3 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
-                        <h4 className="text-xl font-extrabold text-[#ff8fa3] mb-3 leading-tight relative z-10">Medial gap does not match anticipated gap</h4>
-                        <div className="flex flex-col gap-2 w-full relative z-10">
-                            <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-base font-bold">Consider error on 90 deg tibial cut</p>
+                        <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-base mb-2 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
+                        <h4 className="text-xl font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">
+                            Medial gap does not<br />match anticipated gap
+                        </h4>
+                        <div className="flex flex-col gap-1 w-full relative z-10">
+                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
+                                <p className="text-[#ff8fa3] text-base font-bold leading-tight">
+                                    Consider error on<br />90 deg tibial cut
+                                </p>
                             </div>
                             <div className="flex items-center justify-center gap-2 shrink-0">
                                 <div className="h-px bg-[#333333] flex-grow"></div>
                                 <div className="text-gray-500 font-bold text-sm uppercase">OR</div>
                                 <div className="h-px bg-[#333333] flex-grow"></div>
                             </div>
-                            <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-base font-bold">Consider Pre op lateral laxity</p>
+                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
+                                <p className="text-[#ff8fa3] text-base font-bold leading-tight">
+                                    Consider Pre op<br />lateral laxity
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-[-8rem] flex justify-end pb-1 shrink-0 px-2 relative z-10">
+            <div className="mt-2 flex justify-end pb-1 shrink-0 px-2 relative z-10">
                 {/* Proceed Button */}
                 <button
                     onClick={handleProceed}
@@ -207,7 +217,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
                     <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
                         PROCEED FUNCTIONAL TIBIAL CUT
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                     </span>

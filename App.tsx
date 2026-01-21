@@ -97,7 +97,7 @@ const App: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-[calc(100vh-1rem)] flex flex-col">
             <header className="relative flex items-center justify-center p-4 text-center border-b border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]">
                 <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
 
@@ -126,7 +126,7 @@ const App: React.FC = () => {
                 )}
             </header>
             <div className="flex flex-grow">
-                <main className="flex-1 p-4 md:p-8 overflow-hidden relative flex flex-col">
+                <main className="flex-1 p-4 md:p-2 overflow-hidden relative flex flex-col">
                     {renderPage()}
                 </main>
             </div>
