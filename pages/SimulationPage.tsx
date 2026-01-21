@@ -260,13 +260,6 @@ const SimulationPage: React.FC = () => {
             });
 
             context.font = 'bold 24px Roboto, sans-serif';
-            const text = `mHKA: ${postOpMHKA?.toFixed(1) ?? '--'}°`;
-            const textMetrics = context.measureText(text);
-            const textX = newKnee.x - (textMetrics.width / 2);
-            context.fillStyle = 'rgba(29, 29, 31, 0.8)';
-            context.fillRect(textX - 10, newKnee.y - 48, textMetrics.width + 20, 38);
-            context.fillStyle = 'white';
-            context.fillText(text, textX, newKnee.y - 22);
         };
 
         if (isSplitView) {
@@ -456,7 +449,28 @@ const SimulationPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <h2 className="text-3xl font-bold mb-2 px-2 text-[#E0E0E0] relative z-10">Resection Simulation</h2>
+            <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Resection Simulation</h2>
+                {/* Back Button */}
+                <button
+                    onClick={() => setPage('results-analysis')}
+                    className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
+                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                               transition-all duration-300 ease-out
+                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                               active:scale-[0.98] flex items-center"
+                >
+                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                        BACK
+                    </span>
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                </button>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow min-h-0 px-2 mb-2 relative z-10 overflow-hidden">
                 {/* Column 1: Pre-Op HKA View - 25% */}
                 <div className="lg:col-span-1 hidden lg:flex flex-col min-h-0 max-h-full overflow-hidden">
@@ -522,26 +536,7 @@ const SimulationPage: React.FC = () => {
                     />
                 </div>
             </div>
-            <div className="mt-1 flex justify-between px-2 pb-2 relative z-10">
-                {/* Back Button */}
-                <button
-                    onClick={() => setPage('results-analysis')}
-                    className="group relative py-1.5 px-3 bg-[#6D282C] border border-[#893338] rounded-sm 
-                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
-                               transition-all duration-300 ease-out
-                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
-                               active:scale-[0.98] flex items-center"
-                >
-                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative flex items-center gap-2 text-xs font-bold text-white tracking-wider">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
-                        BACK TO RESULTS
-                    </span>
-                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                </button>
+            <div className="mt-1 flex justify-end px-2 pb-2 relative z-10">
                 {/* View Report Button */}
                 <button
                     onClick={() => setPage('report')}

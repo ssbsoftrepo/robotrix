@@ -71,10 +71,10 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-1.5 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <div className="w-full shrink-0 relative z-10">
-                            <span className="inline-block px-2 py-0.5 rounded-sm text-xs font-bold mb-1 bg-[#6D282C] text-white shadow-lg float-left tracking-wider">STEP 4 &gt;</span>
+                            <span className="inline-block px-3 py-1 rounded-sm text-sm font-bold mb-2 bg-[#6D282C] text-white shadow-lg float-left tracking-wider">STEP 4 &gt;</span>
                         </div>
 
-                        <p className="font-bold text-[#E0E0E0] mb-1.5 text-lg leading-snug w-full text-center shrink-0 relative z-10">
+                        <p className="font-bold text-[#E0E0E0] mb-2 text-xl leading-snug w-full text-center shrink-0 relative z-10">
                             Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span> (Asymmetrical Incremental blocks) To gauge lateral and medial extension gaps
                         </p>
 
@@ -82,9 +82,9 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                             <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain" />
                         </div>
 
-                        <div className="mt-auto bg-[#1a1a1a] p-1.5 rounded-lg w-full border border-[#6D282C]/50 shadow-lg text-center shrink-0 relative z-10">
-                            <p className="text-gray-500 text-[10px] mb-0 uppercase tracking-wider font-semibold">Implant Thickness Chosen</p>
-                            <p className="text-2xl font-extrabold text-white">{thickness} <span className="text-xs text-gray-500">mm</span></p>
+                        <div className="mt-auto bg-[#1a1a1a] p-2 rounded-lg w-full border border-[#6D282C]/50 shadow-lg text-center shrink-0 relative z-10">
+                            <p className="text-gray-500 text-xs mb-0 uppercase tracking-wider font-semibold">Implant Thickness Chosen</p>
+                            <p className="text-3xl font-extrabold text-white">{thickness} <span className="text-sm text-gray-500">mm</span></p>
                         </div>
                     </div>
                 </div>
@@ -96,18 +96,18 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                         <div className="flex items-stretch justify-center w-full h-full gap-0">
                             {/* Left Panel - Lateral Gap */}
                             <div className="flex flex-col items-center justify-center text-center shrink-0 mr-[6px] z-10">
-                                <p className="text-xs font-semibold text-gray-400 leading-snug mb-0.5">
+                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-1">
                                     Adjust the  <br />
                                     distal femoral &<br />
                                     proximal tibial cut<br />
                                     thickness to get
                                 </p>
-                                <p className="text-sm text-[#E0E0E0] font-bold mb-1">
+                                <p className="text-base text-[#E0E0E0] font-bold mb-2">
                                     Lateral Gap
                                 </p>
-                                <div className="w-20 h-20 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
-                                    <span className="text-2xl font-bold text-white">{thickness}</span>
-                                    <span className="text-xs text-gray-400 font-bold mt-[-2px]">mm</span>
+                                <div className="w-24 h-24 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
+                                    <span className="text-3xl font-bold text-white">{thickness}</span>
+                                    <span className="text-sm text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
 
@@ -118,40 +118,40 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
 
                             {/* Right Panel - Medial Gap */}
                             <div className="flex flex-col items-center justify-center text-center shrink-0 ml-[6px] z-10">
-                                <p className="text-xs font-semibold text-gray-400 leading-snug mb-0.5">
+                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-1">
                                     <br /><br />
                                     Anticipated
                                 </p>
-                                <p className="text-sm text-[#E0E0E0] font-bold mb-1">
+                                <p className="text-base text-[#E0E0E0] font-bold mb-2">
                                     Medial Gap
                                 </p>
-                                <div className="w-20 h-20 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
-                                    <span className="text-2xl font-bold text-gray-100">{anticipatedMedialGap}</span>
-                                    <span className="text-xs text-gray-400 font-bold mt-[-2px]">mm</span>
+                                <div className="w-24 h-24 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
+                                    <span className="text-3xl font-bold text-gray-100">{anticipatedMedialGap}</span>
+                                    <span className="text-sm text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Footer: Lateral Laxity Check */}
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-1.5 rounded-lg flex items-center justify-between shrink-0">
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-between shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <button
                             onClick={() => setPage('planner-valgus-stress-laxity-check')}
-                            className="group relative py-1.5 px-3 bg-[#6D282C] border border-[#893338] rounded-sm 
+                            className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
                                        shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                        transition-all duration-300 ease-out
                                        hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
                                        active:scale-[0.98] z-10"
                         >
                             <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                            <span className="relative text-xs font-bold text-white tracking-wider">CHECK LATERAL LAXITY</span>
+                            <span className="relative text-sm font-bold text-white tracking-wider">CHECK LATERAL LAXITY</span>
                             <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                             <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                         </button>
                         <div className="text-right relative z-10">
-                            <span className="text-gray-500 text-[10px] uppercase font-bold tracking-wider mr-1">Laxity Level:</span>
-                            <span className={`text-base font-bold ${!lateralLaxity ? 'text-gray-500' : lateralLaxity === 'No Lateral Laxity' ? 'text-green-400' : 'text-[#ff8fa3]'}`}>
+                            <span className="text-gray-500 text-xs uppercase font-bold tracking-wider mr-1">Laxity Level:</span>
+                            <span className={`text-lg font-bold ${!lateralLaxity ? 'text-gray-500' : lateralLaxity === 'No Lateral Laxity' ? 'text-green-400' : 'text-[#ff8fa3]'}`}>
                                 {lateralLaxity || 'Skipped'}
                             </span>
                         </div>
@@ -161,33 +161,33 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 {/* Column 3: Flowchart Logic */}
                 <div className="h-[80%] flex flex-col gap-2 min-h-0">
                     {/* Right Path (Verification Success) */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-3 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
+                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-sm mb-2 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
-                        <h4 className="text-base font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
-                        <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md relative z-10">
-                            <p className="text-base text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
+                        <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-base mb-3 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
+                        <h4 className="text-xl font-extrabold text-[#ff8fa3] mb-3 leading-tight relative z-10">Medial gap matches anticipated gap</h4>
+                        <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md relative z-10">
+                            <p className="text-lg text-gray-200 font-bold tracking-wide leading-snug">Proceed with the Functional Tibia Cut</p>
                         </div>
                     </div>
 
                     {/* Wrong Path */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-3 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
+                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-6 h-6 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-sm mb-2 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
-                        <h4 className="text-base font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">Medial gap does not match anticipated gap</h4>
+                        <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-base mb-3 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
+                        <h4 className="text-xl font-extrabold text-[#ff8fa3] mb-3 leading-tight relative z-10">Medial gap does not match anticipated gap</h4>
                         <div className="flex flex-col gap-2 w-full relative z-10">
-                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-sm font-bold">Consider error on 90 deg tibial cut</p>
+                            <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
+                                <p className="text-[#ff8fa3] text-base font-bold">Consider error on 90 deg tibial cut</p>
                             </div>
                             <div className="flex items-center justify-center gap-2 shrink-0">
                                 <div className="h-px bg-[#333333] flex-grow"></div>
-                                <div className="text-gray-500 font-bold text-xs uppercase">OR</div>
+                                <div className="text-gray-500 font-bold text-sm uppercase">OR</div>
                                 <div className="h-px bg-[#333333] flex-grow"></div>
                             </div>
-                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-[#ff8fa3] text-sm font-bold">Consider Pre op lateral laxity</p>
+                            <div className="bg-black/40 p-3 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
+                                <p className="text-[#ff8fa3] text-base font-bold">Consider Pre op lateral laxity</p>
                             </div>
                         </div>
                     </div>
@@ -198,14 +198,19 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 {/* Proceed Button */}
                 <button
                     onClick={handleProceed}
-                    className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                    className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                transition-all duration-300 ease-out
                                hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
                                active:scale-[0.98]"
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative text-sm font-bold text-white tracking-widest">PROCEED FUNCTIONAL TIBIAL CUT</span>
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
+                        PROCEED FUNCTIONAL TIBIAL CUT
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </span>
                     <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                 </button>

@@ -14,7 +14,15 @@ const LANDMARK_COLORS = {
   tibiaAnatomicAxis: '#6D282C',
 };
 
-const HANDLE_RADIUS = 6;
+const HANDLE_RADIUS = 4;
+
+// Mapping of individual landmark keys to their parent landmark set
+const landmarkToSetMap: Record<string, string> = {
+  medialJointSpace: 'jointLine',
+  lateralJointSpace: 'jointLine',
+  femurAxisPoint: 'femurAnatomicAxis',
+  tibiaAxisPoint: 'tibiaAnatomicAxis',
+};
 const angleBetweenVectors = (v1: Point, v2: Point) => {
   const dot = v1.x * v2.x + v1.y * v2.y;
   const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
@@ -631,25 +639,19 @@ const ValgusStressPlannerPage: React.FC = () => {
         ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
       });
 
-      // Draw M and L labels explicitly
-      // Calculate offset based on relative position to avoid overlap
-      const mOffset = medialJointSpace.x < lateralJointSpace.x ? -25 : 25;
-      const lOffset = lateralJointSpace.x < medialJointSpace.x ? -25 : 25;
+      // Draw M and L labels with better visibility
+      const mOffset = medialJointSpace.x < lateralJointSpace.x ? -30 : 20;
+      const lOffset = lateralJointSpace.x < medialJointSpace.x ? -30 : 20;
 
-      ctx.fillStyle = "#e3e3e3";
+      // Draw background for labels
+      ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+      ctx.fillRect(medialJointSpace.x + mOffset - 4, medialJointSpace.y - 10, 20, 22);
+      ctx.fillRect(lateralJointSpace.x + lOffset - 4, lateralJointSpace.y - 10, 20, 22);
+
+      ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 16px Inter, sans-serif';
-      ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 5);
-      ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 5);
-
-      if (localResultsRef.current.obliquity !== null) {
-        drawTextWithBackground(`Obliquity: ${localResultsRef.current.obliquity.toFixed(1)}°`, jointCenter.x, jointCenter.y - 20);
-      }
-      if (localResultsRef.current.ldfa !== null) {
-        drawTextWithBackground(`LDFA: ${localResultsRef.current.ldfa.toFixed(1)}°`, jointCenter.x, jointCenter.y - 55);
-      }
-      if (localResultsRef.current.mpta !== null) {
-        drawTextWithBackground(`MPTA: ${localResultsRef.current.mpta.toFixed(1)}°`, jointCenter.x, jointCenter.y + 55);
-      }
+      ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6);
+      ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6);
     }
 
     // Validation Overlay removed from canvas
@@ -871,6 +873,9 @@ const ValgusStressPlannerPage: React.FC = () => {
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
       if (!valgusLandmarks[key]) continue;
+      // Only consider landmarks whose parent set is visible
+      const parentSet = landmarkToSetMap[key];
+      if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
       const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
       if (distSq < minDistSq) {
         minDistSq = distSq;
@@ -940,6 +945,9 @@ const ValgusStressPlannerPage: React.FC = () => {
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
       if (!valgusLandmarks[key]) continue;
+      // Only consider landmarks whose parent set is visible
+      const parentSet = landmarkToSetMap[key];
+      if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
       const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
       if (distSq < minDistSq) {
         minDistSq = distSq;
@@ -1048,6 +1056,22 @@ const ValgusStressPlannerPage: React.FC = () => {
             </div>
           ) : (
             <div className="relative w-full h-full flex items-center justify-center">
+              {/* Obliquity Value - Left Side (for Right Knee) */}
+              {legSide === 'right' && valgusResults.obliquity !== null && (
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                  <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                    Obliquity: {valgusResults.obliquity.toFixed(1)}°
+                  </div>
+                </div>
+              )}
+              {/* Obliquity Value - Right Side (for Left Knee) */}
+              {legSide === 'left' && valgusResults.obliquity !== null && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                  <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                    Obliquity: {valgusResults.obliquity.toFixed(1)}°
+                  </div>
+                </div>
+              )}
               <div
                 ref={viewerRef}
                 onClick={handleViewerTap}
@@ -1144,7 +1168,7 @@ const ValgusStressPlannerPage: React.FC = () => {
                   onMouseDown={handlePipStart}
                   onTouchStart={handlePipStart}
                   className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none"
-                  style={{ top: pipPosition.y, left: pipPosition.x }}
+                  style={{ top: pipPosition.y, left: pipPosition.x, willChange: 'top, left', transition: 'none' }}
                 >
                   <canvas
                     ref={pipCanvasRef}
@@ -1204,10 +1228,7 @@ const ValgusStressPlannerPage: React.FC = () => {
             <h4 className="text-sm font-semibold mb-3 text-gray-400 uppercase tracking-wider">Calculated Metrics</h4>
             <div className="grid grid-cols-2 gap-2">
               <MetricItem label="Obliquity" value={`${valgusResults.obliquity?.toFixed(1) ?? '--'}°`} />
-              <MetricItem label="Distal Obliquity Type" value={valgusResults.femurTypeByObliquity ?? '--'} />
-              <MetricItem label="LDFA" value={`${valgusResults.ldfa?.toFixed(1) ?? '--'}°`} />
-              <MetricItem label="MPTA" value={`${valgusResults.mpta?.toFixed(1) ?? '--'}°`} />
-              {/* <MetricItem label="CPAK" value={valgusResults.cpak} highlight /> */}
+              <MetricItem label="Distal Obliquity Type" value={valgusResults.femurTypeByObliquity ?? '--'} highlight />
             </div>
           </section>
 
@@ -1249,16 +1270,16 @@ const ValgusStressPlannerPage: React.FC = () => {
           <section className="relative z-10 bg-[#252525]/50 p-3 rounded-lg border border-[#333333]">
             <div className="flex items-center gap-2 mb-2">
               <span className="w-1 h-4 bg-cyan-400 rounded-full" />
-              <h4 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
+              <h4 className="text-base font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
             </div>
             {activeInstruction ? (
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+              <ul className="list-disc list-inside space-y-1 text-base text-gray-300">
                 {activeInstruction.map((i, idx) => (
                   <li key={idx}>{i}</li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-gray-500">Select a workflow step to begin</p>
+              <p className="text-base text-gray-500">Select a workflow step to begin</p>
             )}
           </section>
 

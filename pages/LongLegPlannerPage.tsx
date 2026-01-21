@@ -9,7 +9,7 @@ const landmarkInstructions = {
     tibialJointLine: ["Mark the highest point of medial (M) tibial condyle.", "Mark the highest point of lateral (L) tibial condyle."],
 };
 
-const HANDLE_RADIUS = 6;
+const HANDLE_RADIUS = 4;
 
 const resolveMedialLateral = (
     p1: Point,
@@ -42,6 +42,18 @@ const LANDMARK_COLORS = {
 };
 
 // --- GEOMETRY HELPERS ---
+
+// Mapping of individual landmark keys to their parent landmark set
+const landmarkToSetMap: Record<string, string> = {
+    hipCenter: 'hkaLine',
+    kneeCenter: 'hkaLine',
+    ankleCenter: 'hkaLine',
+    femurAnatomicAxisPoint: 'femurAnatomicAxis',
+    femoralMedial: 'femoralJointLine',
+    femoralLateral: 'femoralJointLine',
+    tibialMedial: 'tibialJointLine',
+    tibialLateral: 'tibialJointLine',
+};
 
 const angleBetweenVectors = (v1: Point, v2: Point) => {
     const dot = v1.x * v2.x + v1.y * v2.y;
@@ -602,9 +614,6 @@ const LongLegPlannerPage: React.FC = () => {
             [hipCenter, kneeCenter, ankleCenter].forEach(p => {
                 if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); }
             });
-            if (kneeCenter && localResultsRef.current.mhka !== null) {
-                drawTextWithBackground(`mHKA: ${localResultsRef.current.mhka.toFixed(1)}°`, kneeCenter.x, kneeCenter.y - 50);
-            }
         }
 
         if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis')) {
@@ -637,17 +646,19 @@ const LongLegPlannerPage: React.FC = () => {
                     legSide
                 );
 
-                ctx.fillStyle = "#e3e3e3";
-                const mOffsetX = getLabelOffsetX(medial, kneeCenter);
-                const lOffsetX = getLabelOffsetX(lateral, kneeCenter);
+                // Draw M/L labels with better visibility
+                const mOffsetX = medial.x < kneeCenter.x ? -30 : 15;
+                const lOffsetX = lateral.x < kneeCenter.x ? -30 : 15;
 
-                ctx.fillText('M', medial.x + mOffsetX, medial.y + 5);
-                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 5);
+                // Draw background for M label
+                ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+                ctx.fillRect(medial.x + mOffsetX - 4, medial.y - 10, 20, 22);
+                ctx.fillRect(lateral.x + lOffsetX - 4, lateral.y - 10, 20, 22);
 
-            }
-
-            if (kneeCenter && visibleLandmarkSets.has('hkaLine') && localResultsRef.current.ldfa !== null) {
-                drawTextWithBackground(`LDFA: ${localResultsRef.current.ldfa.toFixed(1)}°`, kneeCenter.x, kneeCenter.y - 85);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Roboto, sans-serif';
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6);
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6);
             }
         }
 
@@ -669,17 +680,19 @@ const LongLegPlannerPage: React.FC = () => {
                     legSide
                 );
 
-                ctx.fillStyle = "#e3e3e3";
-                const mOffsetX = getLabelOffsetX(medial, kneeCenter);
-                const lOffsetX = getLabelOffsetX(lateral, kneeCenter);
+                // Draw M/L labels with better visibility
+                const mOffsetX = medial.x < kneeCenter.x ? -30 : 15;
+                const lOffsetX = lateral.x < kneeCenter.x ? -30 : 15;
 
-                ctx.fillText('M', medial.x + mOffsetX, medial.y + 5);
-                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 5);
+                // Draw background for M label
+                ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+                ctx.fillRect(medial.x + mOffsetX - 4, medial.y - 10, 20, 22);
+                ctx.fillRect(lateral.x + lOffsetX - 4, lateral.y - 10, 20, 22);
 
-            }
-
-            if (kneeCenter && visibleLandmarkSets.has('hkaLine') && localResultsRef.current.mpta !== null) {
-                drawTextWithBackground(`MPTA: ${localResultsRef.current.mpta.toFixed(1)}°`, kneeCenter.x, kneeCenter.y + 55);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Roboto, sans-serif';
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6);
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6);
             }
         }
     }, [longLegLandmarks, visibleLandmarkSets, legSide, ldfaMode]);
@@ -808,6 +821,9 @@ const LongLegPlannerPage: React.FC = () => {
         const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
+            // Only consider landmarks whose parent set is visible
+            const parentSet = landmarkToSetMap[key];
+            if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
             if (distSq < minDistSq) { minDistSq = distSq; closestKey = key; }
         }
@@ -853,6 +869,9 @@ const LongLegPlannerPage: React.FC = () => {
         const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
+            // Only consider landmarks whose parent set is visible
+            const parentSet = landmarkToSetMap[key];
+            if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
             if (distSq < minDistSq) { minDistSq = distSq; closestKey = key; }
         }
@@ -939,6 +958,56 @@ const LongLegPlannerPage: React.FC = () => {
                         </div>
                     ) : (
                         <div className="relative w-full h-full flex items-center justify-center">
+                            {/* Angle Values - Left Side (for Right Knee) */}
+                            {legSide === 'right' && (longLegResults.ldfa !== null || longLegResults.mpta !== null || longLegResults.mhka !== null) && (
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
+                                    {longLegResults.ldfa !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            LDFA: {longLegResults.ldfa.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {longLegResults.mpta !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            MPTA: {longLegResults.mpta.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {longLegResults.mhka !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            mHKA: {longLegResults.mhka.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {longLegResults.ahka !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            aHKA: {longLegResults.ahka.toFixed(1)}°
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {/* Angle Values - Right Side (for Left Knee) */}
+                            {legSide === 'left' && (longLegResults.ldfa !== null || longLegResults.mpta !== null || longLegResults.mhka !== null) && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
+                                    {longLegResults.ldfa !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            LDFA: {longLegResults.ldfa.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {longLegResults.mpta !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            MPTA: {longLegResults.mpta.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {longLegResults.mhka !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            mHKA: {longLegResults.mhka.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {longLegResults.ahka !== null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            aHKA: {longLegResults.ahka.toFixed(1)}°
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <div ref={viewerRef} onClick={handleViewerTap}
                                 onTouchEnd={(e) => {
                                     isPanningRef.current = false;
@@ -999,7 +1068,7 @@ const LongLegPlannerPage: React.FC = () => {
                                 </div>
                                 <div ref={pipViewerRef} onMouseDown={handlePipStart} onTouchStart={handlePipStart}
                                     className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none"
-                                    style={{ top: pipPosition.y, left: pipPosition.x }}>
+                                    style={{ top: pipPosition.y, left: pipPosition.x, willChange: 'top, left', transition: 'none' }}>
                                     <canvas ref={pipCanvasRef} width={176} height={176} className="rounded-full" />
                                     <div className="absolute inset-0 rounded-full border-2 border-cyan-400/30 pointer-events-none" />
                                 </div>
@@ -1041,10 +1110,10 @@ const LongLegPlannerPage: React.FC = () => {
                     <section className="relative z-10">
                         <h4 className="text-sm font-semibold mb-3 text-gray-400 uppercase tracking-wider">Calculated Metrics</h4>
                         <div className="grid grid-cols-2 gap-2">
-                            <MetricItem label="LDFA" value={`${longLegResults.ldfa?.toFixed(1) ?? '--'}°`} />
+                            {/* <MetricItem label="LDFA" value={`${longLegResults.ldfa?.toFixed(1) ?? '--'}°`} />
                             <MetricItem label="MPTA" value={`${longLegResults.mpta?.toFixed(1) ?? '--'}°`} />
                             <MetricItem label="aHKA" value={`${longLegResults.ahka?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="mHKA" value={`${longLegResults.mhka?.toFixed(1) ?? '--'}°`} highlight />
+                            <MetricItem label="mHKA" value={`${longLegResults.mhka?.toFixed(1) ?? '--'}°`} highlight /> */}
                             <MetricItem label="JLO" value={`${longLegResults.jlo?.toFixed(1) ?? '--'}°`} />
                             <MetricItem label="LDFA Method" value={ldfaMode === 'corrected' ? 'Corrected' : 'Native'} highlight />
                         </div>
@@ -1086,14 +1155,14 @@ const LongLegPlannerPage: React.FC = () => {
                     <section className="relative z-10 bg-[#252525]/50 p-3 rounded-lg border border-[#333333]">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="w-1 h-4 bg-cyan-400 rounded-full" />
-                            <h4 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
+                            <h4 className="text-base font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
                         </div>
                         {activeInstruction ? (
-                            <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+                            <ul className="list-disc list-inside space-y-1 text-base text-gray-300">
                                 {activeInstruction.map((i, idx) => (<li key={idx}>{i}</li>))}
                             </ul>
                         ) : (
-                            <p className="text-sm text-gray-500">Select a workflow step to begin</p>
+                            <p className="text-base text-gray-500">Select a workflow step to begin</p>
                         )}
                     </section>
 

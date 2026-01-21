@@ -202,7 +202,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
             <div className="flex flex-col flex-grow relative min-h-0 px-1 relative z-10 overflow-hidden">
                 {/* Step Indicator */}
                 <div className="text-left shrink-0">
-                    <span className="inline-block px-2 py-0.5 rounded-sm text-xs font-bold bg-[#6D282C] text-white shadow-lg tracking-wider">STEP 5 &gt;</span>
+                    <span className="inline-block px-3 py-1 rounded-sm text-sm font-bold bg-[#6D282C] text-white shadow-lg tracking-wider">STEP 5 &gt;</span>
                 </div>
 
                 <div className="flex-grow grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] min-h-0 overflow-hidden mt-1">
@@ -212,32 +212,32 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                         <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-[calc(100%-5rem)] flex flex-col p-1.5 space-y-1.5 overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
-                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-0.5 z-10 min-h-0">
-                                <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
+                                <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div>
-                                <p className="text-sm text-gray-400 leading-snug">
+                                <p className="text-base text-gray-400 leading-snug">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-0.5 z-10 min-h-0">
-                                <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
+                                <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     2
                                 </div>
-                                <p className="text-sm text-gray-400 leading-snug">
+                                <p className="text-base text-gray-400 leading-snug">
                                     Changing the 90 deg cut by <span className="text-[#ff8fa3] font-bold">1° varus</span> will open the medial gap by <span className="text-[#ff8fa3] font-bold">~ 1.2 mms</span> in average-sized tibia (70 mms width).
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-1.5 text-center shadow-lg z-10 flex-[0.8] flex flex-col justify-center min-h-0">
-                                <p className="text-gray-400 text-[9px] font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
-                                <p className="text-xl font-black text-white">{anticipatedVarusCut}° <span className="text-xs">Varus</span></p>
+                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-2 text-center shadow-lg z-10 flex-[0.8] flex flex-col justify-center min-h-0">
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
+                                <p className="text-2xl font-black text-white">{anticipatedVarusCut}° <span className="text-sm">Varus</span></p>
                             </div>
 
-                            <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-1.5 flex-[0.8] flex flex-col justify-center items-center gap-0.5 z-10 min-h-0">
-                                <p className="text-gray-400 text-[9px] font-bold uppercase tracking-wider mb-0">Laxity Status</p>
-                                <p className="text-base font-black text-white">{lateralLaxity || 'Unknown'}</p>
+                            <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-2 flex-[0.8] flex flex-col justify-center items-center gap-1 z-10 min-h-0">
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Laxity Status</p>
+                                <p className="text-lg font-black text-white">{lateralLaxity || 'Unknown'}</p>
                                 <button
                                     onClick={applyLateralLaxity}
                                     className="group relative w-full py-1 bg-[#6D282C] border border-[#893338] rounded-sm 
@@ -247,7 +247,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                                active:scale-[0.98]"
                                 >
                                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                                    <span className="relative text-xs font-bold text-white tracking-wider">APPLY LAXITY</span>
+                                    <span className="relative text-sm font-bold text-white tracking-wider">APPLY LAXITY</span>
                                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                     <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                 </button>
@@ -328,13 +328,13 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     <div className="h-[calc(100%-5rem)]  flex flex-col min-h-0">
                         <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
-                            <div className="p-1 bg-[#252525] border-b border-[#333333] text-center shrink-0 relative z-10">
-                                <h3 className="text-xs font-bold text-[#E0E0E0] uppercase tracking-wider">
+                            <div className="p-1.5 bg-[#252525] border-b border-[#333333] text-center shrink-0 relative z-10">
+                                <h3 className="text-sm font-bold text-[#E0E0E0] uppercase tracking-wider">
                                     Robotrix+ Universal Jigs
                                 </h3>
                             </div>
                             <div className="p-0.5 flex-grow flex flex-col justify-evenly items-center h-full overflow-hidden relative z-10">
-                                <p className="text-center text-gray-500 text-[9px] mb-0 shrink-0">Click block to simulate</p>
+                                <p className="text-center text-gray-500 text-xs mb-0 shrink-0">Click block to simulate</p>
 
                                 {/* 0 Degree Neutral Cut Button */}
                                 <div className="flex-1 w-full flex items-center justify-center mb-0">

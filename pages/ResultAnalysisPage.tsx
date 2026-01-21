@@ -63,7 +63,7 @@ const CpakDiagram: React.FC<{ cpakType: string | null }> = ({ cpakType }) => {
         '8': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 15 0 L 15 60 M 10 32 L 20 28" /><path d="M 45 0 L 45 60 M 50 32 L 40 28" /></g></svg>,
         '9': <svg viewBox="0 0 60 60"><g stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none"><path d="M 20 0 L 15 30 L 20 60 M 10 32 L 20 28" /><path d="M 40 0 L 45 30 L 40 60 M 50 32 L 40 28" /></g></svg>,
     };
-    return <div className="h-20 w-20 md:h-24 md:w-24 text-[#ff8fa3]">{diagrams[cpakType] || null}</div>;
+    return <div className="h-14 w-14 md:h-16 md:w-16 text-[#ff8fa3]">{diagrams[cpakType] || null}</div>;
 };
 
 const ImageUploadBox: React.FC<{
@@ -140,14 +140,14 @@ const StepCard: React.FC<{
     };
 
     return (
-        <div className={`${theme.bg} border-2 ${theme.border} rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3 ${className}`}>
+        <div className={`${theme.bg} border-2 ${theme.border} rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 ${className}`}>
             <div className="flex-grow text-center md:text-left flex flex-col justify-center items-center md:items-start h-full">
-                {!hideStepBadge && <span className={`inline-block px-3 py-0.5 rounded-full text-xs font-bold mb-1 ${theme.badge}`}>STEP {step} &gt;</span>}
-                <h4 className="text-base text-gray-200 font-bold mb-1 leading-tight">{title}</h4>
-                <div className={`text-xl font-extrabold ${theme.text} mb-1`}>{value}</div>
+                {!hideStepBadge && <span className={`inline-block px-4 py-1 rounded-full text-sm font-bold mb-2 ${theme.badge}`}>STEP {step} &gt;</span>}
+                <h4 className="text-xl text-gray-200 font-bold mb-2 leading-tight">{title}</h4>
+                <div className={`text-3xl font-extrabold ${theme.text} mb-1`}>{value}</div>
 
-                {subTitle && <p className="text-xs text-gray-400 mt-0.5 font-medium">{subTitle}</p>}
-                {subValue && <div className={`text-xl font-extrabold ${theme.text} mt-1 border-2 border-dashed border-[#333333] inline-block px-2 py-1 rounded-lg shadow-md bg-black/20`}>{subValue}</div>}
+                {subTitle && <p className="text-sm text-gray-400 mt-1 font-medium">{subTitle}</p>}
+                {subValue && <div className={`text-2xl font-extrabold ${theme.text} mt-2 border-2 border-dashed border-[#333333] inline-block px-3 py-2 rounded-lg shadow-md bg-black/20`}>{subValue}</div>}
             </div>
             {(imageSrc || setImageSrc) && (
                 <div className="flex flex-col justify-center">
@@ -256,23 +256,23 @@ const ResultAnalysisPage: React.FC = () => {
                 {/* Column 2: Data & Matrix */}
                 <div className="lg:col-span-4 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     {/* Results Box */}
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg grid grid-cols-2 gap-4 min-h-0 shrink-0 text-center">
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg min-h-0 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
-                        {/* Column 1: Femur Type (JLO) */}
-                        <div className="flex flex-col justify-center items-center py-2 border-r border-[#333333] relative z-10">
-                            <p className="text-xs text-white font-bold uppercase mb-2 tracking-wider">Femur Type</p>
-                            <p className="font-bold text-xl text-[#ff8fa3] leading-tight">{longLegResults.jloType}</p>
+                        {/* Headings Row */}
+                        <div className="grid grid-cols-2 gap-4 relative z-10">
+                            <p className="text-sm text-white font-bold uppercase tracking-wider border-r border-[#333333] pr-4">Femur Type:</p>
+                            <p className="text-sm text-white font-bold uppercase tracking-wider">CPAK Type:</p>
                         </div>
 
-                        {/* Column 2: CPAK */}
-                        <div className="flex flex-col justify-center items-center py-2 relative z-10">
-                            <p className="text-xs text-white font-bold uppercase mb-2 tracking-wider">CPAK Type</p>
+                        {/* Values Row */}
+                        <div className="grid grid-cols-2 gap-4 mt-2 relative z-10">
+                            <div className="border-r border-[#333333] pr-4">
+                                <p className="font-bold text-2xl text-[#ff8fa3] leading-tight">{longLegResults.jloType}</p>
+                            </div>
                             <div className="flex items-center gap-3">
                                 <p className="font-bold text-2xl text-[#ff8fa3] leading-none">CPAK {longLegResults.cpak}</p>
-                                <div className="scale-90 transform">
-                                    <CpakDiagram cpakType={longLegResults.cpak} />
-                                </div>
+                                <CpakDiagram cpakType={longLegResults.cpak} />
                             </div>
                         </div>
                     </div>
@@ -352,7 +352,12 @@ const ResultAnalysisPage: React.FC = () => {
                                    active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative text-sm font-bold text-white tracking-wider">CORONAL BALANCING</span>
+                        <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
+                            CORONAL BALANCING
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </span>
                         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                         <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>
