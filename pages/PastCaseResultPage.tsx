@@ -53,7 +53,8 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
     return '--';
 };
 
-const HANDLE_RADIUS = 4; // Matching Planner sensitivity
+const BASE_HANDLE_RADIUS = 4;
+const BASE_LINE_WIDTH = 3;
 const LANDMARK_COLORS = {
     hkaLine: '#6D282C',
     femurAnatomicAxis: '#6D282C',
@@ -65,6 +66,197 @@ const landmarkInstructions = {
     femurAnatomicAxis: ["Mark a point along the mid-diapheal canal.", "Along the mid shaft of femur."],
     femoralJointLine: ["Mark the most distal part of medial (M) condyle.", "Mark the most distal part of lateral (L) condyle."],
     tibialJointLine: ["Mark the lowest center point of medial (M) condyle.", "Mark the lowest center point of lateral (L) condyle."],
+};
+
+// --- CAMERA MODAL ---
+const CameraModal: React.FC<{
+    isOpen: boolean; onClose: () => void; onCapture: (dataUrl: string) => void;
+}> = ({ isOpen, onClose, onCapture }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const overlayRef = useRef<HTMLCanvasElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [cropRect, setCropRect] = useState({ x: 10, y: 10, width: 80, height: 80 });
+    const cropBoxRef = useRef<HTMLDivElement>(null);
+    const [activeInteraction, setActiveInteraction] = useState<string | null>(null);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+    const stopCamera = useCallback(() => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+            videoRef.current.load();
+        }
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (capturedImage && capturedImage.startsWith('blob:')) URL.revokeObjectURL(capturedImage);
+            stopCamera();
+        };
+    }, [capturedImage, stopCamera]);
+
+    const handleClose = useCallback(() => {
+        if (capturedImage && capturedImage.startsWith('blob:')) URL.revokeObjectURL(capturedImage);
+        setCapturedImage(null);
+        stopCamera();
+        onClose();
+    }, [capturedImage, onClose, stopCamera]);
+
+    useEffect(() => {
+        if (isOpen && !capturedImage) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(stream => {
+                    streamRef.current = stream;
+                    if (videoRef.current) {
+                        videoRef.current.srcObject = stream;
+                        videoRef.current.play().catch(e => console.error("Auto-play failed:", e));
+                        videoRef.current.onloadedmetadata = () => {
+                            if (overlayRef.current && videoRef.current) {
+                                overlayRef.current.width = videoRef.current.videoWidth;
+                                overlayRef.current.height = videoRef.current.videoHeight;
+                                const ctx = overlayRef.current.getContext('2d');
+                                if (ctx) {
+                                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                                    ctx.lineWidth = 1;
+                                    ctx.beginPath();
+                                    ctx.moveTo(ctx.canvas.width / 2, 0); ctx.lineTo(ctx.canvas.width / 2, ctx.canvas.height);
+                                    ctx.moveTo(0, ctx.canvas.height / 2); ctx.lineTo(ctx.canvas.width, ctx.canvas.height / 2);
+                                    ctx.stroke();
+                                }
+                            }
+                        };
+                    }
+                })
+                .catch(err => { console.error("Error accessing camera: ", err); onClose(); });
+        }
+    }, [isOpen, capturedImage, onClose]);
+
+    const handleCapture = async () => {
+        const video = videoRef.current;
+        if (video && video.videoWidth > 0 && video.videoHeight > 0) {
+            try {
+                if (video.paused) await video.play();
+                let attempts = 0;
+                while ((video.readyState < 2 || video.currentTime === 0) && attempts < 10) { await new Promise(resolve => setTimeout(resolve, 50)); attempts++; }
+                await new Promise(resolve => setTimeout(resolve, 200));
+                const canvas = document.createElement('canvas');
+                const MAX_DIM = 1024;
+                let w = video.videoWidth; let h = video.videoHeight;
+                if (w > MAX_DIM || h > MAX_DIM) { const scale = MAX_DIM / Math.max(w, h); w *= scale; h *= scale; }
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(video, 0, 0, w, h);
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            if (capturedImage && capturedImage.startsWith('blob:')) URL.revokeObjectURL(capturedImage);
+                            setCapturedImage(URL.createObjectURL(blob));
+                            stopCamera();
+                        }
+                    }, 'image/jpeg', 0.85);
+                }
+            } catch (err) { console.error("Capture failed:", err); }
+        }
+    };
+
+    const handleCropSave = () => {
+        if (capturedImage) {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const fullW = img.naturalWidth; const fullH = img.naturalHeight;
+                const scaleX = fullW / 100; const scaleY = fullH / 100;
+                const cropW = cropRect.width * scaleX; const cropH = cropRect.height * scaleY;
+                canvas.width = cropW; canvas.height = cropH;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, cropRect.x * scaleX, cropRect.y * scaleY, cropW, cropH, 0, 0, cropW, cropH);
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => { onCapture(reader.result as string); handleClose(); };
+                            reader.readAsDataURL(blob);
+                        }
+                    }, 'image/jpeg', 0.9);
+                }
+            };
+            img.src = capturedImage;
+        }
+    };
+
+    const handleCropMouseDown = (e: React.MouseEvent | React.TouchEvent, interaction: string) => {
+        e.stopPropagation(); setActiveInteraction(interaction);
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        setDragStart({ x: clientX, y: clientY });
+    };
+
+    const handleCropMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!activeInteraction) return;
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const container = cropBoxRef.current?.parentElement;
+        if (!container) return;
+        const dx = ((clientX - dragStart.x) / container.clientWidth) * 100;
+        const dy = ((clientY - dragStart.y) / container.clientHeight) * 100;
+        setCropRect(prev => {
+            let next = { ...prev };
+            if (activeInteraction === 'move') {
+                next.x = Math.max(0, Math.min(100 - prev.width, prev.x + dx));
+                next.y = Math.max(0, Math.min(100 - prev.height, prev.y + dy));
+            } else {
+                if (activeInteraction.includes('l')) { next.x = Math.min(prev.x + prev.width - 10, Math.max(0, prev.x + dx)); next.width = prev.width + (prev.x - next.x); }
+                if (activeInteraction.includes('r')) next.width = Math.max(10, Math.min(100 - prev.x, prev.width + dx));
+                if (activeInteraction.includes('t')) { next.y = Math.min(prev.y + prev.height - 10, Math.max(0, prev.y + dy)); next.height = prev.height + (prev.y - next.y); }
+                if (activeInteraction.includes('b')) next.height = Math.max(10, Math.min(100 - prev.y, prev.height + dy));
+            }
+            return next;
+        });
+        setDragStart({ x: clientX, y: clientY });
+    };
+
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+            <div className="bg-[#1e1f20] border border-[#6D282C] p-4 rounded-lg relative w-full max-w-3xl text-center">
+                {!capturedImage ? (
+                    <>
+                        <h3 className="text-xl font-semibold mb-4">Live Capture with Alignment Grid</h3>
+                        <div className="relative inline-block border-2 border-[#6D282C]">
+                            <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto rounded"></video>
+                            <canvas ref={overlayRef} className="absolute top-0 left-0 w-full h-full"></canvas>
+                        </div>
+                        <div className="mt-4 flex justify-center space-x-4">
+                            <button onClick={handleCapture} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Capture</button>
+                            <button onClick={handleClose} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <h3 className="text-xl font-semibold mb-4">Crop Captured Image</h3>
+                        <div className="relative inline-block border-2 border-[#893338] overflow-hidden select-none touch-none" onMouseMove={handleCropMouseMove} onTouchMove={handleCropMouseMove} onMouseUp={() => setActiveInteraction(null)} onTouchEnd={() => setActiveInteraction(null)}>
+                            <img src={capturedImage} alt="Captured" className="w-full h-auto pointer-events-none" />
+                            <div ref={cropBoxRef} onMouseDown={(e) => handleCropMouseDown(e, 'move')} onTouchStart={(e) => handleCropMouseDown(e, 'move')} className="absolute border-2 border-dashed border-white bg-white/20 cursor-move" style={{ left: `${cropRect.x}%`, top: `${cropRect.y}%`, width: `${cropRect.width}%`, height: `${cropRect.height}%` }}>
+                                <div className="absolute -top-3 -left-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-nw-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'tl')} onTouchStart={(e) => handleCropMouseDown(e, 'tl')} />
+                                <div className="absolute -top-3 -right-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-ne-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'tr')} onTouchStart={(e) => handleCropMouseDown(e, 'tr')} />
+                                <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-sw-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'bl')} onTouchStart={(e) => handleCropMouseDown(e, 'bl')} />
+                                <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-[#893338] border-2 border-white rounded-full cursor-se-resize z-50 shadow-md" onMouseDown={(e) => handleCropMouseDown(e, 'br')} onTouchStart={(e) => handleCropMouseDown(e, 'br')} />
+                            </div>
+                        </div>
+                        <div className="mt-4 flex justify-center space-x-4">
+                            <button onClick={handleCropSave} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Finalize Crop</button>
+                            <button onClick={() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); }} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Retake</button>
+                            <button onClick={handleClose} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
 };
 
 
@@ -106,6 +298,7 @@ const PostOpPlanner: React.FC = () => {
     // Removed local state definitions for landmarks and results as they are now mapped to context
     const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
     const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
 
     const imageRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -245,29 +438,28 @@ const PostOpPlanner: React.FC = () => {
         if (!ctx || Object.keys(landmarks).length === 0) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.font = 'bold 12px Roboto, sans-serif'; // Reduced font size
+        ctx.font = 'bold 12px Roboto, sans-serif';
         const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = landmarks;
 
         if (visibleLandmarkSets.has('hkaLine') && hipCenter && kneeCenter && ankleCenter) {
-            ctx.strokeStyle = LANDMARK_COLORS.hkaLine; ctx.fillStyle = LANDMARK_COLORS.hkaLine; ctx.lineWidth = 3;
+            ctx.strokeStyle = LANDMARK_COLORS.hkaLine; ctx.fillStyle = LANDMARK_COLORS.hkaLine; ctx.lineWidth = BASE_LINE_WIDTH;
             ctx.beginPath(); ctx.moveTo(hipCenter.x, hipCenter.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.lineTo(ankleCenter.x, ankleCenter.y); ctx.stroke();
-            [hipCenter, kneeCenter, ankleCenter].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
+            [hipCenter, kneeCenter, ankleCenter].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
         }
         if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint && kneeCenter) {
-            ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = 3;
+            ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = BASE_LINE_WIDTH;
             ctx.beginPath(); ctx.moveTo(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
-            ctx.beginPath(); ctx.arc(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y, BASE_HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
         }
         if (visibleLandmarkSets.has('femoralJointLine') && femoralMedial && femoralLateral) {
-            ctx.strokeStyle = LANDMARK_COLORS.femoralJointLine; ctx.fillStyle = LANDMARK_COLORS.femoralJointLine; ctx.lineWidth = 3;
+            ctx.strokeStyle = LANDMARK_COLORS.femoralJointLine; ctx.fillStyle = LANDMARK_COLORS.femoralJointLine; ctx.lineWidth = BASE_LINE_WIDTH;
             ctx.beginPath(); ctx.moveTo(femoralMedial.x, femoralMedial.y); ctx.lineTo(femoralLateral.x, femoralLateral.y); ctx.stroke();
-            [femoralMedial, femoralLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
+            [femoralMedial, femoralLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
 
-            // Draw M/L labels with background boxes (matching planner style)
+            // Draw M/L labels with background boxes
             const mOffsetX = (femoralMedial.x < (femoralMedial.x + femoralLateral.x) / 2 ? -30 : 15);
             const lOffsetX = (femoralLateral.x < (femoralMedial.x + femoralLateral.x) / 2 ? -30 : 15);
 
-            // Draw background for M label
             ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
             ctx.fillRect(femoralMedial.x + mOffsetX - 4, femoralMedial.y - 10, 20, 22);
             ctx.fillRect(femoralLateral.x + lOffsetX - 4, femoralLateral.y - 10, 20, 22);
@@ -278,15 +470,14 @@ const PostOpPlanner: React.FC = () => {
             ctx.fillText('L', femoralLateral.x + lOffsetX, femoralLateral.y + 6);
         }
         if (visibleLandmarkSets.has('tibialJointLine') && tibialMedial && tibialLateral) {
-            ctx.strokeStyle = LANDMARK_COLORS.tibialJointLine; ctx.fillStyle = LANDMARK_COLORS.tibialJointLine; ctx.lineWidth = 3;
+            ctx.strokeStyle = LANDMARK_COLORS.tibialJointLine; ctx.fillStyle = LANDMARK_COLORS.tibialJointLine; ctx.lineWidth = BASE_LINE_WIDTH;
             ctx.beginPath(); ctx.moveTo(tibialMedial.x, tibialMedial.y); ctx.lineTo(tibialLateral.x, tibialLateral.y); ctx.stroke();
-            [tibialMedial, tibialLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
+            [tibialMedial, tibialLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
 
-            // Draw M/L labels with background boxes (matching planner style)
+            // Draw M/L labels with background boxes
             const tmOffsetX = (tibialMedial.x < (tibialMedial.x + tibialLateral.x) / 2 ? -30 : 15);
             const tlOffsetX = (tibialLateral.x < (tibialMedial.x + tibialLateral.x) / 2 ? -30 : 15);
 
-            // Draw background for M label
             ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
             ctx.fillRect(tibialMedial.x + tmOffsetX - 4, tibialMedial.y + 10, 20, 22);
             ctx.fillRect(tibialLateral.x + tlOffsetX - 4, tibialLateral.y + 10, 20, 22);
@@ -347,7 +538,7 @@ const PostOpPlanner: React.FC = () => {
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-        const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2; // Increased sensitivity
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2; // Increased sensitivity
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
         for (const key in landmarks) {
@@ -407,7 +598,7 @@ const PostOpPlanner: React.FC = () => {
         if (!canvas) return;
 
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-        const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2; // Increased sensitivity for touch
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2; // Increased sensitivity for touch
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
 
@@ -529,6 +720,7 @@ const PostOpPlanner: React.FC = () => {
 
     return (
         <div className="relative flex flex-col h-full rounded-lg">
+            <CameraModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onCapture={(dataUrl) => { setPostOpLongLegImage(dataUrl); setFileName('Camera Capture'); }} />
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0 max-h-full overflow-hidden">
                 {/* Viewer - Left side (75%) */}
                 <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
@@ -616,7 +808,7 @@ const PostOpPlanner: React.FC = () => {
                                         }
                                     }}
                                 />
-                                <canvas ref={canvasRef} onTouchStart={handleTouchStart} className="absolute cursor-crosshair inset-0 m-auto" onMouseDown={handleMouseDown} />
+                                <canvas ref={canvasRef} onTouchStart={handleTouchStart} className="absolute cursor-crosshair inset-0 m-auto touch-none" style={{ touchAction: 'none' }} onMouseDown={handleMouseDown} />
                             </div>
                             <div ref={pipViewerRef} onMouseDown={handlePipStart}
                                 onTouchStart={handlePipStart} className="absolute w-24 h-24 border-2 border-dark-maroon bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg top-2 right-2 z-10" style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px` }}>
@@ -637,11 +829,16 @@ const PostOpPlanner: React.FC = () => {
                 <div className="lg:col-span-1 flex flex-col space-y-1.5 h-full overflow-y-auto pr-1 order-2 lg:order-none">
                     <div className="shrink-0">
                         <h4 className="text-sm font-semibold text-[#E0E0E0] mb-1">Post-Op Image</h4>
-                        <label htmlFor="postop-xray-upload" className="cursor-pointer text-center py-3 px-3 rounded-sm font-bold text-sm bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider block transition shadow-sm">
-                            UPLOAD X-RAY
-                        </label>
+                        <div className="flex gap-1 mb-1">
+                            <label htmlFor="postop-xray-upload" className="cursor-pointer text-center py-2 px-2 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider flex-1 transition shadow-sm">
+                                UPLOAD
+                            </label>
+                            <button onClick={() => setIsCameraOpen(true)} className="py-2 px-2 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider flex-1 transition shadow-sm">
+                                LIVE CAPTURE
+                            </button>
+                        </div>
                         <input type="file" id="postop-xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                        <span className="text-[10px] text-gray-500 truncate inline-block w-full mt-1.5">{fileName}</span>
+                        <span className="text-[10px] text-gray-500 truncate inline-block w-full">{fileName}</span>
                         <p className="text-gray-500 text-[10px]">Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
                     </div>
 
