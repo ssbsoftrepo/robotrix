@@ -4,7 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { Landmarks, Point, ValgusResults, LegSide } from '../types';
 
 // --- Helper Functions ---
-const HANDLE_RADIUS = 6; // Matching Planner sensitivity6
+const HANDLE_RADIUS = 4; // Matching Planner sensitivity
 const LANDMARK_COLORS = {
     jointLine: '#6D282C',
     femurAnatomicAxis: '#6D282C',
@@ -273,24 +273,19 @@ const PostOpValgusPlanner: React.FC = () => {
             ctx.beginPath(); ctx.moveTo(medialJointSpace.x, medialJointSpace.y); ctx.lineTo(lateralJointSpace.x, lateralJointSpace.y); ctx.stroke();
             [medialJointSpace, lateralJointSpace].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
 
-            // Draw M and L labels
-            const mOffset = medialJointSpace.x < lateralJointSpace.x ? -25 : 25;
-            const lOffset = lateralJointSpace.x < medialJointSpace.x ? -25 : 25;
+            // Draw M/L labels with background boxes (matching planner style)
+            const mOffset = medialJointSpace.x < lateralJointSpace.x ? -30 : 20;
+            const lOffset = lateralJointSpace.x < medialJointSpace.x ? -30 : 20;
 
-            ctx.fillStyle = "#e3e3e3";
+            // Draw background for labels
+            ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+            ctx.fillRect(medialJointSpace.x + mOffset - 4, medialJointSpace.y - 10, 20, 22);
+            ctx.fillRect(lateralJointSpace.x + lOffset - 4, lateralJointSpace.y - 10, 20, 22);
+
+            ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 16px Inter, sans-serif';
-            ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 5);
-            ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 5);
-
-            if (currentResults.obliquity !== null) {
-                drawTextWithBackground(`Obliquity: ${currentResults.obliquity.toFixed(1)}°`, jointCenter.x, jointCenter.y - 20);
-            }
-            if (currentResults.ldfa !== null) {
-                drawTextWithBackground(`LDFA: ${currentResults.ldfa.toFixed(1)}°`, jointCenter.x, jointCenter.y - 55);
-            }
-            if (currentResults.mpta !== null) {
-                drawTextWithBackground(`MPTA: ${currentResults.mpta.toFixed(1)}°`, jointCenter.x, jointCenter.y + 55);
-            }
+            ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6);
+            ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6);
         }
 
         if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
@@ -498,6 +493,46 @@ const PostOpValgusPlanner: React.FC = () => {
                 <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     {postOpValgusImage ? (<>
                         <div className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
+                            {/* Angle Values - Left Side (for Right Knee) */}
+                            {legSide === 'right' && (results.obliquity != null || results.ldfa != null || results.mpta != null) && (
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
+                                    {results.obliquity != null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            Obliquity: {results.obliquity.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {results.ldfa != null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            LDFA: {results.ldfa.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {results.mpta != null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            MPTA: {results.mpta.toFixed(1)}°
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {/* Angle Values - Right Side (for Left Knee) */}
+                            {legSide === 'left' && (results.obliquity != null || results.ldfa != null || results.mpta != null) && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
+                                    {results.obliquity != null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            Obliquity: {results.obliquity.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {results.ldfa != null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            LDFA: {results.ldfa.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {results.mpta != null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            MPTA: {results.mpta.toFixed(1)}°
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <img
                                 ref={imageRef}
                                 src={postOpValgusImage}

@@ -14,7 +14,8 @@ const LANDMARK_COLORS = {
   tibiaAnatomicAxis: '#6D282C',
 };
 
-const HANDLE_RADIUS = 4;
+const BASE_HANDLE_RADIUS = 4;
+const BASE_LINE_WIDTH = 3;
 
 // Mapping of individual landmark keys to their parent landmark set
 const landmarkToSetMap: Record<string, string> = {
@@ -611,6 +612,11 @@ const ValgusStressPlannerPage: React.FC = () => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Zoom-compensated sizes - divide by zoom to keep visual size constant
+    const scaledRadius = BASE_HANDLE_RADIUS / zoom;
+    const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+    const scaledFontSize = Math.max(12, 16 / zoom);
+
     const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = valgusLandmarks;
 
     const drawTextWithBackground = (text: string, x: number, y: number, color: string = '#fdd835') => {
@@ -630,28 +636,32 @@ const ValgusStressPlannerPage: React.FC = () => {
     if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace && jointCenter) {
       ctx.strokeStyle = LANDMARK_COLORS.jointLine;
       ctx.fillStyle = LANDMARK_COLORS.jointLine;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = scaledLineWidth;
       ctx.beginPath();
       ctx.moveTo(medialJointSpace.x, medialJointSpace.y);
       ctx.lineTo(lateralJointSpace.x, lateralJointSpace.y);
       ctx.stroke();
       [medialJointSpace, lateralJointSpace].forEach(p => {
-        ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
       });
 
-      // Draw M and L labels with better visibility
-      const mOffset = medialJointSpace.x < lateralJointSpace.x ? -30 : 20;
-      const lOffset = lateralJointSpace.x < medialJointSpace.x ? -30 : 20;
+      // Draw M and L labels with better visibility - scaled for zoom
+      const baseOffset = 20;
+      const scaledOffset = baseOffset / zoom;
+      const mOffset = medialJointSpace.x < lateralJointSpace.x ? -scaledOffset * 1.5 : scaledOffset;
+      const lOffset = lateralJointSpace.x < medialJointSpace.x ? -scaledOffset * 1.5 : scaledOffset;
+      const boxWidth = 20 / zoom;
+      const boxHeight = 22 / zoom;
 
       // Draw background for labels
       ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-      ctx.fillRect(medialJointSpace.x + mOffset - 4, medialJointSpace.y - 10, 20, 22);
-      ctx.fillRect(lateralJointSpace.x + lOffset - 4, lateralJointSpace.y - 10, 20, 22);
+      ctx.fillRect(medialJointSpace.x + mOffset - 4 / zoom, medialJointSpace.y - 10 / zoom, boxWidth, boxHeight);
+      ctx.fillRect(lateralJointSpace.x + lOffset - 4 / zoom, lateralJointSpace.y - 10 / zoom, boxWidth, boxHeight);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 16px Inter, sans-serif';
-      ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6);
-      ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6);
+      ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
+      ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6 / zoom);
+      ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6 / zoom);
     }
 
     // Validation Overlay removed from canvas
@@ -660,29 +670,29 @@ const ValgusStressPlannerPage: React.FC = () => {
     if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
       ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis;
       ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = scaledLineWidth;
       ctx.beginPath();
       ctx.moveTo(femurAxisPoint.x, femurAxisPoint.y);
       ctx.lineTo(jointCenter.x, jointCenter.y);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(femurAxisPoint.x, femurAxisPoint.y, HANDLE_RADIUS, 0, Math.PI * 2);
+      ctx.arc(femurAxisPoint.x, femurAxisPoint.y, scaledRadius, 0, Math.PI * 2);
       ctx.fill();
     }
 
     if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter) {
       ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis;
       ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = scaledLineWidth;
       ctx.beginPath();
       ctx.moveTo(tibiaAxisPoint.x, tibiaAxisPoint.y);
       ctx.lineTo(jointCenter.x, jointCenter.y);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, HANDLE_RADIUS, 0, Math.PI * 2);
+      ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, scaledRadius, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [valgusLandmarks, visibleLandmarkSets, legSide]);
+  }, [valgusLandmarks, visibleLandmarkSets, legSide, zoom]);
 
   const captureCanvasState = useCallback(() => {
     const image = imageRef.current;
@@ -868,7 +878,7 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-    const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
@@ -940,7 +950,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-    const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {

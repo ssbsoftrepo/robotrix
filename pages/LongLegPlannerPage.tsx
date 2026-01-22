@@ -9,7 +9,8 @@ const landmarkInstructions = {
     tibialJointLine: ["Mark the highest point of medial (M) tibial condyle.", "Mark the highest point of lateral (L) tibial condyle."],
 };
 
-const HANDLE_RADIUS = 4;
+const BASE_HANDLE_RADIUS = 4;
+const BASE_LINE_WIDTH = 3;
 
 const resolveMedialLateral = (
     p1: Point,
@@ -582,7 +583,12 @@ const LongLegPlannerPage: React.FC = () => {
 
         if (Object.keys(longLegLandmarks).length === 0) return;
 
-        ctx.font = 'bold 16px Roboto, sans-serif';
+        // Zoom-compensated sizes - divide by zoom to keep visual size constant
+        const scaledRadius = BASE_HANDLE_RADIUS / zoom;
+        const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+        const scaledFontSize = Math.max(12, 16 / zoom);
+
+        ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
 
         const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = longLegLandmarks;
         const getLabelOffsetX = (point: Point, kneeCenter: Point) => {
@@ -602,41 +608,41 @@ const LongLegPlannerPage: React.FC = () => {
         if (visibleLandmarkSets.has('hkaLine')) {
             if (hipCenter && kneeCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.hkaLine;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = scaledLineWidth;
                 ctx.beginPath(); ctx.moveTo(hipCenter.x, hipCenter.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
             }
             if (kneeCenter && ankleCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.hkaLine;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = scaledLineWidth;
                 ctx.beginPath(); ctx.moveTo(kneeCenter.x, kneeCenter.y); ctx.lineTo(ankleCenter.x, ankleCenter.y); ctx.stroke();
             }
             ctx.fillStyle = LANDMARK_COLORS.hkaLine;
             [hipCenter, kneeCenter, ankleCenter].forEach(p => {
-                if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); }
+                if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill(); }
             });
         }
 
         if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis')) {
             if (femurAnatomicAxisPoint && kneeCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = scaledLineWidth;
                 ctx.beginPath(); ctx.moveTo(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
             }
             if (femurAnatomicAxisPoint) {
                 ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis;
-                ctx.beginPath(); ctx.arc(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
             }
         }
 
         if (visibleLandmarkSets.has('femoralJointLine')) {
             if (femoralMedial && femoralLateral) {
                 ctx.strokeStyle = LANDMARK_COLORS.femoralJointLine;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = scaledLineWidth;
                 ctx.beginPath(); ctx.moveTo(femoralMedial.x, femoralMedial.y); ctx.lineTo(femoralLateral.x, femoralLateral.y); ctx.stroke();
             }
             ctx.fillStyle = LANDMARK_COLORS.femoralJointLine;
             [femoralMedial, femoralLateral].forEach(p => {
-                if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); }
+                if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill(); }
             });
             if (femoralMedial && femoralLateral && kneeCenter) {
                 const { medial, lateral } = resolveMedialLateral(
@@ -646,31 +652,35 @@ const LongLegPlannerPage: React.FC = () => {
                     legSide
                 );
 
-                // Draw M/L labels with better visibility
-                const mOffsetX = medial.x < kneeCenter.x ? -30 : 15;
-                const lOffsetX = lateral.x < kneeCenter.x ? -30 : 15;
+                // Draw M/L labels with better visibility - scaled for zoom
+                const baseOffset = 15;
+                const scaledOffset = baseOffset / zoom;
+                const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
+                const lOffsetX = lateral.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
+                const boxWidth = 20 / zoom;
+                const boxHeight = 22 / zoom;
 
                 // Draw background for M label
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-                ctx.fillRect(medial.x + mOffsetX - 4, medial.y - 10, 20, 22);
-                ctx.fillRect(lateral.x + lOffsetX - 4, lateral.y - 10, 20, 22);
+                ctx.fillRect(medial.x + mOffsetX - 4 / zoom, medial.y - 10 / zoom, boxWidth, boxHeight);
+                ctx.fillRect(lateral.x + lOffsetX - 4 / zoom, lateral.y - 10 / zoom, boxWidth, boxHeight);
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 16px Roboto, sans-serif';
-                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6);
-                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6);
+                ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6 / zoom);
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6 / zoom);
             }
         }
 
         if (visibleLandmarkSets.has('tibialJointLine')) {
             if (tibialMedial && tibialLateral) {
                 ctx.strokeStyle = LANDMARK_COLORS.tibialJointLine;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = scaledLineWidth;
                 ctx.beginPath(); ctx.moveTo(tibialMedial.x, tibialMedial.y); ctx.lineTo(tibialLateral.x, tibialLateral.y); ctx.stroke();
             }
             ctx.fillStyle = LANDMARK_COLORS.tibialJointLine;
             [tibialMedial, tibialLateral].forEach(p => {
-                if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); }
+                if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill(); }
             });
             if (tibialMedial && tibialLateral && kneeCenter) {
                 const { medial, lateral } = resolveMedialLateral(
@@ -680,22 +690,26 @@ const LongLegPlannerPage: React.FC = () => {
                     legSide
                 );
 
-                // Draw M/L labels with better visibility
-                const mOffsetX = medial.x < kneeCenter.x ? -30 : 15;
-                const lOffsetX = lateral.x < kneeCenter.x ? -30 : 15;
+                // Draw M/L labels with better visibility - scaled for zoom
+                const baseOffset = 15;
+                const scaledOffset = baseOffset / zoom;
+                const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
+                const lOffsetX = lateral.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
+                const boxWidth = 20 / zoom;
+                const boxHeight = 22 / zoom;
 
                 // Draw background for M label
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-                ctx.fillRect(medial.x + mOffsetX - 4, medial.y - 10, 20, 22);
-                ctx.fillRect(lateral.x + lOffsetX - 4, lateral.y - 10, 20, 22);
+                ctx.fillRect(medial.x + mOffsetX - 4 / zoom, medial.y - 10 / zoom, boxWidth, boxHeight);
+                ctx.fillRect(lateral.x + lOffsetX - 4 / zoom, lateral.y - 10 / zoom, boxWidth, boxHeight);
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 16px Roboto, sans-serif';
-                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6);
-                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6);
+                ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6 / zoom);
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6 / zoom);
             }
         }
-    }, [longLegLandmarks, visibleLandmarkSets, legSide, ldfaMode]);
+    }, [longLegLandmarks, visibleLandmarkSets, legSide, ldfaMode, zoom]);
 
     const captureCanvasState = useCallback(() => {
         const image = imageRef.current;
@@ -818,7 +832,7 @@ const LongLegPlannerPage: React.FC = () => {
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-        const hitRadiusSq = (HANDLE_RADIUS + 50) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             // Only consider landmarks whose parent set is visible
@@ -866,7 +880,7 @@ const LongLegPlannerPage: React.FC = () => {
         const touch = e.touches[0]; if (!touch) return;
         const canvas = canvasRef.current; if (!canvas) return;
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-        const hitRadiusSq = (HANDLE_RADIUS + 60) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             // Only consider landmarks whose parent set is visible

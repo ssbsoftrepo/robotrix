@@ -53,7 +53,7 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
     return '--';
 };
 
-const HANDLE_RADIUS = 6; // Matching Planner sensitivity
+const HANDLE_RADIUS = 4; // Matching Planner sensitivity
 const LANDMARK_COLORS = {
     hkaLine: '#6D282C',
     femurAnatomicAxis: '#6D282C',
@@ -248,20 +248,10 @@ const PostOpPlanner: React.FC = () => {
         ctx.font = 'bold 12px Roboto, sans-serif'; // Reduced font size
         const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = landmarks;
 
-        const drawTextWithBackground = (text: string, x: number, y: number) => {
-            ctx.fillStyle = 'rgba(29, 29, 31, 0.8)';
-            const textMetrics = ctx.measureText(text);
-            const textWidth = textMetrics.width;
-            ctx.fillRect(x - textWidth / 2 - 4, y - 16, textWidth + 8, 20); // Scaled down box
-            ctx.fillStyle = 'white';
-            ctx.fillText(text, x - textWidth / 2, y);
-        };
-
         if (visibleLandmarkSets.has('hkaLine') && hipCenter && kneeCenter && ankleCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.hkaLine; ctx.fillStyle = LANDMARK_COLORS.hkaLine; ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(hipCenter.x, hipCenter.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.lineTo(ankleCenter.x, ankleCenter.y); ctx.stroke();
             [hipCenter, kneeCenter, ankleCenter].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
-            if (localResultsRef.current.mhka != null) drawTextWithBackground(`mHKA: ${localResultsRef.current.mhka.toFixed(1)}°`, kneeCenter.x, kneeCenter.y - 30);
         }
         if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint && kneeCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = 3;
@@ -273,24 +263,38 @@ const PostOpPlanner: React.FC = () => {
             ctx.beginPath(); ctx.moveTo(femoralMedial.x, femoralMedial.y); ctx.lineTo(femoralLateral.x, femoralLateral.y); ctx.stroke();
             [femoralMedial, femoralLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
 
-            ctx.fillStyle = "#e3e3e3";
-            ctx.font = 'bold 16px Inter, sans-serif';
-            ctx.fillText('M', femoralMedial.x, femoralMedial.y - 10);
-            ctx.fillText('L', femoralLateral.x, femoralLateral.y - 10);
+            // Draw M/L labels with background boxes (matching planner style)
+            const mOffsetX = (femoralMedial.x < (femoralMedial.x + femoralLateral.x) / 2 ? -30 : 15);
+            const lOffsetX = (femoralLateral.x < (femoralMedial.x + femoralLateral.x) / 2 ? -30 : 15);
 
-            if (visibleLandmarkSets.has('hkaLine') && localResultsRef.current.ldfa != null && kneeCenter) drawTextWithBackground(`LDFA: ${localResultsRef.current.ldfa.toFixed(1)}°`, kneeCenter.x, kneeCenter.y - 60);
+            // Draw background for M label
+            ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+            ctx.fillRect(femoralMedial.x + mOffsetX - 4, femoralMedial.y - 10, 20, 22);
+            ctx.fillRect(femoralLateral.x + lOffsetX - 4, femoralLateral.y - 10, 20, 22);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.fillText('M', femoralMedial.x + mOffsetX, femoralMedial.y + 6);
+            ctx.fillText('L', femoralLateral.x + lOffsetX, femoralLateral.y + 6);
         }
         if (visibleLandmarkSets.has('tibialJointLine') && tibialMedial && tibialLateral) {
             ctx.strokeStyle = LANDMARK_COLORS.tibialJointLine; ctx.fillStyle = LANDMARK_COLORS.tibialJointLine; ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(tibialMedial.x, tibialMedial.y); ctx.lineTo(tibialLateral.x, tibialLateral.y); ctx.stroke();
             [tibialMedial, tibialLateral].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
 
-            ctx.fillStyle = "#e3e3e3";
-            ctx.font = 'bold 16px Inter, sans-serif';
-            ctx.fillText('M', tibialMedial.x, tibialMedial.y + 20);
-            ctx.fillText('L', tibialLateral.x, tibialLateral.y + 20);
+            // Draw M/L labels with background boxes (matching planner style)
+            const tmOffsetX = (tibialMedial.x < (tibialMedial.x + tibialLateral.x) / 2 ? -30 : 15);
+            const tlOffsetX = (tibialLateral.x < (tibialMedial.x + tibialLateral.x) / 2 ? -30 : 15);
 
-            if (visibleLandmarkSets.has('hkaLine') && localResultsRef.current.mpta != null && kneeCenter) drawTextWithBackground(`MPTA: ${localResultsRef.current.mpta.toFixed(1)}°`, kneeCenter.x, kneeCenter.y + 40);
+            // Draw background for M label
+            ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+            ctx.fillRect(tibialMedial.x + tmOffsetX - 4, tibialMedial.y + 10, 20, 22);
+            ctx.fillRect(tibialLateral.x + tlOffsetX - 4, tibialLateral.y + 10, 20, 22);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.fillText('M', tibialMedial.x + tmOffsetX, tibialMedial.y + 26);
+            ctx.fillText('L', tibialLateral.x + tlOffsetX, tibialLateral.y + 26);
         }
         updateCalculations();
     }, [landmarks, visibleLandmarkSets, ldfaMode, legSide, updateCalculations]);
@@ -531,6 +535,56 @@ const PostOpPlanner: React.FC = () => {
                     {postOpLongLegImage ? (
                         <>
                             <div className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
+                                {/* Angle Values - Left Side (for Right Knee) */}
+                                {legSide === 'right' && (results.ldfa != null || results.mpta != null || results.mhka != null) && (
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
+                                        {results.ldfa != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                LDFA: {results.ldfa.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {results.mpta != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                MPTA: {results.mpta.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {results.mhka != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                mHKA: {results.mhka.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {results.ahka != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                aHKA: {results.ahka.toFixed(1)}°
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                {/* Angle Values - Right Side (for Left Knee) */}
+                                {legSide === 'left' && (results.ldfa != null || results.mpta != null || results.mhka != null) && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
+                                        {results.ldfa != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                LDFA: {results.ldfa.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {results.mpta != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                MPTA: {results.mpta.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {results.mhka != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                mHKA: {results.mhka.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {results.ahka != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                aHKA: {results.ahka.toFixed(1)}°
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 <img ref={imageRef} src={postOpLongLegImage} alt="Post-op X-ray" className="block max-w-full max-h-full object-contain"
                                     onLoad={(e) => {
                                         const canvas = canvasRef.current;
