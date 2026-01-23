@@ -100,7 +100,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
 
     // Line Position (Static)
-    const [linesYPercent, setLinesYPercent] = useState<number>(25); // Vertical position as %
+    const [linesYPercent, setLinesYPercent] = useState<number>(31); // Vertical position as %
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut based on Valgus results
@@ -170,7 +170,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
     const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
 
     return (
-        <div className="relative flex flex-col h-[77%] overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-[40rem] overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -216,7 +216,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div>
-                                <p className="text-base text-gray-400 leading-snug">
+                                <p className="text-[14px] text-gray-400 leading-snug">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
@@ -225,7 +225,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     2
                                 </div>
-                                <p className="text-base text-gray-400 leading-snug">
+                                <p className="text-[14px] text-gray-400 leading-snug">
                                     Changing the 90 deg cut by <span className="text-[#ff8fa3] font-bold">1° varus</span> will open the medial gap by <span className="text-[#ff8fa3] font-bold">~ 1.2 mms</span> in average-sized tibia (70 mms width).
                                 </p>
                             </div>
@@ -237,7 +237,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
                             <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-2 flex-[0.8] flex flex-col justify-center items-center gap-1 z-10 min-h-0">
                                 <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Laxity Status</p>
-                                <p className="text-lg font-black text-white">{lateralLaxity || 'Unknown'}</p>
+                                <p className="text-md font-black text-white">{lateralLaxity || 'Unknown'}</p>
                                 <button
                                     onClick={applyLateralLaxity}
                                     className="group relative w-full py-1 bg-[#6D282C] border border-[#893338] rounded-sm 
@@ -260,7 +260,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
                         <div
                             ref={containerRef}
-                            className="relative h-full w-full max-w-full aspect-[3/4] mx-auto bg-black border-2 border-[#333333] rounded-xl overflow-hidden shadow-2xl group"
+                            className="relative h-full w-[80%] max-w-full aspect-[3/4] mx-auto bg-black border-2 border-[#333333] rounded-xl overflow-hidden shadow-2xl group"
                             style={{ touchAction: 'none' }}
                         >
 

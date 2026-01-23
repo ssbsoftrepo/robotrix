@@ -828,18 +828,32 @@ const PostOpPlanner: React.FC = () => {
                 {/* Controls - Right side (25%) */}
                 <div className="lg:col-span-1 flex flex-col space-y-1.5 h-full overflow-y-auto pr-1 order-2 lg:order-none">
                     <div className="shrink-0">
-                        <h4 className="text-sm font-semibold text-[#E0E0E0] mb-1">Post-Op Image</h4>
+                        {/* <h4 className="text-sm font-semibold text-[#E0E0E0] mb-1">Post-Op Image</h4>
                         <div className="flex gap-1 mb-1">
                             <label htmlFor="postop-xray-upload" className="cursor-pointer text-center py-2 px-2 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider flex-1 transition shadow-sm">
-                                UPLOAD
+                                UPLOAD X-Ray
                             </label>
                             <button onClick={() => setIsCameraOpen(true)} className="py-2 px-2 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider flex-1 transition shadow-sm">
                                 LIVE CAPTURE
                             </button>
                         </div>
                         <input type="file" id="postop-xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                        <span className="text-[10px] text-gray-500 truncate inline-block w-full">{fileName}</span>
-                        <p className="text-gray-500 text-[10px]">Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
+                        <span className="text-[10px] text-gray-500 truncate inline-block w-full">{fileName}</span> */}
+                        <section className="relative z-10">
+                            <h3 className="text-sm font-semibold mb-2 text-gray-400 uppercase tracking-wider">Upload X-ray</h3>
+                            <div className="grid grid-cols-2 gap-2">
+                                <label htmlFor="xray-upload" className="cursor-pointer text-center py-3 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-sm font-medium text-gray-300">
+                                    <span>📁 File</span>
+                                </label>
+                                <input id="xray-upload" type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                                <button onClick={() => setIsCameraOpen(true)} className="py-3 rounded-lg bg-[#252525] border border-[#333333] hover:bg-[#333333] hover:border-[#6D282C] transition-all text-sm font-medium text-gray-300">
+                                    📷 Camera
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2 truncate">{fileName}</p>
+                            <p className="text-gray-500 text-[10px]">Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
+                        </section>
+
                     </div>
 
                     <div className="flex-grow flex flex-col min-h-0">
