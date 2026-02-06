@@ -130,18 +130,18 @@ const App: React.FC = () => {
                     {renderPage()}
                 </main>
             </div>
-            <Footer />
+            {/* <Footer /> */}
         </div>
     );
 };
 
-const Footer: React.FC = () => {
-    return (
-        <footer className="text-center p-4 text-gray-500 text-lg no-print">
-            Powered by PLUS Orthopedics
-        </footer>
-    );
-};
+// const Footer: React.FC = () => {
+//     return (
+//         <footer className="text-center p-4 text-gray-500 text-lg no-print">
+//             Powered by PLUS Orthopedics
+//         </footer>
+//     );
+// };
 
 
 export default App;

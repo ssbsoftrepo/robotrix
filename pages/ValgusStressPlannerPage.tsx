@@ -9,15 +9,14 @@ const landmarkInstructions = {
 };
 
 const LANDMARK_COLORS = {
-  jointLine: '#6D282C',
-  femurAnatomicAxis: '#6D282C',
-  tibiaAnatomicAxis: '#6D282C',
+  jointLine: '#007AFF',
+  femurAnatomicAxis: '#34C759',
+  tibiaAnatomicAxis: '#FFD60A',
 };
 
 const BASE_HANDLE_RADIUS = 4;
 const BASE_LINE_WIDTH = 3;
 
-// Mapping of individual landmark keys to their parent landmark set
 const landmarkToSetMap: Record<string, string> = {
   medialJointSpace: 'jointLine',
   lateralJointSpace: 'jointLine',
@@ -35,22 +34,17 @@ const angleBetweenVectors = (v1: Point, v2: Point) => {
 
 const calculateClinicalAngle = (
   centerPt: Point,
-  axisPt: Point,    // 
-  sidePt: Point     // The Joint Line Point (Medial or Lateral)
+  axisPt: Point,
+  sidePt: Point
 ) => {
-  // 1. Calculate the angle of the Bone Axis relative to horizontal
   const thetaAxis = Math.atan2(axisPt.y - centerPt.y, axisPt.x - centerPt.x);
 
-  // 2. Calculate the angle of the Joint Line relative to horizontal
   const thetaSide = Math.atan2(sidePt.y - centerPt.y, sidePt.x - centerPt.x);
 
-  // 3. Subtract to find the difference
   let diff = thetaAxis - thetaSide;
 
-  // 4. Convert to degrees
   let deg = diff * (180 / Math.PI);
 
-  // 5. Normalize to ensure we get the positive inner angle (0 to 180)
   deg = Math.abs(deg);
   if (deg > 180) {
     deg = 360 - deg;
@@ -79,7 +73,7 @@ const getTibiaClassification = (mpta: number) => {
   if (mpta > 84) return { type: 'Significant varoid tibia', cut: '4° varus cut' }; // 84 < MPTA ≤ 85°
   return {
     type: 'Significant varoid tibia',
-    cut: '4° varus cut (Native MPTA out of boundary)' // MPTA ≤ 84°
+    cut: '4° varus cut (Native MPTA out of boundary)'
   };
 };
 
@@ -343,9 +337,6 @@ const MetricItem: React.FC<{ label: string; value: string | number; highlight?: 
   </div>
 );
 
-
-// --- MAIN PAGE COMPONENT ---
-
 const ValgusStressPlannerPage: React.FC = () => {
   const {
     legSide, setLegSide,
@@ -355,7 +346,6 @@ const ValgusStressPlannerPage: React.FC = () => {
     valgusLandmarks, setValgusLandmarks
   } = useAppContext();
 
-  // Track previous leg side to trigger swap
   const prevLegSideRef = useRef(legSide);
 
   const [fileName, setFileName] = useState('No file chosen');
@@ -381,6 +371,9 @@ const ValgusStressPlannerPage: React.FC = () => {
   const MIN_ZOOM = 1;
   const MAX_ZOOM = 3;
   const lastResizeTimeRef = useRef(0);
+  const initialPinchDistanceRef = useRef<number | null>(null);
+  const initialInitialPinchZoomRef = useRef<number>(1);
+  const initialPanOffsetRef = useRef({ x: 0, y: 0 });
 
   const zoomIn = () => setZoom(z => Math.min(z + 0.2, MAX_ZOOM));
   const zoomOut = () => setZoom(z => Math.max(z - 0.2, MIN_ZOOM));
@@ -441,26 +434,14 @@ const ValgusStressPlannerPage: React.FC = () => {
     return { status: 'success', msg: '' };
   };
 
-
-  // Valgus-specific CPAK Classification based on Distal Obliquity
   const getCpakClassification = (obliquity: number, ldfa: number | null, mpta: number | null): string => {
-    // If obliquity is not provided (or NaN), fall back to '--' or handle gracefully
     if (typeof obliquity !== 'number' || isNaN(obliquity)) return '--';
 
-    // Classification based on Distal Obliquity Angle:
-    // Angle ≥ 3° → Valgoid → CPAK 2
-    // 1 ≤ Angle < 3 → Median → CPAK 1
-    // 0 ≤ Angle < 1 → Varoid → CPAK 4 (or CPAK 5 if LDFA = MPTA = 90°)
-
     if (obliquity >= 3) {
-      // Significant obliquity - Valgoid - CPAK 2
       return '2';
     } else if (obliquity >= 1) {
-      // Mild obliquity - Median - CPAK 1
       return '1';
     } else {
-      // Neutral obliquity - Varoid - CPAK 4 or CPAK 5
-      // CPAK 5 only if LDFA = MPTA = 90 degrees
       if (ldfa !== null && mpta !== null && Math.round(ldfa) === 90 && Math.round(mpta) === 90) {
         return '5';
       }
@@ -495,7 +476,6 @@ const ValgusStressPlannerPage: React.FC = () => {
         y: (medialPoint.y + lateralPoint.y) / 2
       };
 
-      // 1. Obliquity Calculation (Visual tilt)
       if (visibleLandmarkSets.has('jointLine')) {
         const dy = medialPoint.y - lateralPoint.y;
         const dx = medialPoint.x - lateralPoint.x;
@@ -506,68 +486,38 @@ const ValgusStressPlannerPage: React.FC = () => {
       }
     }
 
-    // 2. LDFA Calculation (Lateral Distal Femoral Angle)
-    // if (
-    //   visibleLandmarkSets.has('femurAnatomicAxis') &&
-    //   femurAxisPoint &&
-    //   jointCenter &&
-    //   lateralPoint
-    // ) {
-    //   newResults.ldfa = calculateDirectionalAngle(jointCenter, femurAxisPoint, lateralPoint, true);
-    // }
-
-    // 3. MPTA Calculation (Medial Proximal Tibial Angle)
-    // if (
-    //   visibleLandmarkSets.has('tibiaAnatomicAxis') &&
-    //   tibiaAxisPoint &&
-    //   jointCenter &&
-    //   medialPoint
-    // ) {
-    //   newResults.mpta = calculateDirectionalAngle(jointCenter, tibiaAxisPoint, medialPoint, false);
-    // }
-    // if (newResults.mpta !== null && newResults.mpta > 90) {
-    //   newResults.mpta = 180 - newResults.mpta;
-    // }
-
     if (
       visibleLandmarkSets.has('femurAnatomicAxis') &&
       femurAxisPoint &&
       jointCenter &&
-      lateralPoint // We MUST use the Lateral point 
+      lateralPoint
     ) {
-      // Calculate angle between Femur Axis and the Lateral edge of the joint line
       newResults.ldfa = calculateClinicalAngle(jointCenter, femurAxisPoint, lateralPoint);
     }
 
-    // 3. MPTA Calculation (Medial Proximal Tibial Angle)
     if (
       visibleLandmarkSets.has('tibiaAnatomicAxis') &&
       tibiaAxisPoint &&
       jointCenter &&
-      medialPoint // We MUST use the Medial point here
+      medialPoint
     ) {
-      // Calculate angle between Tibia Axis and the Medial edge of the joint line
       newResults.mpta = calculateClinicalAngle(jointCenter, tibiaAxisPoint, medialPoint);
     }
-    // 4. Derived Classifications
     if (
       newResults.ldfa !== null &&
       newResults.mpta !== null &&
       newResults.obliquity !== null
     ) {
-      // Standard formulas (Difference for aHKA)
       const calculatedAhka = newResults.mpta - newResults.ldfa;
       newResults.ahka = calculatedAhka;
 
       const calculatedJlo = newResults.mpta + newResults.ldfa;
       newResults.jlo = calculatedJlo;
 
-      // Femur Classification (LDFA-based)
       const femurClass = getFemurClassification(newResults.ldfa);
       newResults.femurType = femurClass.type;
       newResults.cut = femurClass.cut;
 
-      // Femur Classification (Obliquity-based)
       if (newResults.obliquity >= 3) {
         newResults.femurTypeByObliquity = 'Valgoid';
       } else if (newResults.obliquity >= 1) {
@@ -576,7 +526,6 @@ const ValgusStressPlannerPage: React.FC = () => {
         newResults.femurTypeByObliquity = 'Varoid';
       }
 
-      // Tibia Classification
       const tibiaClass = getTibiaClassification(newResults.mpta);
       newResults.tibiaType = tibiaClass.type;
       newResults.tibialCut = tibiaClass.cut;
@@ -612,7 +561,6 @@ const ValgusStressPlannerPage: React.FC = () => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Zoom-compensated sizes - divide by zoom to keep visual size constant
     const scaledRadius = BASE_HANDLE_RADIUS / zoom;
     const scaledLineWidth = BASE_LINE_WIDTH / zoom;
     const scaledFontSize = Math.max(12, 16 / zoom);
@@ -645,7 +593,6 @@ const ValgusStressPlannerPage: React.FC = () => {
         ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
       });
 
-      // Draw M and L labels with better visibility - scaled for zoom
       const baseOffset = 20;
       const scaledOffset = baseOffset / zoom;
       const mOffset = medialJointSpace.x < lateralJointSpace.x ? -scaledOffset * 1.5 : scaledOffset;
@@ -653,7 +600,6 @@ const ValgusStressPlannerPage: React.FC = () => {
       const boxWidth = 20 / zoom;
       const boxHeight = 22 / zoom;
 
-      // Draw background for labels
       ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
       ctx.fillRect(medialJointSpace.x + mOffset - 4 / zoom, medialJointSpace.y - 10 / zoom, boxWidth, boxHeight);
       ctx.fillRect(lateralJointSpace.x + lOffset - 4 / zoom, lateralJointSpace.y - 10 / zoom, boxWidth, boxHeight);
@@ -783,6 +729,16 @@ const ValgusStressPlannerPage: React.FC = () => {
     } else {
       newSets.add(setName);
       setActiveInstruction(landmarkInstructions[setName]);
+
+      // Auto-zoom to joint area when joint line is selected
+      if (setName === 'jointLine') {
+        const canvas = canvasRef.current;
+        if (canvas) {
+          setZoom(2.5);
+          // Center the joint - joint is roughly at the middle
+          setPanOffset({ x: 0, y: 0 });
+        }
+      }
     }
     setVisibleLandmarkSets(newSets);
   };
@@ -858,7 +814,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     if (!pos || !image || !canvas || !pipCanvas) return;
     const pipCtx = pipCanvas.getContext('2d');
     if (!pipCtx) return;
-    const zoomLevel = 4;
+    const zoomLevel = 2.5;
     const sourceSize = pipCanvas.width / zoomLevel;
     pipCtx.fillStyle = 'black';
     pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
@@ -878,12 +834,11 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 15) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
       if (!valgusLandmarks[key]) continue;
-      // Only consider landmarks whose parent set is visible
       const parentSet = landmarkToSetMap[key];
       if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
       const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
@@ -945,17 +900,32 @@ const ValgusStressPlannerPage: React.FC = () => {
   }, []);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      initialPinchDistanceRef.current = dist;
+      initialInitialPinchZoomRef.current = zoom;
+      initialPanOffsetRef.current = { ...panOffset };
+      isPanningRef.current = true;
+      panStartRef.current = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - panOffset.x,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - panOffset.y
+      };
+      return;
+    }
+
     const touch = e.touches[0];
     if (!touch) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 25) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
       if (!valgusLandmarks[key]) continue;
-      // Only consider landmarks whose parent set is visible
       const parentSet = landmarkToSetMap[key];
       if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
       const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
@@ -970,6 +940,28 @@ const ValgusStressPlannerPage: React.FC = () => {
   };
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 2 && initialPinchDistanceRef.current !== null) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const scale = dist / initialPinchDistanceRef.current;
+      const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, initialInitialPinchZoomRef.current * scale));
+      setZoom(newZoom);
+
+      // Two-finger pan
+      if (isPanningRef.current) {
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        setPanOffset({
+          x: midX - panStartRef.current.x,
+          y: midY - panStartRef.current.y
+        });
+      }
+      return;
+    }
+
     if (!draggingPointRef.current) return;
     e.preventDefault();
     const touch = e.touches[0];
@@ -982,7 +974,7 @@ const ValgusStressPlannerPage: React.FC = () => {
       [draggingPointRef.current!]: pos
     }));
     updatePip(pos);
-  }, [setValgusLandmarks, updatePip]);
+  }, [zoom, panOffset, setValgusLandmarks, updatePip]);
 
   const handleTouchEnd = useCallback(() => {
     draggingPointRef.current = null;
@@ -1016,7 +1008,6 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   return (
     <div className="relative flex flex-col h-full gap-4 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
-      {/* Cinematic Lighting */}
       <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
@@ -1066,16 +1057,7 @@ const ValgusStressPlannerPage: React.FC = () => {
             </div>
           ) : (
             <div className="relative w-full h-full flex items-center justify-center">
-              {/* Obliquity Value - Left Side (for Right Knee) */}
-              {legSide === 'right' && valgusResults.obliquity !== null && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
-                  <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                    Obliquity: {valgusResults.obliquity.toFixed(1)}°
-                  </div>
-                </div>
-              )}
-              {/* Obliquity Value - Right Side (for Left Knee) */}
-              {legSide === 'left' && valgusResults.obliquity !== null && (
+              {valgusResults.obliquity !== null && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
                   <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
                     Obliquity: {valgusResults.obliquity.toFixed(1)}°
@@ -1090,7 +1072,6 @@ const ValgusStressPlannerPage: React.FC = () => {
                   handleViewerTap(e);
                 }}
                 onMouseDown={(e) => {
-                  // Only start panning if not dragging a landmark and zoomed in
                   if (zoom > 1 && !draggingPointRef.current) {
                     e.preventDefault();
                     isPanningRef.current = true;
@@ -1098,7 +1079,6 @@ const ValgusStressPlannerPage: React.FC = () => {
                   }
                 }}
                 onMouseMove={(e) => {
-                  // Only pan if panning is active AND not dragging a landmark
                   if (isPanningRef.current && zoom > 1 && !draggingPointRef.current) {
                     setPanOffset({
                       x: e.clientX - panStartRef.current.x,
@@ -1109,14 +1089,12 @@ const ValgusStressPlannerPage: React.FC = () => {
                 onMouseUp={() => { isPanningRef.current = false; }}
                 onMouseLeave={() => { isPanningRef.current = false; }}
                 onTouchStart={(e) => {
-                  // Only start panning if not dragging a landmark
                   if (zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
                     isPanningRef.current = true;
                     panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
                   }
                 }}
                 onTouchMove={(e) => {
-                  // Only pan if panning is active AND not dragging a landmark
                   if (isPanningRef.current && zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
                     setPanOffset({
                       x: e.touches[0].clientX - panStartRef.current.x,
@@ -1250,20 +1228,33 @@ const ValgusStressPlannerPage: React.FC = () => {
             <div className="flex flex-col gap-2 mb-3">
               {Object.entries(landmarkInstructions).map(([key, value], idx) => {
                 const isSelected = visibleLandmarkSets.has(key);
+                const btnColor = LANDMARK_COLORS[key as keyof typeof LANDMARK_COLORS];
                 return (
                   <button
                     key={key}
                     onClick={() => toggleLandmarkSet(key as any)}
                     className={`group relative w-full py-3 px-4 text-sm font-semibold rounded-lg border transition-all text-left flex items-center gap-3
                       ${isSelected
-                        ? 'bg-gradient-to-r from-[#6D282C] to-[#893338] border-[#a04046] text-white shadow-[0_0_20px_rgba(109,40,44,0.3)]'
+                        ? 'bg-[#1a1a1a] border-[#333] text-white shadow-lg'
                         : 'bg-[#252525] border-[#333333] hover:bg-[#333333] hover:border-[#6D282C]/50 text-gray-300'}`}
                   >
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all
-                      ${isSelected ? 'bg-white text-[#6D282C] border-white' : 'bg-transparent border-gray-500 text-gray-500'}`}>
+                    <span
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all`}
+                      style={{
+                        backgroundColor: isSelected ? btnColor : 'transparent',
+                        borderColor: btnColor,
+                        color: isSelected ? '#fff' : btnColor
+                      }}
+                    >
                       {isSelected ? '✓' : idx + 1}
                     </span>
                     <span>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                    {isSelected && (
+                      <div
+                        className="absolute right-3 w-2 h-2 rounded-full animate-pulse"
+                        style={{ backgroundColor: btnColor }}
+                      />
+                    )}
                   </button>
                 )
               })}

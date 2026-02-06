@@ -7,9 +7,9 @@ import { Landmarks, Point, ValgusResults, LegSide } from '../types';
 const BASE_HANDLE_RADIUS = 4;
 const BASE_LINE_WIDTH = 3;
 const LANDMARK_COLORS = {
-    jointLine: '#6D282C',
-    femurAnatomicAxis: '#6D282C',
-    tibiaAnatomicAxis: '#6D282C',
+    jointLine: '#007AFF',       // Bright Blue
+    femurAnatomicAxis: '#34C759', // Bright Green
+    tibiaAnatomicAxis: '#FFD60A', // Bright Yellow
 };
 const landmarkInstructions = {
     jointLine: ["Mark the center of the medial M joint space.", "Mark the center of the lateral L joint space."],
@@ -332,7 +332,7 @@ const PostOpValgusPlanner: React.FC = () => {
         const pipCtx = pipCanvas.getContext('2d');
         if (!pipCtx) return;
 
-        const zoomLevel = 4;
+        const zoomLevel = 2.5;
         const sourceSize = pipCanvas.width / zoomLevel;
         pipCtx.fillStyle = 'black';
         pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
@@ -686,28 +686,8 @@ const PostOpValgusPlanner: React.FC = () => {
                 <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     {postOpValgusImage ? (<>
                         <div className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
-                            {/* Angle Values - Left Side (for Right Knee) */}
-                            {legSide === 'right' && (results.obliquity != null || results.ldfa != null || results.mpta != null) && (
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
-                                    {results.obliquity != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            Obliquity: {results.obliquity.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {results.ldfa != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            LDFA: {results.ldfa.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {results.mpta != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            MPTA: {results.mpta.toFixed(1)}°
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            {/* Angle Values - Right Side (for Left Knee) */}
-                            {legSide === 'left' && (results.obliquity != null || results.ldfa != null || results.mpta != null) && (
+                            {/* Angle Values - Always displayed on Right Side */}
+                            {(results.obliquity != null || results.ldfa != null || results.mpta != null) && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
                                     {results.obliquity != null && (
                                         <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
@@ -788,11 +768,37 @@ const PostOpValgusPlanner: React.FC = () => {
                             <button onClick={handleResetAll} className="text-[10px] text-red-400 hover:text-red-300 uppercase font-bold tracking-wider">Reset</button>
                         </div>
                         <div className="space-y-1">
-                            {Object.keys(landmarkInstructions).map((key) => (
-                                <button key={key} onClick={() => toggleLandmarkSet(key as any)} className={`w-full text-left py-3 px-3 rounded-sm font-semibold text-sm border ${visibleLandmarkSets.has(key) ? 'bg-[#6D282C] border-[#893338] text-white shadow-sm' : 'bg-[#252525] border-[#333333] text-gray-400 hover:bg-[#333333]'}`}>
-                                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                                </button>
-                            ))}
+                            {Object.keys(landmarkInstructions).map((key, idx) => {
+                                const isSelected = visibleLandmarkSets.has(key);
+                                const btnColor = LANDMARK_COLORS[key as keyof typeof LANDMARK_COLORS];
+                                return (
+                                    <button
+                                        key={key}
+                                        onClick={() => toggleLandmarkSet(key as any)}
+                                        className={`group relative w-full py-3 px-4 text-sm font-semibold rounded-lg border transition-all text-left flex items-center gap-3
+                                            ${isSelected
+                                                ? 'bg-[#1a1a1a] border-[#333] text-white shadow-lg'
+                                                : 'bg-[#252525] border-[#333333] hover:bg-[#333333] hover:border-[#6D282C]/50 text-gray-300'}`}>
+                                        <span
+                                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all`}
+                                            style={{
+                                                backgroundColor: isSelected ? btnColor : 'transparent',
+                                                borderColor: btnColor,
+                                                color: isSelected ? '#fff' : btnColor
+                                            }}
+                                        >
+                                            {isSelected ? '✓' : idx + 1}
+                                        </span>
+                                        <span>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                                        {isSelected && (
+                                            <div
+                                                className="absolute right-3 w-2 h-2 rounded-full animate-pulse"
+                                                style={{ backgroundColor: btnColor }}
+                                            />
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

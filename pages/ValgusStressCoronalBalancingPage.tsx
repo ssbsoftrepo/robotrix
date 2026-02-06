@@ -22,11 +22,9 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
 
 
     const handleProceed = () => {
-        // Save the calculated gaps to context so the next page can read them
         setValgusCoronalBalancingResults({
-            lateralGap: thickness.toString(), // Store Lateral Gap (Implant Thickness)
-            selectedSeries: anticipatedMedialGap, // Store Base Medial Gap
-            // Defaults for unused fields in this flow
+            lateralGap: thickness.toString(),
+            selectedSeries: anticipatedMedialGap,
             medialRelease: 0,
             simFemoralCut: 0,
             simTibialCut: 0,
@@ -36,7 +34,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col h-[40rem] overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-[44rem] overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />

@@ -36,15 +36,12 @@ const classifyJloType = (jlo: number) => {
 
 
 const LANDMARK_COLORS = {
-    hkaLine: '#6D282C',
-    femurAnatomicAxis: '#6D282C',
-    femoralJointLine: '#6D282C',
-    tibialJointLine: '#6D282C',
+    hkaLine: '#FF3B30',
+    femurAnatomicAxis: '#34C759',
+    femoralJointLine: '#007AFF',
+    tibialJointLine: '#FFD60A',
 };
 
-// --- GEOMETRY HELPERS ---
-
-// Mapping of individual landmark keys to their parent landmark set
 const landmarkToSetMap: Record<string, string> = {
     hipCenter: 'hkaLine',
     kneeCenter: 'hkaLine',
@@ -78,15 +75,12 @@ const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
 const getLongLegCpakType = (ahka: number, jlo: number): string => {
     let ahkaClass: 'varus' | 'neutral' | 'valgus';
 
-    // CORRECTION: Use strictly less/greater than (<, >) instead of inclusive (<=, >=)
-    // -2 and 2 must fall into the 'else' (neutral) block.
     if (ahka < -2) ahkaClass = 'varus';
     else if (ahka > 2) ahkaClass = 'valgus';
     else ahkaClass = 'neutral';
 
     let jloClass: 'distal' | 'neutral' | 'proximal';
 
-    // JLO Logic was already correct per screenshot
     if (jlo < 177) jloClass = 'distal';
     else if (jlo > 183) jloClass = 'proximal';
     else jloClass = 'neutral';
@@ -101,7 +95,6 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
         if (ahkaClass === 'neutral') return '5';
         return '6';
     }
-    // Proximal
     if (ahkaClass === 'varus') return '7';
     if (ahkaClass === 'neutral') return '8';
     return '9';
@@ -120,15 +113,14 @@ const getLongLegValgusCut = (ldfa: number | null): string => {
 
 const getRecommendedVarusCut = (mpta: number | null) => {
     if (mpta === null) return '--';
-    if (mpta > 90) return '0° (neutral cut)';  // Valgoid tibia: MPTA > 90°
-    if (mpta > 88) return '1° varus cut';      // Neutral tibia: 88 < MPTA ≤ 90°
-    if (mpta > 87) return '2° varus cut';      // Mild varoid tibia: 87 < MPTA ≤ 88°
-    if (mpta > 85) return '3° varus cut';      // Moderate varoid tibia: 85 < MPTA ≤ 87°
-    if (mpta > 84) return '4° varus cut';      // Significant varoid tibia: 84 < MPTA ≤ 85°
-    return '4° varus cut (Native MPTA out of boundary)'; // MPTA ≤ 84°
+    if (mpta > 90) return '0° (neutral cut)';
+    if (mpta > 88) return '1° varus cut';
+    if (mpta > 87) return '2° varus cut';
+    if (mpta > 85) return '3° varus cut';
+    if (mpta > 84) return '4° varus cut';
+    return '4° varus cut (Native MPTA out of boundary)';
 };
 
-// --- CAMERA MODAL (Unchanged) ---
 const CameraModal: React.FC<{
     isOpen: boolean; onClose: () => void; onCapture: (dataUrl: string) => void;
 }> = ({ isOpen, onClose, onCapture }) => {
@@ -367,6 +359,9 @@ const LongLegPlannerPage: React.FC = () => {
     const MIN_ZOOM = 1;
     const MAX_ZOOM = 3;
     const lastResizeTimeRef = useRef(0);
+    const initialPinchDistanceRef = useRef<number | null>(null);
+    const initialInitialPinchZoomRef = useRef<number>(1);
+    const initialPanOffsetRef = useRef({ x: 0, y: 0 });
 
     const zoomIn = () => setZoom(z => Math.min(z + 0.2, MAX_ZOOM));
     const zoomOut = () => setZoom(z => Math.max(z - 0.2, MIN_ZOOM));
@@ -386,7 +381,6 @@ const LongLegPlannerPage: React.FC = () => {
         }
     }, []);
 
-    // Swap medial/lateral landmarks when leg side changes
     useEffect(() => {
         if (prevLegSideRef.current !== legSide) {
             setLongLegLandmarks(prev => {
@@ -462,28 +456,22 @@ const LongLegPlannerPage: React.FC = () => {
     };
 
 
-    // --- 2. UPDATED CALCULATION LOOP ---
     const updateCalculations = useCallback(() => {
         const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = longLegLandmarks;
 
-        // Basic check: need centers to do HKA
         if (!hipCenter || !kneeCenter || !ankleCenter) return;
 
         let newResults = { ...localResultsRef.current };
 
-        // 1. mHKA (Mechanical Hip-Knee-Ankle Angle)
         if (visibleLandmarkSets.has('hkaLine')) {
             const femurVec = { x: hipCenter.x - kneeCenter.x, y: hipCenter.y - kneeCenter.y };
             const tibiaVec = { x: ankleCenter.x - kneeCenter.x, y: ankleCenter.y - kneeCenter.y };
             const rawAngle = angleBetweenVectors(femurVec, tibiaVec);
-            // mHKA is deviation from 180
-            // newResults.mhka = rawAngle - 180;
             newResults.mhka = 180 - rawAngle;
         } else {
             newResults.mhka = null;
         }
 
-        // 2. LDFA (Lateral Distal Femoral Angle)
         if (
             visibleLandmarkSets.has('hkaLine') &&
             visibleLandmarkSets.has('femoralJointLine') &&
@@ -495,7 +483,6 @@ const LongLegPlannerPage: React.FC = () => {
             newResults.ldfa = null;
         }
 
-        // 3. MPTA (Medial Proximal Tibial Angle)
         if (
             visibleLandmarkSets.has('hkaLine') &&
             visibleLandmarkSets.has('tibialJointLine') &&
@@ -507,10 +494,8 @@ const LongLegPlannerPage: React.FC = () => {
             newResults.mpta = null;
         }
 
-        // Calculate CPAK only if both LDFA and MPTA are available
         if (newResults.ldfa !== null && newResults.mpta !== null) {
             const ahka = newResults.mpta - newResults.ldfa;
-            // const jlo = newResults.mpta + newResults.ldfa;
             const jlo = Number((newResults.mpta + newResults.ldfa).toFixed(1));
 
 
@@ -543,7 +528,6 @@ const LongLegPlannerPage: React.FC = () => {
                 recommendedVarusCut: getRecommendedVarusCut(newResults.mpta),
             };
         } else {
-            // Reset CPAK and related values when requirements are not met
             newResults = {
                 ...newResults,
                 ahka: null,
@@ -555,14 +539,12 @@ const LongLegPlannerPage: React.FC = () => {
             };
         }
 
-        // VCA Calculation (Femur Anatomic)
         if (ldfaMode === 'corrected' && visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint) {
             const mechAxisVec = { x: hipCenter.x - kneeCenter.x, y: hipCenter.y - kneeCenter.y };
             const anatomicAxisVec = { x: femurAnatomicAxisPoint.x - kneeCenter.x, y: femurAnatomicAxisPoint.y - kneeCenter.y };
             newResults.vca = angleBetweenVectors(mechAxisVec, anatomicAxisVec);
         }
 
-        // Only update state if results actually changed to prevent loops
         if (JSON.stringify(newResults) !== JSON.stringify(localResultsRef.current)) {
             localResultsRef.current = newResults;
             setLongLegResults(newResults);
@@ -583,7 +565,6 @@ const LongLegPlannerPage: React.FC = () => {
 
         if (Object.keys(longLegLandmarks).length === 0) return;
 
-        // Zoom-compensated sizes - divide by zoom to keep visual size constant
         const scaledRadius = BASE_HANDLE_RADIUS / zoom;
         const scaledLineWidth = BASE_LINE_WIDTH / zoom;
         const scaledFontSize = Math.max(12, 16 / zoom);
@@ -652,7 +633,6 @@ const LongLegPlannerPage: React.FC = () => {
                     legSide
                 );
 
-                // Draw M/L labels with better visibility - scaled for zoom
                 const baseOffset = 15;
                 const scaledOffset = baseOffset / zoom;
                 const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
@@ -660,7 +640,6 @@ const LongLegPlannerPage: React.FC = () => {
                 const boxWidth = 20 / zoom;
                 const boxHeight = 22 / zoom;
 
-                // Draw background for M label
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
                 ctx.fillRect(medial.x + mOffsetX - 4 / zoom, medial.y - 10 / zoom, boxWidth, boxHeight);
                 ctx.fillRect(lateral.x + lOffsetX - 4 / zoom, lateral.y - 10 / zoom, boxWidth, boxHeight);
@@ -690,7 +669,6 @@ const LongLegPlannerPage: React.FC = () => {
                     legSide
                 );
 
-                // Draw M/L labels with better visibility - scaled for zoom
                 const baseOffset = 15;
                 const scaledOffset = baseOffset / zoom;
                 const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
@@ -698,7 +676,6 @@ const LongLegPlannerPage: React.FC = () => {
                 const boxWidth = 20 / zoom;
                 const boxHeight = 22 / zoom;
 
-                // Draw background for M label
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
                 ctx.fillRect(medial.x + mOffsetX - 4 / zoom, medial.y - 10 / zoom, boxWidth, boxHeight);
                 ctx.fillRect(lateral.x + lOffsetX - 4 / zoom, lateral.y - 10 / zoom, boxWidth, boxHeight);
@@ -769,11 +746,23 @@ const LongLegPlannerPage: React.FC = () => {
 
     const toggleLandmarkSet = (setName: keyof typeof landmarkInstructions) => {
         const newSets = new Set(visibleLandmarkSets);
-        if (newSets.has(setName)) { newSets.delete(setName); activeLandmarkRef.current = null; setActiveInstruction(null); }
+        if (newSets.has(setName)) {
+            newSets.delete(setName);
+            activeLandmarkRef.current = null;
+            setActiveInstruction(null);
+        }
         else {
             newSets.add(setName);
             activeLandmarkRef.current = setName === 'hkaLine' ? 'hipCenter' : setName === 'femurAnatomicAxis' ? 'femurAnatomicAxisPoint' : null;
             setActiveInstruction(landmarkInstructions[setName]);
+
+            if (setName === 'femoralJointLine' || setName === 'tibialJointLine') {
+                const canvas = canvasRef.current;
+                if (canvas) {
+                    setZoom(2.2);
+                    setPanOffset({ x: 0, y: -canvas.height * 0.1 });
+                }
+            }
         }
         setVisibleLandmarkSets(newSets);
     };
@@ -796,13 +785,10 @@ const LongLegPlannerPage: React.FC = () => {
         const rect = container.getBoundingClientRect();
         const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-        // Calculate position relative to container center, accounting for zoom and pan
         const containerCenterX = rect.width / 2;
         const containerCenterY = rect.height / 2;
-        // Position from container top-left
         const relX = clientX - rect.left;
         const relY = clientY - rect.top;
-        // Adjust for pan offset and zoom - transform from screen coords to image coords
         const x = (relX - containerCenterX - panOffset.x) / zoom + containerCenterX;
         const y = (relY - containerCenterY - panOffset.y) / zoom + containerCenterY;
         return { x, y };
@@ -820,7 +806,7 @@ const LongLegPlannerPage: React.FC = () => {
         const pos = overridePos || (key ? longLegLandmarks[key] : null);
         if (!pos || !image || !canvas || !pipCanvas) return;
         const pipCtx = pipCanvas.getContext('2d'); if (!pipCtx) return;
-        const zoomLevel = 4; const sourceSize = pipCanvas.width / zoomLevel;
+        const zoomLevel = 2.5; const sourceSize = pipCanvas.width / zoomLevel;
         pipCtx.fillStyle = 'black'; pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
         const imgScaleX = image.naturalWidth / canvas.width; const imgScaleY = image.naturalHeight / canvas.height;
         pipCtx.drawImage(image, (pos.x * imgScaleX) - (sourceSize / 2), (pos.y * imgScaleY) - (sourceSize / 2), sourceSize, sourceSize, 0, 0, pipCanvas.width, pipCanvas.height);
@@ -832,10 +818,9 @@ const LongLegPlannerPage: React.FC = () => {
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 15) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
-            // Only consider landmarks whose parent set is visible
             const parentSet = landmarkToSetMap[key];
             if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
@@ -877,13 +862,28 @@ const LongLegPlannerPage: React.FC = () => {
     const handlePipEnd = useCallback(() => { isDraggingPipRef.current = false; }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        if (e.touches.length === 2) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialPinchDistanceRef.current = dist;
+            initialInitialPinchZoomRef.current = zoom;
+            initialPanOffsetRef.current = { ...panOffset };
+            isPanningRef.current = true;
+            panStartRef.current = {
+                x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - panOffset.x,
+                y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - panOffset.y
+            };
+            return;
+        }
+
         const touch = e.touches[0]; if (!touch) return;
         const canvas = canvasRef.current; if (!canvas) return;
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 25) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
-            // Only consider landmarks whose parent set is visible
             const parentSet = landmarkToSetMap[key];
             if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
@@ -893,16 +893,43 @@ const LongLegPlannerPage: React.FC = () => {
     };
 
     const handleTouchMove = useCallback((e: TouchEvent) => {
+        if (e.touches.length === 2 && initialPinchDistanceRef.current !== null) {
+            e.preventDefault();
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const scale = dist / initialPinchDistanceRef.current;
+            const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, initialInitialPinchZoomRef.current * scale));
+            setZoom(newZoom);
+
+            // Two-finger pan
+            if (isPanningRef.current) {
+                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                setPanOffset({
+                    x: midX - panStartRef.current.x,
+                    y: midY - panStartRef.current.y
+                });
+            }
+            return;
+        }
+
         if (!draggingPointRef.current) return;
         e.preventDefault();
-        const touch = e.touches[0]; if (!touch) return;
+        const touch = e.touches[0];
         const canvas = canvasRef.current; if (!canvas) return;
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
         setLongLegLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip(pos);
-    }, [setLongLegLandmarks, updatePip]);
+    }, [zoom, panOffset, setLongLegLandmarks, updatePip]);
 
-    const handleTouchEnd = useCallback(() => { draggingPointRef.current = null; captureCanvasState(); }, [captureCanvasState]);
+    const handleTouchEnd = useCallback(() => {
+        draggingPointRef.current = null;
+        initialPinchDistanceRef.current = null;
+        isPanningRef.current = false;
+        captureCanvasState();
+    }, [captureCanvasState]);
 
     useEffect(() => {
         window.addEventListener('mousemove', handleMouseMove); window.addEventListener('mouseup', handleMouseUp);
@@ -972,33 +999,7 @@ const LongLegPlannerPage: React.FC = () => {
                         </div>
                     ) : (
                         <div className="relative w-full h-full flex items-center justify-center">
-                            {/* Angle Values - Left Side (for Right Knee) */}
-                            {legSide === 'right' && (longLegResults.ldfa !== null || longLegResults.mpta !== null || longLegResults.mhka !== null) && (
-                                <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
-                                    {longLegResults.ldfa !== null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            LDFA: {longLegResults.ldfa.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {longLegResults.mpta !== null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            MPTA: {longLegResults.mpta.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {longLegResults.mhka !== null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            mHKA: {longLegResults.mhka.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {longLegResults.ahka !== null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            aHKA: {longLegResults.ahka.toFixed(1)}°
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            {/* Angle Values - Right Side (for Left Knee) */}
-                            {legSide === 'left' && (longLegResults.ldfa !== null || longLegResults.mpta !== null || longLegResults.mhka !== null) && (
+                            {(longLegResults.ldfa !== null || longLegResults.mpta !== null || longLegResults.mhka !== null) && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
                                     {longLegResults.ldfa !== null && (
                                         <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
@@ -1028,7 +1029,6 @@ const LongLegPlannerPage: React.FC = () => {
                                     handleViewerTap(e);
                                 }}
                                 onMouseDown={(e) => {
-                                    // Only start panning if not dragging a landmark and zoomed in
                                     if (zoom > 1 && !draggingPointRef.current) {
                                         e.preventDefault();
                                         isPanningRef.current = true;
@@ -1036,7 +1036,6 @@ const LongLegPlannerPage: React.FC = () => {
                                     }
                                 }}
                                 onMouseMove={(e) => {
-                                    // Only pan if panning is active AND not dragging a landmark
                                     if (isPanningRef.current && zoom > 1 && !draggingPointRef.current) {
                                         setPanOffset({
                                             x: e.clientX - panStartRef.current.x,
@@ -1047,14 +1046,12 @@ const LongLegPlannerPage: React.FC = () => {
                                 onMouseUp={() => { isPanningRef.current = false; }}
                                 onMouseLeave={() => { isPanningRef.current = false; }}
                                 onTouchStart={(e) => {
-                                    // Only start panning if not dragging a landmark
                                     if (zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
                                         isPanningRef.current = true;
                                         panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
                                     }
                                 }}
                                 onTouchMove={(e) => {
-                                    // Only pan if panning is active AND not dragging a landmark
                                     if (isPanningRef.current && zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
                                         setPanOffset({
                                             x: e.touches[0].clientX - panStartRef.current.x,
@@ -1143,19 +1140,32 @@ const LongLegPlannerPage: React.FC = () => {
                                 .filter(btn => !btn.mode || btn.mode === ldfaMode)
                                 .map((btn, idx) => {
                                     const active = visibleLandmarkSets.has(btn.key);
+                                    const btnColor = LANDMARK_COLORS[btn.key as keyof typeof LANDMARK_COLORS];
                                     return (
                                         <button
                                             key={btn.key}
                                             onClick={() => toggleLandmarkSet(btn.key as any)}
                                             className={`group relative w-full py-3 px-4 text-sm font-semibold rounded-lg border transition-all text-left flex items-center gap-3
                                             ${active
-                                                    ? 'bg-gradient-to-r from-[#6D282C] to-[#893338] border-[#a04046] text-white shadow-[0_0_20px_rgba(109,40,44,0.3)]'
+                                                    ? 'bg-[#1a1a1a] border-[#333] text-white shadow-lg'
                                                     : 'bg-[#252525] border-[#333333] hover:bg-[#333333] hover:border-[#6D282C]/50 text-gray-300'}`}>
-                                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all
-                                            ${active ? 'bg-white text-[#6D282C] border-white' : 'bg-transparent border-gray-500 text-gray-500'}`}>
+                                            <span
+                                                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all`}
+                                                style={{
+                                                    backgroundColor: active ? btnColor : 'transparent',
+                                                    borderColor: btnColor,
+                                                    color: active ? '#fff' : btnColor
+                                                }}
+                                            >
                                                 {active ? '✓' : idx + 1}
                                             </span>
                                             <span>{btn.text}</span>
+                                            {active && (
+                                                <div
+                                                    className="absolute right-3 w-2 h-2 rounded-full animate-pulse"
+                                                    style={{ backgroundColor: btnColor }}
+                                                />
+                                            )}
                                         </button>
                                     );
                                 })}

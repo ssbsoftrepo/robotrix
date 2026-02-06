@@ -56,10 +56,10 @@ const getLongLegCpakType = (ahka: number, jlo: number): string => {
 const BASE_HANDLE_RADIUS = 4;
 const BASE_LINE_WIDTH = 3;
 const LANDMARK_COLORS = {
-    hkaLine: '#6D282C',
-    femurAnatomicAxis: '#6D282C',
-    femoralJointLine: '#6D282C',
-    tibialJointLine: '#6D282C',
+    hkaLine: '#FF3B30',      // Bright Red
+    femurAnatomicAxis: '#34C759', // Bright Green
+    femoralJointLine: '#007AFF',  // Bright Blue
+    tibialJointLine: '#FFD60A',   // Bright Yellow
 };
 const landmarkInstructions = {
     hkaLine: ["Mark hip center.", "Mark knee center.", "Mark ankle center."],
@@ -522,7 +522,7 @@ const PostOpPlanner: React.FC = () => {
         const pipCtx = pipCanvas.getContext('2d');
         if (!pipCtx) return;
 
-        const zoomLevel = 4;
+        const zoomLevel = 2.5;
         const sourceSize = pipCanvas.width / zoomLevel;
         pipCtx.fillStyle = 'black';
         pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
@@ -727,33 +727,8 @@ const PostOpPlanner: React.FC = () => {
                     {postOpLongLegImage ? (
                         <>
                             <div className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
-                                {/* Angle Values - Left Side (for Right Knee) */}
-                                {legSide === 'right' && (results.ldfa != null || results.mpta != null || results.mhka != null) && (
-                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
-                                        {results.ldfa != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                                LDFA: {results.ldfa.toFixed(1)}°
-                                            </div>
-                                        )}
-                                        {results.mpta != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                                MPTA: {results.mpta.toFixed(1)}°
-                                            </div>
-                                        )}
-                                        {results.mhka != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                                mHKA: {results.mhka.toFixed(1)}°
-                                            </div>
-                                        )}
-                                        {results.ahka != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                                aHKA: {results.ahka.toFixed(1)}°
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                {/* Angle Values - Right Side (for Left Knee) */}
-                                {legSide === 'left' && (results.ldfa != null || results.mpta != null || results.mhka != null) && (
+                                {/* Angle Values - Always displayed on Right Side */}
+                                {(results.ldfa != null || results.mpta != null || results.mhka != null) && (
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
                                         {results.ldfa != null && (
                                             <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
@@ -862,10 +837,37 @@ const PostOpPlanner: React.FC = () => {
                             <button onClick={handleResetAll} className="text-[10px] text-red-400 hover:text-red-300 uppercase font-bold tracking-wider">Reset</button>
                         </div>
                         <div className="flex-grow overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                            {landmarkButtons.map((btn) => {
+                            {landmarkButtons.map((btn, idx) => {
                                 if ((btn.mode as string) && btn.mode !== ldfaMode) return null;
                                 const isSelected = visibleLandmarkSets.has(btn.key);
-                                return <button key={btn.key} onClick={() => toggleLandmarkSet(btn.key as any)} className={`w-full py-3 px-3 rounded-sm font-semibold text-sm transition text-left border ${isSelected ? 'bg-[#6D282C] border-[#893338] text-white shadow-sm' : 'bg-[#252525] border-[#333333] hover:bg-[#333333] text-gray-400'}`}>{btn.text}</button>
+                                const btnColor = LANDMARK_COLORS[btn.key as keyof typeof LANDMARK_COLORS];
+                                return (
+                                    <button
+                                        key={btn.key}
+                                        onClick={() => toggleLandmarkSet(btn.key as any)}
+                                        className={`group relative w-full py-3 px-4 text-sm font-semibold rounded-lg border transition-all text-left flex items-center gap-3
+                                            ${isSelected
+                                                ? 'bg-[#1a1a1a] border-[#333] text-white shadow-lg'
+                                                : 'bg-[#252525] border-[#333333] hover:bg-[#333333] hover:border-[#6D282C]/50 text-gray-300'}`}>
+                                        <span
+                                            className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all`}
+                                            style={{
+                                                backgroundColor: isSelected ? btnColor : 'transparent',
+                                                borderColor: btnColor,
+                                                color: isSelected ? '#fff' : btnColor
+                                            }}
+                                        >
+                                            {isSelected ? '✓' : idx + 1}
+                                        </span>
+                                        <span>{btn.text}</span>
+                                        {isSelected && (
+                                            <div
+                                                className="absolute right-3 w-2 h-2 rounded-full animate-pulse"
+                                                style={{ backgroundColor: btnColor }}
+                                            />
+                                        )}
+                                    </button>
+                                );
                             })}
                         </div>
                     </div>
