@@ -100,7 +100,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
 
     // Line Position (Static)
-    const [linesYPercent, setLinesYPercent] = useState<number>(31); // Vertical position as %
+    const [linesYPercent, setLinesYPercent] = useState<number>(32); // Vertical position as %
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut based on Valgus results
@@ -213,30 +213,30 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
                             <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
-                                <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
+                                {/* <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
-                                </div>
-                                <p className="text-[14px] text-gray-400 leading-snug">
+                                </div> */}
+                                <p className="text-[20px] text-gray-400 leading-snug">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
 
-                            <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
+                            {/* <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
                                 <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     2
                                 </div>
                                 <p className="text-[14px] text-gray-400 leading-snug">
                                     Changing the 90 deg cut by <span className="text-[#ff8fa3] font-bold">1° varus</span> will open the medial gap by <span className="text-[#ff8fa3] font-bold">~ 1.2 mms</span> in average-sized tibia (70 mms width).
                                 </p>
-                            </div>
+                            </div> */}
 
-                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-2 text-center shadow-lg z-10 flex-[0.8] flex flex-col justify-center min-h-0">
-                                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
-                                <p className="text-2xl font-black text-white">{anticipatedVarusCut}° <span className="text-sm">Varus</span></p>
+                            <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-1 text-center shadow-lg z-10 flex-[0.8] flex flex-col justify-center min-h-0">
+                                <p className="text-gray-400 text-md font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
+                                <p className="text-3xl font-black text-white">{anticipatedVarusCut}° <span className="text-sm">Varus</span></p>
                             </div>
 
                             <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-2 flex-[0.8] flex flex-col justify-center items-center gap-1 z-10 min-h-0">
-                                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Laxity Status</p>
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Laxity Level</p>
                                 <p className="text-md font-black text-white">{lateralLaxity || 'Unknown'}</p>
                                 <button
                                     onClick={applyLateralLaxity}
@@ -247,7 +247,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                                active:scale-[0.98]"
                                 >
                                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                                    <span className="relative text-sm font-bold text-white tracking-wider">APPLY LAXITY</span>
+                                    <span className="relative text-md font-bold text-white tracking-wider">CHECK LATERAL LAXITY</span>
                                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                     <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                                 </button>

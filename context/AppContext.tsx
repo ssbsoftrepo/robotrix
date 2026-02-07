@@ -12,6 +12,18 @@ export interface CoronalBalancingResults {
     simResectionDepth: number;
 }
 
+export interface IntraOpValidationData {
+    medialGap: number;
+    lateralGap: number;
+    tibiaWidth: number;
+}
+
+export interface IntraOpCoronalBalancingData {
+    additionalFemurCut: number;
+    additionalTibiaCut: number;
+    additionalLaxity: number;
+}
+
 // Centralized data structure for a single case
 export interface CaseData {
     legSide: LegSide;
@@ -77,6 +89,8 @@ export interface CaseData {
     // Line Positions Persistence
     valgusFunctionalLinesY: number;
     longLegFunctionalLinesY: number;
+    intraOpValidationData: IntraOpValidationData;
+    intraOpCoronalBalancingData: IntraOpCoronalBalancingData;
 }
 
 // Combine all context values into a single interface
@@ -149,6 +163,8 @@ interface AppContextType extends CaseData {
 
     setValgusFunctionalLinesY: (y: number) => void;
     setLongLegFunctionalLinesY: (y: number) => void;
+    setIntraOpValidationData: (data: IntraOpValidationData) => void;
+    setIntraOpCoronalBalancingData: (data: IntraOpCoronalBalancingData) => void;
 
     isLoading: boolean;
 }
@@ -159,6 +175,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const initialLongLegResults: LongLegResults = { ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', vca: null };
 const initialValgusResults: ValgusResults = { obliquity: null, femurType: '--', femurTypeByObliquity: '--', cpak: '--', cut: '--', ldfa: null, mpta: null };
 const initialCoronalBalancingResults: CoronalBalancingResults = { selectedSeries: null, lateralGap: '', medialRelease: 0, simFemoralCut: 3.0, simTibialCut: 0.0, simResectionDepth: 20 };
+const initialIntraOpValidationData: IntraOpValidationData = { medialGap: 16, lateralGap: 16, tibiaWidth: 70 };
+const initialIntraOpCoronalBalancingData: IntraOpCoronalBalancingData = { additionalFemurCut: 0, additionalTibiaCut: 0, additionalLaxity: 0 };
 
 // The single source of truth for a new/cleared case
 const initialCaseData: CaseData = {
@@ -207,6 +225,8 @@ const initialCaseData: CaseData = {
     longLegFunctionalCutDegree: 2,
     valgusFunctionalLinesY: 30,
     longLegFunctionalLinesY: 30,
+    intraOpValidationData: initialIntraOpValidationData,
+    intraOpCoronalBalancingData: initialIntraOpCoronalBalancingData,
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -479,6 +499,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         setValgusFunctionalLinesY: createSetter('valgusFunctionalLinesY'),
         setLongLegFunctionalLinesY: createSetter('longLegFunctionalLinesY'),
+        setIntraOpValidationData: createSetter('intraOpValidationData'),
+        setIntraOpCoronalBalancingData: createSetter('intraOpCoronalBalancingData'),
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

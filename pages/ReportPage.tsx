@@ -25,6 +25,32 @@ const ReportCard: React.FC<{ title: string; children: React.ReactNode; className
     </div>
 );
 
+const getCpakType = (ahka: number, jlo: number): string => {
+    let ahkaClass: 'varus' | 'neutral' | 'valgus';
+    if (ahka < -2) ahkaClass = 'varus';
+    else if (ahka > 2) ahkaClass = 'valgus';
+    else ahkaClass = 'neutral';
+
+    let jloClass: 'distal' | 'neutral' | 'proximal';
+    if (jlo < 177) jloClass = 'distal';
+    else if (jlo > 183) jloClass = 'proximal';
+    else jloClass = 'neutral';
+
+    if (jloClass === 'distal') {
+        if (ahkaClass === 'varus') return '1';
+        if (ahkaClass === 'neutral') return '2';
+        return '3';
+    }
+    if (jloClass === 'neutral') {
+        if (ahkaClass === 'varus') return '4';
+        if (ahkaClass === 'neutral') return '5';
+        return '6';
+    }
+    if (ahkaClass === 'varus') return '7';
+    if (ahkaClass === 'neutral') return '8';
+    return '9';
+};
+
 const ReportPage: React.FC = () => {
     const {
         patients,
@@ -36,8 +62,25 @@ const ReportPage: React.FC = () => {
         tibiaBoundary,
         setPage,
         longLegCoronalBalancingResults,
-        legSide
+        legSide,
+        intraOpValidationData,
+        intraOpCoronalBalancingData,
+        longLegFunctionalCutDegree
     } = useAppContext();
+
+    // Logic: Post-Op Simulation (Re-calculated for report)
+    const nativeLDFA = longLegResults.ldfa ?? 87;
+    const nativeMPTA = longLegResults.mpta ?? 87;
+    const initialSimFemoralCut = 3;
+    const initialSimTibialCut = longLegFunctionalCutDegree ?? 2;
+
+    const simulatedLDFA = nativeLDFA + initialSimFemoralCut + intraOpCoronalBalancingData.additionalFemurCut;
+    const simulatedMPTA = nativeMPTA + initialSimTibialCut + intraOpCoronalBalancingData.additionalTibiaCut;
+
+    const simulatedAHKA = simulatedMPTA - simulatedLDFA;
+    const simulatedJLO = simulatedMPTA + simulatedLDFA;
+    const simulatedCPAK = getCpakType(simulatedAHKA, simulatedJLO);
+
     const patient = patients.find(p => p.id === currentPatientId);
 
     const handlePrint = () => {
@@ -230,6 +273,79 @@ const ReportPage: React.FC = () => {
                         </div>
                     </ReportCard>
                 )}
+
+                {/* Intra-Operative Actual Values - Full Width */}
+                <ReportCard title="INTRA OPERATIVE ACTUAL VALUES" className="border-t-4 border-t-[#6D282C]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Left: Validation Data */}
+                        <div className="space-y-4">
+                            <div className="bg-[#252525] p-4 rounded-xl border border-[#333333]">
+                                <p className="text-[#ff8fa3] text-xs font-black uppercase tracking-widest mb-3 italic underline">Actual Intra-op Measurements</p>
+                                <div className="space-y-2">
+                                    <ReportItem label="Actual Medial Gap" value={`${intraOpValidationData.medialGap} mm`} highlight />
+                                    <ReportItem label="Actual Lateral Gap" value={`${intraOpValidationData.lateralGap} mm`} highlight />
+                                    <ReportItem label="Actual Tibia Width" value={`${intraOpValidationData.tibiaWidth} mm`} />
+                                </div>
+                            </div>
+
+                            <div className="bg-[#252525] p-4 rounded-xl border border-[#333333]">
+                                <p className="text-[#ff8fa3] text-xs font-black uppercase tracking-widest mb-3 italic underline">Simulation Adjustments</p>
+                                <div className="space-y-2">
+                                    <ReportItem label="Add. Distal Femur Cut" value={`${intraOpCoronalBalancingData.additionalFemurCut} mm`} />
+                                    <ReportItem label="Add. 90° Tibia Cut" value={`${intraOpCoronalBalancingData.additionalTibiaCut} mm`} />
+                                    <ReportItem label="Applied Laxity" value={`${intraOpCoronalBalancingData.additionalLaxity} mm`} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: Phenotype Analysis */}
+                        <div className="bg-[#252525] p-4 rounded-xl border border-[#333333] flex flex-col justify-center items-center text-center">
+                            <p className="text-[#ff8fa3] text-sm font-black uppercase tracking-widest mb-6 border-b border-[#ff8fa3]/30 pb-2 w-full">Post-Operative Phenotype Analysis</p>
+
+                            <div className="flex items-center gap-8 mb-6">
+                                <div className="text-center">
+                                    <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-2">Native</p>
+                                    <div className="w-20 h-20 rounded-full border-4 border-[#333333] flex items-center justify-center bg-black/40">
+                                        <span className="text-2xl font-black text-gray-300">{longLegResults.cpak ?? '--'}</span>
+                                    </div>
+                                </div>
+
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6D282C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+
+                                <div className="text-center">
+                                    <p className="text-[#ff8fa3] text-[10px] font-black uppercase tracking-widest mb-2">Simulated Post-Op</p>
+                                    <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center bg-black/40 ${simulatedCPAK === longLegResults.cpak ? 'border-green-500' : 'border-amber-500'}`}>
+                                        <span className={`text-2xl font-black ${simulatedCPAK === longLegResults.cpak ? 'text-green-500' : 'text-amber-500'}`}>{simulatedCPAK}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 ${simulatedCPAK === longLegResults.cpak ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
+                                <div className={`w-3 h-3 rounded-full ${simulatedCPAK === longLegResults.cpak ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+                                <p className={`text-xs font-bold ${simulatedCPAK === longLegResults.cpak ? 'text-green-500' : 'text-amber-500'}`}>
+                                    {simulatedCPAK === longLegResults.cpak ? 'CPAK Phenotype Successfully Retained' : 'CPAK Phenotype Shift Detected'}
+                                </p>
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-3 gap-2 w-full">
+                                <div className="bg-black/20 p-2 rounded border border-[#333333]">
+                                    <p className="text-[8px] text-gray-500 font-bold uppercase">Post-Op LDFA</p>
+                                    <p className="text-sm font-black text-white">{simulatedLDFA.toFixed(1)}°</p>
+                                </div>
+                                <div className="bg-black/20 p-2 rounded border border-[#333333]">
+                                    <p className="text-[8px] text-gray-500 font-bold uppercase">Post-Op MPTA</p>
+                                    <p className="text-sm font-black text-white">{simulatedMPTA.toFixed(1)}°</p>
+                                </div>
+                                <div className="bg-black/20 p-2 rounded border border-[#333333]">
+                                    <p className="text-[8px] text-gray-500 font-bold uppercase">Post-Op AHKA</p>
+                                    <p className="text-sm font-black text-white">{simulatedAHKA.toFixed(1)}°</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ReportCard>
             </div>
         </div>
     );

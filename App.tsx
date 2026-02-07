@@ -17,6 +17,8 @@ import LongLegLaxityCheckPage from './pages/LongLegLaxityCheckPage';
 import LongLegCoronalBalancingPage from './pages/LongLegCoronalBalancingPage';
 import LongLegFunctionalTibialCutPage from './pages/LongLegFunctionalTibialCutPage';
 import ValgusFunctionalTibialCutPage from './pages/ValgusFunctionalTibialCutPage';
+import IntraOperativeValidationPage from './pages/IntraOperativeValidationPage';
+import IntraOperativeCoronalBalancingPage from './pages/IntraOperativeCoronalBalancingPage';
 import LandingPage from './pages/LandingPage';
 import { Camera } from '@capacitor/camera';
 import { Filesystem } from '@capacitor/filesystem';
@@ -71,6 +73,10 @@ const App: React.FC = () => {
                 return <LongLegCoronalBalancingPage />;
             case 'planner-long-leg-functional-tibial-cut':
                 return <LongLegFunctionalTibialCutPage />;
+            case 'intra-operative-validation':
+                return <IntraOperativeValidationPage />;
+            case 'intra-operative-coronal-balancing':
+                return <IntraOperativeCoronalBalancingPage />;
             case 'simulation':
                 return <SimulationPage />;
             case 'report':

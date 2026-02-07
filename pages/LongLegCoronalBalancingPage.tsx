@@ -63,139 +63,127 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                 </button>
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-0.5 min-h-0 px-2 relative z-10">
-                {/* Column 1: Instructions & Block Upload */}
-                <div className="h-full flex flex-col overflow-hidden">
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-1.5 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
-                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <div className="w-full shrink-0 relative z-10">
-                            <span className="inline-block px-3 py-1 rounded-sm text-sm font-bold mb-2 bg-[#6D282C] text-white shadow-lg float-left tracking-wider">STEP 4 &gt;</span>
-                        </div>
-
-                        <p className="font-bold text-[#E0E0E0] mb-2 text-xl leading-snug w-full text-center shrink-0 relative z-10">
-                            Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span> (Asymmetrical Incremental blocks) To gauge lateral and medial extension gaps
-                        </p>
-
-                        <div className="w-full aspect-square max-h-[220px] rounded-lg flex items-center justify-center relative overflow-hidden my-auto self-center border border-[#333333] bg-black shrink-0 z-10">
-                            <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain" />
-                        </div>
-
-                        <div className="mt-auto bg-[#1a1a1a] p-2 rounded-lg w-full border border-[#6D282C]/50 shadow-lg text-center shrink-0 relative z-10">
-                            <p className="text-gray-500 text-xs mb-0 uppercase tracking-wider font-semibold">Implant Thickness Chosen</p>
-                            <p className="text-3xl font-extrabold text-white">{thickness} <span className="text-sm text-gray-500">mm</span></p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Column 2: Image with Side Panels */}
-                <div className="h-full flex flex-col overflow-hidden">
-                    <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-transparent overflow-hidden rounded-xl border border-[#333333]">
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-2 min-h-0 px-2 relative z-10">
+                {/* Column 1: Joint View & Implant Thickness */}
+                <div className="h-full flex flex-col gap-2 overflow-hidden">
+                    <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-[#1a1a1a] overflow-hidden rounded-xl border border-[#333333]">
+                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         {/* Horizontal layout: Left panel - Image - Right panel */}
-                        <div className="flex items-stretch justify-center w-full h-full gap-0">
+                        <div className="flex items-stretch justify-center w-full h-full gap-0 p-4">
                             {/* Left Panel - Lateral Gap */}
-                            <div className="flex flex-col items-center justify-center text-center shrink-0 mr-[6px] z-10">
-                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-1">
-                                    Adjust the  <br />
+                            <div className="flex flex-col items-center justify-center text-center shrink-0 mr-[6%] z-10">
+                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-2">
+                                    Adjust the <br />
                                     distal femoral &<br />
                                     proximal tibial cut<br />
                                     thickness to get
                                 </p>
-                                <p className="text-base text-[#E0E0E0] font-bold mb-2">
+                                <p className="text-base text-[#E0E0E0] font-bold mb-4">
                                     Lateral Gap
                                 </p>
-                                <div className="w-24 h-24 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
-                                    <span className="text-3xl font-bold text-white">{thickness}</span>
-                                    <span className="text-sm text-gray-400 font-bold mt-[-2px]">mm</span>
+                                <div className="w-32 h-32 rounded-full border-[6px] border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(109,40,44,0.6)] backdrop-blur-sm transition-all hover:scale-105">
+                                    <span className="text-4xl font-bold text-white">{thickness}</span>
+                                    <span className="text-base text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
 
                             {/* Center - Bone Image */}
-                            <div className="shrink-0 h-[100%] flex items-center justify-center">
-                                <img src="/center.png" alt="Knee View Reference" className="max-h-[100%] object-contain" />
+                            <div className="shrink-0 h-full flex items-center justify-center">
+                                <img src="/center.png" alt="Knee View Reference" className="max-h-full object-contain" />
                             </div>
 
                             {/* Right Panel - Medial Gap */}
-                            <div className="flex flex-col items-center justify-center text-center shrink-0 ml-[6px] z-10">
-                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-1">
-                                    <br /><br />
+                            <div className="flex flex-col items-center justify-center text-center shrink-0 ml-[6%] z-10">
+                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-2">
+                                    <br />
                                     Anticipated
                                 </p>
-                                <p className="text-base text-[#E0E0E0] font-bold mb-2">
+                                <p className="text-base text-[#E0E0E0] font-bold mb-4">
                                     Medial Gap
                                 </p>
-                                <div className="w-24 h-24 rounded-full border-4 border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(109,40,44,0.6)] backdrop-blur-sm">
-                                    <span className="text-3xl font-bold text-gray-100">{anticipatedMedialGap}</span>
-                                    <span className="text-sm text-gray-400 font-bold mt-[-2px]">mm</span>
+                                <div className="w-32 h-32 rounded-full border-[6px] border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(109,40,44,0.6)] backdrop-blur-sm transition-all hover:scale-105">
+                                    <span className="text-4xl font-bold text-gray-100">{anticipatedMedialGap}</span>
+                                    <span className="text-base text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Footer: Lateral Laxity Check */}
-                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-between shrink-0">
-                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <button
-                            onClick={() => setPage('planner-long-leg-laxity-check')}
-                            className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
-                                       shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
-                                       transition-all duration-300 ease-out
-                                       hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
-                                       active:scale-[0.98] z-10"
-                        >
-                            <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                            <span className="relative text-sm font-bold text-white tracking-wider">CHECK LATERAL LAXITY</span>
-                            <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                            <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                        </button>
-                        <div className="text-right relative z-10">
-                            <span className="text-gray-500 text-xs uppercase font-bold tracking-wider mr-1">Laxity Level:</span>
-                            <span className={`text-lg font-bold ${!lateralLaxity ? 'text-gray-500' : lateralLaxity === 'No Lateral Laxity' ? 'text-green-400' : 'text-[#ff8fa3]'}`}>
-                                {lateralLaxity || 'Skipped'}
-                            </span>
+                    {/* Implant Thickness Below Bone Model */}
+                    <div className="bg-[#1a1a1a] p-3 rounded-xl border border-[#333333] shadow-lg flex items-center justify-center shrink-0 relative">
+                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
+                        <div className="flex flex-col items-center">
+                            <p className="text-gray-500 text-[10px] uppercase tracking-[0.2em] font-black mb-0.5">Implant Thickness Chosen</p>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-4xl font-black text-white">{thickness}</span>
+                                <span className="text-xl font-bold text-gray-500">mm</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Column 3: Flowchart Logic */}
-                <div className="h-full flex flex-col gap-1 min-h-0">
-                    {/* Right Path (Verification Success) */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-2 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
+                {/* Column 2: Instructions & Flowchart */}
+                <div className="h-full flex flex-col gap-2 overflow-hidden">
+                    {/* Instructions Section */}
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] p-2.5 rounded-xl flex flex-col items-center text-center overflow-y-auto shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
-                        <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-base mb-2 shadow-[0_0_10px_#22c55e] shrink-0 relative z-10">✓</div>
-                        <h4 className="text-lg font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">
-                            Medial gap matches<br />anticipated gap
-                        </h4>
-                        <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 w-full backdrop-blur-md relative z-10">
-                            <p className="text-md text-gray-200 font-bold tracking-wide leading-tight">
-                                Proceed with<br />Functional Tibia Cut
-                            </p>
+                        <div className="w-full flex justify-center mb-1.5">
+                            <span className="px-3 py-1 rounded-sm text-[10px] font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">STEP 4</span>
+                        </div>
+                        <p className="font-bold text-[#E0E0E0] mb-2 text-base leading-tight">
+                            Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span><br />
+                            To gauge extension gaps
+                        </p>
+                        <div className="w-full aspect-[4/3] max-h-[100px] rounded-lg flex items-center justify-center relative overflow-hidden border border-[#333333] bg-black/40">
+                            <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain p-2" />
                         </div>
                     </div>
 
-                    {/* Wrong Path */}
-                    <div className="relative bg-[#1a1a1a] border-2 border-[#6D282C] rounded-xl p-2 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg hover:bg-[#252525] transition-colors flex-1 min-h-0">
-                        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
-                        <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                        <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-base mb-2 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
-                        <h4 className="text-lg font-extrabold text-[#ff8fa3] mb-2 leading-tight relative z-10">
-                            Medial gap does not<br />match anticipated gap
-                        </h4>
-                        <div className="flex flex-col gap-1 w-full relative z-10">
-                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-md text-base font-bold leading-tight">
-                                    Consider error on<br />90 deg tibial cut
+                    {/* Flowchart Logic */}
+                    <div className="flex-grow flex flex-col gap-2 min-h-0">
+                        {/* Right Path (Verification Success) */}
+                        <div className="relative bg-[#1a1a1a] border border-[#6D282C]/30 rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg transition-all hover:bg-[#1f1f1f] flex-1">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
+                            <div className="absolute top-0 left-0 w-full h-1 bg-green-500/50"></div>
+                            <div className="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-xl mb-3 shadow-[0_0_15px_rgba(22,163,74,0.4)] shrink-0">✓</div>
+                            <h4 className="text-xl font-black text-white mb-3 tracking-tight">
+                                Medial gap matches<br />anticipated gap
+                            </h4>
+                            <div className="bg-green-950/30 px-6 py-2 rounded-full border border-green-500/30">
+                                <p className="text-sm text-green-400 font-bold uppercase tracking-wider">
+                                    Proceed with Functional Tibia Cut
                                 </p>
                             </div>
-                            <div className="flex items-center justify-center gap-2 shrink-0">
-                                <div className="h-px bg-[#333333] flex-grow"></div>
-                                <div className="text-gray-500 font-bold text-sm uppercase">OR</div>
-                                <div className="h-px bg-[#333333] flex-grow"></div>
-                            </div>
-                            <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-md text-base font-bold leading-tight">
-                                    Consider Pre op<br />lateral laxity
-                                </p>
+                        </div>
+
+                        {/* Wrong Path */}
+                        <div className="relative bg-[#1a1a1a] border border-[#6D282C] rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg transition-all hover:bg-[#1f1f1f] flex-[1.5]">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
+                            <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
+                            <div className="w-10 h-10 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-xl mb-3 shadow-[0_0_15px_rgba(109,40,44,0.4)] shrink-0">✕</div>
+                            <h4 className="text-xl font-black text-[#ff8fa3] mb-4 tracking-tight">
+                                Medial gap does not<br />match anticipated gap
+                            </h4>
+                            <div className="flex flex-col gap-2 w-full">
+                                <div className="bg-black/60 p-2.5 rounded-lg border border-[#6D282C]/40">
+                                    <p className="text-sm font-bold text-gray-200">Consider error on 90 deg tibial cut</p>
+                                </div>
+                                <div className="flex items-center justify-center gap-3">
+                                    <div className="h-px bg-white/5 flex-grow"></div>
+                                    <span className="text-[10px] text-gray-500 font-black tracking-widest font-mono">OR</span>
+                                    <div className="h-px bg-white/5 flex-grow"></div>
+                                </div>
+                                <div className="bg-black/60 p-2.5 rounded-lg border border-[#6D282C]/40">
+                                    <p className="text-sm font-bold text-gray-200">Consider Pre op lateral laxity</p>
+                                </div>
+                                <div className="flex items-center justify-center gap-3">
+                                    <div className="h-px bg-white/5 flex-grow"></div>
+                                    <span className="text-[10px] text-gray-500 font-black tracking-widest font-mono">OR</span>
+                                    <div className="h-px bg-white/5 flex-grow"></div>
+                                </div>
+                                <div className="bg-[#6D282C]/20 p-2.5 rounded-lg border border-[#6D282C]/80">
+                                    <p className="text-sm font-bold text-[#ff8fa3]">Input of inaccurate data from long leg film</p>
+                                </div>
                             </div>
                         </div>
                     </div>

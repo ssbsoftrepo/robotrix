@@ -68,4 +68,6 @@ export type Page =
     'past-case-valgus-result' |
     'planner-long-leg-laxity-check' |
     'planner-long-leg-coronal-balancing' |
-    'planner-long-leg-functional-tibial-cut';
+    'planner-long-leg-functional-tibial-cut' |
+    'intra-operative-validation' |
+    'intra-operative-coronal-balancing';
