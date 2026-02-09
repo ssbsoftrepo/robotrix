@@ -538,7 +538,7 @@ const PostOpPlanner: React.FC = () => {
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2; // Increased sensitivity
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 70) ** 2; // Increased sensitivity for gloves
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
         for (const key in landmarks) {
@@ -598,7 +598,7 @@ const PostOpPlanner: React.FC = () => {
         if (!canvas) return;
 
         const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 50) ** 2; // Increased sensitivity for touch
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 80) ** 2; // Increased sensitivity for gloves
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
 

@@ -72,12 +72,14 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                         <div className="flex items-stretch justify-center w-full h-full gap-0 p-4">
                             {/* Left Panel - Lateral Gap */}
                             <div className="flex flex-col items-center justify-center text-center shrink-0 mr-[6%] z-10">
-                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-2">
-                                    Adjust the <br />
-                                    distal femoral &<br />
-                                    proximal tibial cut<br />
-                                    thickness to get
-                                </p>
+                                <div className="min-h-[5rem] flex items-end justify-center pb-2">
+                                    <p className="text-sm font-semibold text-gray-400 leading-snug mb-0">
+                                        Adjust the <br />
+                                        distal femoral &<br />
+                                        proximal tibial cut<br />
+                                        thickness to get
+                                    </p>
+                                </div>
                                 <p className="text-base text-[#E0E0E0] font-bold mb-4">
                                     Lateral Gap
                                 </p>
@@ -94,10 +96,12 @@ const LongLegCoronalBalancingPage: React.FC = () => {
 
                             {/* Right Panel - Medial Gap */}
                             <div className="flex flex-col items-center justify-center text-center shrink-0 ml-[6%] z-10">
-                                <p className="text-sm font-semibold text-gray-400 leading-snug mb-2">
-                                    <br />
-                                    Anticipated
-                                </p>
+                                <div className="min-h-[5rem] flex items-end justify-center pb-2">
+                                    <p className="text-sm font-semibold text-gray-400 leading-snug mb-0">
+                                        <br />
+                                        Anticipated
+                                    </p>
+                                </div>
                                 <p className="text-base text-[#E0E0E0] font-bold mb-4">
                                     Medial Gap
                                 </p>
@@ -113,8 +117,8 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     <div className="bg-[#1a1a1a] p-3 rounded-xl border border-[#333333] shadow-lg flex items-center justify-center shrink-0 relative">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="flex flex-col items-center">
-                            <p className="text-gray-500 text-[10px] uppercase tracking-[0.2em] font-black mb-0.5">Implant Thickness Chosen</p>
                             <div className="flex items-baseline gap-2">
+                                <p className="text-gray-500 text-xl uppercase tracking-[0.2em] font-black mb-0.5">Implant Thickness Chosen</p>
                                 <span className="text-4xl font-black text-white">{thickness}</span>
                                 <span className="text-xl font-bold text-gray-500">mm</span>
                             </div>
@@ -128,27 +132,29 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-2.5 rounded-xl flex flex-col items-center text-center overflow-y-auto shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="w-full flex justify-center mb-1.5">
-                            <span className="px-3 py-1 rounded-sm text-[10px] font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">STEP 4</span>
+                            <span className="px-3 py-1 rounded-sm text-[12px] font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">STEP 4</span>
                         </div>
                         <p className="font-bold text-[#E0E0E0] mb-2 text-base leading-tight">
                             Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span><br />
-                            To gauge extension gaps
+                            (Asymmetrical Incremental Blocks) To gauge lateral and media extension gaps
                         </p>
-                        <div className="w-full aspect-[4/3] max-h-[100px] rounded-lg flex items-center justify-center relative overflow-hidden border border-[#333333] bg-black/40">
-                            <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain p-2" />
+                        <div className="w-full max-h-[6rem] rounded-lg flex items-center justify-center relative overflow-hidden border border-[#333333] bg-black/40">
+                            <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain p-1" />
                         </div>
                     </div>
 
                     {/* Flowchart Logic */}
                     <div className="flex-grow flex flex-col gap-2 min-h-0">
                         {/* Right Path (Verification Success) */}
-                        <div className="relative bg-[#1a1a1a] border border-[#6D282C]/30 rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg transition-all hover:bg-[#1f1f1f] flex-1">
+                        <div className="relative bg-[#1a1a1a] border border-[#6D282C]/30 rounded-xl p-2 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg transition-all hover:bg-[#1f1f1f] flex-[0.8]">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                             <div className="absolute top-0 left-0 w-full h-1 bg-green-500/50"></div>
-                            <div className="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-xl mb-3 shadow-[0_0_15px_rgba(22,163,74,0.4)] shrink-0">✓</div>
-                            <h4 className="text-xl font-black text-white mb-3 tracking-tight">
-                                Medial gap matches<br />anticipated gap
-                            </h4>
+                            <div className="flex flex-row items-center justify-center gap-3 mb-2 mt-1">
+                                <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-lg shadow-[0_0_15px_rgba(22,163,74,0.4)] shrink-0">✓</div>
+                                <h4 className="text-lg font-black text-white tracking-tight text-left leading-tight">
+                                    Medial gap matches<br />anticipated gap
+                                </h4>
+                            </div>
                             <div className="bg-green-950/30 px-6 py-2 rounded-full border border-green-500/30">
                                 <p className="text-sm text-green-400 font-bold uppercase tracking-wider">
                                     Proceed with Functional Tibia Cut
@@ -157,31 +163,33 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                         </div>
 
                         {/* Wrong Path */}
-                        <div className="relative bg-[#1a1a1a] border border-[#6D282C] rounded-xl p-4 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg transition-all hover:bg-[#1f1f1f] flex-[1.5]">
+                        <div className="relative bg-[#1a1a1a] border border-[#6D282C] rounded-xl p-2 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg transition-all hover:bg-[#1f1f1f] flex-[2]">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                             <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
-                            <div className="w-10 h-10 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-xl mb-3 shadow-[0_0_15px_rgba(109,40,44,0.4)] shrink-0">✕</div>
-                            <h4 className="text-xl font-black text-[#ff8fa3] mb-4 tracking-tight">
-                                Medial gap does not<br />match anticipated gap
-                            </h4>
-                            <div className="flex flex-col gap-2 w-full">
-                                <div className="bg-black/60 p-2.5 rounded-lg border border-[#6D282C]/40">
-                                    <p className="text-sm font-bold text-gray-200">Consider error on 90 deg tibial cut</p>
+                            <div className="flex flex-row items-center justify-center gap-3 mb-2 mt-1 px-4">
+                                <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-lg shadow-[0_0_15px_rgba(109,40,44,0.4)] shrink-0">✕</div>
+                                <h4 className="text-lg font-black text-[#ff8fa3] tracking-tight leading-tight text-left">
+                                    Medial gap does not<br />match anticipated gap
+                                </h4>
+                            </div>
+                            <div className="flex flex-col gap-1 w-full">
+                                <div className="bg-[#6D282C]/20 p-2 rounded-lg border border-[#6D282C]/80">
+                                    <p className="text-sm font-bold text-[#ff8fa3]">Consider error on 90 deg tibial cut</p>
                                 </div>
                                 <div className="flex items-center justify-center gap-3">
                                     <div className="h-px bg-white/5 flex-grow"></div>
                                     <span className="text-[10px] text-gray-500 font-black tracking-widest font-mono">OR</span>
                                     <div className="h-px bg-white/5 flex-grow"></div>
                                 </div>
-                                <div className="bg-black/60 p-2.5 rounded-lg border border-[#6D282C]/40">
-                                    <p className="text-sm font-bold text-gray-200">Consider Pre op lateral laxity</p>
+                                <div className="bg-[#6D282C]/20 p-2 rounded-lg border border-[#6D282C]/80">
+                                    <p className="text-sm font-bold text-[#ff8fa3]">Consider Pre op lateral laxity</p>
                                 </div>
                                 <div className="flex items-center justify-center gap-3">
                                     <div className="h-px bg-white/5 flex-grow"></div>
                                     <span className="text-[10px] text-gray-500 font-black tracking-widest font-mono">OR</span>
                                     <div className="h-px bg-white/5 flex-grow"></div>
                                 </div>
-                                <div className="bg-[#6D282C]/20 p-2.5 rounded-lg border border-[#6D282C]/80">
+                                <div className="bg-[#6D282C]/20 p-2 rounded-lg border border-[#6D282C]/80">
                                     <p className="text-sm font-bold text-[#ff8fa3]">Input of inaccurate data from long leg film</p>
                                 </div>
                             </div>

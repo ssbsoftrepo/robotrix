@@ -70,4 +70,6 @@ export type Page =
     'planner-long-leg-coronal-balancing' |
     'planner-long-leg-functional-tibial-cut' |
     'intra-operative-validation' |
-    'intra-operative-coronal-balancing';
+    'intra-operative-coronal-balancing' |
+    'valgus-intra-operative-validation' |
+    'valgus-intra-operative-coronal-balancing';

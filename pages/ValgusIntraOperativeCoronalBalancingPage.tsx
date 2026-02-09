@@ -107,10 +107,10 @@ const CuttingBlock: React.FC<{
     </div>
 );
 
-const IntraOperativeCoronalBalancingPage: React.FC = () => {
+const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const {
         setPage,
-        longLegResults,
+        valgusResults, // Changed
         implantThickness,
         intraOpValidationData,
         intraOpCoronalBalancingData,
@@ -119,11 +119,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     } = useAppContext();
 
     const handleCheckLaxity = () => {
-        if (kneeType === 'valgus') {
-            setPage('planner-valgus-stress-laxity-check');
-        } else {
-            setPage('planner-long-leg-laxity-check');
-        }
+        // Force valgus laxity check page for this flow
+        setPage('planner-valgus-stress-laxity-check');
     };
 
     const { additionalFemurCut, additionalTibiaCut, additionalLaxity } = intraOpCoronalBalancingData;
@@ -146,9 +143,10 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
         setSelectedJig(recommendedTheta);
     }, [recommendedTheta]);
 
-    const nativeLDFA = longLegResults.ldfa ?? 87;
-    const nativeMPTA = longLegResults.mpta ?? 87;
-    let nativeCPAK = longLegResults.cpak;
+    // Use valgusResults with fallback calculation
+    const nativeLDFA = valgusResults.ldfa ?? 87;
+    const nativeMPTA = valgusResults.mpta ?? 87;
+    let nativeCPAK = valgusResults.cpak;
 
     // Fallback calculation if CPAK is not present
     if (!nativeCPAK || ['--', 'N/A'].includes(nativeCPAK)) {
@@ -177,9 +175,9 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-red-900/5 rounded-full blur-[150px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10 border-b border-[#333333] bg-black/40">
-                <h2 className="text-xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-operative Coronal Balancing</h2>
+                <h2 className="text-xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-operative Coronal Balancing (Valgus)</h2>
                 <button
-                    onClick={() => setPage('intra-operative-validation')}
+                    onClick={() => setPage('valgus-intra-operative-validation')}
                     className="group relative py-1.5 px-3 bg-[#1A1A1A] border border-[#333333] rounded-sm transition-all hover:bg-[#252525]"
                 >
                     <span className="relative flex items-center gap-2 text-[10px] font-black text-gray-400 tracking-wider">
@@ -375,7 +373,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
             {/* Footer proceeds to Report */}
             <div className="mt-2 flex justify-end pb-1 shrink-0 px-2 relative z-10">
                 <button
-                    onClick={() => setPage('report')}
+                    onClick={() => setPage('planner-valgus-stress-report')}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                transition-all duration-300 ease-out
@@ -397,4 +395,4 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     );
 };
 
-export default IntraOperativeCoronalBalancingPage;
+export default ValgusIntraOperativeCoronalBalancingPage;

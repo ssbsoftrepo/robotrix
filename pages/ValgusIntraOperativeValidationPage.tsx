@@ -2,11 +2,11 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
 
-const IntraOperativeValidationPage: React.FC = () => {
+const ValgusIntraOperativeValidationPage: React.FC = () => {
     const {
         setPage,
         implantThickness,
-        longLegResults,
+        valgusResults, // Changed from longLegResults
         intraOpValidationData,
         setIntraOpValidationData,
     } = useAppContext();
@@ -14,7 +14,8 @@ const IntraOperativeValidationPage: React.FC = () => {
     const { medialGap, lateralGap, tibiaWidth } = intraOpValidationData;
 
     const thickness = implantThickness ?? 10;
-    const mpta = longLegResults.mpta ?? 86;
+    // Use valgusResults for MPTA
+    const mpta = valgusResults.mpta ?? 86;
     const rawTightness = 86 - mpta;
     const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
     const anticipatedMedialGap = thickness - anticipatedTightness;
@@ -50,9 +51,9 @@ const IntraOperativeValidationPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-red-900/5 rounded-full blur-[150px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10 border-b border-[#333333] bg-black/40">
-                <h2 className="text-xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-Operative Input Screen</h2>
+                <h2 className="text-xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-Operative Input Screen (Valgus)</h2>
                 <button
-                    onClick={() => setPage('simulation')}
+                    onClick={() => setPage('planner-valgus-functional-tibial-cut')}
                     className="group relative py-1.5 px-3 bg-[#1A1A1A] border border-[#333333] rounded-sm transition-all hover:bg-[#252525]"
                 >
                     <span className="relative flex items-center gap-2 text-[10px] font-black text-gray-400 tracking-wider">
@@ -215,7 +216,7 @@ const IntraOperativeValidationPage: React.FC = () => {
             {/* Footer proceeds to Coronal Balancing */}
             <div className="mt-2 flex justify-end pb-1 shrink-0 px-2 relative z-10">
                 <button
-                    onClick={() => setPage('intra-operative-coronal-balancing')}
+                    onClick={() => setPage('valgus-intra-operative-coronal-balancing')}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                transition-all duration-300 ease-out
@@ -237,4 +238,4 @@ const IntraOperativeValidationPage: React.FC = () => {
     );
 };
 
-export default IntraOperativeValidationPage;
+export default ValgusIntraOperativeValidationPage;

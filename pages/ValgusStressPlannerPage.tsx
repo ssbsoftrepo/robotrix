@@ -834,7 +834,7 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 15) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 40) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
@@ -921,7 +921,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 25) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
