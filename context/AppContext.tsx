@@ -97,6 +97,8 @@ export interface CaseData {
 interface AppContextType extends CaseData {
     page: Page;
     setPage: (page: Page) => void;
+    previousPage: Page | null;
+    setPreviousPage: (page: Page | null) => void;
     patients: Patient[];
     savePatient: (patient: Patient) => void;
     deletePatient: (patientId: string) => void;
@@ -231,6 +233,7 @@ const initialCaseData: CaseData = {
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [page, setPage] = useState<Page>('case-management');
+    const [previousPage, setPreviousPage] = useState<Page | null>(null);
     const [patients, setPatients] = useState<Patient[]>([]);
     const [currentPatientId, _setCurrentPatientId] = useState<string | null>(null);
     const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
@@ -438,6 +441,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const value: AppContextType = {
         page,
         setPage,
+        previousPage,
+        setPreviousPage,
         patients,
         savePatient,
         deletePatient,

@@ -221,25 +221,6 @@ const ResultAnalysisPage: React.FC = () => {
 
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
                 <h2 className="text-3xl font-bold text-[#E0E0E0]">Long Leg Film Analysis</h2>
-                {/* Back Button */}
-                <button
-                    onClick={() => setPage('planner-long-leg')}
-                    className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
-                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
-                               transition-all duration-300 ease-out
-                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
-                               active:scale-[0.98] flex items-center"
-                >
-                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
-                        BACK
-                    </span>
-                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-grow min-h-0 px-2 relative z-10 overflow-hidden">
@@ -321,7 +302,7 @@ const ResultAnalysisPage: React.FC = () => {
                         />
                         <StepCard
                             step={3}
-                            title="Anticipated tibial cut"
+                            title="Anticipated Functional tibia cut"
                             value={displayTibialCut}
                             colorTheme="pink"
                             className="flex-1"
@@ -340,7 +321,27 @@ const ResultAnalysisPage: React.FC = () => {
                     </div>
                 )}
 
-                <div className="flex justify-end w-full">
+                <div className="flex justify-between w-full">
+                    {/* Back Button */}
+                    <button
+                        onClick={() => setPage('planner-long-leg')}
+                        className="group relative py-2 px-4 bg-[#252525] border border-[#444444] rounded-sm 
+                                   shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                   active:scale-[0.98] flex items-center"
+                    >
+                        <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                        <span className="relative flex items-center gap-2 text-sm font-bold text-gray-200 tracking-wider group-hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                            </svg>
+                            BACK
+                        </span>
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                    </button>
+
                     {/* Proceed Button */}
                     <button
                         onClick={() => setPage('planner-long-leg-coronal-balancing')}

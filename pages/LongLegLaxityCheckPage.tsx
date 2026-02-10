@@ -58,6 +58,7 @@ const LaxityOption: React.FC<LaxityOptionProps> = ({ level, onClick, imageSrc, i
 const LongLegLaxityCheckPage: React.FC = () => {
     const {
         setPage,
+        previousPage,
         setLateralLaxity,
         longLegImageSrc,
         setPlannerMode,
@@ -135,18 +136,30 @@ const LongLegLaxityCheckPage: React.FC = () => {
     const handleConfirmSelection = () => {
         if (!userSelection) return;
         setLateralLaxity(userSelection);
-        setPlannerMode('advanced');
-        setPage('planner-long-leg');
+        if (previousPage) {
+            setPage(previousPage);
+        } else {
+            setPlannerMode('advanced');
+            setPage('planner-long-leg');
+        }
     };
 
     const handleSkip = () => {
-        setPage('planner-long-leg');
+        if (previousPage) {
+            setPage(previousPage);
+        } else {
+            setPage('planner-long-leg');
+        }
     };
 
     const goBack = () => {
-        setLateralLaxity(null);
-        setPlannerMode(null);
-        setPage('case-management');
+        if (previousPage) {
+            setPage(previousPage);
+        } else {
+            setLateralLaxity(null);
+            setPlannerMode(null);
+            setPage('case-management');
+        }
     };
 
     const laxityLevels = [
@@ -168,25 +181,6 @@ const LongLegLaxityCheckPage: React.FC = () => {
             <div className="flex justify-between items-center mb-1 relative z-10 shrink-0">
                 <h2 className="text-3xl font-bold text-[#E0E0E0]">Check for Lateral Laxity (Long Leg)</h2>
                 <div className="flex space-x-2">
-                    {/* Skip Button */}
-                    <button
-                        onClick={handleSkip}
-                        className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
-                                   shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
-                                   transition-all duration-300 ease-out
-                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
-                                   active:scale-[0.98] flex items-center"
-                    >
-                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative font-bold text-sm text-white tracking-wider flex items-center">
-                            SKIP TO PLANNER
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                        </span>
-                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    </button>
                     {/* Cancel Button */}
                     <button
                         onClick={goBack}
@@ -194,10 +188,15 @@ const LongLegLaxityCheckPage: React.FC = () => {
                                    shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
                                    transition-all duration-300 ease-out
                                    hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
-                                   active:scale-[0.98]"
+                                   active:scale-[0.98] flex items-center"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
-                        <span className="relative font-bold text-sm text-gray-200 tracking-wider group-hover:text-white">CANCEL</span>
+                        <span className="relative font-bold text-sm text-gray-200 tracking-wider flex items-center group-hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                            </svg>
+                            CANCEL
+                        </span>
                         <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                         <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                     </button>
@@ -277,16 +276,17 @@ const LongLegLaxityCheckPage: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="mt-1 grid grid-cols-1 lg:grid-cols-3 gap-2 items-start relative z-10 bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg shrink-0">
+            <div className="mt-1 flex items-center justify-between relative z-10 bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg shrink-0">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                <div className="lg:col-span-2 text-md text-gray-500 relative z-10">
+                <div className="flex flex-col justify-center relative z-10 text-md text-gray-500">
                     <p className="font-bold text-[#E0E0E0] mb-1">Important Note:</p>
                     <ul className="list-disc list-inside space-y-1">
                         <li>Lateral laxity is best made out in a varus stress film or a one-leg standing film.</li>
                         <li>Lateral laxity must not be compensated for by altering bony cuts. Suitable releases must be performed on the medial side to match the stretched lateral side.</li>
                     </ul>
                 </div>
-                <div className="lg:col-span-1 flex flex-col items-end justify-center h-full relative z-10">
+
+                <div className="flex flex-col items-end justify-center relative z-10 shrink-0 ml-4">
                     <p className="text-gray-400 text-md mb-2 self-center lg:self-end">
                         Selected: <span className="font-bold text-[#E0E0E0]">{userSelection || 'None'}</span>
                     </p>

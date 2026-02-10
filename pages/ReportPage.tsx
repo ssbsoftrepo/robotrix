@@ -65,7 +65,8 @@ const ReportPage: React.FC = () => {
         legSide,
         intraOpValidationData,
         intraOpCoronalBalancingData,
-        longLegFunctionalCutDegree
+        longLegFunctionalCutDegree,
+        lateralLaxity
     } = useAppContext();
 
     // Logic: Post-Op Simulation (Re-calculated for report)
@@ -275,77 +276,59 @@ const ReportPage: React.FC = () => {
                 )}
 
                 {/* Intra-Operative Actual Values - Full Width */}
-                <ReportCard title="INTRA OPERATIVE ACTUAL VALUES" className="border-t-4 border-t-[#6D282C]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Left: Validation Data */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
+                    <ReportCard title="INTRA OPERATIVE ACTUAL VALUES" className="border-t-4 border-t-[#6D282C] h-full">
                         <div className="space-y-4">
-                            <div className="bg-[#252525] p-4 rounded-xl border border-[#333333]">
-                                <p className="text-[#ff8fa3] text-xs font-black uppercase tracking-widest mb-3 italic underline">Actual Intra-op Measurements</p>
-                                <div className="space-y-2">
-                                    <ReportItem label="Actual Medial Gap" value={`${intraOpValidationData.medialGap} mm`} highlight />
-                                    <ReportItem label="Actual Lateral Gap" value={`${intraOpValidationData.lateralGap} mm`} highlight />
-                                    <ReportItem label="Actual Tibia Width" value={`${intraOpValidationData.tibiaWidth} mm`} />
+                            <div>
+                                <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Coronal Balancing Data</p>
+                                <div className="space-y-1">
+                                    <ReportItem label="Mes. Lateral Gap" value={`${intraOpValidationData.lateralGap}mm`} />
+                                    <ReportItem label="Mes. Medial Gap" value={`${intraOpValidationData.medialGap}mm`} />
+                                    <ReportItem label="Mes. Tibia l Width" value={`${intraOpValidationData.tibiaWidth}mm`} />
                                 </div>
                             </div>
 
-                            <div className="bg-[#252525] p-4 rounded-xl border border-[#333333]">
-                                <p className="text-[#ff8fa3] text-xs font-black uppercase tracking-widest mb-3 italic underline">Simulation Adjustments</p>
-                                <div className="space-y-2">
-                                    <ReportItem label="Add. Distal Femur Cut" value={`${intraOpCoronalBalancingData.additionalFemurCut} mm`} />
-                                    <ReportItem label="Add. 90° Tibia Cut" value={`${intraOpCoronalBalancingData.additionalTibiaCut} mm`} />
-                                    <ReportItem label="Applied Laxity" value={`${intraOpCoronalBalancingData.additionalLaxity} mm`} />
-                                </div>
+                            <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                                <span className="text-gray-400 text-sm font-medium">Revised Functional Tibia cut</span>
+                                <span className="text-lg font-extrabold text-[#ff8fa3]">{longLegFunctionalCutDegree ?? 0} deg varus cut</span>
                             </div>
                         </div>
+                    </ReportCard>
 
-                        {/* Right: Phenotype Analysis */}
-                        <div className="bg-[#252525] p-4 rounded-xl border border-[#333333] flex flex-col justify-center items-center text-center">
-                            <p className="text-[#ff8fa3] text-sm font-black uppercase tracking-widest mb-6 border-b border-[#ff8fa3]/30 pb-2 w-full">Post-Operative Phenotype Analysis</p>
-
-                            <div className="flex items-center gap-8 mb-6">
-                                <div className="text-center">
-                                    <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-2">Native</p>
-                                    <div className="w-20 h-20 rounded-full border-4 border-[#333333] flex items-center justify-center bg-black/40">
-                                        <span className="text-2xl font-black text-gray-300">{longLegResults.cpak ?? '--'}</span>
+                    <ReportCard title="SURGICAL DECISION MATRIX" className="border-t-4 border-t-[#6D282C] h-full">
+                        <div className="space-y-4">
+                            {/* Lateral Laxity */}
+                            <div>
+                                <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Lateral laxity</p>
+                                <div className="flex gap-2">
+                                    <div className="flex-1 bg-[#252525] border border-[#333333] rounded-lg p-2 text-center">
+                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Level</p>
+                                        <p className="text-sm font-bold text-[#ff8fa3]">{lateralLaxity ?? 'Not checked'}</p>
                                     </div>
-                                </div>
-
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6D282C" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M5 12h14M12 5l7 7-7 7" />
-                                </svg>
-
-                                <div className="text-center">
-                                    <p className="text-[#ff8fa3] text-[10px] font-black uppercase tracking-widest mb-2">Simulated Post-Op</p>
-                                    <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center bg-black/40 ${simulatedCPAK === longLegResults.cpak ? 'border-green-500' : 'border-amber-500'}`}>
-                                        <span className={`text-2xl font-black ${simulatedCPAK === longLegResults.cpak ? 'text-green-500' : 'text-amber-500'}`}>{simulatedCPAK}</span>
+                                    <div className="flex-1 bg-[#252525] border border-[#333333] rounded-lg p-2 text-center">
+                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Applied</p>
+                                        <p className="text-sm font-bold text-white">{intraOpCoronalBalancingData.additionalLaxity} mm</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className={`w-full p-3 rounded-lg border flex items-center justify-center gap-2 ${simulatedCPAK === longLegResults.cpak ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
-                                <div className={`w-3 h-3 rounded-full ${simulatedCPAK === longLegResults.cpak ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-                                <p className={`text-xs font-bold ${simulatedCPAK === longLegResults.cpak ? 'text-green-500' : 'text-amber-500'}`}>
-                                    {simulatedCPAK === longLegResults.cpak ? 'CPAK Phenotype Successfully Retained' : 'CPAK Phenotype Shift Detected'}
-                                </p>
+                            {/* Coronal Balancing Achieved */}
+                            <div>
+                                <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Coronal Balancing Achieved</p>
+                                <div className="space-y-1">
+                                    <ReportItem label="Lateral Gap" value={`${Number(lateralGap || 0) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut + intraOpCoronalBalancingData.additionalLaxity}mm`} />
+                                    <ReportItem label="Medial Gap" value={`${(selectedSeries ?? 0) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut}mm`} />
+                                </div>
                             </div>
 
-                            <div className="mt-4 grid grid-cols-3 gap-2 w-full">
-                                <div className="bg-black/20 p-2 rounded border border-[#333333]">
-                                    <p className="text-[8px] text-gray-500 font-bold uppercase">Post-Op LDFA</p>
-                                    <p className="text-sm font-black text-white">{simulatedLDFA.toFixed(1)}°</p>
-                                </div>
-                                <div className="bg-black/20 p-2 rounded border border-[#333333]">
-                                    <p className="text-[8px] text-gray-500 font-bold uppercase">Post-Op MPTA</p>
-                                    <p className="text-sm font-black text-white">{simulatedMPTA.toFixed(1)}°</p>
-                                </div>
-                                <div className="bg-black/20 p-2 rounded border border-[#333333]">
-                                    <p className="text-[8px] text-gray-500 font-bold uppercase">Post-Op AHKA</p>
-                                    <p className="text-sm font-black text-white">{simulatedAHKA.toFixed(1)}°</p>
-                                </div>
+                            {/* Post Operative CPAK */}
+                            <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                                <span className="text-gray-400 text-sm font-medium">Post Operative CPAK</span>
+                                <span className="text-lg font-extrabold text-[#ff8fa3]">TYPE {simulatedCPAK}</span>
                             </div>
                         </div>
-                    </div>
-                </ReportCard>
+                    </ReportCard>
+                </div>
             </div>
         </div>
     );

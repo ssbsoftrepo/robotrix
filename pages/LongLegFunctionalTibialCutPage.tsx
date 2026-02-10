@@ -95,6 +95,7 @@ const CuttingBlock: React.FC<{
 const LongLegFunctionalTibialCutPage: React.FC = () => {
     const {
         setPage,
+        setPreviousPage,
         longLegResults,
         tibiaBoundary,
         longLegCoronalBalancingResults,
@@ -187,25 +188,6 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
                 <h2 className="text-3xl font-bold text-[#E0E0E0]">Functional Tibia Cut (Long Leg)</h2>
-                {/* Back Button */}
-                <button
-                    onClick={() => setPage('planner-long-leg-coronal-balancing')}
-                    className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
-                               shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
-                               transition-all duration-300 ease-out
-                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
-                               active:scale-[0.98] flex items-center"
-                >
-                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                        </svg>
-                        BACK
-                    </span>
-                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                </button>
             </div>
 
             <div className="flex flex-col flex-grow relative min-h-0 px-1 relative z-10 overflow-hidden">
@@ -248,7 +230,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                                 <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Laxity Level</p>
                                 <p className="text-md font-black text-white">{lateralLaxity || 'Unknown'}</p>
                                 <button
-                                    onClick={applyLateralLaxity}
+                                    onClick={() => { setPreviousPage('planner-long-leg-functional-tibial-cut'); setPage('planner-long-leg-laxity-check'); }}
                                     className="group relative w-full py-1 bg-[#6D282C] border border-[#893338] rounded-sm 
                                                shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                                transition-all duration-300 ease-out
@@ -384,7 +366,27 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
             </div>
 
             {/* Footer Action Button */}
-            <div className="flex justify-end mt-2 pb-1 shrink-0 px-2 relative z-10">
+            <div className="flex justify-between mt-2 pb-1 shrink-0 px-2 relative z-10">
+                {/* Back Button */}
+                <button
+                    onClick={() => setPage('planner-long-leg-coronal-balancing')}
+                    className="group relative py-2 px-4 bg-[#252525] border border-[#444444] rounded-sm 
+                               shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                               transition-all duration-300 ease-out
+                               hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                               active:scale-[0.98] flex items-center"
+                >
+                    <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-gray-200 tracking-wider group-hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                        BACK
+                    </span>
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                </button>
+
                 <button
                     onClick={() => setPage('simulation')}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
@@ -400,8 +402,8 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                             <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                     </span>
-                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                 </button>
             </div>
         </div>
