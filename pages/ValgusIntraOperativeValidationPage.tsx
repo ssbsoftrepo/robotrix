@@ -51,7 +51,7 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-red-900/5 rounded-full blur-[150px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10 border-b border-[#333333] bg-black/40">
-                <h2 className="text-xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-Operative Input Screen (Valgus)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-Operative Input Screen (Valgus)</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-[25fr_45fr_30fr] gap-2 min-h-0 px-2 relative z-10">
@@ -62,10 +62,10 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                         <div className="w-full flex justify-center mb-3">
                             <span className="px-4 py-1.5 rounded-sm text-xs font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">Actual Gaps</span>
                         </div>
-                        <p className="text-gray-300 text-base font-bold text-center leading-relaxed mb-2">
+                        <p className="text-gray-300 text-xl font-bold  leading-relaxed mb-2">
                             1. Assess the Actual medial and lateral extensor gaps
                         </p>
-                        <p className="text-gray-300 text-base font-bold text-center leading-relaxed">
+                        <p className="text-gray-300 text-xl font-bold  leading-relaxed">
                             2. Measure the mediolateral tibial width using tibial calipers
                         </p>
                     </div>
@@ -76,31 +76,31 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Medial Gap (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-12 h-12 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-4xl font-black text-white">{medialGap}</span>
+                                        <span className="text-2xl font-black text-white">{medialGap}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-12 h-12 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Lateral Gap (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('lateralGap', -1)} className="w-12 h-12 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('lateralGap', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-4xl font-black text-white">{lateralGap}</span>
+                                        <span className="text-2xl font-black text-white">{lateralGap}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('lateralGap', 1)} className="w-12 h-12 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('lateralGap', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Mid Tibia Width (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-12 h-12 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-4xl font-black text-white">{tibiaWidth}</span>
+                                        <span className="text-2xl font-black text-white">{tibiaWidth}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-12 h-12 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
                                 </div>
                             </div>
                         </div>
@@ -173,29 +173,23 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                             </div>
 
                             {/* Revised Cut Info */}
-                            <div className="mt-auto bg-black/40 p-5 rounded-xl border border-[#333333]">
-                                <p className="text-[#ff8fa3] text-sm font-black uppercase tracking-widest mb-4 border-b border-[#ff8fa3]/20 pb-2 italic">Revised Varus Formula</p>
-                                <div className="space-y-4">
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-500">Correction Factor (C):</span>
-                                            <span className="text-white font-black text-lg">{C.toFixed(2)}</span>
-                                        </div>
-                                        <p className="text-[10px] text-gray-600 leading-tight italic">
-                                            ( {tibiaWidth} / 70 ) × 1.2 = {C.toFixed(2)} mm per 1°
-                                        </p>
-                                    </div>
+                            <div className="mt-auto bg-[#0a0a0a] border border-[#d32f2f] rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-[#d32f2f]/5 group-hover:bg-[#d32f2f]/10 transition-colors duration-500" />
 
-                                    <div className="pt-3 border-t border-white/5">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-100 text-sm font-bold">Revised Varus Cut (θ):</span>
-                                            <span className="text-[#ff8fa3] text-2xl font-black">{revisedVarusCut.toFixed(2)}°</span>
-                                        </div>
-                                        <p className="text-[10px] text-gray-600 leading-tight italic mt-1">
-                                            ( {thickness} - {medialGap} ) / {C.toFixed(2)}
-                                        </p>
-                                    </div>
+                                <h3 className="text-[#F59E0B] text-xs font-black uppercase tracking-[0.2em] mb-4 relative z-10 text-center">
+                                    Revised Functional Tibia Cut (θ)
+                                </h3>
+
+                                <div className="flex items-start relative z-10 mb-4">
+                                    <span className="text-7xl font-black text-white tracking-tighter leading-none">
+                                        {Math.round(revisedVarusCut)}
+                                    </span>
+                                    <span className="text-3xl font-black text-[#F59E0B] mt-1 ml-1">°</span>
                                 </div>
+
+                                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider text-center relative z-10 max-w-[90%]">
+                                    Calculated using patient-specific tibial width
+                                </p>
                             </div>
                         </div>
                     </div>
