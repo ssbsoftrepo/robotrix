@@ -46,11 +46,14 @@ const IntraOperativeValidationPage: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col h-[44rem] overflow-hidden bg-[#0A0A0A]">
-            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-red-900/5 rounded-full blur-[150px] pointer-events-none" />
+        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+            {/* Cinematic Lighting */}
+            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+            <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10 border-b border-[#333333] bg-black/40">
-                <h2 className="text-xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-Operative Input Screen</h2>
+            {/* Header */}
+            <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Intra-Operative Input Screen</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-[25fr_45fr_30fr] gap-2 min-h-0 px-2 relative z-10">
@@ -112,15 +115,15 @@ const IntraOperativeValidationPage: React.FC = () => {
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
                         <div className="w-full flex flex-col items-center z-20 mb-2">
-                            <span className="px-2 py-0.5 rounded-sm text-[8px] font-black bg-[#333333] text-gray-400 tracking-widest uppercase mb-2">ANTICIPATED GAPS</span>
-                            <div className="flex gap-16">
-                                <div className="text-center">
+                            <span className="px-2 py-0.5 rounded-sm text-[10px] font-black bg-[#333333] text-gray-400 tracking-widest uppercase mb-2">ANTICIPATED GAPS</span>
+                            <div className="flex gap-45">
+                                <div className="text-left">
                                     <p className="text-gray-200 text-xl font-black">{anticipatedLateralGap}mm</p>
-                                    <p className="text-gray-500 text-[9px] font-black uppercase">LATERAL</p>
+                                    <p className="text-gray-500 text-[12px] font-black uppercase">LATERAL</p>
                                 </div>
-                                <div className="text-center">
+                                <div className="text-left">
                                     <p className="text-gray-200 text-xl font-black">{anticipatedMedialGap}mm</p>
-                                    <p className="text-gray-500 text-[9px] font-black uppercase">MEDIAL</p>
+                                    <p className="text-gray-500 text-[12px] font-black uppercase">MEDIAL</p>
                                 </div>
                             </div>
                         </div>
@@ -129,7 +132,7 @@ const IntraOperativeValidationPage: React.FC = () => {
                         <div className="flex items-center justify-center gap-4 flex-grow w-full">
                             {/* Left Circle - Actual Lateral */}
                             <div className="flex flex-col items-center shrink-0">
-                                <p className="text-gray-500 text-[9px] font-bold uppercase tracking-wider mb-2">Actual Lateral</p>
+                                <p className="text-gray-500 text-[12px] font-bold uppercase tracking-wider mb-2">Actual Lateral</p>
                                 <div className={`w-24 h-24 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(lateralDiff)}`}>
                                     <span className="text-3xl font-black leading-tight">{lateralGap}</span>
                                     <span className="text-xs font-bold opacity-60">mm</span>
@@ -138,12 +141,12 @@ const IntraOperativeValidationPage: React.FC = () => {
 
                             {/* Center - Bone Image */}
                             <div className="flex-grow flex items-center justify-center max-h-full">
-                                <img src="/intraval.png" alt="Joint Model" className="max-h-[420px] object-contain" />
+                                <img src="/intraval.png" alt="Joint Model" className="max-h-full max-w-full object-contain" />
                             </div>
 
                             {/* Right Circle - Actual Medial */}
                             <div className="flex flex-col items-center shrink-0">
-                                <p className="text-gray-500 text-[9px] font-bold uppercase tracking-wider mb-2">Actual Medial</p>
+                                <p className="text-gray-500 text-[12px] font-bold uppercase tracking-wider mb-2">Actual Medial</p>
                                 <div className={`w-24 h-24 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(medialDiff)}`}>
                                     <span className="text-3xl font-black leading-tight">{medialGap}</span>
                                     <span className="text-xs font-bold opacity-60">mm</span>
@@ -175,7 +178,7 @@ const IntraOperativeValidationPage: React.FC = () => {
                             <div className="mt-auto bg-[#0a0a0a] border border-[#d32f2f] rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
                                 <div className="absolute inset-0 bg-[#d32f2f]/5 group-hover:bg-[#d32f2f]/10 transition-colors duration-500" />
 
-                                <h3 className="text-[#F59E0B] text-xs font-black uppercase tracking-[0.2em] mb-4 relative z-10 text-center">
+                                <h3 className="text-[#F59E0B] text-md font-black uppercase tracking-[0.2em] mb-4 relative z-10 text-center">
                                     Revised Functional Tibia Cut (θ)
                                 </h3>
 
@@ -186,7 +189,7 @@ const IntraOperativeValidationPage: React.FC = () => {
                                     <span className="text-3xl font-black text-[#F59E0B] mt-1 ml-1">°</span>
                                 </div>
 
-                                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-wider text-center relative z-10 max-w-[90%]">
+                                <p className="text-gray-400 text-[14px] font-bold uppercase tracking-wider text-center relative z-10 max-w-[90%]">
                                     Calculated using patient-specific tibial width
                                 </p>
                             </div>

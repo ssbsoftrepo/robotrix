@@ -109,9 +109,9 @@ const App: React.FC = () => {
     }
 
     return (
-        <div className="min-h-[calc(100vh)] flex flex-col">
-            <div className="flex flex-grow">
-                <main className="flex-1 p-1 md:p-1 overflow-hidden relative flex flex-col">
+        <div className="h-screen flex flex-col overflow-hidden">
+            <div className="flex flex-1 min-h-0">
+                <main className="flex-1 p-1 md:p-1 overflow-hidden relative flex flex-col min-h-0">
                     {renderPage()}
                 </main>
             </div>

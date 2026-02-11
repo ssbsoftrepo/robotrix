@@ -39,12 +39,12 @@ const CuttingBlock: React.FC<{
         className={`relative flex flex-col items-center transition-all duration-300 cursor-pointer w-full ${isSelected ? 'scale-105 z-10' : 'opacity-60 hover:opacity-100'}`}
     >
         {isRecommended && (
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[8px] font-black px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider border border-[#ff8fa3]/30">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
                 RECOMMENDED
             </div>
         )}
 
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[70px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[78px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -177,18 +177,21 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col h-[44rem] overflow-hidden bg-[#0A0A0A]">
-            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-red-900/5 rounded-full blur-[150px] pointer-events-none" />
+        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+            {/* Cinematic Lighting */}
+            <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
+            <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10 border-b border-[#333333] bg-black/40">
-                <h2 className="text-xl font-bold text-[#E0E0E0] tracking-tighter uppercase">Intra-operative Coronal Balancing</h2>
+            {/* Header */}
+            <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">Intra-operative Coronal Balancing</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-[25fr_50fr_25fr] gap-2 min-h-0 p-2 relative z-10">
                 {/* Column 1: Simulation Controls */}
                 <div className="h-full flex flex-col gap-2">
                     <div className="bg-[#111111] border border-[#222222] p-4 rounded-xl flex flex-col gap-6 h-full shadow-2xl">
-                        <p className="text-[#ff8fa3] text-[11px] font-black leading-tight uppercase tracking-widest italic opacity-80">
+                        <p className="text-gray-300 text-md font-black leading-tight uppercase tracking-widest italic opacity-80">
                             Aim for lateral space to match the minimum composite thickness of your TKR system
                         </p>
 
@@ -229,7 +232,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="pt-4 flex flex-col items-center gap-3">
+                            <div className="pt-2 flex flex-col items-center gap-3">
                                 <button onClick={handleCheckLaxity} className="w-full py-2 bg-[#6D282C] text-white text-[10px] font-black rounded-sm border border-[#893338] shadow-lg">CHECK LATERAL LAXITY</button>
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-gray-500 uppercase">Laxity Level:</span>
@@ -272,8 +275,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
                                     {/* Femur horizontal cut line - at bottom edge of femur */}
                                     <line
-                                        x1="10" y1={`${58 - additionalFemurCut * 1}`}
-                                        x2="90" y2={`${58 - additionalFemurCut * 1}`}
+                                        x1="10" y1={`${56 - additionalFemurCut * 1}`}
+                                        x2="90" y2={`${56 - additionalFemurCut * 1}`}
                                         stroke="#6D282C" strokeWidth="1.5"
                                     />
 
@@ -322,13 +325,13 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                         </div>
 
                         {/* Analysis Footer */}
-                        <div className="w-full flex justify-between items-end mt-2">
+                        <div className="w-full flex justify-between items-end mt-1">
                             <div className="flex flex-col items-start gap-1">
-                                <p className="text-[8px] text-gray-600 font-black uppercase tracking-[0.2em]">Phenotype Retention Analysis</p>
-                                <p className="text-[10px] font-black text-green-500 uppercase px-2 py-0.5 bg-green-500/10 border border-green-500/30">Constitutional Match</p>
+                                <p className="text-[12px] text-gray-600 font-black uppercase tracking-[0.2em]">Phenotype Retention Analysis</p>
+                                <p className="text-[14px] font-black text-green-500 uppercase px-2 py-0.5 bg-green-500/10 border border-green-500/30">Constitutional Match</p>
                             </div>
                             <div className="h-10 w-20 bg-green-500 flex items-center justify-center rounded-sm">
-                                <span className="text-[10px] font-black text-black">CPAK {simulatedCPAK}</span>
+                                <span className="text-[12px] font-black text-black">CPAK {simulatedCPAK}</span>
                             </div>
                         </div>
                     </div>
@@ -337,21 +340,26 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                 <div className="h-full flex flex-col gap-2">
                     <div className="bg-[#111111] border border-[#222222] p-4 rounded-xl flex flex-col gap-4 h-full">
                         <div className="bg-[#6D282C] py-4 px-2 rounded-sm text-center border-t-2 border-[#ff8fa3]">
-                            <p className="text-[8px] text-white/60 font-black uppercase tracking-widest mb-1">Revised Functional Tibia Cut (θ)</p>
-                            <p className="text-5xl font-black text-white">{recommendedTheta}°</p>
+                            <p className="text-[12px] text-white/60 font-black uppercase tracking-widest mb-1">Revised Functional Tibia Cut (θ)</p>
+                            <p className="text-3xl font-black text-white">{recommendedTheta}°</p>
                         </div>
 
                         <div className="flex-grow flex flex-col gap-3">
-                            <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-2 tracking-widest">Robotrix+ Universal Jigs</p>
-                            <p className="text-[8px] text-gray-600 text-center uppercase -mt-2">Click block to simulate</p>
+                            <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
+                            <p className="text-[8px] text-gray-600 text-center uppercase -mt-1">Click block to simulate</p>
 
-                            <div className="space-y-4 overflow-y-auto pr-1 py-1">
+                            <div className="space-y-4 overflow-y-auto pr-1 py-2">
                                 {/* Neutral jig */}
                                 <div className="px-2">
                                     <button
                                         onClick={() => setSelectedJig(0)}
-                                        className={`w-full py-2.5 rounded-sm border transition-all flex flex-col items-center bg-[#1A1A1A] ${selectedJig === 0 ? 'border-[#ff8fa3] shadow-lg scale-[1.02]' : 'border-[#333333] opacity-60 hover:opacity-100'}`}
+                                        className={`w-full py-2.5 rounded-sm border transition-all flex flex-col items-center bg-[#1A1A1A] relative ${selectedJig === 0 ? 'border-[#ff8fa3] shadow-lg scale-[1.02]' : 'border-[#333333] opacity-60 hover:opacity-100'}`}
                                     >
+                                        {recommendedTheta === 0 && (
+                                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
+                                                RECOMMENDED
+                                            </div>
+                                        )}
                                         <span className="text-sm font-black text-white uppercase">0 Degree</span>
                                         <span className="text-[8px] font-bold text-gray-500 uppercase">Neutral Cut</span>
                                     </button>
