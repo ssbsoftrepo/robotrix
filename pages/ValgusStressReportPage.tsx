@@ -133,7 +133,7 @@ const ValgusStressReportPage: React.FC = () => {
     // Post-Op Simulation (Re-calculated for report)
     const nativeLDFA = ldfa ?? 87;
     const nativeMPTA = mpta ?? 87;
-    const initialSimFemoralCut = 3;
+    const initialSimFemoralCut = valgusCoronalBalancingResults.simFemoralCut ?? 3;
     const initialSimTibialCut = selectedDegree;
 
     const simulatedLDFA = nativeLDFA + initialSimFemoralCut + intraOpCoronalBalancingData.additionalFemurCut;

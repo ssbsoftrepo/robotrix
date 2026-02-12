@@ -1,5 +1,4 @@
-
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 
 // Helper component for statically selected matrix options
@@ -134,6 +133,8 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
         setPage,
         valgusCanvasDataUrl,
         valgusResults,
+        valgusCoronalBalancingResults, setValgusCoronalBalancingResults,
+        valgusFunctionalCutDegree, setValgusFunctionalCutDegree
     } = useAppContext();
 
     const getAnticipatedTibiaCut = () => {
@@ -141,11 +142,11 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
         if (mpta === null) return '--';
 
         let varusCut = 0;
-        if (mpta > 90) varusCut = 0;       // Valgoid tibia: MPTA > 90°
-        else if (mpta > 88) varusCut = 1;  // Neutral tibia: 88 < MPTA ≤ 90°
-        else if (mpta > 87) varusCut = 2;  // Mild varoid tibia: 87 < MPTA ≤ 88°
-        else if (mpta > 85) varusCut = 3;  // Moderate varoid tibia: 85 < MPTA ≤ 87°
-        else varusCut = 4;                 // Significant varoid tibia: ≤ 85°
+        if (mpta <= 85) varusCut = 4;
+        else if (mpta <= 87) varusCut = 3;
+        else if (mpta <= 88) varusCut = 2;
+        else if (mpta <= 90) varusCut = 1;
+        // MPTA > 90 = 0° (valgoid tibia / neutral cut)
 
         // Apply basic matrix constraint (0-3 for Valgus per logic)
         if (varusCut > 3) return "3° varus cut (clamped to Basic Matrix)";
@@ -170,6 +171,32 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
     const anticipatedTibiaCut = getAnticipatedTibiaCut();
     const recommendedFemoralCut = getClampedFemoralCut();
+
+    // Sync calculated values to context for downstream pages
+    useEffect(() => {
+        // Parse Femoral Cut
+        let numericFemoralCut = 3; // Default
+        if (recommendedFemoralCut !== '--') {
+            const match = recommendedFemoralCut.match(/(\d+)°/);
+            if (match) numericFemoralCut = parseInt(match[1]);
+        }
+
+        // Parse Tibial Cut
+        let numericTibialCut = 0;
+        if (anticipatedTibiaCut !== '--') {
+            const match = anticipatedTibiaCut.match(/(\d+)°/);
+            if (match) numericTibialCut = parseInt(match[1]);
+        }
+
+        // Update if different
+        if (valgusCoronalBalancingResults.simFemoralCut !== numericFemoralCut) {
+            setValgusCoronalBalancingResults({ ...valgusCoronalBalancingResults, simFemoralCut: numericFemoralCut });
+        }
+
+        if (valgusFunctionalCutDegree !== numericTibialCut) {
+            setValgusFunctionalCutDegree(numericTibialCut);
+        }
+    }, [recommendedFemoralCut, anticipatedTibiaCut, valgusCoronalBalancingResults, setValgusCoronalBalancingResults, valgusFunctionalCutDegree, setValgusFunctionalCutDegree]);
 
     return (
         <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">

@@ -775,29 +775,30 @@ const LongLegPlannerPage: React.FC = () => {
         setLongLegCanvasDataUrl(null);
     };
 
-    const getCanvasPos = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
-        return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-    };
+    const getStableCoordinates = useCallback((clientX: number, clientY: number) => {
+        const viewer = viewerRef.current;
+        const canvas = canvasRef.current;
+        if (!viewer || !canvas) return { x: 0, y: 0 };
 
-    const getImageCoordinates = (e: React.MouseEvent | React.TouchEvent, container: HTMLDivElement) => {
-        const rect = container.getBoundingClientRect();
-        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-        const containerCenterX = rect.width / 2;
-        const containerCenterY = rect.height / 2;
-        const relX = clientX - rect.left;
-        const relY = clientY - rect.top;
-        const x = (relX - containerCenterX - panOffset.x) / zoom + containerCenterX;
-        const y = (relY - containerCenterY - panOffset.y) / zoom + containerCenterY;
+        const viewerRect = viewer.getBoundingClientRect();
+        const viewerCenterX = viewerRect.left + viewerRect.width / 2;
+        const viewerCenterY = viewerRect.top + viewerRect.height / 2;
+
+        const contentCenterX = viewerCenterX + panOffset.x;
+        const contentCenterY = viewerCenterY + panOffset.y;
+
+        const x = (clientX - contentCenterX) / zoom + canvas.width / 2;
+        const y = (clientY - contentCenterY) / zoom + canvas.height / 2;
+
         return { x, y };
-    };
+    }, [panOffset, zoom]);
 
     const handleViewerTap = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
         if (!viewerRef.current || !activeLandmarkRef.current) return;
         e.preventDefault();
-        const { x, y } = getImageCoordinates(e, viewerRef.current);
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const { x, y } = getStableCoordinates(clientX, clientY);
         setLongLegLandmarks(prev => ({ ...prev, [activeLandmarkRef.current!]: { x, y } }));
     };
 
@@ -817,7 +818,7 @@ const LongLegPlannerPage: React.FC = () => {
     }, [longLegLandmarks]);
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
+        const pos = getStableCoordinates(e.clientX, e.clientY);
         const hitRadiusSq = (BASE_HANDLE_RADIUS + 40) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
@@ -831,11 +832,10 @@ const LongLegPlannerPage: React.FC = () => {
 
     const handleMouseMove = useCallback((e: MouseEvent) => {
         if (!draggingPointRef.current) return;
-        const canvas = canvasRef.current; if (!canvas) return;
-        const pos = getCanvasPos(canvas, e.clientX, e.clientY);
+        const pos = getStableCoordinates(e.clientX, e.clientY);
         setLongLegLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip(pos);
-    }, [setLongLegLandmarks, updatePip]);
+    }, [setLongLegLandmarks, updatePip, getStableCoordinates]);
 
     const handleMouseUp = useCallback(() => { draggingPointRef.current = null; captureCanvasState(); }, [captureCanvasState]);
 
@@ -879,8 +879,7 @@ const LongLegPlannerPage: React.FC = () => {
         }
 
         const touch = e.touches[0]; if (!touch) return;
-        const canvas = canvasRef.current; if (!canvas) return;
-        const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
+        const pos = getStableCoordinates(touch.clientX, touch.clientY);
         const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
@@ -918,11 +917,10 @@ const LongLegPlannerPage: React.FC = () => {
         if (!draggingPointRef.current) return;
         e.preventDefault();
         const touch = e.touches[0];
-        const canvas = canvasRef.current; if (!canvas) return;
-        const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
+        const pos = getStableCoordinates(touch.clientX, touch.clientY);
         setLongLegLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip(pos);
-    }, [zoom, panOffset, setLongLegLandmarks, updatePip]);
+    }, [zoom, panOffset, setLongLegLandmarks, updatePip, getStableCoordinates]);
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
@@ -984,7 +982,7 @@ const LongLegPlannerPage: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-4 flex-grow min-h-0 px-4 relative z-10">
                 {/* LEFT: X-Ray Canvas (75%) */}
-                <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-240px)] flex items-center justify-center">
+                <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-200px)] flex items-center justify-center">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
                     {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
                     <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
@@ -1088,7 +1086,7 @@ const LongLegPlannerPage: React.FC = () => {
                     )}
                 </div>
                 {/* RIGHT: Control & Instrument Panel (25%) */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-240px)]">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-200px)]">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
                     {/* Upload Section */}
@@ -1194,7 +1192,7 @@ const LongLegPlannerPage: React.FC = () => {
             </div>
 
             {/* Footer Action */}
-            <div className="flex justify-end px-4 pb-4 relative z-10">
+            <div className="flex justify-end px-2 pb-2 relative z-10">
                 <button
                     onClick={() => setPage('results-analysis')}
                     disabled={!longLegResults.cpak || longLegResults.cpak === '--'}

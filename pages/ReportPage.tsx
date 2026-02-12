@@ -72,7 +72,7 @@ const ReportPage: React.FC = () => {
     // Logic: Post-Op Simulation (Re-calculated for report)
     const nativeLDFA = longLegResults.ldfa ?? 87;
     const nativeMPTA = longLegResults.mpta ?? 87;
-    const initialSimFemoralCut = 3;
+    const initialSimFemoralCut = longLegCoronalBalancingResults.simFemoralCut ?? 3;
     const initialSimTibialCut = longLegFunctionalCutDegree ?? 2;
 
     const simulatedLDFA = nativeLDFA + initialSimFemoralCut + intraOpCoronalBalancingData.additionalFemurCut;

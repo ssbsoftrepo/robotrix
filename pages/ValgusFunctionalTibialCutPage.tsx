@@ -94,6 +94,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
         lateralLaxity,
         valgusFunctionalTibialCutImage,
         setValgusFunctionalTibialCutImage,
+        valgusFunctionalCutDegree,
         setValgusFunctionalCutDegree,
         valgusFunctionalLinesY,
         setValgusFunctionalLinesY
@@ -101,7 +102,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
 
     // Line Position (Static)
-    const [linesYPercent, setLinesYPercent] = useState<number>(32); // Vertical position as %
+    const [linesYPercent, setLinesYPercent] = useState<number>(31); // Vertical position as %
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut based on Valgus results
@@ -125,14 +126,19 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
     const [selectedDegree, setSelectedDegree] = useState<number>(anticipatedVarusCut || 2);
 
     useEffect(() => {
-        if (anticipatedVarusCut > 0) {
+        // If we already have a functional cut degree from Analysis (Context), use it.
+        // Otherwise, fall back to calculation.
+        if (valgusFunctionalCutDegree !== null && valgusFunctionalCutDegree !== undefined) {
+            setCurrentRecommendation(valgusFunctionalCutDegree);
+            setSelectedDegree(valgusFunctionalCutDegree);
+        } else if (anticipatedVarusCut > 0) {
             setCurrentRecommendation(anticipatedVarusCut);
             setSelectedDegree(anticipatedVarusCut);
         } else {
             setCurrentRecommendation(2);
             setSelectedDegree(2);
         }
-    }, [anticipatedVarusCut]);
+    }, [anticipatedVarusCut, valgusFunctionalCutDegree]);
 
     useEffect(() => {
         setValgusFunctionalCutDegree(selectedDegree);

@@ -26,8 +26,8 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
 
     const getStatusColor = (diff: number) => {
         if (diff === 0) return 'text-green-500 border-green-500 bg-green-500/10';
-        if (Math.abs(diff) <= 1) return 'text-amber-500 border-amber-500 bg-amber-500/10';
-        return 'text-red-500 border-red-500 bg-red-500/10';
+        if (diff > 0) return 'text-amber-500 border-amber-500 bg-amber-500/10'; // Loose
+        return 'text-red-500 border-red-500 bg-red-500/10'; // Tight
     };
 
     const getGapStatus = (diff: number) => {
@@ -59,16 +59,16 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
 
             <div className="flex-grow grid grid-cols-[25fr_45fr_30fr] gap-2 min-h-0 px-2 relative z-10">
                 {/* Column 1: Inputs & Instructions */}
-                <div className="h-full flex flex-col gap-4 overflow-hidden">
+                <div className="h-full flex flex-col gap-2 overflow-hidden">
                     {/* Instructions Section */}
                     <div className="bg-[#1a1a1a] border border-[#333333] p-5 rounded-xl">
                         <div className="w-full flex justify-center mb-3">
                             <span className="px-4 py-1.5 rounded-sm text-xs font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">Actual Gaps</span>
                         </div>
-                        <p className="text-gray-300 text-xl font-bold  leading-relaxed mb-2">
+                        <p className="text-gray-300 text-lg font-bold  leading-relaxed mb-2">
                             1. Assess the Actual medial and lateral extensor gaps
                         </p>
-                        <p className="text-gray-300 text-xl font-bold  leading-relaxed">
+                        <p className="text-gray-300 text-lg font-bold  leading-relaxed">
                             2. Measure the mediolateral tibial width using tibial calipers
                         </p>
                     </div>
@@ -111,7 +111,7 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Visual Comparison */}
-                <div className="h-full flex flex-col gap-2 overflow-hidden">
+                <div className="h-full flex flex-col gap-1 overflow-hidden">
                     <div className="relative flex-grow bg-[#1a1a1a] border border-[#333333] rounded-xl flex flex-col items-center justify-start p-4">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
@@ -142,7 +142,7 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
 
                             {/* Center - Bone Image */}
                             <div className="flex-grow flex items-center justify-center max-h-full">
-                                <img src="/intraval.png" alt="Joint Model" className="max-h-full max-w-full object-contain" />
+                                <img src="/intraval.png" alt="Joint Model" className="max-h-[60vh] max-w-full object-contain" />
                             </div>
 
                             {/* Right Circle - Actual Medial */}

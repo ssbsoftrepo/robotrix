@@ -102,6 +102,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
         lateralLaxity,
         longLegFunctionalTibialCutImage,
         setLongLegFunctionalTibialCutImage,
+        longLegFunctionalCutDegree,
         setLongLegFunctionalCutDegree,
         longLegFunctionalLinesY,
         setLongLegFunctionalLinesY
@@ -109,7 +110,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
 
 
     // Line Dragging State
-    const [linesYPercent, setLinesYPercent] = useState<number>(32);
+    const [linesYPercent, setLinesYPercent] = useState<number>(31);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Logic for calculating the anticipated tibial cut
@@ -135,14 +136,19 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
     const [selectedDegree, setSelectedDegree] = useState<number>(anticipatedVarusCut || 2);
 
     useEffect(() => {
-        if (anticipatedVarusCut > 0) {
+        // If we already have a functional cut degree from Analysis (Context), use it.
+        // Otherwise, fall back to calculation.
+        if (longLegFunctionalCutDegree !== null && longLegFunctionalCutDegree !== undefined) {
+            setCurrentRecommendation(longLegFunctionalCutDegree);
+            setSelectedDegree(longLegFunctionalCutDegree);
+        } else if (anticipatedVarusCut > 0) {
             setCurrentRecommendation(anticipatedVarusCut);
             setSelectedDegree(anticipatedVarusCut);
         } else {
             setCurrentRecommendation(2);
             setSelectedDegree(2);
         }
-    }, [anticipatedVarusCut]);
+    }, [anticipatedVarusCut, longLegFunctionalCutDegree]);
 
     useEffect(() => {
         setLongLegFunctionalCutDegree(selectedDegree);

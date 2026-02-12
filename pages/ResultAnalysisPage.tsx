@@ -165,12 +165,15 @@ const ResultAnalysisPage: React.FC = () => {
         longLegResults,
         femurBoundary, setFemurBoundary,
         tibiaBoundary, setTibiaBoundary,
+        longLegCoronalBalancingResults, setLongLegCoronalBalancingResults,
+        longLegFunctionalCutDegree, setLongLegFunctionalCutDegree
     } = useAppContext();
 
     useEffect(() => {
         if (femurBoundary === null) setFemurBoundary('expanded');
         if (tibiaBoundary === null) setTibiaBoundary('expanded');
     }, [femurBoundary, tibiaBoundary, setFemurBoundary, setTibiaBoundary]);
+
     const getFemurClassification = (ldfa: number) => {
         if (ldfa > 92) return { type: 'Significant varoid femur', cut: '2° valgus cut' };
         if (ldfa > 91) return { type: 'Mild varoid femur', cut: '3° valgus cut' };
@@ -210,8 +213,34 @@ const ResultAnalysisPage: React.FC = () => {
     const displayFemoralCut = getFemoralCut();
     const displayTibialCut = getTibialCut();
 
-    const showLdfaWarning = longLegResults.ldfa !== null && longLegResults.ldfa < 86;
-    const showMptaWarning = longLegResults.mpta !== null && longLegResults.mpta < 84;
+    // Sync calculated values to context for downstream pages
+    useEffect(() => {
+        // Parse Femoral Cut
+        let numericFemoralCut = 3; // Default
+        if (displayFemoralCut !== '--') {
+            const match = displayFemoralCut.match(/(\d+)°/);
+            if (match) numericFemoralCut = parseInt(match[1]);
+        }
+
+        // Parse Tibial Cut
+        let numericTibialCut = 0;
+        if (displayTibialCut !== '--') {
+            const match = displayTibialCut.match(/(\d+)°/);
+            if (match) numericTibialCut = parseInt(match[1]);
+        }
+
+        // Update if different
+        if (longLegCoronalBalancingResults.simFemoralCut !== numericFemoralCut) {
+            setLongLegCoronalBalancingResults({ ...longLegCoronalBalancingResults, simFemoralCut: numericFemoralCut });
+        }
+
+        if (longLegFunctionalCutDegree !== numericTibialCut) {
+            setLongLegFunctionalCutDegree(numericTibialCut);
+        }
+    }, [displayFemoralCut, displayTibialCut, longLegCoronalBalancingResults, setLongLegCoronalBalancingResults, longLegFunctionalCutDegree, setLongLegFunctionalCutDegree]);
+
+    const showLdfaWarning = longLegResults.ldfa !== null && longLegResults.ldfa <= 86;
+    const showMptaWarning = longLegResults.mpta !== null && longLegResults.mpta <= 84;
 
     return (
         <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">

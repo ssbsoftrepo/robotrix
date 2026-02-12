@@ -276,6 +276,7 @@ const PostOpValgusPlanner: React.FC = () => {
     const localResultsRef = useRef(results);
     useEffect(() => { localResultsRef.current = results; }, [results]);
     const prevLegSideRef = useRef(legSide);
+    const viewerRef = useRef<HTMLDivElement>(null);
 
     // Restore visibleLandmarkSets from existing landmarks
     useEffect(() => {
@@ -572,15 +573,23 @@ const PostOpValgusPlanner: React.FC = () => {
 
 
     // Update getCanvasPos to account for DPR and Scale
-    const getCanvasPos = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
-    };
-    const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        const pos = getCanvasPos(e.currentTarget, e.clientX, e.clientY);
+    const getStableCoordinates = useCallback((clientX: number, clientY: number) => {
+        const viewer = viewerRef.current;
+        const canvas = canvasRef.current;
+        if (!viewer || !canvas) return { x: 0, y: 0 };
+
+        const viewerRect = viewer.getBoundingClientRect();
+        const viewerCenterX = viewerRect.left + viewerRect.width / 2;
+        const viewerCenterY = viewerRect.top + viewerRect.height / 2;
+
+        const x = (clientX - viewerCenterX) + canvas.width / 2;
+        const y = (clientY - viewerCenterY) + canvas.height / 2;
+
+        return { x, y };
+    }, []);
+
+    const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+        const pos = getStableCoordinates(e.clientX, e.clientY);
         const hitRadiusSq = (BASE_HANDLE_RADIUS + 70) ** 2; // Increased sensitivity for gloves
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
@@ -597,13 +606,14 @@ const PostOpValgusPlanner: React.FC = () => {
         if (closestKey) {
             draggingPointRef.current = closestKey;
         }
-    };
+    }, [landmarks, getStableCoordinates]);
+
     const handleMouseMove = useCallback((e: MouseEvent) => {
-        if (!draggingPointRef.current || !canvasRef.current) return;
-        const pos = getCanvasPos(canvasRef.current, e.clientX, e.clientY);
+        if (!draggingPointRef.current) return;
+        const pos = getStableCoordinates(e.clientX, e.clientY);
         setLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip();
-    }, [updatePip]);
+    }, [updatePip, getStableCoordinates]);
 
     const handleMouseUp = useCallback(() => { draggingPointRef.current = null; }, []);
 
@@ -611,9 +621,7 @@ const PostOpValgusPlanner: React.FC = () => {
         e.preventDefault();
         const touch = e.touches[0];
         if (!touch) return;
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const pos = getCanvasPos(canvas, touch.clientX, touch.clientY);
+        const pos = getStableCoordinates(touch.clientX, touch.clientY);
         const hitRadiusSq = (BASE_HANDLE_RADIUS + 80) ** 2; // Increased sensitivity for gloves
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
@@ -633,14 +641,14 @@ const PostOpValgusPlanner: React.FC = () => {
     };
 
     const handleTouchMove = useCallback((e: TouchEvent) => {
-        if (!draggingPointRef.current || !canvasRef.current) return;
+        if (!draggingPointRef.current) return;
         e.preventDefault(); // Critical: stops scrolling
         const touch = e.touches[0];
         if (!touch) return;
-        const pos = getCanvasPos(canvasRef.current, touch.clientX, touch.clientY);
+        const pos = getStableCoordinates(touch.clientX, touch.clientY);
         setLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip();
-    }, [updatePip]);
+    }, [updatePip, getStableCoordinates]);
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
@@ -685,7 +693,7 @@ const PostOpValgusPlanner: React.FC = () => {
                 {/* Viewer - Left side (75%) */}
                 <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     {postOpValgusImage ? (<>
-                        <div className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
+                        <div ref={viewerRef} className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
                             {/* Angle Values - Always displayed on Right Side */}
                             {(results.obliquity != null || results.ldfa != null || results.mpta != null) && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
