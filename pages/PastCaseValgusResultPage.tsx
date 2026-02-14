@@ -4,8 +4,8 @@ import { useAppContext } from '../context/AppContext';
 import { Landmarks, Point, ValgusResults, LegSide } from '../types';
 
 // --- Helper Functions ---
-const BASE_HANDLE_RADIUS = 4;
-const BASE_LINE_WIDTH = 3;
+const BASE_HANDLE_RADIUS = 6;
+const BASE_LINE_WIDTH = 4;
 const LANDMARK_COLORS = {
     jointLine: '#007AFF',       // Bright Blue
     femurAnatomicAxis: '#34C759', // Bright Green
@@ -16,6 +16,10 @@ const landmarkInstructions = {
     femurAnatomicAxis: ["Mark mid femur axis."],
     tibiaAnatomicAxis: ["Mark mid tibia axis."],
 };
+
+import ReactDOM from 'react-dom';
+
+// ... (existing imports)
 
 // --- CAMERA MODAL ---
 const CameraModal: React.FC<{
@@ -29,6 +33,12 @@ const CameraModal: React.FC<{
     const cropBoxRef = useRef<HTMLDivElement>(null);
     const [activeInteraction, setActiveInteraction] = useState<string | null>(null);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
     const stopCamera = useCallback(() => {
         if (streamRef.current) {
@@ -168,10 +178,15 @@ const CameraModal: React.FC<{
         setDragStart({ x: clientX, y: clientY });
     };
 
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div className="bg-[#1e1f20] border border-[#6D282C] p-4 rounded-lg relative w-full max-w-3xl text-center">
+    const handleTouch = (action: () => void) => (e: React.TouchEvent) => {
+        e.preventDefault();
+        action();
+    };
+
+    if (!isOpen || !mounted) return null;
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-[9999] flex items-center justify-center p-4">
+            <div className="bg-[#1e1f20] border border-[#6D282C] p-4 rounded-lg relative w-full max-w-3xl text-center shadow-2xl">
                 {!capturedImage ? (
                     <>
                         <h3 className="text-xl font-semibold mb-4">Live Capture with Alignment Grid</h3>
@@ -180,8 +195,8 @@ const CameraModal: React.FC<{
                             <canvas ref={overlayRef} className="absolute top-0 left-0 w-full h-full"></canvas>
                         </div>
                         <div className="mt-4 flex justify-center space-x-4">
-                            <button onClick={handleCapture} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Capture</button>
-                            <button onClick={handleClose} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
+                            <button onClick={handleCapture} onTouchEnd={handleTouch(handleCapture)} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Capture</button>
+                            <button onClick={handleClose} onTouchEnd={handleTouch(handleClose)} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
                         </div>
                     </>
                 ) : (
@@ -197,14 +212,15 @@ const CameraModal: React.FC<{
                             </div>
                         </div>
                         <div className="mt-4 flex justify-center space-x-4">
-                            <button onClick={handleCropSave} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Finalize Crop</button>
-                            <button onClick={() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); }} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Retake</button>
-                            <button onClick={handleClose} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
+                            <button onClick={handleCropSave} onTouchEnd={handleTouch(handleCropSave)} className="relative px-8 py-3 bg-[#6D282C] border border-[#893338] rounded-sm shadow-[0_4px_20px_rgba(109,40,44,0.4)] transition-all duration-300 ease-out hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98] text-white font-bold tracking-wide">Finalize Crop</button>
+                            <button onClick={() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); }} onTouchEnd={handleTouch(() => { if (capturedImage?.startsWith('blob:')) URL.revokeObjectURL(capturedImage); setCapturedImage(null); })} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Retake</button>
+                            <button onClick={handleClose} onTouchEnd={handleTouch(handleClose)} className="relative px-8 py-3 bg-[#2a2b2c] border border-[#5f6368] rounded-sm shadow-[0_2px_10px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out hover:bg-[#3a3b3c] hover:border-[#777] active:scale-[0.98] text-white font-bold tracking-wide">Cancel</button>
                         </div>
                     </>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 const angleBetweenVectors = (v1: Point, v2: Point) => {
@@ -277,6 +293,23 @@ const PostOpValgusPlanner: React.FC = () => {
     useEffect(() => { localResultsRef.current = results; }, [results]);
     const prevLegSideRef = useRef(legSide);
     const viewerRef = useRef<HTMLDivElement>(null);
+
+    // Zoom and Pan State
+    const [zoom, setZoom] = useState(1);
+    const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const isPanningRef = useRef(false);
+    const panStartRef = useRef({ x: 0, y: 0 });
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 3;
+
+    // Pinch-to-Zoom Refs
+    const initialPinchDistanceRef = useRef<number | null>(null);
+    const initialInitialPinchZoomRef = useRef<number>(1);
+    const initialPanOffsetRef = useRef({ x: 0, y: 0 });
+
+    const zoomIn = () => setZoom(z => Math.min(z + 0.2, MAX_ZOOM));
+    const zoomOut = () => setZoom(z => Math.max(z - 0.2, MIN_ZOOM));
+    const resetZoom = () => { setZoom(1); setPanOffset({ x: 0, y: 0 }); };
 
     // Restore visibleLandmarkSets from existing landmarks
     useEffect(() => {
@@ -463,33 +496,44 @@ const PostOpValgusPlanner: React.FC = () => {
         const jointCenter = (medialJointSpace && lateralJointSpace) ? { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 } : null;
 
         if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace && jointCenter) {
-            ctx.strokeStyle = LANDMARK_COLORS.jointLine; ctx.fillStyle = LANDMARK_COLORS.jointLine; ctx.lineWidth = BASE_LINE_WIDTH;
+            const scaledRadius = BASE_HANDLE_RADIUS / zoom;
+            const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+            ctx.strokeStyle = LANDMARK_COLORS.jointLine; ctx.fillStyle = LANDMARK_COLORS.jointLine; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(medialJointSpace.x, medialJointSpace.y); ctx.lineTo(lateralJointSpace.x, lateralJointSpace.y); ctx.stroke();
-            [medialJointSpace, lateralJointSpace].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, BASE_HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill(); });
+            [medialJointSpace, lateralJointSpace].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill(); });
 
             // Draw M/L labels with background boxes
-            const mOffset = medialJointSpace.x < lateralJointSpace.x ? -30 : 20;
-            const lOffset = lateralJointSpace.x < medialJointSpace.x ? -30 : 20;
+            const baseOffset = 15;
+            const scaledOffset = baseOffset / zoom;
+            const mOffset = medialJointSpace.x < lateralJointSpace.x ? -scaledOffset * 2 : scaledOffset;
+            const lOffset = lateralJointSpace.x < medialJointSpace.x ? -scaledOffset * 2 : scaledOffset;
+            const boxWidth = 20 / zoom;
+            const boxHeight = 22 / zoom;
+            const scaledFontSize = Math.max(12, 16 / zoom);
 
             ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-            ctx.fillRect(medialJointSpace.x + mOffset - 4, medialJointSpace.y - 10, 20, 22);
-            ctx.fillRect(lateralJointSpace.x + lOffset - 4, lateralJointSpace.y - 10, 20, 22);
+            ctx.fillRect(medialJointSpace.x + mOffset - 4 / zoom, medialJointSpace.y - 10 / zoom, boxWidth, boxHeight);
+            ctx.fillRect(lateralJointSpace.x + lOffset - 4 / zoom, lateralJointSpace.y - 10 / zoom, boxWidth, boxHeight);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 16px Inter, sans-serif';
-            ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6);
-            ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6);
+            ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
+            ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6 / zoom);
+            ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6 / zoom);
         }
 
         if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
-            ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = BASE_LINE_WIDTH;
+            const scaledRadius = BASE_HANDLE_RADIUS / zoom;
+            const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+            ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(femurAxisPoint.x, femurAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
-            ctx.beginPath(); ctx.arc(femurAxisPoint.x, femurAxisPoint.y, BASE_HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(femurAxisPoint.x, femurAxisPoint.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
         }
         if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter) {
-            ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.lineWidth = BASE_LINE_WIDTH;
+            const scaledRadius = BASE_HANDLE_RADIUS / zoom;
+            const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+            ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(tibiaAxisPoint.x, tibiaAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
-            ctx.beginPath(); ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, BASE_HANDLE_RADIUS, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
         }
     }, [landmarks, visibleLandmarkSets, updateCalculations]);
 
@@ -582,15 +626,18 @@ const PostOpValgusPlanner: React.FC = () => {
         const viewerCenterX = viewerRect.left + viewerRect.width / 2;
         const viewerCenterY = viewerRect.top + viewerRect.height / 2;
 
-        const x = (clientX - viewerCenterX) + canvas.width / 2;
-        const y = (clientY - viewerCenterY) + canvas.height / 2;
+        const contentCenterX = viewerCenterX + panOffset.x;
+        const contentCenterY = viewerCenterY + panOffset.y;
+
+        const x = (clientX - contentCenterX) / zoom + canvas.width / 2;
+        const y = (clientY - contentCenterY) / zoom + canvas.height / 2;
 
         return { x, y };
-    }, []);
+    }, [panOffset, zoom]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getStableCoordinates(e.clientX, e.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 70) ** 2; // Increased sensitivity for gloves
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 120) ** 2; // Increased sensitivity for gloves
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
         for (const key in landmarks) {
@@ -609,20 +656,51 @@ const PostOpValgusPlanner: React.FC = () => {
     }, [landmarks, getStableCoordinates]);
 
     const handleMouseMove = useCallback((e: MouseEvent) => {
+        if (isPanningRef.current) {
+            setPanOffset({
+                x: e.clientX - panStartRef.current.x,
+                y: e.clientY - panStartRef.current.y
+            });
+            return;
+        }
+
         if (!draggingPointRef.current) return;
         const pos = getStableCoordinates(e.clientX, e.clientY);
         setLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip();
     }, [updatePip, getStableCoordinates]);
 
-    const handleMouseUp = useCallback(() => { draggingPointRef.current = null; }, []);
+    const handleMouseUp = useCallback(() => {
+        draggingPointRef.current = null;
+        isPanningRef.current = false;
+    }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        if (e.touches.length === 2) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialPinchDistanceRef.current = dist;
+            initialInitialPinchZoomRef.current = zoom;
+            initialPanOffsetRef.current = { ...panOffset };
+            isPanningRef.current = true;
+            panStartRef.current = {
+                x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - panOffset.x,
+                y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - panOffset.y
+            };
+            return;
+        }
+
+        if (e.touches.length === 1 && zoom > 1 && !draggingPointRef.current) {
+            isPanningRef.current = true;
+            panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
+        }
         e.preventDefault();
         const touch = e.touches[0];
         if (!touch) return;
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 80) ** 2; // Increased sensitivity for gloves
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 120) ** 2; // Increased sensitivity for gloves
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
         for (const key in landmarks) {
@@ -637,10 +715,42 @@ const PostOpValgusPlanner: React.FC = () => {
         }
         if (closestKey) {
             draggingPointRef.current = closestKey;
+            isPanningRef.current = false;
         }
     };
 
     const handleTouchMove = useCallback((e: TouchEvent) => {
+        if (e.touches.length === 2 && initialPinchDistanceRef.current !== null) {
+            e.preventDefault();
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const scale = dist / initialPinchDistanceRef.current;
+            const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, initialInitialPinchZoomRef.current * scale));
+            setZoom(newZoom);
+
+            // Two-finger pan
+            if (isPanningRef.current) {
+                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                setPanOffset({
+                    x: midX - panStartRef.current.x,
+                    y: midY - panStartRef.current.y
+                });
+            }
+            return;
+        }
+
+        if (isPanningRef.current) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            setPanOffset({
+                x: touch.clientX - panStartRef.current.x,
+                y: touch.clientY - panStartRef.current.y
+            });
+            return;
+        }
         if (!draggingPointRef.current) return;
         e.preventDefault(); // Critical: stops scrolling
         const touch = e.touches[0];
@@ -652,6 +762,8 @@ const PostOpValgusPlanner: React.FC = () => {
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
+        initialPinchDistanceRef.current = null;
+        isPanningRef.current = false;
     }, []);
 
     useEffect(() => {
@@ -692,8 +804,25 @@ const PostOpValgusPlanner: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0 max-h-full overflow-hidden">
                 {/* Viewer - Left side (75%) */}
                 <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
+                    <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
+                    {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
+                    {postOpValgusImage && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                        <button onClick={zoomIn} className="bg-black/70 px-3 py-1 rounded"> ＋ </button>
+                        <button onClick={zoomOut} className="bg-black/70 px-3 py-1 rounded"> － </button>
+                        <button onClick={resetZoom} className="bg-black/70 px-2 py-1 rounded text-xs">Reset</button>
+                    </div>}
                     {postOpValgusImage ? (<>
-                        <div ref={viewerRef} className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden">
+                        <div ref={viewerRef} className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden"
+                            onMouseDown={(e) => {
+                                if (zoom > 1 && !draggingPointRef.current) {
+                                    e.preventDefault();
+                                    isPanningRef.current = true;
+                                    panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
+                                }
+                            }}
+                            onMouseUp={() => { isPanningRef.current = false; }}
+                            onMouseLeave={() => { isPanningRef.current = false; }}
+                            style={{ cursor: zoom > 1 ? (isPanningRef.current ? 'grabbing' : 'grab') : 'default' }}>
                             {/* Angle Values - Always displayed on Right Side */}
                             {(results.obliquity != null || results.ldfa != null || results.mpta != null) && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
@@ -714,29 +843,29 @@ const PostOpValgusPlanner: React.FC = () => {
                                     )}
                                 </div>
                             )}
-                            <img
-                                ref={imageRef}
-                                src={postOpValgusImage}
-                                className="block max-w-full max-h-full object-contain"
-                                alt=""
-                            />
-                            <canvas
-                                ref={canvasRef}
-                                className="absolute cursor-crosshair touch-none inset-0 m-auto"
-                                style={{ touchAction: 'none' }}
-                                onMouseDown={handleMouseDown}
-                                onTouchStart={handleTouchStart}
-                            />
+                            <div className="relative" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
+                                <img
+                                    ref={imageRef}
+                                    src={postOpValgusImage}
+                                    className="block max-w-full max-h-full object-contain"
+                                    alt=""
+                                />
+                                <canvas
+                                    ref={canvasRef}
+                                    className="absolute cursor-crosshair touch-none inset-0 m-auto"
+                                    style={{ touchAction: 'none' }}
+                                    onMouseDown={handleMouseDown}
+                                    onTouchStart={handleTouchStart}
+                                />
+                            </div>
                         </div>
                         <div ref={pipViewerRef} onMouseDown={handlePipStart}
                             onTouchStart={handlePipStart} className="absolute w-24 h-24 border-2 border-dark-maroon bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg top-2 right-2 z-10" style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px` }}>
                             <canvas ref={pipCanvasRef} width="128" height="128" className="rounded-full w-full h-full"></canvas>
                         </div>
-                    </>) : <div className="flex flex-col items-center justify-center text-gray-500 opacity-60">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-sm">Upload Post-Op X-Ray</p>
+                    </>) : <div className="text-center text-gray-400 cursor-pointer p-10 border-2 border-dashed border-gray-600 rounded-lg hover:bg-white/5 transition" onClick={() => document.getElementById('xray-upload')?.click()}>
+                        <p className="text-xl font-bold">Upload an X-ray to begin</p>
+                        <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
                     </div>}
                 </div>
 

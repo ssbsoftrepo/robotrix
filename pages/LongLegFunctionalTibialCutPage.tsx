@@ -133,26 +133,50 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
     }, [longLegResults.mpta, tibiaBoundary]);
 
     const [currentRecommendation, setCurrentRecommendation] = useState<number>(anticipatedVarusCut);
-    const [selectedDegree, setSelectedDegree] = useState<number>(anticipatedVarusCut || 2);
+
+    // Initialize Selection: 
+    // We do NOT want a useEffect to sync "selectedDegree" -> "context" automatically on every render,
+    // as that causes the loop. We only want to Initialize local state from context if available.
+    const [selectedDegree, setSelectedDegree] = useState<number>(() => {
+        if (longLegFunctionalCutDegree !== null && longLegFunctionalCutDegree !== undefined) {
+            return longLegFunctionalCutDegree;
+        }
+        return anticipatedVarusCut > 0 ? anticipatedVarusCut : 2;
+    });
 
     useEffect(() => {
-        // If we already have a functional cut degree from Analysis (Context), use it.
-        // Otherwise, fall back to calculation.
-        if (longLegFunctionalCutDegree !== null && longLegFunctionalCutDegree !== undefined) {
-            setCurrentRecommendation(longLegFunctionalCutDegree);
-            setSelectedDegree(longLegFunctionalCutDegree);
-        } else if (anticipatedVarusCut > 0) {
+        // Update recommendation based on calculation (Algorithm)
+        if (anticipatedVarusCut > 0) {
             setCurrentRecommendation(anticipatedVarusCut);
-            setSelectedDegree(anticipatedVarusCut);
         } else {
             setCurrentRecommendation(2);
-            setSelectedDegree(2);
         }
-    }, [anticipatedVarusCut, longLegFunctionalCutDegree]);
 
-    useEffect(() => {
-        setLongLegFunctionalCutDegree(selectedDegree);
-    }, [selectedDegree, setLongLegFunctionalCutDegree]);
+        // If we have NO selection in context yet, we can default to the recommendation
+        // But we must be careful not to overwrite user selection if they have one.
+        // The useState initializer handles the mount case. This is for updates to anticipatedVarusCut
+        // ONLY if the user hasn't made a manual selection (hard to track "manual" vs "auto", 
+        // so we generally trust the context if it's set).
+
+        // Actually, if anticipatedVarusCut changes (e.g. data loaded), we might want to update selection 
+        // IF the user hasn't explicitly set something else? 
+        // For now, let's trust the useState initializer for the initial load.
+        // If the recommendation changes significantly, we might want to alert, but auto-switching can be annoying.
+
+        // Safe approach: Sync recommendation to selection ONLY if context is null/undefined (first run)
+        if (longLegFunctionalCutDegree === null || longLegFunctionalCutDegree === undefined) {
+            const newDefault = anticipatedVarusCut > 0 ? anticipatedVarusCut : 2;
+            setSelectedDegree(newDefault);
+            setLongLegFunctionalCutDegree(newDefault);
+        }
+
+    }, [anticipatedVarusCut, longLegFunctionalCutDegree, setLongLegFunctionalCutDegree]);
+
+    // Explicit Handler for Selection to avoid Loop
+    const handleSelectDegree = (degree: number) => {
+        setSelectedDegree(degree);
+        setLongLegFunctionalCutDegree(degree);
+    };
 
     useEffect(() => {
         setLongLegFunctionalLinesY(linesYPercent);
@@ -177,7 +201,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
         adjustedDegree = Math.max(0, adjustedDegree);
 
         setCurrentRecommendation(adjustedDegree);
-        setSelectedDegree(adjustedDegree);
+        handleSelectDegree(adjustedDegree);
     };
 
     const lateralGapValue = longLegCoronalBalancingResults?.lateralGap || '--';
@@ -213,19 +237,11 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                                 {/* <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div> */}
-                                <p className="text-[20px] text-gray-400 leading-snug">
+                                <p className="text-[20px] text-gray-400 leading-snug text-left">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
 
-                            {/* <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
-                                <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
-                                    2
-                                </div>
-                                <p className="text-[14px] text-gray-400 leading-snug">
-                                    Changing the 90 deg cut by <span className="text-[#ff8fa3] font-bold">1° varus</span> will open the medial gap by <span className="text-[#ff8fa3] font-bold">~ 1.2 mms</span> in average-sized tibia (70 mms width).
-                                </p>
-                            </div> */}
 
                             <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-2 text-center shadow-lg z-10 flex-[0.8] flex flex-col justify-center min-h-0">
                                 <p className="text-gray-400 text-md font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
@@ -336,7 +352,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                                 {/* 0 Degree Neutral Cut Button */}
                                 <div className="flex-1 w-full flex items-center justify-center mb-0">
                                     <button
-                                        onClick={() => setSelectedDegree(0)}
+                                        onClick={() => handleSelectDegree(0)}
                                         className={`w-full py-1 rounded-lg border-2 font-bold text-base transition-all shadow-lg flex flex-col items-center justify-center relative h-full ${selectedDegree === 0
                                             ? 'bg-gray-200 text-black border-[#6D282C] shadow-[0_0_15px_rgba(109,40,44,0.5)] scale-95 z-10'
                                             : 'bg-[#252525] text-gray-400 border-[#333333] hover:bg-[#333333] hover:text-white scale-90'
@@ -359,7 +375,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                                             degree={deg}
                                             isRecommended={deg === currentRecommendation}
                                             isSelected={deg === selectedDegree}
-                                            onClick={() => setSelectedDegree(deg)}
+                                            onClick={() => handleSelectDegree(deg)}
                                         />
                                     </div>
                                 ))}

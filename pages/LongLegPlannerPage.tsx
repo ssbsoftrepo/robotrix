@@ -9,8 +9,8 @@ const landmarkInstructions = {
     tibialJointLine: ["Mark the highest point of medial (M) tibial condyle.", "Mark the highest point of lateral (L) tibial condyle."],
 };
 
-const BASE_HANDLE_RADIUS = 4;
-const BASE_LINE_WIDTH = 3;
+const BASE_HANDLE_RADIUS = 6;
+const BASE_LINE_WIDTH = 4;
 
 const resolveMedialLateral = (
     p1: Point,
@@ -819,7 +819,7 @@ const LongLegPlannerPage: React.FC = () => {
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getStableCoordinates(e.clientX, e.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 40) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 70) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             const parentSet = landmarkToSetMap[key];
@@ -880,7 +880,7 @@ const LongLegPlannerPage: React.FC = () => {
 
         const touch = e.touches[0]; if (!touch) return;
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+        const hitRadiusSq = (BASE_HANDLE_RADIUS + 80) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             const parentSet = landmarkToSetMap[key];

@@ -171,7 +171,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                                     <div className="h-px bg-white/5 flex-grow"></div>
                                 </div>
                                 <div className="bg-[#6D282C]/20 p-2 rounded-lg border border-[#6D282C]/80">
-                                    <p className="text-sm font-bold text-[#ff8fa3]">Input of inaccurate data from long leg film</p>
+                                    <p className="text-sm font-bold text-[#ff8fa3]">Input of inaccurate data from Valgus stress film</p>
                                 </div>
                             </div>
                         </div>

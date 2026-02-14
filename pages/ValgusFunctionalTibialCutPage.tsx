@@ -123,26 +123,40 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
     // This state tracks the currently recommended cut based on laxity adjustments
     const [currentRecommendation, setCurrentRecommendation] = useState<number>(anticipatedVarusCut);
-    const [selectedDegree, setSelectedDegree] = useState<number>(anticipatedVarusCut || 2);
+
+    // Initialize Selection: 
+    // We do NOT want a useEffect to sync "selectedDegree" -> "context" automatically on every render,
+    // as that causes the loop. We only want to Initialize local state from context if available.
+    const [selectedDegree, setSelectedDegree] = useState<number>(() => {
+        if (valgusFunctionalCutDegree !== null && valgusFunctionalCutDegree !== undefined) {
+            return valgusFunctionalCutDegree;
+        }
+        return anticipatedVarusCut > 0 ? anticipatedVarusCut : 2;
+    });
 
     useEffect(() => {
-        // If we already have a functional cut degree from Analysis (Context), use it.
-        // Otherwise, fall back to calculation.
-        if (valgusFunctionalCutDegree !== null && valgusFunctionalCutDegree !== undefined) {
-            setCurrentRecommendation(valgusFunctionalCutDegree);
-            setSelectedDegree(valgusFunctionalCutDegree);
-        } else if (anticipatedVarusCut > 0) {
+        // ALWAYS keep recommendation based on calculation (Algorithm)
+        if (anticipatedVarusCut > 0) {
             setCurrentRecommendation(anticipatedVarusCut);
-            setSelectedDegree(anticipatedVarusCut);
         } else {
             setCurrentRecommendation(2);
-            setSelectedDegree(2);
         }
-    }, [anticipatedVarusCut, valgusFunctionalCutDegree]);
 
-    useEffect(() => {
-        setValgusFunctionalCutDegree(selectedDegree);
-    }, [selectedDegree, setValgusFunctionalCutDegree]);
+        // Initialize Selection:
+        // If we already have a selected degree in Context (user history), use it.
+        // Otherwise, default selection to the recommendation.
+        if (valgusFunctionalCutDegree === null || valgusFunctionalCutDegree === undefined) {
+            const newDefault = anticipatedVarusCut > 0 ? anticipatedVarusCut : 2;
+            setSelectedDegree(newDefault);
+            setValgusFunctionalCutDegree(newDefault);
+        }
+    }, [anticipatedVarusCut, valgusFunctionalCutDegree, setValgusFunctionalCutDegree]);
+
+    // Explicit Handler for Selection to avoid Loop
+    const handleSelectDegree = (degree: number) => {
+        setSelectedDegree(degree);
+        setValgusFunctionalCutDegree(degree);
+    };
 
     useEffect(() => {
         setValgusFunctionalLinesY(linesYPercent);
@@ -167,7 +181,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
         adjustedDegree = Math.max(0, adjustedDegree);
 
         setCurrentRecommendation(adjustedDegree);
-        setSelectedDegree(adjustedDegree);
+        handleSelectDegree(adjustedDegree);
     };
 
     // No dragging logic needed as per user request (static lines)
@@ -204,7 +218,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 {/* <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div> */}
-                                <p className="text-[20px] text-gray-400 leading-snug">
+                                <p className="text-[20px] text-gray-400 leading-snug text-left">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
@@ -327,7 +341,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 {/* 0 Degree Neutral Cut Button */}
                                 <div className="flex-1 w-full flex items-center justify-center mb-0">
                                     <button
-                                        onClick={() => setSelectedDegree(0)}
+                                        onClick={() => handleSelectDegree(0)}
                                         className={`w-full py-2 rounded-lg border-2 font-bold text-lg transition-all shadow-lg flex flex-col items-center justify-center relative h-full ${selectedDegree === 0
                                             ? 'bg-gray-200 text-black border-[#6D282C] shadow-[0_0_15px_rgba(109,40,44,0.5)] scale-95 z-10'
                                             : 'bg-[#252525] text-gray-400 border-[#333333] hover:bg-[#333333] hover:text-white scale-90'
@@ -351,7 +365,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                                 degree={deg}
                                                 isRecommended={deg === currentRecommendation}
                                                 isSelected={deg === selectedDegree}
-                                                onClick={() => setSelectedDegree(deg)}
+                                                onClick={() => handleSelectDegree(deg)}
                                             />
                                         </div>
                                     </div>

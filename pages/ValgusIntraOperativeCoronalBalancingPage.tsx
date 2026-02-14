@@ -44,7 +44,7 @@ const CuttingBlock: React.FC<{
             </div>
         )}
 
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[74px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[88px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -126,7 +126,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
         setPage('planner-valgus-stress-laxity-check');
     };
 
-    const { additionalFemurCut, additionalTibiaCut, additionalLaxity } = intraOpCoronalBalancingData;
+    const { additionalFemurCut, additionalTibiaCut, additionalLaxity, functionalTibiaCutDegree } = intraOpCoronalBalancingData;
     const { medialGap, lateralGap, tibiaWidth } = intraOpValidationData;
     const { simFemoralCut } = valgusCoronalBalancingResults;
 
@@ -141,10 +141,33 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const thetaValue = Math.round((LMT - baseMedial) / C);
     const recommendedTheta = Math.max(0, Math.min(4, thetaValue));
 
-    const [selectedJig, setSelectedJig] = React.useState<number>(recommendedTheta);
+    // Initialize from Context (Persistence) -> Fallback to Recommendation
+    const [selectedJig, setSelectedJig] = React.useState<number>(() => {
+        if (functionalTibiaCutDegree !== null && functionalTibiaCutDegree !== undefined) {
+            return functionalTibiaCutDegree;
+        }
+        return recommendedTheta;
+    });
 
+    // Handle Manual Selection
+    const handleSelectJig = (angle: number) => {
+        setSelectedJig(angle);
+        setIntraOpCoronalBalancingData({
+            ...intraOpCoronalBalancingData,
+            functionalTibiaCutDegree: angle
+        });
+    };
+
+    // React to Recommendation Changes (Input parameters changed)
     React.useEffect(() => {
         setSelectedJig(recommendedTheta);
+
+        if (functionalTibiaCutDegree !== recommendedTheta) {
+            setIntraOpCoronalBalancingData(prev => ({
+                ...prev,
+                functionalTibiaCutDegree: recommendedTheta
+            }));
+        }
     }, [recommendedTheta]);
 
     const nativeLDFA = valgusResults.ldfa ?? 87;
@@ -157,13 +180,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
         nativeCPAK = getCpakType(currentAhka, currentJlo);
     }
 
-    const plannedFemurCut = simFemoralCut ?? 5; // Default for Valgus might be 5 or 6? Checking defaults showed 3 for LL. Assuming 5 based on valgus logic usually. Let's check initialValgusResults... actually initialCoronalBalancingResults had simFemoralCut: 3.0. I'll stick to 3.0 as default if null.
-    // Wait, Valgus generally has higher cut? Let's check AppContext defaults. 
-    // initialCoronalBalancingResults has simFemoralCut: 3.0. 
-    // I will use 3 as fallback to match the provided default, but dynamic value will be correct.
+    const plannedFemurCut = simFemoralCut ?? 3; // Default for Valgus set to 3 to match Varus and Basic Matrix lower bound
 
     const finalSimulatedMedialGap = baseMedial + (selectedJig * C);
-    const simulatedLDFA = nativeLDFA + (simFemoralCut ?? 3) + additionalFemurCut;
+    const simulatedLDFA = nativeLDFA + plannedFemurCut + additionalFemurCut;
     const simulatedMPTA = nativeMPTA + selectedJig + additionalTibiaCut;
 
     const simulatedAHKA = simulatedMPTA - simulatedLDFA;
@@ -204,9 +224,6 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                 {/* Column 1: Simulation Controls */}
                 <div className="h-full flex flex-col gap-1">
                     <div className="bg-[#111111] border border-[#222222] p-4 rounded-xl flex flex-col gap-6 h-full shadow-2xl">
-                        <p className="text-gray-300 text-md font-black leading-tight uppercase tracking-widest italic opacity-80">
-                            Aim for lateral space to match the minimum composite thickness of your TKR system
-                        </p>
 
                         <div className="space-y-3">
                             {/* Femur Cut */}
@@ -253,6 +270,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        <div className="bg-[#6D282C] py-2 px-2 rounded-sm text-center border-t-2 border-[#ff8fa3]">
+                            <p className="text-[10px] text-white/60 font-black uppercase tracking-widest mb-1">Revised Functional Tibia Cut (θ)</p>
+                            <p className="text-xl font-black text-white">{recommendedTheta}°</p>
+                        </div>
 
                         <div className="mt-auto pt-2 border-t border-[#333333]">
                             <div className="bg-black/80 border border-[#333333] p-4 rounded flex justify-between items-center">
@@ -273,7 +294,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                         {/* Horizontal layout: Lateral Box - Image - Medial Box */}
                         <div className="flex items-center justify-center gap-2 flex-grow w-full relative">
                             {/* Left Box - Lateral Gap */}
-                            <div className="flex flex-col items-center shrink-0 z-20">
+                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 ml-4">
                                 <div className="bg-black/80 border-2 border-[#333333] rounded-lg px-4 py-3 text-center shadow-lg">
                                     <p className="text-gray-500 text-[9px] font-black uppercase tracking-wider mb-1">LATERAL</p>
                                     <p className="text-2xl font-black text-white">{baseLateral}<span className="text-sm text-gray-400 ml-1">mm</span></p>
@@ -298,8 +319,8 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
 
                                     {/* Dynamic Tibia horizontal cut - at top edge of tibia */}
                                     <line
-                                        x1="10" y1={`${67 + additionalTibiaCut * 1}`}
-                                        x2="90" y2={`${67 + additionalTibiaCut * 1}`}
+                                        x1="10" y1={`${68 + additionalTibiaCut * 1}`}
+                                        x2="90" y2={`${68 + additionalTibiaCut * 1}`}
                                         stroke="#6D282C" strokeWidth="0.8"
                                     />
 
@@ -307,7 +328,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                     {[0, 1, 2, 3, 4].map((angle) => {
                                         const isSelected = selectedJig === angle;
                                         const yOffset = angle * 1.5;
-                                        const baseY = 67 + additionalTibiaCut * 1;
+                                        const baseY = 68 + additionalTibiaCut * 1;
                                         return (
                                             <line
                                                 key={angle}
@@ -329,7 +350,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Right Box - Medial Gap */}
-                            <div className="flex flex-col items-center shrink-0 z-20">
+                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 mr-4">
                                 <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-4 py-3 text-center shadow-lg">
                                     <p className="text-[#ff8fa3] text-[9px] font-black uppercase tracking-wider mb-1">MEDIAL</p>
                                     <p className="text-2xl font-black text-[#ff8fa3]">{baseMedial}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
@@ -353,10 +374,6 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                 {/* Column 3: Jig Selection */}
                 <div className="h-full flex flex-col gap-1">
                     <div className="bg-[#111111] border border-[#222222] p-4 rounded-xl flex flex-col gap-4 h-full">
-                        <div className="bg-[#6D282C] py-2 px-2 rounded-sm text-center border-t-2 border-[#ff8fa3]">
-                            <p className="text-[10px] text-white/60 font-black uppercase tracking-widest mb-1">Revised Functional Tibia Cut (θ)</p>
-                            <p className="text-xl font-black text-white">{recommendedTheta}°</p>
-                        </div>
 
                         <div className="flex-grow flex flex-col gap-3">
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
@@ -366,7 +383,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 {/* Neutral jig */}
                                 <div className="px-2">
                                     <button
-                                        onClick={() => setSelectedJig(0)}
+                                        onClick={() => handleSelectJig(0)}
                                         className={`w-full py-2 rounded-sm border transition-all flex flex-col items-center bg-[#1A1A1A] relative ${selectedJig === 0 ? 'border-[#ff8fa3] shadow-lg scale-[1.02]' : 'border-[#333333] opacity-60 hover:opacity-100'}`}
                                     >
                                         {recommendedTheta === 0 && (
@@ -386,7 +403,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                             degree={angle}
                                             isSelected={selectedJig === angle}
                                             isRecommended={recommendedTheta === angle}
-                                            onClick={() => setSelectedJig(angle)}
+                                            onClick={() => handleSelectJig(angle)}
                                         />
                                     </div>
                                 ))}

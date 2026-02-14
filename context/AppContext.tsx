@@ -22,6 +22,7 @@ export interface IntraOpCoronalBalancingData {
     additionalFemurCut: number;
     additionalTibiaCut: number;
     additionalLaxity: number;
+    functionalTibiaCutDegree: number | null;
 }
 
 // Centralized data structure for a single case
@@ -83,8 +84,8 @@ export interface CaseData {
     longLegLaxityReferenceImages: Record<string, string | null>;
 
     // Functional Cut Degrees for Report
-    valgusFunctionalCutDegree: number;
-    longLegFunctionalCutDegree: number;
+    valgusFunctionalCutDegree: number | null;
+    longLegFunctionalCutDegree: number | null;
 
     // Line Positions Persistence
     valgusFunctionalLinesY: number;
@@ -160,8 +161,8 @@ interface AppContextType extends CaseData {
     setValgusLaxityReferenceImages: (images: Record<string, string | null>) => void;
     setLongLegLaxityReferenceImages: (images: Record<string, string | null>) => void;
 
-    setValgusFunctionalCutDegree: (degree: number) => void;
-    setLongLegFunctionalCutDegree: (degree: number) => void;
+    setValgusFunctionalCutDegree: (degree: number | null) => void;
+    setLongLegFunctionalCutDegree: (degree: number | null) => void;
 
     setValgusFunctionalLinesY: (y: number) => void;
     setLongLegFunctionalLinesY: (y: number) => void;
@@ -178,7 +179,7 @@ const initialLongLegResults: LongLegResults = { ldfa: null, mpta: null, ahka: nu
 const initialValgusResults: ValgusResults = { obliquity: null, femurType: '--', femurTypeByObliquity: '--', cpak: '--', cut: '--', ldfa: null, mpta: null };
 const initialCoronalBalancingResults: CoronalBalancingResults = { selectedSeries: null, lateralGap: '', medialRelease: 0, simFemoralCut: 3.0, simTibialCut: 0.0, simResectionDepth: 20 };
 const initialIntraOpValidationData: IntraOpValidationData = { medialGap: 16, lateralGap: 16, tibiaWidth: 70 };
-const initialIntraOpCoronalBalancingData: IntraOpCoronalBalancingData = { additionalFemurCut: 0, additionalTibiaCut: 0, additionalLaxity: 0 };
+const initialIntraOpCoronalBalancingData: IntraOpCoronalBalancingData = { additionalFemurCut: 0, additionalTibiaCut: 0, additionalLaxity: 0, functionalTibiaCutDegree: null };
 
 // The single source of truth for a new/cleared case
 const initialCaseData: CaseData = {
@@ -223,8 +224,8 @@ const initialCaseData: CaseData = {
     resultAnalysisTibialImage: null,
     valgusLaxityReferenceImages: {},
     longLegLaxityReferenceImages: {},
-    valgusFunctionalCutDegree: 2,
-    longLegFunctionalCutDegree: 2,
+    valgusFunctionalCutDegree: null,
+    longLegFunctionalCutDegree: null,
     valgusFunctionalLinesY: 30,
     longLegFunctionalLinesY: 30,
     intraOpValidationData: initialIntraOpValidationData,

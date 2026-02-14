@@ -290,7 +290,7 @@ const ReportPage: React.FC = () => {
 
                             <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
                                 <span className="text-gray-400 text-sm font-medium">Revised Functional Tibia cut</span>
-                                <span className="text-lg font-extrabold text-[#ff8fa3]">{longLegFunctionalCutDegree ?? 0} deg varus cut</span>
+                                <span className="text-lg font-extrabold text-[#ff8fa3]">{longLegFunctionalCutDegree ?? 0}° varus cut</span>
                             </div>
                         </div>
                     </ReportCard>

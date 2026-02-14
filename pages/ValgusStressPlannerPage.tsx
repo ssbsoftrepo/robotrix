@@ -14,8 +14,8 @@ const LANDMARK_COLORS = {
   tibiaAnatomicAxis: '#FFD60A',
 };
 
-const BASE_HANDLE_RADIUS = 4;
-const BASE_LINE_WIDTH = 3;
+const BASE_HANDLE_RADIUS = 6;
+const BASE_LINE_WIDTH = 4;
 
 const landmarkToSetMap: Record<string, string> = {
   medialJointSpace: 'jointLine',
@@ -734,9 +734,9 @@ const ValgusStressPlannerPage: React.FC = () => {
       if (setName === 'jointLine') {
         const canvas = canvasRef.current;
         if (canvas) {
-          setZoom(2.5);
+          setZoom(2.2);
           // Center the joint - joint is roughly at the middle
-          setPanOffset({ x: 0, y: 0 });
+          setPanOffset({ x: 0, y: -canvas.height * 0.1 });
         }
       }
     }
@@ -825,7 +825,7 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const pos = getStableCoordinates(e.clientX, e.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 40) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 70) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
@@ -908,7 +908,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     const touch = e.touches[0];
     if (!touch) return;
     const pos = getStableCoordinates(touch.clientX, touch.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 60) ** 2;
+    const hitRadiusSq = (BASE_HANDLE_RADIUS + 80) ** 2;
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
