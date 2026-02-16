@@ -369,6 +369,7 @@ const LongLegPlannerPage: React.FC = () => {
 
     const viewerRef = useRef<HTMLDivElement>(null);
     const activeLandmarkRef = useRef<string | null>(null);
+    const imageDimensionsRef = useRef({ width: 0, height: 0 });
 
     useEffect(() => {
         if (longLegResults && Object.values(longLegResults).some(v => v !== null && v !== '--')) {
@@ -423,8 +424,11 @@ const LongLegPlannerPage: React.FC = () => {
     }, [longLegLandmarks, visibleLandmarkSets, legSide, setLongLegLandmarks, ldfaMode]);
 
 
-    const resetLandmarks = useCallback((canvas: HTMLCanvasElement) => {
-        const w = canvas.width; const h = canvas.height;
+    const resetLandmarks = useCallback((width: number, height: number) => {
+        // Use natural dimensions if available from image, otherwise fallback (though we should always have image loaded by now)
+        const w = imageRef.current?.naturalWidth || width;
+        const h = imageRef.current?.naturalHeight || height;
+
         const isLeft = legSide === 'left';
 
         setLongLegLandmarks({
@@ -557,44 +561,65 @@ const LongLegPlannerPage: React.FC = () => {
 
     const draw = useCallback(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const image = imageRef.current;
+        if (!canvas || !image) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
+        // Canvas is now screen-space (viewer size). clear it all.
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (Object.keys(longLegLandmarks).length === 0) return;
 
-        const scaledRadius = BASE_HANDLE_RADIUS / zoom;
-        const scaledLineWidth = BASE_LINE_WIDTH / zoom;
-        const scaledFontSize = Math.max(12, 16 / zoom);
+        // Prepare Transform Matrix
+        ctx.save();
+
+        // 1. Move to center of canvas
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        // 2. Apply Pan
+        ctx.translate(panOffset.x, panOffset.y);
+        // 3. Apply Zoom
+        ctx.scale(zoom, zoom);
+        // 4. Move back by half of IMAGE size (to make 0,0 top-left of image)
+        // We need the CURRENT display size of the image to know where 0,0 is relative to center.
+        // The image.style.width/height are set in onLoad/resize.
+        const imgW = parseFloat(image.style.width) || 0;
+        const imgH = parseFloat(image.style.height) || 0;
+        ctx.translate(-imgW / 2, -imgH / 2);
+
+        // V2: Apply Scale from Natural to Display
+        // Landmarks are now in NATURAL coordinates. We need to scale them to Display coordinates.
+        const scaleX = image.naturalWidth ? imgW / image.naturalWidth : 1;
+        const scaleY = image.naturalHeight ? imgH / image.naturalHeight : 1;
+
+        ctx.scale(scaleX, scaleY);
+
+        // Styling constants - radius is fixed screen-size, so we divide by zoom to keep it consistent visually?
+        // OR we want them to scale with zoom?
+        // User asked: "landmarks getting moving... pixelated". 
+        // Usually handles should remain constant SCREEN size for usability, 
+        // but lines should scale with image? 
+        // If lines scale with image, they get thick. User said "pixelated in zoom".
+        // Let's keep line width constant in SCREEN pixels (anti-pixelation).
+
+        // We also divide by scaleX to counter the natural->display scaling we just applied
+        const scaledWidth = BASE_LINE_WIDTH / (zoom * scaleX);
+        const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
+        const scaledFontSize = Math.max(12, 16 / (zoom * scaleX)); // Keep text readable
 
         ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
 
         const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = longLegLandmarks;
-        const getLabelOffsetX = (point: Point, kneeCenter: Point) => {
-            return point.x < kneeCenter.x ? -20 : 10;
-        };
-
-        const drawTextWithBackground = (text: string, x: number, y: number) => {
-            ctx.fillStyle = 'rgba(29, 29, 31, 0.8)';
-            const textMetrics = ctx.measureText(text);
-            const textWidth = textMetrics.width;
-            const boxPadding = 8;
-            ctx.fillRect(x - textWidth / 2 - boxPadding, y - 20, textWidth + boxPadding * 2, 30);
-            ctx.fillStyle = 'white';
-            ctx.fillText(text, x - textWidth / 2, y);
-        };
 
         if (visibleLandmarkSets.has('hkaLine')) {
             if (hipCenter && kneeCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.hkaLine;
-                ctx.lineWidth = scaledLineWidth;
+                ctx.lineWidth = scaledWidth;
                 ctx.beginPath(); ctx.moveTo(hipCenter.x, hipCenter.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
             }
             if (kneeCenter && ankleCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.hkaLine;
-                ctx.lineWidth = scaledLineWidth;
+                ctx.lineWidth = scaledWidth;
                 ctx.beginPath(); ctx.moveTo(kneeCenter.x, kneeCenter.y); ctx.lineTo(ankleCenter.x, ankleCenter.y); ctx.stroke();
             }
             ctx.fillStyle = LANDMARK_COLORS.hkaLine;
@@ -606,7 +631,7 @@ const LongLegPlannerPage: React.FC = () => {
         if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis')) {
             if (femurAnatomicAxisPoint && kneeCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis;
-                ctx.lineWidth = scaledLineWidth;
+                ctx.lineWidth = scaledWidth;
                 ctx.beginPath(); ctx.moveTo(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
             }
             if (femurAnatomicAxisPoint) {
@@ -618,7 +643,7 @@ const LongLegPlannerPage: React.FC = () => {
         if (visibleLandmarkSets.has('femoralJointLine')) {
             if (femoralMedial && femoralLateral) {
                 ctx.strokeStyle = LANDMARK_COLORS.femoralJointLine;
-                ctx.lineWidth = scaledLineWidth;
+                ctx.lineWidth = scaledWidth;
                 ctx.beginPath(); ctx.moveTo(femoralMedial.x, femoralMedial.y); ctx.lineTo(femoralLateral.x, femoralLateral.y); ctx.stroke();
             }
             ctx.fillStyle = LANDMARK_COLORS.femoralJointLine;
@@ -634,27 +659,27 @@ const LongLegPlannerPage: React.FC = () => {
                 );
 
                 const baseOffset = 15;
-                const scaledOffset = baseOffset / zoom;
+                const scaledOffset = baseOffset / (zoom * scaleX);
                 const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
                 const lOffsetX = lateral.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
-                const boxWidth = 20 / zoom;
-                const boxHeight = 22 / zoom;
+                const boxWidth = 20 / (zoom * scaleX);
+                const boxHeight = 22 / (zoom * scaleX);
 
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-                ctx.fillRect(medial.x + mOffsetX - 4 / zoom, medial.y - 10 / zoom, boxWidth, boxHeight);
-                ctx.fillRect(lateral.x + lOffsetX - 4 / zoom, lateral.y - 10 / zoom, boxWidth, boxHeight);
+                ctx.fillRect(medial.x + mOffsetX - 4 / (zoom * scaleX), medial.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
+                ctx.fillRect(lateral.x + lOffsetX - 4 / (zoom * scaleX), lateral.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
 
                 ctx.fillStyle = '#ffffff';
                 ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
-                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6 / zoom);
-                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6 / zoom);
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6 / (zoom * scaleX));
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6 / (zoom * scaleX));
             }
         }
 
         if (visibleLandmarkSets.has('tibialJointLine')) {
             if (tibialMedial && tibialLateral) {
                 ctx.strokeStyle = LANDMARK_COLORS.tibialJointLine;
-                ctx.lineWidth = scaledLineWidth;
+                ctx.lineWidth = scaledWidth;
                 ctx.beginPath(); ctx.moveTo(tibialMedial.x, tibialMedial.y); ctx.lineTo(tibialLateral.x, tibialLateral.y); ctx.stroke();
             }
             ctx.fillStyle = LANDMARK_COLORS.tibialJointLine;
@@ -670,23 +695,26 @@ const LongLegPlannerPage: React.FC = () => {
                 );
 
                 const baseOffset = 15;
-                const scaledOffset = baseOffset / zoom;
+                const scaledOffset = baseOffset / (zoom * scaleX);
                 const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
                 const lOffsetX = lateral.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
-                const boxWidth = 20 / zoom;
-                const boxHeight = 22 / zoom;
+                const boxWidth = 20 / (zoom * scaleX);
+                const boxHeight = 22 / (zoom * scaleX);
 
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-                ctx.fillRect(medial.x + mOffsetX - 4 / zoom, medial.y - 10 / zoom, boxWidth, boxHeight);
-                ctx.fillRect(lateral.x + lOffsetX - 4 / zoom, lateral.y - 10 / zoom, boxWidth, boxHeight);
+                ctx.fillRect(medial.x + mOffsetX - 4 / (zoom * scaleX), medial.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
+                ctx.fillRect(lateral.x + lOffsetX - 4 / (zoom * scaleX), lateral.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
 
                 ctx.fillStyle = '#ffffff';
                 ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
-                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6 / zoom);
-                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6 / zoom);
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + 6 / (zoom * scaleX));
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + 6 / (zoom * scaleX));
             }
         }
-    }, [longLegLandmarks, visibleLandmarkSets, legSide, ldfaMode, zoom]);
+
+        ctx.restore();
+
+    }, [longLegLandmarks, visibleLandmarkSets, legSide, ldfaMode, zoom, panOffset]);
 
     const captureCanvasState = useCallback(() => {
         const image = imageRef.current;
@@ -707,33 +735,63 @@ const LongLegPlannerPage: React.FC = () => {
     useEffect(() => {
         const handleResize = () => {
             const now = Date.now();
-            if (now - lastResizeTimeRef.current < 100) return;
+            if (now - lastResizeTimeRef.current < 50) return;
             lastResizeTimeRef.current = now;
-            const img = imageRef.current; const canvas = canvasRef.current;
-            if (!img || !canvas || img.naturalWidth === 0) return;
-            const viewer = canvas.parentElement?.parentElement;
-            if (!viewer) return;
-            const availWidth = viewer.clientWidth - 16; const availHeight = viewer.clientHeight - 16;
-            const oldW = parseFloat(img.style.width) || img.width;
-            const aspect = img.naturalWidth / img.naturalHeight;
-            let newW = availHeight * aspect; let newH = availHeight;
-            if (newW > availWidth) { newW = availWidth; newH = newW / aspect; }
-            if (Math.abs(newW - oldW) > 1) {
-                const scale = newW / oldW;
-                img.style.width = `${newW}px`; img.style.height = `${newH}px`;
-                canvas.width = newW; canvas.height = newH;
-                setLongLegLandmarks(prev => {
-                    const next: any = {};
-                    for (const key in prev) { if (prev[key]) { next[key] = { x: prev[key].x * scale, y: prev[key].y * scale }; } }
-                    return next as Landmarks;
-                });
-                requestAnimationFrame(draw);
+
+            const viewer = viewerRef.current;
+            const canvas = canvasRef.current;
+            const image = imageRef.current;
+            if (!viewer || !canvas || !image) return;
+
+            // Resize canvas to full viewer size (Screen Space)
+            const dpr = window.devicePixelRatio || 1;
+            const rect = viewer.getBoundingClientRect();
+
+            // Set display size (css)
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+
+            // Set actual memory size (scaled for DPI)
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+
+            // Normalize coordinate system so (0,0) is top-left of canvas in logical pixels
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.scale(dpr, dpr);
+
+            // Re-calculate image fitting to update visual
+            const availableWidth = viewer.clientWidth - 32;
+            const availableHeight = viewer.clientHeight - 32;
+            const aspect = image.naturalWidth / image.naturalHeight;
+
+            let displayWidth = availableHeight * aspect;
+            let displayHeight = availableHeight;
+            if (displayWidth > availableWidth) {
+                displayWidth = availableWidth;
+                displayHeight = displayWidth / aspect;
             }
+
+            const oldW = parseFloat(image.style.width) || image.width;
+
+            // Update image display size (used by draw for coordinate mapping)
+            // Update image display size (used by draw for coordinate mapping)
+            image.style.width = `${displayWidth}px`;
+            image.style.height = `${displayHeight}px`;
+
+            // Store for reset
+            imageDimensionsRef.current = { width: displayWidth, height: displayHeight };
+
+            // NO LANDMARK SCALING HERE - Landmarks are now in Natural Coordinates!
+            // We just let the draw function handle the mapping based on the new display size.
+
+            requestAnimationFrame(draw);
         };
+
         window.addEventListener('resize', handleResize);
-        const interval = setInterval(handleResize, 1000);
-        return () => { window.removeEventListener('resize', handleResize); clearInterval(interval); };
-    }, [draw, setLongLegLandmarks]);
+        handleResize(); // Initial call
+
+        return () => { window.removeEventListener('resize', handleResize); };
+    }, [draw]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -768,7 +826,15 @@ const LongLegPlannerPage: React.FC = () => {
     };
 
     const handleResetAll = () => {
-        if (canvasRef.current) resetLandmarks(canvasRef.current);
+        // Use natural
+        if (imageRef.current) {
+            resetLandmarks(imageRef.current.naturalWidth, imageRef.current.naturalHeight);
+        } else if (imageDimensionsRef.current.width > 0) {
+            resetLandmarks(imageDimensionsRef.current.width, imageDimensionsRef.current.height);
+        } else if (canvasRef.current) {
+            // Fallback (unlikely)
+            resetLandmarks(canvasRef.current.width / (window.devicePixelRatio || 1), canvasRef.current.height / (window.devicePixelRatio || 1));
+        }
         setVisibleLandmarkSets(new Set()); setActiveInstruction(null);
         setLongLegResults({ ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', vca: null });
         setFemurBoundary(null); setTibiaBoundary(null);
@@ -777,20 +843,38 @@ const LongLegPlannerPage: React.FC = () => {
 
     const getStableCoordinates = useCallback((clientX: number, clientY: number) => {
         const viewer = viewerRef.current;
-        const canvas = canvasRef.current;
-        if (!viewer || !canvas) return { x: 0, y: 0 };
+        const image = imageRef.current;
+        if (!viewer || !image) return { x: 0, y: 0 };
 
         const viewerRect = viewer.getBoundingClientRect();
+
+        // 1. Client CS -> Viewer CS (offset from center)
         const viewerCenterX = viewerRect.left + viewerRect.width / 2;
         const viewerCenterY = viewerRect.top + viewerRect.height / 2;
 
-        const contentCenterX = viewerCenterX + panOffset.x;
-        const contentCenterY = viewerCenterY + panOffset.y;
+        const dx = clientX - viewerCenterX;
+        const dy = clientY - viewerCenterY;
 
-        const x = (clientX - contentCenterX) / zoom + canvas.width / 2;
-        const y = (clientY - contentCenterY) / zoom + canvas.height / 2;
+        // 2. Remove Pan & Zoom
+        // (x - pan) / zoom
+        const unzoomedX = (dx - panOffset.x) / zoom;
+        const unzoomedY = (dy - panOffset.y) / zoom;
 
-        return { x, y };
+        // 3. To Image Display CS
+        const imgW = parseFloat(image.style.width) || 0;
+        const imgH = parseFloat(image.style.height) || 0;
+
+        const imageDisplayNameX = unzoomedX + imgW / 2;
+        const imageDisplayNameY = unzoomedY + imgH / 2;
+
+        // 4. To Natural CS
+        const scaleX = image.naturalWidth ? imgW / image.naturalWidth : 1;
+        const scaleY = image.naturalHeight ? imgH / image.naturalHeight : 1;
+
+        const naturalX = imageDisplayNameX / scaleX;
+        const naturalY = imageDisplayNameY / scaleY;
+
+        return { x: naturalX, y: naturalY };
     }, [panOffset, zoom]);
 
     const handleViewerTap = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
@@ -809,8 +893,8 @@ const LongLegPlannerPage: React.FC = () => {
         const pipCtx = pipCanvas.getContext('2d'); if (!pipCtx) return;
         const zoomLevel = 2.5; const sourceSize = pipCanvas.width / zoomLevel;
         pipCtx.fillStyle = 'black'; pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
-        const imgScaleX = image.naturalWidth / canvas.width; const imgScaleY = image.naturalHeight / canvas.height;
-        pipCtx.drawImage(image, (pos.x * imgScaleX) - (sourceSize / 2), (pos.y * imgScaleY) - (sourceSize / 2), sourceSize, sourceSize, 0, 0, pipCanvas.width, pipCanvas.height);
+        // Note: pos is in natural coordinates now, so we can use it directly with drawImage on the NATURAL image!
+        pipCtx.drawImage(image, pos.x - (sourceSize / 2), pos.y - (sourceSize / 2), sourceSize, sourceSize, 0, 0, pipCanvas.width, pipCanvas.height);
         pipCtx.strokeStyle = '#fdd835'; pipCtx.lineWidth = 1; pipCtx.beginPath();
         pipCtx.moveTo(pipCanvas.width / 2, 0); pipCtx.lineTo(pipCanvas.width / 2, pipCanvas.height);
         pipCtx.moveTo(0, pipCanvas.height / 2); pipCtx.lineTo(pipCanvas.width, pipCanvas.height / 2);
@@ -819,7 +903,19 @@ const LongLegPlannerPage: React.FC = () => {
 
     const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getStableCoordinates(e.clientX, e.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 70) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+
+        // Calculate hit radius in Natural Coordinates
+        // Screen radius ~30px -> Natural radius
+        // hitRadiusNatural = hitRadiusScreen / (zoom * scaleX)
+        const image = imageRef.current;
+        const imgW = parseFloat(image?.style.width || "0");
+        const scaleX = (image?.naturalWidth && imgW) ? imgW / image.naturalWidth : 1;
+
+        const scaledHitRadius = (BASE_HANDLE_RADIUS + 24) / (zoom * scaleX);
+        const hitRadiusSq = scaledHitRadius ** 2;
+
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             const parentSet = landmarkToSetMap[key];
@@ -827,17 +923,37 @@ const LongLegPlannerPage: React.FC = () => {
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
             if (distSq < minDistSq) { minDistSq = distSq; closestKey = key; }
         }
-        if (closestKey) draggingPointRef.current = closestKey;
+
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
+        } else {
+            if (zoom > 1) {
+                isPanningRef.current = true;
+                panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
+            }
+        }
     };
 
     const handleMouseMove = useCallback((e: MouseEvent) => {
+        if (isPanningRef.current) {
+            setPanOffset({
+                x: e.clientX - panStartRef.current.x,
+                y: e.clientY - panStartRef.current.y
+            });
+            return;
+        }
+
         if (!draggingPointRef.current) return;
         const pos = getStableCoordinates(e.clientX, e.clientY);
         setLongLegLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip(pos);
     }, [setLongLegLandmarks, updatePip, getStableCoordinates]);
 
-    const handleMouseUp = useCallback(() => { draggingPointRef.current = null; captureCanvasState(); }, [captureCanvasState]);
+    const handleMouseUp = useCallback(() => {
+        draggingPointRef.current = null;
+        isPanningRef.current = false;
+        // removed captureCanvasState
+    }, []);
 
     const handlePipStart = (e: React.MouseEvent | React.TouchEvent) => {
         isDraggingPipRef.current = true;
@@ -880,7 +996,17 @@ const LongLegPlannerPage: React.FC = () => {
 
         const touch = e.touches[0]; if (!touch) return;
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 80) ** 2; let minDistSq = hitRadiusSq; let closestKey: string | null = null;
+
+        // Calculate hit radius in Natural Coordinates
+        const image = imageRef.current;
+        const imgW = parseFloat(image?.style.width || "0");
+        const scaleX = (image?.naturalWidth && imgW) ? imgW / image.naturalWidth : 1;
+
+        const scaledHitRadius = (BASE_HANDLE_RADIUS + 24) / (zoom * scaleX);
+        const hitRadiusSq = scaledHitRadius ** 2;
+
+        let minDistSq = hitRadiusSq;
+        let closestKey: string | null = null;
         for (const key in longLegLandmarks) {
             if (!longLegLandmarks[key]) continue;
             const parentSet = landmarkToSetMap[key];
@@ -888,7 +1014,16 @@ const LongLegPlannerPage: React.FC = () => {
             const distSq = (longLegLandmarks[key].x - pos.x) ** 2 + (longLegLandmarks[key].y - pos.y) ** 2;
             if (distSq < minDistSq) { minDistSq = distSq; closestKey = key; }
         }
-        if (closestKey) draggingPointRef.current = closestKey;
+
+        if (closestKey) {
+            draggingPointRef.current = closestKey;
+        } else {
+            // Start Pan if not hitting landmark
+            if (zoom > 1) {
+                isPanningRef.current = true;
+                panStartRef.current = { x: touch.clientX - panOffset.x, y: touch.clientY - panOffset.y };
+            }
+        }
     };
 
     const handleTouchMove = useCallback((e: TouchEvent) => {
@@ -903,14 +1038,27 @@ const LongLegPlannerPage: React.FC = () => {
             setZoom(newZoom);
 
             // Two-finger pan
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+            // Adjust pan to keep center stable relative to pinch?
+            // Simple pan for now:
             if (isPanningRef.current) {
-                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
                 setPanOffset({
                     x: midX - panStartRef.current.x,
                     y: midY - panStartRef.current.y
                 });
             }
+            return;
+        }
+
+        if (isPanningRef.current) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            setPanOffset({
+                x: touch.clientX - panStartRef.current.x,
+                y: touch.clientY - panStartRef.current.y
+            });
             return;
         }
 
@@ -926,8 +1074,8 @@ const LongLegPlannerPage: React.FC = () => {
         draggingPointRef.current = null;
         initialPinchDistanceRef.current = null;
         isPanningRef.current = false;
-        captureCanvasState();
-    }, [captureCanvasState]);
+        // removed captureCanvasState
+    }, []);
 
     useEffect(() => {
         window.addEventListener('mousemove', handleMouseMove); window.addEventListener('mouseup', handleMouseUp);
@@ -948,6 +1096,108 @@ const LongLegPlannerPage: React.FC = () => {
         { key: 'femoralJointLine', text: 'Femoral Articulating Line' },
         { key: 'tibialJointLine', text: 'Tibial Articulating Line' },
     ];
+
+
+    const captureFullResSnapshot = useCallback(() => {
+        const image = imageRef.current;
+        if (!image) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // 1. Draw Image
+        ctx.drawImage(image, 0, 0);
+
+        // 2. Draw Landmarks (Natural Coordinates)
+        const refScale = Math.max(1, canvas.width / 1000);
+        const lineWidth = BASE_LINE_WIDTH * refScale;
+        const radius = BASE_HANDLE_RADIUS * refScale;
+        const fontSize = Math.max(24, 16 * refScale);
+
+        ctx.font = `bold ${fontSize}px Roboto, sans-serif`;
+
+        const { hipCenter, kneeCenter, ankleCenter, femurAnatomicAxisPoint, femoralMedial, femoralLateral, tibialMedial, tibialLateral } = longLegLandmarks;
+
+        if (visibleLandmarkSets.has('hkaLine')) {
+            if (hipCenter && kneeCenter) {
+                ctx.strokeStyle = LANDMARK_COLORS.hkaLine; ctx.lineWidth = lineWidth;
+                ctx.beginPath(); ctx.moveTo(hipCenter.x, hipCenter.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
+            }
+            if (kneeCenter && ankleCenter) {
+                ctx.strokeStyle = LANDMARK_COLORS.hkaLine; ctx.lineWidth = lineWidth;
+                ctx.beginPath(); ctx.moveTo(kneeCenter.x, kneeCenter.y); ctx.lineTo(ankleCenter.x, ankleCenter.y); ctx.stroke();
+            }
+            ctx.fillStyle = LANDMARK_COLORS.hkaLine;
+            [hipCenter, kneeCenter, ankleCenter].forEach(p => {
+                if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2); ctx.fill(); }
+            });
+        }
+
+        if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis')) {
+            if (femurAnatomicAxisPoint && kneeCenter) {
+                ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = lineWidth;
+                ctx.beginPath(); ctx.moveTo(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
+            }
+            if (femurAnatomicAxisPoint) {
+                ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis;
+                ctx.beginPath(); ctx.arc(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y, radius, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        if (visibleLandmarkSets.has('femoralJointLine')) {
+            if (femoralMedial && femoralLateral) {
+                ctx.strokeStyle = LANDMARK_COLORS.femoralJointLine; ctx.lineWidth = lineWidth;
+                ctx.beginPath(); ctx.moveTo(femoralMedial.x, femoralMedial.y); ctx.lineTo(femoralLateral.x, femoralLateral.y); ctx.stroke();
+            }
+            ctx.fillStyle = LANDMARK_COLORS.femoralJointLine;
+            [femoralMedial, femoralLateral].forEach(p => { if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2); ctx.fill(); } });
+
+            if (femoralMedial && femoralLateral && kneeCenter) {
+                const { medial, lateral } = resolveMedialLateral(femoralMedial, femoralLateral, kneeCenter, legSide);
+                const baseOffset = 15 * refScale;
+                const mOffsetX = medial.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
+                const lOffsetX = lateral.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
+                const boxWidth = 20 * refScale; const boxHeight = 22 * refScale;
+
+                ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+                ctx.fillRect(medial.x + mOffsetX - (4 * refScale), medial.y - (10 * refScale), boxWidth, boxHeight);
+                ctx.fillRect(lateral.x + lOffsetX - (4 * refScale), lateral.y - (10 * refScale), boxWidth, boxHeight);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + (6 * refScale));
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + (6 * refScale));
+            }
+        }
+
+        if (visibleLandmarkSets.has('tibialJointLine')) {
+            if (tibialMedial && tibialLateral) {
+                ctx.strokeStyle = LANDMARK_COLORS.tibialJointLine; ctx.lineWidth = lineWidth;
+                ctx.beginPath(); ctx.moveTo(tibialMedial.x, tibialMedial.y); ctx.lineTo(tibialLateral.x, tibialLateral.y); ctx.stroke();
+            }
+            ctx.fillStyle = LANDMARK_COLORS.tibialJointLine;
+            [tibialMedial, tibialLateral].forEach(p => { if (p) { ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2); ctx.fill(); } });
+            if (tibialMedial && tibialLateral && kneeCenter) {
+                const { medial, lateral } = resolveMedialLateral(tibialMedial, tibialLateral, kneeCenter, legSide);
+                const baseOffset = 15 * refScale;
+                const mOffsetX = medial.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
+                const lOffsetX = lateral.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
+                const boxWidth = 20 * refScale; const boxHeight = 22 * refScale;
+
+                ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+                ctx.fillRect(medial.x + mOffsetX - (4 * refScale), medial.y - (10 * refScale), boxWidth, boxHeight);
+                ctx.fillRect(lateral.x + lOffsetX - (4 * refScale), lateral.y - (10 * refScale), boxWidth, boxHeight);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText('M', medial.x + mOffsetX, medial.y + (6 * refScale));
+                ctx.fillText('L', lateral.x + lOffsetX, lateral.y + (6 * refScale));
+            }
+        }
+
+        setLongLegCanvasDataUrl(canvas.toDataURL('image/png'));
+    }, [longLegLandmarks, visibleLandmarkSets, legSide, ldfaMode, setLongLegCanvasDataUrl]);
 
     if (kneeType === 'valgus') {
         return (
@@ -1021,62 +1271,72 @@ const LongLegPlannerPage: React.FC = () => {
                                     )}
                                 </div>
                             )}
-                            <div ref={viewerRef} onClick={handleViewerTap}
-                                onTouchEnd={(e) => {
-                                    isPanningRef.current = false;
-                                    handleViewerTap(e);
-                                }}
-                                onMouseDown={(e) => {
-                                    if (zoom > 1 && !draggingPointRef.current) {
-                                        e.preventDefault();
-                                        isPanningRef.current = true;
-                                        panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
-                                    }
-                                }}
-                                onMouseMove={(e) => {
-                                    if (isPanningRef.current && zoom > 1 && !draggingPointRef.current) {
-                                        setPanOffset({
-                                            x: e.clientX - panStartRef.current.x,
-                                            y: e.clientY - panStartRef.current.y
-                                        });
-                                    }
-                                }}
-                                onMouseUp={() => { isPanningRef.current = false; }}
-                                onMouseLeave={() => { isPanningRef.current = false; }}
-                                onTouchStart={(e) => {
-                                    if (zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
-                                        isPanningRef.current = true;
-                                        panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
-                                    }
-                                }}
-                                onTouchMove={(e) => {
-                                    if (isPanningRef.current && zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
-                                        setPanOffset({
-                                            x: e.touches[0].clientX - panStartRef.current.x,
-                                            y: e.touches[0].clientY - panStartRef.current.y
-                                        });
-                                    }
-                                }}
-                                className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center"
-                                style={{ cursor: zoom > 1 ? (isPanningRef.current ? 'grabbing' : 'grab') : 'default' }}
-                            >
-                                <div className="relative" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
-                                    <img ref={imageRef} src={longLegImageSrc} alt="X-ray" className="block mix-blend-screen" onLoad={() => {
-                                        const image = imageRef.current; const canvas = canvasRef.current;
-                                        if (!image || !canvas) return;
-                                        const viewer = canvas.parentElement?.parentElement; if (!viewer) return;
-                                        const availableHeight = viewer.clientHeight - 16; const availableWidth = viewer.clientWidth - 16;
-                                        const aspect = image.naturalWidth / image.naturalHeight;
-                                        let h = availableHeight; let w = h * aspect;
-                                        if (w > availableWidth) { w = availableWidth; h = w / aspect; }
-                                        canvas.width = w; canvas.height = h; image.style.width = `${w}px`; image.style.height = `${h}px`;
-                                        if (Object.keys(longLegLandmarks).length === 0) resetLandmarks(canvas);
-                                        requestAnimationFrame(draw);
-                                    }} />
-                                    <canvas ref={canvasRef} onMouseDown={handleMouseDown} onTouchStart={handleTouchStart} className="absolute top-0 left-0 cursor-crosshair touch-none" />
+                            <div ref={viewerRef} className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center bg-black">
+                                <div
+                                    style={{
+                                        transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
+                                        transformOrigin: 'center center',
+                                        transition: 'transform 0.1s ease-out'
+                                    }}
+                                    className="relative flex items-center justify-center"
+                                >
+                                    <img
+                                        ref={imageRef}
+                                        src={longLegImageSrc}
+                                        alt="X-ray"
+                                        className="block mix-blend-screen max-w-none"
+                                        style={{ pointerEvents: 'none', userSelect: 'none' }}
+                                        onLoad={() => {
+                                            const image = imageRef.current;
+                                            if (!image) return;
+
+                                            // 1. Calculate how to fit image in viewer (screen space)
+                                            const viewer = viewerRef.current;
+                                            if (!viewer) return;
+
+                                            const availableWidth = viewer.clientWidth - 32; // - padding
+                                            const availableHeight = viewer.clientHeight - 32;
+
+                                            const aspect = image.naturalWidth / image.naturalHeight;
+                                            let displayWidth = availableHeight * aspect;
+                                            let displayHeight = availableHeight;
+
+                                            if (displayWidth > availableWidth) {
+                                                displayWidth = availableWidth;
+                                                displayHeight = displayWidth / aspect;
+                                            }
+
+                                            image.style.width = `${displayWidth}px`;
+                                            image.style.height = `${displayHeight}px`;
+
+                                            // 2. Initialize / Scale landmarks if needed
+                                            // Store dimensions
+                                            imageDimensionsRef.current = { width: displayWidth, height: displayHeight };
+
+                                            // Simple initialization if empty
+                                            if (Object.keys(longLegLandmarks).length === 0) {
+                                                const isLeft = legSide === 'left';
+                                                resetLandmarks(displayWidth, displayHeight);
+                                            }
+
+                                            // Trigger draw
+                                            requestAnimationFrame(draw);
+                                        }}
+                                    />
                                 </div>
-                                <div ref={pipViewerRef} onMouseDown={handlePipStart} onTouchStart={handlePipStart}
-                                    className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none"
+                                <canvas
+                                    ref={canvasRef}
+                                    onMouseDown={handleMouseDown}
+                                    onTouchStart={handleTouchStart}
+                                    className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
+                                    style={{ pointerEvents: 'auto' }}
+                                />
+
+                                {/* PIP Viewer */}
+                                <div ref={pipViewerRef}
+                                    onMouseDown={handlePipStart}
+                                    onTouchStart={handlePipStart}
+                                    className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none z-50"
                                     style={{ top: pipPosition.y, left: pipPosition.x, willChange: 'top, left', transition: 'none' }}>
                                     <canvas ref={pipCanvasRef} width={176} height={176} className="rounded-full" />
                                     <div className="absolute inset-0 rounded-full border-2 border-cyan-400/30 pointer-events-none" />
@@ -1194,7 +1454,10 @@ const LongLegPlannerPage: React.FC = () => {
             {/* Footer Action */}
             <div className="flex justify-end px-2 pb-2 relative z-10">
                 <button
-                    onClick={() => setPage('results-analysis')}
+                    onClick={() => {
+                        captureFullResSnapshot();
+                        setPage('results-analysis');
+                    }}
                     disabled={!longLegResults.cpak || longLegResults.cpak === '--'}
                     className={`group relative py-3 px-8 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
                         ${(!longLegResults.cpak || longLegResults.cpak === '--')

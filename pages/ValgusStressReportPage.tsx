@@ -344,7 +344,7 @@ const ValgusStressReportPage: React.FC = () => {
                                 <div className="space-y-1">
                                     <ReportItem label="Mes. Lateral Gap" value={`${intraOpValidationData.lateralGap}mm`} />
                                     <ReportItem label="Mes. Medial Gap" value={`${intraOpValidationData.medialGap}mm`} />
-                                    <ReportItem label="Mes. Tibia l Width" value={`${intraOpValidationData.tibiaWidth}mm`} />
+                                    <ReportItem label="Mes. Tibial Width" value={`${intraOpValidationData.tibiaWidth}mm`} />
                                 </div>
                             </div>
 

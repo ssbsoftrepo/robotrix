@@ -101,32 +101,23 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
     } = useAppContext();
 
 
-    // Line Position (Static)
-    const [linesYPercent, setLinesYPercent] = useState<number>(31); // Vertical position as %
+    const [linesYPercent, setLinesYPercent] = useState<number>(33);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Logic for calculating the anticipated tibial cut based on Valgus results
     const anticipatedVarusCut = useMemo(() => {
         const mpta = valgusResults.mpta;
         if (mpta === null) return 0;
 
         let varusCut = 0;
-        if (mpta <= 85) varusCut = 4;  // Significant varoid (includes out of boundary ≤84)
-        else if (mpta <= 87) varusCut = 3;  // Moderate varoid: 85 < MPTA ≤ 87
-        else if (mpta <= 88) varusCut = 2;  // Mild varoid: 87 < MPTA ≤ 88
-        else if (mpta <= 90) varusCut = 1;  // Neutral tibia: 88 < MPTA ≤ 90
-        // MPTA > 90 = 0° (valgoid tibia / neutral cut)
-
-        // Limit to 3 max for Valgus path
+        if (mpta <= 85) varusCut = 4;
+        else if (mpta <= 87) varusCut = 3;
+        else if (mpta <= 88) varusCut = 2;
+        else if (mpta <= 90) varusCut = 1;
         return Math.min(varusCut, 3);
     }, [valgusResults.mpta]);
 
-    // This state tracks the currently recommended cut based on laxity adjustments
     const [currentRecommendation, setCurrentRecommendation] = useState<number>(anticipatedVarusCut);
 
-    // Initialize Selection: 
-    // We do NOT want a useEffect to sync "selectedDegree" -> "context" automatically on every render,
-    // as that causes the loop. We only want to Initialize local state from context if available.
     const [selectedDegree, setSelectedDegree] = useState<number>(() => {
         if (valgusFunctionalCutDegree !== null && valgusFunctionalCutDegree !== undefined) {
             return valgusFunctionalCutDegree;
@@ -135,16 +126,12 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
     });
 
     useEffect(() => {
-        // ALWAYS keep recommendation based on calculation (Algorithm)
         if (anticipatedVarusCut > 0) {
             setCurrentRecommendation(anticipatedVarusCut);
         } else {
             setCurrentRecommendation(2);
         }
 
-        // Initialize Selection:
-        // If we already have a selected degree in Context (user history), use it.
-        // Otherwise, default selection to the recommendation.
         if (valgusFunctionalCutDegree === null || valgusFunctionalCutDegree === undefined) {
             const newDefault = anticipatedVarusCut > 0 ? anticipatedVarusCut : 2;
             setSelectedDegree(newDefault);
@@ -152,7 +139,6 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
         }
     }, [anticipatedVarusCut, valgusFunctionalCutDegree, setValgusFunctionalCutDegree]);
 
-    // Explicit Handler for Selection to avoid Loop
     const handleSelectDegree = (degree: number) => {
         setSelectedDegree(degree);
         setValgusFunctionalCutDegree(degree);
@@ -184,11 +170,9 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
         handleSelectDegree(adjustedDegree);
     };
 
-    // No dragging logic needed as per user request (static lines)
-
     const lateralGapValue = valgusCoronalBalancingResults?.lateralGap || '--';
     const baseMedialGap = valgusCoronalBalancingResults?.selectedSeries || 0;
-    const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
+    const medialGapValue = Math.round(baseMedialGap + (selectedDegree * 1.2));
 
     return (
         <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -213,33 +197,23 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     <div className="h-full">
                         <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-inner h-full flex flex-col p-1.5 space-y-1 overflow-hidden">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
-
-                            <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
-                                {/* <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
+                            <div className="relative bg-[#252525] p-2 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
+                                <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
-                                </div> */}
-                                <p className="text-[20px] text-gray-400 leading-snug text-left">
+                                </div>
+                                <p className="text-[18px] text-gray-400 leading-snug text-justify">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
 
-                            {/* <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1.5] flex flex-col justify-center items-center text-center gap-1 z-10 min-h-0">
-                                <div className="bg-[#6D282C] text-white w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
-                                    2
-                                </div>
-                                <p className="text-[14px] text-gray-400 leading-snug">
-                                    Changing the 90 deg cut by <span className="text-[#ff8fa3] font-bold">1° varus</span> will open the medial gap by <span className="text-[#ff8fa3] font-bold">~ 1.2 mms</span> in average-sized tibia (70 mms width).
-                                </p>
-                            </div> */}
-
                             <div className="relative bg-[#1a1a1a] border-2 border-[#333333] rounded-lg p-2 text-center shadow-lg z-10 flex-[0.8] flex flex-col justify-center min-h-0">
-                                <p className="text-gray-400 text-md font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
-                                <p className="text-3xl font-black text-white">{anticipatedVarusCut}° <span className="text-sm">Varus</span></p>
+                                <p className="text-gray-400 text-lg font-bold uppercase tracking-wider mb-0">Anticipated Cut</p>
+                                <p className="text-4xl font-black text-[#ff8fa3]">{anticipatedVarusCut}° <span className="text-sm">Varus</span></p>
                             </div>
 
                             <div className="relative bg-[#252525] border border-[#333333] rounded-lg p-2 flex-[0.8] flex flex-col justify-center items-center gap-1 z-10 min-h-0">
-                                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-0">Laxity Level</p>
-                                <p className="text-md font-black text-white">{lateralLaxity || 'Unknown'}</p>
+                                <p className="text-gray-400 text-lg font-bold uppercase tracking-wider mb-0">Laxity Level</p>
+                                <p className="text-md font-black text-[#ff8fa3]">{lateralLaxity || 'Unknown'}</p>
                                 <button
                                     onClick={() => { setPreviousPage('planner-valgus-functional-tibial-cut'); setPage('planner-valgus-stress-laxity-check'); }}
                                     className="group relative w-full py-1 bg-[#6D282C] border border-[#893338] rounded-sm 

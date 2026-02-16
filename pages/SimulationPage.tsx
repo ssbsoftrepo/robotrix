@@ -274,8 +274,8 @@ const SimulationPage: React.FC = () => {
         }
 
         if (isSplitView) {
-            ctx.strokeStyle = 'rgba(109, 40, 44, 0.7)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(109, 40, 44, 0.9)';
+            ctx.lineWidth = 4;
             ctx.beginPath();
             ctx.moveTo(centerlineX, 0);
             ctx.lineTo(centerlineX, canvas.height);
@@ -520,7 +520,7 @@ const SimulationPage: React.FC = () => {
             <div className="mt-1 flex justify-between px-2 pb-2 relative z-10">
                 {/* Back Button */}
                 <button
-                    onClick={() => setPage('results-analysis')}
+                    onClick={() => setPage('planner-long-leg-functional-tibial-cut')}
                     className="group relative py-2 px-4 bg-[#252525] border border-[#444444] rounded-sm 
                                shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
                                transition-all duration-300 ease-out

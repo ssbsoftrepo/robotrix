@@ -306,6 +306,7 @@ const PostOpValgusPlanner: React.FC = () => {
     const initialPinchDistanceRef = useRef<number | null>(null);
     const initialInitialPinchZoomRef = useRef<number>(1);
     const initialPanOffsetRef = useRef({ x: 0, y: 0 });
+    const lastResizeTimeRef = useRef(0);
 
     const zoomIn = () => setZoom(z => Math.min(z + 0.2, MAX_ZOOM));
     const zoomOut = () => setZoom(z => Math.max(z - 0.2, MIN_ZOOM));
@@ -323,7 +324,10 @@ const PostOpValgusPlanner: React.FC = () => {
     }, []); // Run only on mount to restore state
 
     const resetLandmarks = useCallback((canvas: HTMLCanvasElement) => {
-        const w = canvas.width; const h = canvas.height;
+        // Use natural dimensions if available
+        const w = imageRef.current?.naturalWidth || canvas.width;
+        const h = imageRef.current?.naturalHeight || canvas.height;
+
         const isLeft = legSide === 'left';
         setLandmarks({
             medialJointSpace: { x: isLeft ? w * 0.45 : w * 0.55, y: h * 0.5 },
@@ -373,7 +377,8 @@ const PostOpValgusPlanner: React.FC = () => {
         const imgScaleX = image.naturalWidth / canvas.width;
         const imgScaleY = image.naturalHeight / canvas.height;
 
-        pipCtx.drawImage(image, (pos.x * imgScaleX) - (sourceSize / 2), (pos.y * imgScaleY) - (sourceSize / 2), sourceSize, sourceSize, 0, 0, pipCanvas.width, pipCanvas.height);
+        // Correct logic for natural coordinates:
+        pipCtx.drawImage(image, pos.x - (sourceSize / 2), pos.y - (sourceSize / 2), sourceSize, sourceSize, 0, 0, pipCanvas.width, pipCanvas.height);
         pipCtx.strokeStyle = '#fdd835'; pipCtx.lineWidth = 1; pipCtx.beginPath();
         pipCtx.moveTo(pipCanvas.width / 2, 0); pipCtx.lineTo(pipCanvas.width / 2, pipCanvas.height);
         pipCtx.moveTo(0, pipCanvas.height / 2); pipCtx.lineTo(pipCanvas.width, pipCanvas.height / 2);
@@ -474,68 +479,82 @@ const PostOpValgusPlanner: React.FC = () => {
 
     const draw = useCallback(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const image = imageRef.current;
+        if (!canvas || !image) return;
         const ctx = canvas.getContext('2d');
-        if (!ctx || Object.keys(landmarks).length === 0) return;
+        if (!ctx) return;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (Object.keys(landmarks).length === 0) return;
+
+        // Prepare Transform Matrix
+        ctx.save();
+
+        // 1. Center
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        // 2. Pan
+        ctx.translate(panOffset.x, panOffset.y);
+        // 3. Zoom
+        ctx.scale(zoom, zoom);
+        // 4. Center Image
+        const imgW = parseFloat(image.style.width) || 0;
+        const imgH = parseFloat(image.style.height) || 0;
+        ctx.translate(-imgW / 2, -imgH / 2);
+
+        // V2: Apply Scale from Natural to Display
+        const scaleX = image.naturalWidth ? imgW / image.naturalWidth : 1;
+        const scaleY = image.naturalHeight ? imgH / image.naturalHeight : 1;
+        ctx.scale(scaleX, scaleY);
 
         const currentResults = updateCalculations();
 
         const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = landmarks;
 
-        const drawTextWithBackground = (text: string, x: number, y: number, color: string = '#fdd835') => {
-            ctx.font = 'bold 20px Inter, sans-serif';
-            ctx.fillStyle = 'rgba(29, 29, 31, 0.8)';
-            const textMetrics = ctx.measureText(text);
-            const textWidth = textMetrics.width;
-            ctx.fillRect(x - textWidth / 2 - 8, y - 20, textWidth + 16, 30);
-            ctx.fillStyle = color;
-            ctx.fillText(text, x - textWidth / 2, y);
-        };
-
         const jointCenter = (medialJointSpace && lateralJointSpace) ? { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 } : null;
 
         if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace && jointCenter) {
-            const scaledRadius = BASE_HANDLE_RADIUS / zoom;
-            const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+            const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
+            const scaledLineWidth = BASE_LINE_WIDTH / (zoom * scaleX);
             ctx.strokeStyle = LANDMARK_COLORS.jointLine; ctx.fillStyle = LANDMARK_COLORS.jointLine; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(medialJointSpace.x, medialJointSpace.y); ctx.lineTo(lateralJointSpace.x, lateralJointSpace.y); ctx.stroke();
             [medialJointSpace, lateralJointSpace].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill(); });
 
             // Draw M/L labels with background boxes
             const baseOffset = 15;
-            const scaledOffset = baseOffset / zoom;
+            const scaledOffset = baseOffset / (zoom * scaleX);
             const mOffset = medialJointSpace.x < lateralJointSpace.x ? -scaledOffset * 2 : scaledOffset;
             const lOffset = lateralJointSpace.x < medialJointSpace.x ? -scaledOffset * 2 : scaledOffset;
-            const boxWidth = 20 / zoom;
-            const boxHeight = 22 / zoom;
-            const scaledFontSize = Math.max(12, 16 / zoom);
+            const boxWidth = 20 / (zoom * scaleX);
+            const boxHeight = 22 / (zoom * scaleX);
+            const scaledFontSize = Math.max(12, 16 / (zoom * scaleX));
 
             ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-            ctx.fillRect(medialJointSpace.x + mOffset - 4 / zoom, medialJointSpace.y - 10 / zoom, boxWidth, boxHeight);
-            ctx.fillRect(lateralJointSpace.x + lOffset - 4 / zoom, lateralJointSpace.y - 10 / zoom, boxWidth, boxHeight);
+            ctx.fillRect(medialJointSpace.x + mOffset - 4 / (zoom * scaleX), medialJointSpace.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
+            ctx.fillRect(lateralJointSpace.x + lOffset - 4 / (zoom * scaleX), lateralJointSpace.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
 
             ctx.fillStyle = '#ffffff';
             ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
-            ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6 / zoom);
-            ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6 / zoom);
+            ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6 / (zoom * scaleX));
+            ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6 / (zoom * scaleX));
         }
 
         if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
-            const scaledRadius = BASE_HANDLE_RADIUS / zoom;
-            const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+            const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
+            const scaledLineWidth = BASE_LINE_WIDTH / (zoom * scaleX);
             ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(femurAxisPoint.x, femurAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
             ctx.beginPath(); ctx.arc(femurAxisPoint.x, femurAxisPoint.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
         }
         if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter) {
-            const scaledRadius = BASE_HANDLE_RADIUS / zoom;
-            const scaledLineWidth = BASE_LINE_WIDTH / zoom;
+            const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
+            const scaledLineWidth = BASE_LINE_WIDTH / (zoom * scaleX);
             ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(tibiaAxisPoint.x, tibiaAxisPoint.y); ctx.lineTo(jointCenter.x, jointCenter.y); ctx.stroke();
             ctx.beginPath(); ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
         }
-    }, [landmarks, visibleLandmarkSets, updateCalculations]);
+        ctx.restore();
+    }, [landmarks, visibleLandmarkSets, updateCalculations, zoom, panOffset]);
 
     useEffect(() => { draw(); }, [draw]);
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -550,63 +569,71 @@ const PostOpValgusPlanner: React.FC = () => {
     };
 
     useEffect(() => {
-        const imgElement = imageRef.current;
-        const canvasElement = canvasRef.current;
+        const handleResize = () => {
+            const now = Date.now();
+            if (now - lastResizeTimeRef.current < 50) return;
+            lastResizeTimeRef.current = now;
 
-        const handleImageLoad = () => {
-            if (!imgElement || !canvasElement) return;
+            const viewer = viewerRef.current;
+            const canvas = canvasRef.current;
+            const image = imageRef.current;
+            if (!viewer || !canvas || !image) return;
 
-            const viewer = canvasElement.parentElement?.parentElement; // container
-            if (!viewer) return;
+            const dpr = window.devicePixelRatio || 1;
+            const rect = viewer.getBoundingClientRect();
 
-            const imgNaturalWidth = imgElement.naturalWidth;
-            const imgNaturalHeight = imgElement.naturalHeight;
+            // Set canvas size to match viewer (screen space)
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
 
-            if (imgNaturalWidth === 0 || imgNaturalHeight === 0) return;
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.scale(dpr, dpr);
 
-            const availWidth = viewer.clientWidth;
-            const availHeight = viewer.clientHeight;
+            // Fit image
+            const availableWidth = viewer.clientWidth;
+            const availableHeight = viewer.clientHeight;
+            const aspect = image.naturalWidth / image.naturalHeight;
 
-            const aspectRatio = imgNaturalWidth / imgNaturalHeight;
+            let displayWidth = availableWidth;
+            let displayHeight = displayWidth / aspect;
 
-            let displayWidth = availWidth;
-            let displayHeight = displayWidth / aspectRatio;
-
-            if (displayHeight > availHeight) {
-                displayHeight = availHeight;
-                displayWidth = displayHeight * aspectRatio;
+            if (displayHeight > availableHeight) {
+                displayHeight = availableHeight;
+                displayWidth = displayHeight * aspect;
             }
 
-            // Set canvas and image display sizes
-            imgElement.style.width = `${displayWidth}px`;
-            imgElement.style.height = `${displayHeight}px`;
-            canvasElement.style.width = `${displayWidth}px`;
-            canvasElement.style.height = `${displayHeight}px`;
+            const oldW = parseFloat(image.style.width) || image.width;
 
-            // Set canvas internal resolution to match display size (no DPR scaling)
-            canvasElement.width = displayWidth;
-            canvasElement.height = displayHeight;
+            image.style.width = `${displayWidth}px`;
+            image.style.height = `${displayHeight}px`;
 
-            // Reset landmarks ONLY if they are empty (prevent overwriting saved data)
+            if (oldW && Math.abs(displayWidth - oldW) > 1) {
+                // NO LANDMARK SCALING - Landmarks in Natural Coordinates
+            }
+
             if (Object.keys(landmarksRef.current).length === 0) {
-                resetLandmarks(canvasElement);
+                resetLandmarks(canvas);
             }
-            draw(); // Redraw after resize and potential landmark reset
+
+            requestAnimationFrame(draw);
         };
 
+        const imgElement = imageRef.current;
         if (imgElement) {
-            imgElement.addEventListener('load', handleImageLoad);
+            imgElement.addEventListener('load', handleResize);
             if (imgElement.complete && imgElement.naturalWidth > 0) {
-                handleImageLoad();
+                handleResize();
             }
         }
+        window.addEventListener('resize', handleResize);
 
         return () => {
-            if (imgElement) {
-                imgElement.removeEventListener('load', handleImageLoad);
-            }
+            if (imgElement) imgElement.removeEventListener('load', handleResize);
+            window.removeEventListener('resize', handleResize);
         };
-    }, [draw, postOpValgusImage, resetLandmarks]);
+    }, [draw, postOpValgusImage, resetLandmarks, setLandmarks]);
 
     // Handle Reset
     const handleResetAll = () => {
@@ -619,25 +646,42 @@ const PostOpValgusPlanner: React.FC = () => {
     // Update getCanvasPos to account for DPR and Scale
     const getStableCoordinates = useCallback((clientX: number, clientY: number) => {
         const viewer = viewerRef.current;
-        const canvas = canvasRef.current;
-        if (!viewer || !canvas) return { x: 0, y: 0 };
+        const image = imageRef.current;
+        if (!viewer || !image) return { x: 0, y: 0 };
 
         const viewerRect = viewer.getBoundingClientRect();
         const viewerCenterX = viewerRect.left + viewerRect.width / 2;
         const viewerCenterY = viewerRect.top + viewerRect.height / 2;
 
-        const contentCenterX = viewerCenterX + panOffset.x;
-        const contentCenterY = viewerCenterY + panOffset.y;
+        const dx = clientX - viewerCenterX;
+        const dy = clientY - viewerCenterY;
 
-        const x = (clientX - contentCenterX) / zoom + canvas.width / 2;
-        const y = (clientY - contentCenterY) / zoom + canvas.height / 2;
+        const unzoomedX = (dx - panOffset.x) / zoom;
+        const unzoomedY = (dy - panOffset.y) / zoom;
 
-        return { x, y };
+        const imgW = parseFloat(image.style.width) || 0;
+        const imgH = parseFloat(image.style.height) || 0;
+
+        const scaleX = image.naturalWidth ? imgW / image.naturalWidth : 1;
+        const scaleY = image.naturalHeight ? imgH / image.naturalHeight : 1;
+
+        const naturalX = (unzoomedX + imgW / 2) / scaleX;
+        const naturalY = (unzoomedY + imgH / 2) / scaleY;
+
+        return { x: naturalX, y: naturalY };
     }, [panOffset, zoom]);
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getStableCoordinates(e.clientX, e.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 120) ** 2; // Increased sensitivity for gloves
+
+        // Calculate hit radius in Natural Coordinates
+        const image = imageRef.current;
+        const imgW = parseFloat(image?.style.width || "0");
+        const scaleX = (image?.naturalWidth && imgW) ? imgW / image.naturalWidth : 1;
+
+        const scaledHitRadius = (BASE_HANDLE_RADIUS + 24) / (zoom * scaleX);
+        const hitRadiusSq = scaledHitRadius ** 2;
+
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
         for (const key in landmarks) {
@@ -700,7 +744,15 @@ const PostOpValgusPlanner: React.FC = () => {
         const touch = e.touches[0];
         if (!touch) return;
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
-        const hitRadiusSq = (BASE_HANDLE_RADIUS + 120) ** 2; // Increased sensitivity for gloves
+
+        // Calculate hit radius in Natural Coordinates
+        const image = imageRef.current;
+        const imgW = parseFloat(image?.style.width || "0");
+        const scaleX = (image?.naturalWidth && imgW) ? imgW / image.naturalWidth : 1;
+
+        const scaledHitRadius = (BASE_HANDLE_RADIUS + 24) / (zoom * scaleX);
+        const hitRadiusSq = scaledHitRadius ** 2;
+
         let minDistSq = hitRadiusSq;
         let closestKey: string | null = null;
         for (const key in landmarks) {
@@ -843,21 +895,22 @@ const PostOpValgusPlanner: React.FC = () => {
                                     )}
                                 </div>
                             )}
-                            <div className="relative" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
+                            <div className="relative flex items-center justify-center" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
                                 <img
                                     ref={imageRef}
                                     src={postOpValgusImage}
-                                    className="block max-w-full max-h-full object-contain"
+                                    className="block max-w-none"
+                                    style={{ pointerEvents: 'none', userSelect: 'none' }}
                                     alt=""
                                 />
-                                <canvas
-                                    ref={canvasRef}
-                                    className="absolute cursor-crosshair touch-none inset-0 m-auto"
-                                    style={{ touchAction: 'none' }}
-                                    onMouseDown={handleMouseDown}
-                                    onTouchStart={handleTouchStart}
-                                />
                             </div>
+                            <canvas
+                                ref={canvasRef}
+                                className="absolute cursor-crosshair touch-none inset-0 w-full h-full"
+                                style={{ pointerEvents: 'auto' }}
+                                onMouseDown={handleMouseDown}
+                                onTouchStart={handleTouchStart}
+                            />
                         </div>
                         <div ref={pipViewerRef} onMouseDown={handlePipStart}
                             onTouchStart={handlePipStart} className="absolute w-24 h-24 border-2 border-dark-maroon bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg top-2 right-2 z-10" style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px` }}>

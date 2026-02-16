@@ -110,13 +110,7 @@ const App: React.FC = () => {
 
     return (
         <div className="h-screen flex flex-col overflow-hidden">
-            <div className="flex flex-1 min-h-0">
-                <main className="flex-1 p-1 md:p-1 overflow-hidden relative flex flex-col min-h-0">
-                    {renderPage()}
-                </main>
-            </div>
-
-            <footer className="relative flex items-center justify-center p-2 text-center border-t border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]">
+            <header className="relative flex items-center justify-center p-2 text-center border-b border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]">
                 <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
                 {page !== 'case-management' && (
                     <button
@@ -138,7 +132,13 @@ const App: React.FC = () => {
                 <h1 className="relative z-10 text-4xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg">
                     ROBOTRIX<span className="text-[#6D282C]">+</span>
                 </h1>
-            </footer>
+            </header>
+
+            <div className="flex flex-1 min-h-0">
+                <main className="flex-1 p-1 md:p-1 overflow-hidden relative flex flex-col min-h-0">
+                    {renderPage()}
+                </main>
+            </div>
         </div>
     );
 };

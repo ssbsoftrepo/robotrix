@@ -61,49 +61,51 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                 {/* Column 1: Inputs & Instructions */}
                 <div className="h-full flex flex-col gap-2 overflow-hidden">
                     {/* Instructions Section */}
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-5 rounded-xl">
-                        <div className="w-full flex justify-center mb-3">
+                    <div className="flex flex-col gap-2 flex-[1] min-h-0">
+                        <div className="w-full flex justify-center">
                             <span className="px-4 py-1.5 rounded-sm text-xs font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">Actual Gaps</span>
                         </div>
-                        <p className="text-gray-300 text-lg font-bold  leading-relaxed mb-2">
-                            1. Assess the Actual medial and lateral extensor gaps
-                        </p>
-                        <p className="text-gray-300 text-lg font-bold  leading-relaxed">
-                            2. Measure the mediolateral tibial width using tibial calipers
-                        </p>
+                        <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1] flex items-center gap-3 z-10 min-h-0">
+                            <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">1</div>
+                            <p className="text-[18px] text-gray-400 leading-snug text-justify">Assess the Actual medial and lateral extensor gaps</p>
+                        </div>
+                        <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1] flex items-center gap-3 z-10 min-h-0">
+                            <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">2</div>
+                            <p className="text-[18px] text-gray-400 leading-snug text-justify">Measure the mediolateral tibial width using tibial calipers</p>
+                        </div>
                     </div>
 
                     {/* Input Fields Section */}
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-5 rounded-xl flex-grow flex flex-col justify-center">
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-5 rounded-xl flex-[1] flex flex-col justify-center">
                         <div className="space-y-6">
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Medial Gap (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{medialGap}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Lateral Gap (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('lateralGap', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('lateralGap', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{lateralGap}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('lateralGap', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('lateralGap', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Mid Tibia Width (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{tibiaWidth}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-2xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
                                 </div>
                             </div>
                         </div>
@@ -112,62 +114,56 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
 
                 {/* Column 2: Visual Comparison */}
                 <div className="h-full flex flex-col gap-1 overflow-hidden">
-                    <div className="relative flex-grow bg-[#1a1a1a] border border-[#333333] rounded-xl flex flex-col items-center justify-start p-4">
+                    <div className="relative flex-grow bg-black border border-[#333333] rounded-xl flex items-stretch p-2">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
-                        <div className="w-full flex justify-between px-2 z-20 mb-4">
-                            <div className="flex flex-col items-center justify-center bg-[#111827] border border-[#1F2937] rounded-lg p-3 w-[48%] shadow-lg">
-                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">ANTICIPATED LATERAL GAP</span>
+                        {/* Left Side - Anticipated Lateral Gap + Actual Circle */}
+                        <div className="flex flex-col items-center justify-center gap-3 z-20 px-3 shrink-0 w-[130px]">
+                            <div className="flex flex-col items-center justify-center bg-[#1a1a1a] border border-[#333333] rounded-lg p-3 shadow-lg w-full">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 text-center">ANTICIPATED<br />LATERAL GAP</span>
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-2xl font-black text-white">{anticipatedLateralGap}</span>
-                                    <span className="text-xs font-bold text-[#6B7280]">mm</span>
+                                    <span className="text-sm font-bold text-gray-500">mm</span>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-center justify-center bg-[#111827] border border-[#1F2937] rounded-lg p-3 w-[48%] shadow-lg">
-                                <span className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">ANTICIPATED MEDIAL GAP</span>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-2xl font-black text-white">{anticipatedMedialGap}</span>
-                                    <span className="text-xs font-bold text-[#6B7280]">mm</span>
-                                </div>
+                            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL LATERAL</p>
+                            <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(lateralDiff)}`}>
+                                <span className="text-2xl font-black leading-tight">{lateralGap}</span>
+                                <span className="text-xs font-bold opacity-60">mm</span>
                             </div>
                         </div>
 
-                        {/* Horizontal layout: Circle - Image - Circle */}
-                        <div className="flex items-center justify-center gap-4 flex-grow w-full">
-                            {/* Left Circle - Actual Lateral */}
-                            <div className="flex flex-col items-center shrink-0">
-                                <p className="text-gray-500 text-[12px] font-bold uppercase tracking-wider mb-2">ACTUAL LATERAL GAP</p>
-                                <div className={`w-24 h-24 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(lateralDiff)}`}>
-                                    <span className="text-3xl font-black leading-tight">{lateralGap}</span>
-                                    <span className="text-xs font-bold opacity-60">mm</span>
+                        {/* Center - Bone Image (full height) */}
+                        <div className="flex-grow flex items-center justify-center z-10 min-w-0">
+                            <img src="/intraval.png" alt="Joint Model" className="max-h-full max-w-full object-contain" />
+                        </div>
+
+                        {/* Right Side - Anticipated Medial Gap + Actual Circle */}
+                        <div className="flex flex-col items-center justify-center gap-3 z-20 px-3 shrink-0 w-[130px]">
+                            <div className="flex flex-col items-center justify-center bg-[#1a1a1a] border border-[#333333] rounded-lg p-3 shadow-lg w-full">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 text-center">ANTICIPATED<br />MEDIAL GAP</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-2xl font-black text-white">{anticipatedMedialGap}</span>
+                                    <span className="text-sm font-bold text-gray-500">mm</span>
                                 </div>
                             </div>
-
-                            {/* Center - Bone Image */}
-                            <div className="flex-grow flex items-center justify-center max-h-full">
-                                <img src="/intraval.png" alt="Joint Model" className="max-h-[50vh] max-w-full object-contain" />
-                            </div>
-
-                            {/* Right Circle - Actual Medial */}
-                            <div className="flex flex-col items-center shrink-0">
-                                <p className="text-gray-500 text-[12px] font-bold uppercase tracking-wider mb-2">ACTUAL MEDIAL GAP</p>
-                                <div className={`w-24 h-24 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(medialDiff)}`}>
-                                    <span className="text-3xl font-black leading-tight">{medialGap}</span>
-                                    <span className="text-xs font-bold opacity-60">mm</span>
-                                </div>
+                            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL MEDIAL</p>
+                            <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(medialDiff)}`}>
+                                <span className="text-2xl font-black leading-tight">{medialGap}</span>
+                                <span className="text-xs font-bold opacity-60">mm</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Column 3: Analysis & Formula */}
-                <div className="h-full flex flex-col overflow-hidden">
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-5 rounded-xl flex flex-col h-full">
-                        <div className="w-full flex justify-center mb-4">
+                <div className="h-full flex flex-col gap-2 overflow-hidden">
+                    {/* Section 1: Analysis */}
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col flex-[1] min-h-0">
+                        <div className="w-full flex justify-center mb-3">
                             <span className="px-4 py-1.5 rounded-sm text-xs font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">ANALYSIS</span>
                         </div>
-
-                        <div className="flex-grow flex flex-col gap-5">
+                        <div className="flex-grow flex flex-col gap-3 justify-center">
                             <div className={`p-4 rounded-lg border border-white/5 flex flex-col items-center justify-center ${getStatusColor(lateralDiff).replace('bg-', 'bg-opacity-5 ')}`}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <div className={`w-2 h-2 rounded-full ${lateralDiff === 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -175,7 +171,6 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                                 </div>
                                 <p className={`text-xl font-black ${lateralDiff === 0 ? 'text-green-500' : 'text-red-500'}`}>{getGapStatus(lateralDiff)}</p>
                             </div>
-
                             <div className={`p-4 rounded-lg border border-white/5 flex flex-col items-center justify-center ${getStatusColor(medialDiff).replace('bg-', 'bg-opacity-5 ')}`}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <div className={`w-2 h-2 rounded-full ${medialDiff === 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -183,55 +178,51 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                                 </div>
                                 <p className={`text-xl font-black ${medialDiff === 0 ? 'text-green-500' : 'text-red-500'}`}>{getGapStatus(medialDiff)}</p>
                             </div>
-
-                            {/* Conditional Display: Revised Cut OR Error Considerations */}
-                            {medialDiff === 0 && lateralDiff === 0 ? (
-                                <div className="mt-auto bg-[#0a0a0a] border border-[#333333] rounded-xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                                    <div className="absolute inset-0 bg-[#d32f2f]/0 group-hover:bg-[#d32f2f]/5 transition-colors duration-500" />
-
-                                    <h3 className="text-white text-sm font-bold uppercase tracking-wider mb-4 relative z-10 text-center">
-                                        REVISED FUNCTIONAL TIBIA CUT
-                                    </h3>
-
-                                    <div className="flex items-start relative z-10 mb-4">
-                                        <span className="text-6xl font-black text-[#F87171] tracking-tighter leading-none">
-                                            {Math.round(revisedVarusCut)}
-                                        </span>
-                                        <span className="text-3xl font-black text-[#F87171] mt-1 ml-1">°</span>
-                                    </div>
-
-                                    <p className="text-gray-500 text-[10px] font-medium text-center relative z-10 max-w-[90%]">
-                                        Calculated using patient-specific tibial width (70mm)
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="mt-auto bg-[#0a0a0a] border border-[#333333] rounded-xl p-5 flex flex-col gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <span className="text-amber-500 font-bold text-sm">Actual gaps do not match.</span>
-                                    </div>
-                                    <div>
-                                        <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-2">CONSIDER THE FOLLOWING:</p>
-                                        <div className="space-y-2">
-                                            {[
-                                                "Input of inaccurate data",
-                                                "Under/over resection of foundations",
-                                                "Presence of pre-op lateral laxity",
-                                                "Error in Provisional 90° tibial cut"
-                                            ].map((item, index) => (
-                                                <div key={index} className="flex items-center gap-2 bg-[#1A1A1A] p-2 rounded border border-white/5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                                                    <span className="text-gray-300 text-[10px] font-bold">{item}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
+
+                    {/* Section 2: Revised Cut / Error Considerations */}
+                    {medialDiff === 0 && lateralDiff === 0 ? (
+                        <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-xl p-5 flex flex-col items-center justify-center flex-[1] min-h-0">
+                            <h3 className="text-gray-200 text-lg font-bold uppercase tracking-wider mb-4 text-center">
+                                REVISED FUNCTIONAL TIBIA CUT
+                            </h3>
+                            <div className="flex items-start mb-3">
+                                <span className="text-7xl font-black text-[#ff8fa3] tracking-tighter leading-none">
+                                    {Math.round(revisedVarusCut)}
+                                </span>
+                                <span className="text-4xl font-black text-[#ff8fa3] mt-1 ml-1">°</span>
+                            </div>
+                            <p className="text-gray-400 text-sm font-medium text-center max-w-[90%]">
+                                Calculated using patient-specific tibial width (70mm)
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-xl p-5 flex flex-col flex-[1] min-h-0">
+                            <div className="flex items-center gap-3 mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <span className="text-amber-500 font-bold text-base">Actual gaps do not match.</span>
+                            </div>
+                            <div className="flex-grow">
+                                <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-3">CONSIDER THE FOLLOWING:</p>
+                                <div className="space-y-2">
+                                    {[
+                                        "Input of inaccurate data",
+                                        "Under/over resection of foundations",
+                                        "Presence of pre-op lateral laxity",
+                                        "Error in Provisional 90° tibial cut"
+                                    ].map((item, index) => (
+                                        <div key={index} className="flex items-center gap-2 bg-black/20 p-2.5 rounded border border-[#6D282C]/20">
+                                            <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                                            <span className="text-gray-300 text-sm font-bold">{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

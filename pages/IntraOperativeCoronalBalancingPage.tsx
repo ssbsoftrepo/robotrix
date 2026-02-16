@@ -141,6 +141,16 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const baseMedial = medialGap + additionalFemurCut + additionalTibiaCut;
     const baseLateral = lateralGap + additionalFemurCut + additionalTibiaCut;
 
+    // Gap match check from validation page
+    const mpta = longLegResults.mpta ?? 86;
+    const rawTightness = 86 - mpta;
+    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
+    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const anticipatedLateralGap = thickness;
+    const medialDiff = medialGap - anticipatedMedialGap;
+    const lateralDiff = lateralGap - anticipatedLateralGap;
+    const gapsMatch = medialDiff === 0 && lateralDiff === 0;
+
     const LMT = thickness - additionalLaxity;
 
     const thetaValue = Math.round((LMT - baseMedial) / C);
@@ -163,27 +173,24 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
         });
     };
 
-    // React to Recommendation Changes (Input parameters changed)
-    // We want to force-update the selection to the new recommendation when inputs change
-    // AND update the context to reflect this new "current state".
+    const prevRecommendedTheta = React.useRef(recommendedTheta);
+
     React.useEffect(() => {
-        // Only update if the recommendation is different from what we currently have
-        // OR if the context is not synced.
-
-        // Note: We update local state to follow recommendation when inputs change.
-        setSelectedJig(recommendedTheta);
-
-        // We also sync this to context so if user leaves, they see this state.
-        // We use functional update to avoid dependency on full intraOpCoronalBalancingData object if possible,
-        // but here we need to spread it. 
-        // To avoid loop, we check equality.
-        if (functionalTibiaCutDegree !== recommendedTheta) {
+        if (prevRecommendedTheta.current !== recommendedTheta) {
+            setSelectedJig(recommendedTheta);
+            setIntraOpCoronalBalancingData(prev => ({
+                ...prev,
+                functionalTibiaCutDegree: recommendedTheta
+            }));
+            prevRecommendedTheta.current = recommendedTheta;
+        } else if (functionalTibiaCutDegree === null || functionalTibiaCutDegree === undefined) {
+            setSelectedJig(recommendedTheta);
             setIntraOpCoronalBalancingData(prev => ({
                 ...prev,
                 functionalTibiaCutDegree: recommendedTheta
             }));
         }
-    }, [recommendedTheta]); // ONLY run when recommendedTheta changes (inputs change)
+    }, [recommendedTheta]);
 
     const nativeLDFA = longLegResults.ldfa ?? 87;
     const nativeMPTA = longLegResults.mpta ?? 87;
@@ -246,11 +253,11 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             <div className="flex flex-col gap-1">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Additional foundational distal femoral cut resection</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('additionalFemurCut', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('additionalFemurCut', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
                                     <div className="w-20 py-2 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-xl font-black text-white">{additionalFemurCut}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalFemurCut', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('additionalFemurCut', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
                                 </div>
                             </div>
 
@@ -258,11 +265,11 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             <div className="flex flex-col gap-1">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Additional provisional 90 deg tibial cut resection</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('additionalTibiaCut', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('additionalTibiaCut', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
                                     <div className="w-20 py-2 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-xl font-black text-white">{additionalTibiaCut}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalTibiaCut', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('additionalTibiaCut', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
                                 </div>
                             </div>
 
@@ -270,11 +277,11 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             <div className="flex flex-col gap-1">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Apply Pre-op lateral laxity</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('additionalLaxity', -1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-xl hover:bg-[#6D282C] transition-colors">-</button>
+                                    <button onClick={() => handleUpdateData('additionalLaxity', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
                                     <div className="w-20 py-2 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-xl font-black text-white">{additionalLaxity}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalLaxity', 1)} className="w-10 h-10 rounded-sm bg-[#1A1A1A] border border-[#333333] text-white font-bold text-xl hover:bg-[#6D282C] transition-colors">+</button>
+                                    <button onClick={() => handleUpdateData('additionalLaxity', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
                                 </div>
                             </div>
 
@@ -282,20 +289,33 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 <button onClick={handleCheckLaxity} className="w-full py-2 bg-[#6D282C] text-white text-[10px] font-black rounded-sm border border-[#893338] shadow-lg">CHECK LATERAL LAXITY</button>
                                 <div className="flex items-center gap-1">
                                     <span className="text-[10px] font-bold text-gray-500 uppercase">Laxity Level:</span>
-                                    <span className="text-[10px] font-black text-pink-400 uppercase">{lateralLaxity ?? 'Not checked'}</span>
+                                    <span className="text-[10px] font-black text-white uppercase">{lateralLaxity ?? 'Not checked'}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-[#6D282C] py-1 px-1 rounded-sm text-center border-t-2 border-[#ff8fa3]">
-                            <p className="text-[10px] text-white/60 font-black uppercase tracking-widest mb-1">Revised Functional Tibia Cut (θ)</p>
-                            <p className="text-xl font-black text-white">{recommendedTheta}°</p>
-                        </div>
-                        <div className="mt-auto pt-1 border-t border-[#333333]">
+                        {(gapsMatch || additionalLaxity > 0) && (
+                            <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-xl p-3 text-center">
+                                <p className="text-[10px] text-gray-200 font-bold uppercase tracking-widest mb-1">Revised Functional Tibia Cut (θ)</p>
+                                <div className="flex items-center justify-center">
+                                    <span className="text-3xl font-black text-[#ff8fa3]">{recommendedTheta}</span>
+                                    <span className="text-xl font-black text-[#ff8fa3] ml-0.5">°</span>
+                                </div>
+                            </div>
+                        )}
+                        <div className="mt-auto pt-1 border-t border-[#333333] space-y-2">
                             <div className="bg-black/80 border border-[#333333] p-2 rounded flex justify-between items-center">
                                 <span className="text-[12px] font-black text-white uppercase tracking-widest">Native CPAK</span>
                                 <span className="text-xl font-black text-[#ff8fa3]">
                                     {['--', 'N/A'].includes(nativeCPAK) ? nativeCPAK : `Type ${nativeCPAK}`}
                                 </span>
+                            </div>
+                            <div className={`p-2 rounded flex justify-between items-center border ${retentionStatus.text === 'Constitutional Match' ? 'bg-green-500/10 border-green-500/30' : 'bg-gray-500/10 border-gray-500/30'}`}>
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Phenotype</span>
+                                <span className={`text-sm font-black uppercase ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>{retentionStatus.text}</span>
+                            </div>
+                            <div className="bg-black/80 border border-[#333333] p-2 rounded flex justify-between items-center">
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Simulated CPAK</span>
+                                <span className={`text-lg font-black ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>Type {simulatedCPAK}</span>
                             </div>
                         </div>
                     </div>
@@ -303,22 +323,22 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
 
                 {/* Column 2: Visual Simulation */}
                 <div className="h-full flex flex-col gap-1">
-                    <div className="relative flex-grow bg-[#1a1a1a] border border-[#333333] rounded-xl flex flex-col items-center justify-start p-1 overflow-hidden">
+                    <div className="relative flex-grow bg-black border border-[#333333] rounded-xl flex flex-col items-center justify-start p-1 overflow-hidden">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
                         {/* Horizontal layout: Lateral Box - Image - Medial Box */}
                         <div className="flex items-center justify-center gap-2 flex-grow w-full relative">
                             {/* Left Box - Lateral Gap */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 ml-4">
-                                <div className="bg-black/80 border-2 border-[#333333] rounded-lg px-4 py-3 text-center shadow-lg">
+                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 ml-2 w-[100px]">
+                                <div className="bg-black/80 border-2 border-[#333333] rounded-lg px-3 py-3 text-center shadow-lg w-full">
                                     <p className="text-gray-500 text-[9px] font-black uppercase tracking-wider mb-1">LATERAL</p>
                                     <p className="text-2xl font-black text-white">{baseLateral}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                                 </div>
                             </div>
 
                             {/* Center - Bone Image */}
-                            <div className="flex-grow flex items-center justify-center max-h-[60vh] relative w-full">
-                                <img src="/intracoronal.png" alt="Simulation" className="h-[59vh] w-full object-contain" />
+                            <div className="flex-grow flex items-center justify-center relative w-full min-w-[300px]">
+                                <img src="/intracoronal.png" alt="Simulation" className="h-full w-full object-contain" />
 
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
@@ -349,8 +369,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                                 key={angle}
                                                 x1="10" y1={`${baseY}`}
                                                 x2="90" y2={`${baseY + yOffset}`}
-                                                stroke={isSelected ? "#ff8fa3" : "#555555"}
-                                                strokeWidth={isSelected ? "0.8" : "0.4"}
+                                                stroke={isSelected ? "#6D282C" : "#555555"}
+                                                strokeWidth={isSelected ? "1" : "0.4"}
                                                 strokeDasharray={isSelected ? "" : "2,1"}
                                                 opacity={isSelected ? 1 : 0.5}
                                             />
@@ -359,30 +379,21 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </svg>
 
                                 {/* Angle indicator box inside bone */}
-                                <div className="absolute bottom-[15%] bg-black/80 border border-[#333333] px-4 py-2 rounded-lg shadow-lg">
-                                    <span className="text-lg font-black text-white">{selectedJig}°</span>
+                                <div className="absolute bottom-[15%] bg-black/90 border-2 border-[#6D282C] px-5 py-2 rounded-lg shadow-lg">
+                                    <span className="text-xl font-black text-white">{selectedJig}° <span className="text-sm text-gray-400">varus</span></span>
                                 </div>
                             </div>
 
                             {/* Right Box - Medial Gap */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 mr-4">
-                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-4 py-3 text-center shadow-lg">
+                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 mr-2 w-[100px]">
+                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-lg w-full">
                                     <p className="text-[#ff8fa3] text-[9px] font-black uppercase tracking-wider mb-1">MEDIAL</p>
-                                    <p className="text-2xl font-black text-[#ff8fa3]">{baseMedial}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
+                                    <p className="text-2xl font-black text-[#ff8fa3]">{Math.round(finalSimulatedMedialGap)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Analysis Footer */}
-                        <div className="w-full flex justify-between items-end mt-1">
-                            <div className="flex flex-col items-start gap-1">
-                                <p className="text-[12px] text-gray-600 font-black uppercase tracking-[0.2em]">Phenotype Retention Analysis</p>
-                                <p className={`text-[14px] font-black uppercase px-2 py-0.5 ${retentionStatus.bg} ${retentionStatus.border} ${retentionStatus.color} border`}>{retentionStatus.text}</p>
-                            </div>
-                            <div className="h-10 w-20 bg-green-500 flex items-center justify-center rounded-sm">
-                                <span className="text-[12px] font-black text-black">CPAK {simulatedCPAK}</span>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
                 {/* Column 3: Jig Selection */}

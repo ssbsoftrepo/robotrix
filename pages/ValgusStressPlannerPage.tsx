@@ -381,6 +381,7 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const viewerRef = useRef<HTMLDivElement>(null);
   const activeLandmarkRef = useRef<string | null>(null);
+  const imageDimensionsRef = useRef({ width: 0, height: 0 });
 
   useEffect(() => {
     localResultsRef.current = valgusResults;
@@ -406,8 +407,11 @@ const ValgusStressPlannerPage: React.FC = () => {
     }
   }, [legSide, setValgusLandmarks]);
 
-  const resetLandmarks = useCallback((canvas: HTMLCanvasElement) => {
-    const w = canvas.width; const h = canvas.height;
+  const resetLandmarks = useCallback((width: number, height: number) => {
+    // Use natural dimensions if available
+    const w = imageRef.current?.naturalWidth || width;
+    const h = imageRef.current?.naturalHeight || height;
+
     const isLeft = legSide === 'left';
 
     setValgusLandmarks({
@@ -555,24 +559,52 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const image = imageRef.current;
+    if (!canvas || !image) return;
     const ctx = canvas.getContext('2d');
-    if (!ctx || Object.keys(valgusLandmarks).length === 0) return;
+    if (!ctx) return;
 
+    // Canvas is now screen-space (viewer size). clear it all.
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const scaledRadius = BASE_HANDLE_RADIUS / zoom;
-    const scaledLineWidth = BASE_LINE_WIDTH / zoom;
-    const scaledFontSize = Math.max(12, 16 / zoom);
+    if (Object.keys(valgusLandmarks).length === 0) return;
+
+    // Prepare Transform Matrix
+    ctx.save();
+
+    // 1. Move to center of canvas
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    // 2. Apply Pan
+    ctx.translate(panOffset.x, panOffset.y);
+    // 3. Apply Zoom
+    ctx.scale(zoom, zoom);
+    // 4. Move back by half of IMAGE size (to make 0,0 top-left of image)
+    const imgW = parseFloat(image.style.width) || 0;
+    const imgH = parseFloat(image.style.height) || 0;
+    ctx.translate(-imgW / 2, -imgH / 2);
+
+    // V2: Apply Scale from Natural to Display
+    const scaleX = image.naturalWidth ? imgW / image.naturalWidth : 1;
+    const scaleY = image.naturalHeight ? imgH / image.naturalHeight : 1;
+    ctx.scale(scaleX, scaleY);
+
+    const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
+    const scaledLineWidth = BASE_LINE_WIDTH / (zoom * scaleX);
+    const scaledFontSize = Math.max(12, 16 / (zoom * scaleX));
+
+    ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
 
     const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = valgusLandmarks;
 
     const drawTextWithBackground = (text: string, x: number, y: number, color: string = '#fdd835') => {
-      ctx.font = 'bold 20px Inter, sans-serif';
+      // Logic inside transform requires scaling back if we want constant size?
+      // Actually standard ctx.fillText will scale with the matrix. 
+      // If we want constant screen size text, we should inverse scale or use the scaledFontSize we calculated.
+      // scaledFontSize is 16/zoom. So it will appear 16px on screen.
       ctx.fillStyle = 'rgba(29, 29, 31, 0.8)';
       const textMetrics = ctx.measureText(text);
       const textWidth = textMetrics.width;
-      ctx.fillRect(x - textWidth / 2 - 8, y - 20, textWidth + 16, 30);
+      ctx.fillRect(x - textWidth / 2 - 8, y - 20 / (zoom * scaleX), textWidth + 16, 30 / (zoom * scaleX));
       ctx.fillStyle = color;
       ctx.fillText(text, x - textWidth / 2, y);
     };
@@ -594,23 +626,21 @@ const ValgusStressPlannerPage: React.FC = () => {
       });
 
       const baseOffset = 20;
-      const scaledOffset = baseOffset / zoom;
+      const scaledOffset = baseOffset / (zoom * scaleX);
       const mOffset = medialJointSpace.x < lateralJointSpace.x ? -scaledOffset * 1.5 : scaledOffset;
       const lOffset = lateralJointSpace.x < medialJointSpace.x ? -scaledOffset * 1.5 : scaledOffset;
-      const boxWidth = 20 / zoom;
-      const boxHeight = 22 / zoom;
+      const boxWidth = 20 / (zoom * scaleX);
+      const boxHeight = 22 / (zoom * scaleX);
 
       ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
-      ctx.fillRect(medialJointSpace.x + mOffset - 4 / zoom, medialJointSpace.y - 10 / zoom, boxWidth, boxHeight);
-      ctx.fillRect(lateralJointSpace.x + lOffset - 4 / zoom, lateralJointSpace.y - 10 / zoom, boxWidth, boxHeight);
+      ctx.fillRect(medialJointSpace.x + mOffset - 4 / (zoom * scaleX), medialJointSpace.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
+      ctx.fillRect(lateralJointSpace.x + lOffset - 4 / (zoom * scaleX), lateralJointSpace.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
-      ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6 / zoom);
-      ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6 / zoom);
+      ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + 6 / (zoom * scaleX));
+      ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + 6 / (zoom * scaleX));
     }
-
-    // Validation Overlay removed from canvas
 
 
     if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
@@ -638,7 +668,10 @@ const ValgusStressPlannerPage: React.FC = () => {
       ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, scaledRadius, 0, Math.PI * 2);
       ctx.fill();
     }
-  }, [valgusLandmarks, visibleLandmarkSets, legSide, zoom]);
+
+    ctx.restore();
+
+  }, [valgusLandmarks, visibleLandmarkSets, legSide, zoom, panOffset]);
 
   const captureCanvasState = useCallback(() => {
     const image = imageRef.current;
@@ -662,51 +695,55 @@ const ValgusStressPlannerPage: React.FC = () => {
   useEffect(() => {
     const handleResize = () => {
       const now = Date.now();
-      if (now - lastResizeTimeRef.current < 100) return;
+      if (now - lastResizeTimeRef.current < 50) return;
       lastResizeTimeRef.current = now;
-      const img = imageRef.current;
+
+      const viewer = viewerRef.current;
       const canvas = canvasRef.current;
-      if (!img || !canvas || img.naturalWidth === 0) return;
-      const viewer = canvas.parentElement?.parentElement;
-      if (!viewer) return;
-      const availWidth = viewer.clientWidth - 16;
-      const availHeight = viewer.clientHeight - 16;
-      const oldW = parseFloat(img.style.width) || img.width;
-      const aspect = img.naturalWidth / img.naturalHeight;
-      let newW = availHeight * aspect;
-      let newH = availHeight;
-      if (newW > availWidth) {
-        newW = availWidth;
-        newH = newW / aspect;
+      const image = imageRef.current;
+      if (!viewer || !canvas || !image) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = viewer.getBoundingClientRect();
+
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.scale(dpr, dpr);
+
+      const availableWidth = viewer.clientWidth - 32;
+      const availableHeight = viewer.clientHeight - 32;
+      const aspect = image.naturalWidth / image.naturalHeight;
+
+      let displayWidth = availableHeight * aspect;
+      let displayHeight = availableHeight;
+      if (displayWidth > availableWidth) {
+        displayWidth = availableWidth;
+        displayHeight = displayWidth / aspect;
       }
-      if (Math.abs(newW - oldW) > 1) {
-        const scale = newW / oldW;
-        img.style.width = `${newW}px`;
-        img.style.height = `${newH}px`;
-        canvas.width = newW;
-        canvas.height = newH;
-        setValgusLandmarks(prev => {
-          const next: any = {};
-          for (const key in prev) {
-            if (prev[key]) {
-              next[key] = {
-                x: prev[key].x * scale,
-                y: prev[key].y * scale
-              };
-            }
-          }
-          return next as Landmarks;
-        });
-        requestAnimationFrame(draw);
-      }
+
+      const oldW = parseFloat(image.style.width) || image.width;
+
+      image.style.width = `${displayWidth}px`;
+      image.style.height = `${displayHeight}px`;
+
+      // Store for reset
+      imageDimensionsRef.current = { width: displayWidth, height: displayHeight };
+
+      // NO LANDMARK SCALING HERE - Landmarks are now in Natural Coordinates!
+
+      requestAnimationFrame(draw);
     };
+
     window.addEventListener('resize', handleResize);
-    const interval = setInterval(handleResize, 1000);
+    handleResize();
     return () => {
       window.removeEventListener('resize', handleResize);
-      clearInterval(interval);
     };
-  }, [draw, setValgusLandmarks]);
+  }, [draw]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -744,11 +781,16 @@ const ValgusStressPlannerPage: React.FC = () => {
   };
 
   const handleResetAll = () => {
-    if (canvasRef.current) {
-      resetLandmarks(canvasRef.current);
+    // Use natural
+    if (imageRef.current) {
+      resetLandmarks(imageRef.current.naturalWidth, imageRef.current.naturalHeight);
+    } else if (imageDimensionsRef.current.width > 0) {
+      resetLandmarks(imageDimensionsRef.current.width, imageDimensionsRef.current.height);
+    } else if (canvasRef.current) {
+      // Fallback (unlikely)
+      resetLandmarks(canvasRef.current.width / (window.devicePixelRatio || 1), canvasRef.current.height / (window.devicePixelRatio || 1));
     }
-    setVisibleLandmarkSets(new Set());
-    setActiveInstruction(null);
+    setVisibleLandmarkSets(new Set()); setActiveInstruction(null);
     setValgusResults({
       obliquity: null,
       ldfa: null,
@@ -766,20 +808,28 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const getStableCoordinates = useCallback((clientX: number, clientY: number) => {
     const viewer = viewerRef.current;
-    const canvas = canvasRef.current;
-    if (!viewer || !canvas) return { x: 0, y: 0 };
+    const image = imageRef.current;
+    if (!viewer || !image) return { x: 0, y: 0 };
 
     const viewerRect = viewer.getBoundingClientRect();
     const viewerCenterX = viewerRect.left + viewerRect.width / 2;
     const viewerCenterY = viewerRect.top + viewerRect.height / 2;
 
-    const contentCenterX = viewerCenterX + panOffset.x;
-    const contentCenterY = viewerCenterY + panOffset.y;
+    const dx = clientX - viewerCenterX;
+    const dy = clientY - viewerCenterY;
 
-    const x = (clientX - contentCenterX) / zoom + canvas.width / 2;
-    const y = (clientY - contentCenterY) / zoom + canvas.height / 2;
+    // Remove Pan & Zoom
+    const unzoomedX = (dx - panOffset.x) / zoom;
+    const unzoomedY = (dy - panOffset.y) / zoom;
 
-    return { x, y };
+    // Map to Image CS
+    const imgW = parseFloat(image.style.width) || 0;
+    const imgH = parseFloat(image.style.height) || 0;
+
+    const imageX = unzoomedX + imgW / 2;
+    const imageY = unzoomedY + imgH / 2;
+
+    return { x: imageX, y: imageY };
   }, [panOffset, zoom]);
 
   const handleViewerTap = (
@@ -825,25 +875,45 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const pos = getStableCoordinates(e.clientX, e.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 70) ** 2;
+
+    // Calculate hit radius in Natural Coordinates
+    const image = imageRef.current;
+    const imgW = parseFloat(image?.style.width || "0");
+    const scaleX = (image?.naturalWidth && imgW) ? imgW / image.naturalWidth : 1;
+
+    const scaledHitRadius = (BASE_HANDLE_RADIUS + 24) / (zoom * scaleX);
+    const hitRadiusSq = scaledHitRadius ** 2;
+
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
+
     for (const key in valgusLandmarks) {
       if (!valgusLandmarks[key]) continue;
       const parentSet = landmarkToSetMap[key];
       if (!parentSet || !visibleLandmarkSets.has(parentSet)) continue;
       const distSq = (valgusLandmarks[key].x - pos.x) ** 2 + (valgusLandmarks[key].y - pos.y) ** 2;
-      if (distSq < minDistSq) {
-        minDistSq = distSq;
-        closestKey = key;
-      }
+      if (distSq < minDistSq) { minDistSq = distSq; closestKey = key; }
     }
+
     if (closestKey) {
       draggingPointRef.current = closestKey;
+    } else {
+      if (zoom > 1) {
+        isPanningRef.current = true;
+        panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
+      }
     }
   };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isPanningRef.current) {
+      setPanOffset({
+        x: e.clientX - panStartRef.current.x,
+        y: e.clientY - panStartRef.current.y
+      });
+      return;
+    }
+
     if (!draggingPointRef.current) return;
     const pos = getStableCoordinates(e.clientX, e.clientY);
     setValgusLandmarks(prev => ({
@@ -855,8 +925,9 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const handleMouseUp = useCallback(() => {
     draggingPointRef.current = null;
-    captureCanvasState();
-  }, [captureCanvasState]);
+    isPanningRef.current = false; // Ensure panning stops on mouse up
+    // removed captureCanvasState
+  }, []);
 
   const handlePipStart = (e: React.MouseEvent | React.TouchEvent) => {
     isDraggingPipRef.current = true;
@@ -908,7 +979,15 @@ const ValgusStressPlannerPage: React.FC = () => {
     const touch = e.touches[0];
     if (!touch) return;
     const pos = getStableCoordinates(touch.clientX, touch.clientY);
-    const hitRadiusSq = (BASE_HANDLE_RADIUS + 80) ** 2;
+
+    // Calculate hit radius in Natural Coordinates
+    const image = imageRef.current;
+    const imgW = parseFloat(image?.style.width || "0");
+    const scaleX = (image?.naturalWidth && imgW) ? imgW / image.naturalWidth : 1;
+
+    const scaledHitRadius = (BASE_HANDLE_RADIUS + 24) / (zoom * scaleX);
+    const hitRadiusSq = scaledHitRadius ** 2;
+
     let minDistSq = hitRadiusSq;
     let closestKey: string | null = null;
     for (const key in valgusLandmarks) {
@@ -923,6 +1002,11 @@ const ValgusStressPlannerPage: React.FC = () => {
     }
     if (closestKey) {
       draggingPointRef.current = closestKey;
+    } else {
+      if (zoom > 1) {
+        isPanningRef.current = true;
+        panStartRef.current = { x: touch.clientX - panOffset.x, y: touch.clientY - panOffset.y };
+      }
     }
   };
 
@@ -938,9 +1022,10 @@ const ValgusStressPlannerPage: React.FC = () => {
       setZoom(newZoom);
 
       // Two-finger pan
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
       if (isPanningRef.current) {
-        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         setPanOffset({
           x: midX - panStartRef.current.x,
           y: midY - panStartRef.current.y
@@ -949,22 +1034,42 @@ const ValgusStressPlannerPage: React.FC = () => {
       return;
     }
 
+    if (isPanningRef.current) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      setPanOffset({
+        x: touch.clientX - panStartRef.current.x,
+        y: touch.clientY - panStartRef.current.y
+      });
+      return;
+    }
+
     if (!draggingPointRef.current) return;
     e.preventDefault();
     const touch = e.touches[0];
     if (!touch) return;
-    const pos = getStableCoordinates(touch.clientX, touch.clientY);
-    setValgusLandmarks(prev => ({
-      ...prev,
-      [draggingPointRef.current!]: pos
-    }));
-    updatePip(pos);
+
+    if (draggingPointRef.current) {
+      const pos = getStableCoordinates(touch.clientX, touch.clientY);
+      setValgusLandmarks(prev => ({
+        ...prev,
+        [draggingPointRef.current!]: pos
+      }));
+      updatePip(pos);
+    } else if (isPanningRef.current && zoom > 1) {
+      setPanOffset({
+        x: touch.clientX - panStartRef.current.x,
+        y: touch.clientY - panStartRef.current.y
+      });
+    }
   }, [zoom, panOffset, setValgusLandmarks, updatePip, getStableCoordinates]);
 
   const handleTouchEnd = useCallback(() => {
     draggingPointRef.current = null;
-    captureCanvasState();
-  }, [captureCanvasState]);
+    isPanningRef.current = false; // Ensure panning stops on touch end
+    initialPinchDistanceRef.current = null; // Reset pinch state
+    // removed captureCanvasState
+  }, []);
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
@@ -990,6 +1095,91 @@ const ValgusStressPlannerPage: React.FC = () => {
       window.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [handleMouseMove, handleMouseUp, handlePipMove, handlePipEnd, handleTouchMove, handleTouchEnd]);
+
+  const captureFullResSnapshot = useCallback(() => {
+    const image = imageRef.current;
+    if (!image) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 1. Draw Image
+    ctx.drawImage(image, 0, 0);
+
+    // 2. Draw Landmarks (Natural Coordinates)
+    const refScale = Math.max(1, canvas.width / 1000);
+    const lineWidth = BASE_LINE_WIDTH * refScale;
+    const radius = BASE_HANDLE_RADIUS * refScale;
+    const fontSize = Math.max(24, 16 * refScale);
+
+    ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+
+    const { medialJointSpace, lateralJointSpace, femurAxisPoint, tibiaAxisPoint } = valgusLandmarks;
+
+    const jointCenter = (medialJointSpace && lateralJointSpace)
+      ? { x: (medialJointSpace.x + lateralJointSpace.x) / 2, y: (medialJointSpace.y + lateralJointSpace.y) / 2 }
+      : null;
+
+    if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace && jointCenter) {
+      ctx.strokeStyle = LANDMARK_COLORS.jointLine;
+      ctx.fillStyle = LANDMARK_COLORS.jointLine;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(medialJointSpace.x, medialJointSpace.y);
+      ctx.lineTo(lateralJointSpace.x, lateralJointSpace.y);
+      ctx.stroke();
+      [medialJointSpace, lateralJointSpace].forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2); ctx.fill();
+      });
+
+      const baseOffset = 20 * refScale;
+      // logic for offsets needs to be adapted for scale
+      const mOffset = medialJointSpace.x < lateralJointSpace.x ? -baseOffset * 1.5 : baseOffset;
+      const lOffset = lateralJointSpace.x < medialJointSpace.x ? -baseOffset * 1.5 : baseOffset;
+      const boxWidth = 20 * refScale;
+      const boxHeight = 22 * refScale;
+
+      ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
+      ctx.fillRect(medialJointSpace.x + mOffset - (4 * refScale), medialJointSpace.y - (10 * refScale), boxWidth, boxHeight);
+      ctx.fillRect(lateralJointSpace.x + lOffset - (4 * refScale), lateralJointSpace.y - (10 * refScale), boxWidth, boxHeight);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+      ctx.fillText('M', medialJointSpace.x + mOffset, medialJointSpace.y + (6 * refScale));
+      ctx.fillText('L', lateralJointSpace.x + lOffset, lateralJointSpace.y + (6 * refScale));
+    }
+
+    if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter) {
+      ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis;
+      ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(femurAxisPoint.x, femurAxisPoint.y);
+      ctx.lineTo(jointCenter.x, jointCenter.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(femurAxisPoint.x, femurAxisPoint.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter) {
+      ctx.strokeStyle = LANDMARK_COLORS.tibiaAnatomicAxis;
+      ctx.fillStyle = LANDMARK_COLORS.tibiaAnatomicAxis;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(tibiaAxisPoint.x, tibiaAxisPoint.y);
+      ctx.lineTo(jointCenter.x, jointCenter.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    setValgusCanvasDataUrl(canvas.toDataURL('image/png'));
+  }, [valgusLandmarks, visibleLandmarkSets, legSide, setValgusCanvasDataUrl]);
 
   return (
     <div className="relative flex flex-col h-full gap-4 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -1049,109 +1239,78 @@ const ValgusStressPlannerPage: React.FC = () => {
                   </div>
                 </div>
               )}
-              <div
-                ref={viewerRef}
-                onClick={handleViewerTap}
-                onTouchEnd={(e) => {
-                  isPanningRef.current = false;
-                  handleViewerTap(e);
-                }}
-                onMouseDown={(e) => {
-                  if (zoom > 1 && !draggingPointRef.current) {
-                    e.preventDefault();
-                    isPanningRef.current = true;
-                    panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
-                  }
-                }}
-                onMouseMove={(e) => {
-                  if (isPanningRef.current && zoom > 1 && !draggingPointRef.current) {
-                    setPanOffset({
-                      x: e.clientX - panStartRef.current.x,
-                      y: e.clientY - panStartRef.current.y
-                    });
-                  }
-                }}
-                onMouseUp={() => { isPanningRef.current = false; }}
-                onMouseLeave={() => { isPanningRef.current = false; }}
-                onTouchStart={(e) => {
-                  if (zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
-                    isPanningRef.current = true;
-                    panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
-                  }
-                }}
-                onTouchMove={(e) => {
-                  if (isPanningRef.current && zoom > 1 && e.touches.length === 1 && !draggingPointRef.current) {
-                    setPanOffset({
-                      x: e.touches[0].clientX - panStartRef.current.x,
-                      y: e.touches[0].clientY - panStartRef.current.y
-                    });
-                  }
-                }}
-                className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center nav-ignore"
-                style={{ cursor: zoom > 1 ? (isPanningRef.current ? 'grabbing' : 'grab') : 'default' }}
-              >
+              <div ref={viewerRef} className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center bg-black">
                 <div
-                  className="relative"
                   style={{
                     transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
-                    transformOrigin: 'center center'
+                    transformOrigin: 'center center',
+                    transition: 'transform 0.1s ease-out'
                   }}
+                  className="relative flex items-center justify-center"
                 >
                   <img
                     ref={imageRef}
                     src={valgusImageSrc}
-                    alt="Valgus Stress X-ray"
-                    className="block mix-blend-screen"
+                    alt="X-ray"
+                    className="block mix-blend-screen max-w-none"
+                    style={{ pointerEvents: 'none', userSelect: 'none' }}
                     onLoad={() => {
                       const image = imageRef.current;
-                      const canvas = canvasRef.current;
-                      if (!image || !canvas) return;
-                      const viewer = canvas.parentElement?.parentElement;
+                      if (!image) return;
+
+                      // 1. Calculate how to fit image in viewer (screen space)
+                      const viewer = viewerRef.current;
                       if (!viewer) return;
-                      const availableHeight = viewer.clientHeight - 16;
-                      const availableWidth = viewer.clientWidth - 16;
-                      const aspectRatio = image.naturalWidth / image.naturalHeight;
+
+                      const availableWidth = viewer.clientWidth - 32; // - padding
+                      const availableHeight = viewer.clientHeight - 32;
+
+                      const aspect = image.naturalWidth / image.naturalHeight;
+                      let displayWidth = availableHeight * aspect;
                       let displayHeight = availableHeight;
-                      let displayWidth = displayHeight * aspectRatio;
+
                       if (displayWidth > availableWidth) {
                         displayWidth = availableWidth;
-                        displayHeight = displayWidth / aspectRatio;
+                        displayHeight = displayWidth / aspect;
                       }
-                      canvas.width = displayWidth;
-                      canvas.height = displayHeight;
+
                       image.style.width = `${displayWidth}px`;
                       image.style.height = `${displayHeight}px`;
+
+                      // 2. Initialize / Scale landmarks if needed
+                      // Store dimensions
+                      imageDimensionsRef.current = { width: displayWidth, height: displayHeight };
+
+                      // Simple initialization if empty
                       if (Object.keys(valgusLandmarks).length === 0) {
-                        resetLandmarks(canvas);
+                        const isLeft = legSide === 'left';
+                        resetLandmarks(displayWidth, displayHeight);
                       }
+
+                      // Trigger draw
                       requestAnimationFrame(draw);
                     }}
                   />
-                  <canvas
-                    ref={canvasRef}
-                    onMouseDown={handleMouseDown}
-                    onTouchStart={handleTouchStart}
-                    className="absolute top-0 left-0 cursor-crosshair touch-none"
-                  />
                 </div>
+                <canvas
+                  ref={canvasRef}
+                  onMouseDown={handleMouseDown}
+                  onTouchStart={handleTouchStart}
+                  className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
+                  style={{ pointerEvents: 'auto' }}
+                />
 
-                {/* PIP */}
-                <div
-                  ref={pipViewerRef}
+                {/* PIP Viewer */}
+                <div ref={pipViewerRef}
                   onMouseDown={handlePipStart}
                   onTouchStart={handlePipStart}
-                  className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none"
-                  style={{ top: pipPosition.y, left: pipPosition.x, willChange: 'top, left', transition: 'none' }}
-                >
-                  <canvas
-                    ref={pipCanvasRef}
-                    width={176}
-                    height={176}
-                    className="rounded-full"
-                  />
+                  className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none z-50"
+                  style={{ top: pipPosition.y, left: pipPosition.x, willChange: 'top, left', transition: 'none' }}>
+                  <canvas ref={pipCanvasRef} width={176} height={176} className="rounded-full" />
                   <div className="absolute inset-0 rounded-full border-2 border-cyan-400/30 pointer-events-none" />
                 </div>
               </div>
+
             </div>
           )}
         </div>
@@ -1275,7 +1434,10 @@ const ValgusStressPlannerPage: React.FC = () => {
       {/* Footer Action */}
       <div className="flex justify-end px-2 pb-2 relative z-10">
         <button
-          onClick={() => setPage('planner-valgus-stress-results')}
+          onClick={() => {
+            captureFullResSnapshot();
+            setPage('planner-valgus-stress-results');
+          }}
           disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
           className={`group relative py-3 px-8 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
             ${(!valgusResults.cpak || valgusResults.cpak === '--')
