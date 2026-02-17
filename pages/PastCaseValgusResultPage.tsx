@@ -579,6 +579,9 @@ const PostOpValgusPlanner: React.FC = () => {
             const image = imageRef.current;
             if (!viewer || !canvas || !image) return;
 
+            // Guard: skip if image hasn't decoded yet (naturalWidth/Height would be 0)
+            if (!image.complete || !image.naturalWidth) return;
+
             const dpr = window.devicePixelRatio || 1;
             const rect = viewer.getBoundingClientRect();
 
@@ -902,6 +905,12 @@ const PostOpValgusPlanner: React.FC = () => {
                                     className="block max-w-none"
                                     style={{ pointerEvents: 'none', userSelect: 'none' }}
                                     alt=""
+                                    onLoad={() => {
+                                        // Reset throttle so the resize call is not skipped
+                                        lastResizeTimeRef.current = 0;
+                                        window.dispatchEvent(new Event('resize'));
+                                        if (Object.keys(landmarks).length === 0 && canvasRef.current) resetLandmarks(canvasRef.current);
+                                    }}
                                 />
                             </div>
                             <canvas

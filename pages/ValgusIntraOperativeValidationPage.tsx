@@ -81,31 +81,37 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Medial Gap (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
+                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{medialGap}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
+                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Lateral Gap (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('lateralGap', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
+                                    <button onClick={() => handleUpdateData('lateralGap', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{lateralGap}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('lateralGap', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
+                                    <button onClick={() => handleUpdateData('lateralGap', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Mid Tibia Width (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
+                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
                                     <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{tibiaWidth}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-2xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
+                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
                         </div>
@@ -117,19 +123,20 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                     <div className="relative flex-grow bg-black border border-[#333333] rounded-xl flex items-stretch p-2">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
-                        {/* Left Side - Anticipated Lateral Gap + Actual Circle */}
-                        <div className="flex flex-col items-center justify-center gap-3 z-20 px-3 shrink-0 w-[130px]">
-                            <div className="flex flex-col items-center justify-center bg-[#1a1a1a] border border-[#333333] rounded-lg p-3 shadow-lg w-full">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 text-center">ANTICIPATED<br />LATERAL GAP</span>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-2xl font-black text-white">{anticipatedLateralGap}</span>
-                                    <span className="text-sm font-bold text-gray-500">mm</span>
-                                </div>
+                        {/* Left Side - Anticipated Lateral Gap (top) + Actual Circle (centered) */}
+                        <div className="flex flex-col items-center z-20 px-3 shrink-0 w-[130px]">
+                            {/* Anticipated box at top */}
+                            <div className="bg-black/80 border-2 border-[#333333] rounded-lg px-3 py-3 text-center shadow-lg w-full mt-4">
+                                <p className="text-gray-500 text-[9px] font-black uppercase tracking-wider mb-1">ANTICIPATED<br />LATERAL GAP</p>
+                                <p className="text-2xl font-black text-white">{anticipatedLateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                             </div>
-                            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL LATERAL</p>
-                            <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(lateralDiff)}`}>
-                                <span className="text-2xl font-black leading-tight">{lateralGap}</span>
-                                <span className="text-xs font-bold opacity-60">mm</span>
+                            {/* Actual circle centered in remaining space */}
+                            <div className="flex-grow flex flex-col items-center justify-center gap-1">
+                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL LATERAL</p>
+                                <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(lateralDiff)}`}>
+                                    <span className="text-2xl font-black leading-tight">{lateralGap}</span>
+                                    <span className="text-xs font-bold opacity-60">mm</span>
+                                </div>
                             </div>
                         </div>
 
@@ -138,19 +145,21 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                             <img src="/intraval.png" alt="Joint Model" className="max-h-full max-w-full object-contain" />
                         </div>
 
-                        {/* Right Side - Anticipated Medial Gap + Actual Circle */}
-                        <div className="flex flex-col items-center justify-center gap-3 z-20 px-3 shrink-0 w-[130px]">
-                            <div className="flex flex-col items-center justify-center bg-[#1a1a1a] border border-[#333333] rounded-lg p-3 shadow-lg w-full">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 text-center">ANTICIPATED<br />MEDIAL GAP</span>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-2xl font-black text-white">{anticipatedMedialGap}</span>
-                                    <span className="text-sm font-bold text-gray-500">mm</span>
-                                </div>
+                        {/* Right Side - Anticipated Medial Gap (top) + Actual Circle (centered) */}
+                        <div className="flex flex-col items-center z-20 px-3 shrink-0 w-[130px]">
+                            {/* Anticipated box at top */}
+                            <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-lg w-full mt-4">
+                                <p className="text-[#ff8fa3] text-[9px] font-black uppercase tracking-wider mb-1">ANTICIPATED<br />MEDIAL GAP</p>
+                                <p className="text-2xl font-black text-[#ff8fa3]">{anticipatedMedialGap}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                             </div>
-                            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL MEDIAL</p>
-                            <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(medialDiff)}`}>
-                                <span className="text-2xl font-black leading-tight">{medialGap}</span>
-                                <span className="text-xs font-bold opacity-60">mm</span>
+
+                            {/* Actual circle centered in remaining space */}
+                            <div className="flex-grow flex flex-col items-center justify-center gap-1">
+                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL MEDIAL</p>
+                                <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(medialDiff)}`}>
+                                    <span className="text-2xl font-black leading-tight">{medialGap}</span>
+                                    <span className="text-xs font-bold opacity-60">mm</span>
+                                </div>
                             </div>
                         </div>
                     </div>

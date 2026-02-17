@@ -245,78 +245,87 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
 
             <div className="flex-grow grid grid-cols-[25fr_50fr_25fr] gap-2 min-h-0 p-1 relative z-10">
                 {/* Column 1: Simulation Controls */}
-                <div className="h-full flex flex-col gap-1">
-                    <div className="bg-[#111111] border border-[#222222] p-4 rounded-xl flex flex-col gap-6 h-full shadow-2xl">
+                <div className="h-full flex flex-col overflow-hidden">
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-1 rounded-xl flex flex-col h-full shadow-2xl overflow-hidden">
 
-                        <div className="space-y-3">
+                        {/* Section 1: +/- Controls — 40% */}
+                        <div className="flex flex-col justify-evenly px-1" style={{ flex: '0 0 40%' }}>
                             {/* Femur Cut */}
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col items-center">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Additional foundational distal femoral cut resection</label>
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('additionalFemurCut', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
-                                    <div className="w-20 py-2 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-xl font-black text-white">{additionalFemurCut}</span>
+                                <div className="flex items-center justify-center gap-3 w-full">
+                                    <button onClick={() => handleUpdateData('additionalFemurCut', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
+                                    <div className="w-20 py-1 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
+                                        <span className="text-2xl font-black text-white">{additionalFemurCut}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalFemurCut', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
+                                    <button onClick={() => handleUpdateData('additionalFemurCut', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
 
                             {/* Tibia Cut */}
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col items-center">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Additional provisional 90 deg tibial cut resection</label>
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('additionalTibiaCut', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
-                                    <div className="w-20 py-2 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-xl font-black text-white">{additionalTibiaCut}</span>
+                                <div className="flex items-center justify-center gap-3 w-full">
+                                    <button onClick={() => handleUpdateData('additionalTibiaCut', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
+                                    <div className="w-20 py-1 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
+                                        <span className="text-2xl font-black text-white">{additionalTibiaCut}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalTibiaCut', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
+                                    <button onClick={() => handleUpdateData('additionalTibiaCut', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
 
                             {/* Laxity */}
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col items-center">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Apply Pre-op lateral laxity</label>
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('additionalLaxity', -1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">-</button>
-                                    <div className="w-20 py-2 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-xl font-black text-white">{additionalLaxity}</span>
+                                <div className="flex items-center justify-center gap-3 w-full">
+                                    <button onClick={() => handleUpdateData('additionalLaxity', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
+                                    <div className="w-20 py-1 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
+                                        <span className="text-2xl font-black text-white">{additionalLaxity}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalLaxity', 1)} className="w-10 h-10 rounded-sm bg-gradient-to-b from-[#893338] to-[#6D282C] border border-[#a04046] text-white font-bold text-xl hover:from-[#a04046] hover:to-[#893338] transition-all shadow-[0_2px_8px_rgba(109,40,44,0.4)]">+</button>
-                                </div>
-                            </div>
-
-                            <div className="pt-2 flex flex-col items-center gap-3">
-                                <button onClick={handleCheckLaxity} className="w-full py-2 bg-[#6D282C] text-white text-[10px] font-black rounded-sm border border-[#893338] shadow-lg">CHECK LATERAL LAXITY</button>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-gray-500 uppercase">Laxity Level:</span>
-                                    <span className="text-[10px] font-black text-white uppercase">{lateralLaxity ?? 'Not checked'}</span>
+                                    <button onClick={() => handleUpdateData('additionalLaxity', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
                         </div>
-                        {(gapsMatch || additionalLaxity > 0) && (
-                            <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-xl p-3 text-center">
-                                <p className="text-[10px] text-gray-200 font-bold uppercase tracking-widest mb-1">Revised Functional Tibia Cut (θ)</p>
-                                <div className="flex items-center justify-center">
-                                    <span className="text-3xl font-black text-[#ff8fa3]">{recommendedTheta}</span>
-                                    <span className="text-xl font-black text-[#ff8fa3] ml-0.5">°</span>
-                                </div>
-                            </div>
-                        )}
 
-                        <div className="mt-auto pt-1 border-t border-[#333333] space-y-2">
-                            <div className="bg-black/80 border border-[#333333] p-2 rounded flex justify-between items-center">
-                                <span className="text-[12px] font-black text-white uppercase tracking-widest">Native CPAK</span>
-                                <span className="text-xl font-black text-[#ff8fa3]">
+                        {/* Section 2: Check Laxity + Revised Tibial Cut — 30% */}
+                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1" style={{ flex: '0 0 30%' }}>
+                            <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-gray-500 uppercase">Laxity Level:</span>
+                                <span className="text-sm font-black text-white uppercase">{lateralLaxity ?? 'Not checked'}</span>
+                            </div>
+                            {(gapsMatch || additionalLaxity > 0) && (
+                                <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-lg p-2 text-center w-full">
+                                    <p className="text-[10px] text-gray-200 font-bold uppercase tracking-widest">Revised Functional Tibia Cut (θ)</p>
+                                    <div className="flex items-center justify-center">
+                                        <span className="text-3xl font-black text-[#ff8fa3]">{recommendedTheta}</span>
+                                        <span className="text-xl font-black text-[#ff8fa3] ml-0.5">°</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Section 3: Native CPAK / Phenotype / Simulated CPAK — 30% */}
+                        <div className="flex flex-col justify-evenly border-t border-[#333333] px-1" style={{ flex: '0 0 30%' }}>
+                            <div className="bg-black/80 border border-[#333333] p-2.5 rounded-lg flex justify-between items-center w-full">
+                                <span className="text-xs font-black text-white uppercase tracking-widest">Native CPAK</span>
+                                <span className="text-xl font-black text-white">
                                     {['--', 'N/A'].includes(nativeCPAK) ? nativeCPAK : `Type ${nativeCPAK}`}
                                 </span>
                             </div>
-                            <div className={`p-2 rounded flex justify-between items-center border ${retentionStatus.text === 'Constitutional Match' ? 'bg-green-500/10 border-green-500/30' : 'bg-gray-500/10 border-gray-500/30'}`}>
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Phenotype</span>
+                            <div className={`p-2.5 rounded-lg flex justify-between items-center border w-full ${retentionStatus.text === 'Constitutional Match' ? 'bg-green-500/10 border-green-500/30' : 'bg-gray-500/10 border-gray-500/30'}`}>
+                                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Phenotype</span>
                                 <span className={`text-sm font-black uppercase ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>{retentionStatus.text}</span>
                             </div>
-                            <div className="bg-black/80 border border-[#333333] p-2 rounded flex justify-between items-center">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Simulated CPAK</span>
-                                <span className={`text-lg font-black ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>Type {simulatedCPAK}</span>
+                            <div className="bg-black/80 border border-[#333333] p-2.5 rounded-lg flex justify-between items-center w-full">
+                                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Simulated CPAK</span>
+                                <span className={`text-xl font-black ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>Type {simulatedCPAK}</span>
                             </div>
                         </div>
                     </div>
@@ -338,50 +347,52 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Center - Bone Image */}
-                            <div className="flex-grow flex items-center justify-center relative w-full min-w-[300px]">
+                            <div className="flex-grow flex items-center justify-center relative w-full h-full">
                                 <img src="/intracoronal.png" alt="Simulation" className="h-full w-full object-contain" />
 
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
                                     {/* Femur horizontal cut line - at bottom edge of femur */}
                                     <line
-                                        x1="10" y1={`${55 - additionalFemurCut * 1}`}
-                                        x2="90" y2={`${55 - additionalFemurCut * 1}`}
-                                        stroke="#6D282C" strokeWidth="0.8"
+                                        x1="0" y1={`${54.5 - additionalFemurCut * 1}%`}
+                                        x2="100%" y2={`${54.5 - additionalFemurCut * 1}%`}
+                                        stroke="#6D282C" strokeWidth="3"
                                     />
 
                                     {/* Baseline Tibia dotted line - at top edge of tibia */}
-                                    <line x1="10" y1="55" x2="90" y2="55" stroke="#444444" strokeWidth="0.5" strokeDasharray="2,1" />
+                                    <line x1="0" y1="54.5%" x2="100%" y2="54.5%" stroke="#444444" strokeWidth="1.5" strokeDasharray="5,2" />
 
                                     {/* Dynamic Tibia horizontal cut - at top edge of tibia */}
                                     <line
-                                        x1="10" y1={`${68 + additionalTibiaCut * 1}`}
-                                        x2="90" y2={`${68 + additionalTibiaCut * 1}`}
-                                        stroke="#6D282C" strokeWidth="0.8"
+                                        x1="0" y1={`${65 + additionalTibiaCut * 1}%`}
+                                        x2="100%" y2={`${65 + additionalTibiaCut * 1}%`}
+                                        stroke="#6D282C" strokeWidth="2"
                                     />
 
                                     {/* Varus Angle Lines - fan out from left pivot on tibia */}
+                                    <circle cx="0" cy={`${65 + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
                                     {[0, 1, 2, 3, 4].map((angle) => {
                                         const isSelected = selectedJig === angle;
-                                        const yOffset = angle * 1.5;
-                                        const baseY = 68 + additionalTibiaCut * 1;
+                                        const yOffsetPercent = angle * 2.5;
+                                        const baseY = 65 + additionalTibiaCut * 1;
                                         return (
                                             <line
                                                 key={angle}
-                                                x1="10" y1={`${baseY}`}
-                                                x2="90" y2={`${baseY + yOffset}`}
-                                                stroke={isSelected ? "#6D282C" : "#555555"}
-                                                strokeWidth={isSelected ? "1" : "0.4"}
-                                                strokeDasharray={isSelected ? "" : "2,1"}
-                                                opacity={isSelected ? 1 : 0.5}
+                                                x1="0" y1={`${baseY}%`}
+                                                x2="100%" y2={`${baseY + yOffsetPercent}%`}
+                                                stroke={isSelected ? "#6D282C" : "#333333"}
+                                                strokeWidth={isSelected ? "4" : "1.5"}
+                                                strokeDasharray={isSelected ? "0" : "5,2"}
+                                                opacity={isSelected ? 1 : 0.6}
                                             />
                                         );
                                     })}
                                 </svg>
-
-                                {/* Angle indicator box inside bone */}
-                                <div className="absolute bottom-[15%] bg-black/90 border-2 border-[#6D282C] px-5 py-2 rounded-lg shadow-lg">
-                                    <span className="text-xl font-black text-white">{selectedJig}° <span className="text-sm text-gray-400">varus</span></span>
+                                <div className="absolute top-[84%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
+                                    <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                                        <p className="text-gray-500 text-[9px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
+                                        <p className="text-3xl font-extrabold text-white tracking-tighter">{selectedJig}°</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -400,7 +411,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
 
                 {/* Column 3: Jig Selection */}
                 <div className="h-full flex flex-col gap-1">
-                    <div className="bg-[#111111] border border-[#222222] p-4 rounded-xl flex flex-col gap-4 h-full">
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-4 h-full">
 
                         <div className="flex-grow flex flex-col gap-3">
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>

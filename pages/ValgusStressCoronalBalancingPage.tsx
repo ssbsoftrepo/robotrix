@@ -70,7 +70,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
 
                 {/* Column 2: Image with Side Panels */}
                 <div className="h-full flex flex-col overflow-hidden">
-                    <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-[#1a1a1a] overflow-hidden rounded-xl border border-[#333333]">
+                    <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-black overflow-hidden rounded-xl border border-[#333333]">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="flex items-stretch justify-center w-full h-full gap-0 p-4">
                             <div className="flex flex-col items-center justify-center text-center shrink-0 mr-[6%] z-10">

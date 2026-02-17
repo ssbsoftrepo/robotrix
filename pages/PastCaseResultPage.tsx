@@ -580,6 +580,9 @@ const PostOpPlanner: React.FC = () => {
             const image = imageRef.current;
             if (!viewer || !canvas || !image) return;
 
+            // Guard: skip if image hasn't decoded yet (naturalWidth/Height would be 0)
+            if (!image.complete || !image.naturalWidth) return;
+
             const dpr = window.devicePixelRatio || 1;
             const rect = viewer.getBoundingClientRect();
 
@@ -614,9 +617,20 @@ const PostOpPlanner: React.FC = () => {
             requestAnimationFrame(draw);
         };
 
+        // Listen on image load event directly to handle cached/data-URL images reliably
+        const imgElement = imageRef.current;
+        if (imgElement) {
+            imgElement.addEventListener('load', handleResize);
+            // If image is already loaded (cached), trigger resize immediately
+            if (imgElement.complete && imgElement.naturalWidth > 0) {
+                handleResize();
+            }
+        }
         window.addEventListener('resize', handleResize);
-        handleResize();
-        return () => { window.removeEventListener('resize', handleResize); };
+        return () => {
+            if (imgElement) imgElement.removeEventListener('load', handleResize);
+            window.removeEventListener('resize', handleResize);
+        };
     }, [draw, setLandmarks]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1017,7 +1031,8 @@ const PostOpPlanner: React.FC = () => {
                                     <img ref={imageRef} src={postOpLongLegImage} alt="Post-op X-ray" className="block max-w-none"
                                         style={{ pointerEvents: 'none', userSelect: 'none' }}
                                         onLoad={() => {
-                                            // Trigger handleResize to calculate dimensions and draw
+                                            // Reset throttle so the resize call is not skipped
+                                            lastResizeTimeRef.current = 0;
                                             window.dispatchEvent(new Event('resize'));
                                             if (Object.keys(landmarks).length === 0 && canvasRef.current) resetLandmarks(canvasRef.current);
                                         }}
