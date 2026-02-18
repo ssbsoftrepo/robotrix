@@ -32,8 +32,9 @@ const CuttingBlock: React.FC<{
     degree: number;
     isSelected: boolean;
     isRecommended: boolean;
+    isReduced?: boolean;
     onClick: () => void;
-}> = ({ degree, isSelected, isRecommended, onClick }) => (
+}> = ({ degree, isSelected, isRecommended, isReduced, onClick }) => (
     <div
         onClick={onClick}
         className={`relative flex flex-col items-center transition-all duration-300 cursor-pointer w-full ${isSelected ? 'scale-105 z-10' : 'opacity-60 hover:opacity-100'}`}
@@ -44,7 +45,8 @@ const CuttingBlock: React.FC<{
             </div>
         )}
 
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[88px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        {/* Dynamic height based on isReduced prop (-5px from 88px) */}
+        <svg viewBox="0 0 320 130" className={`w-full h-auto ${isReduced ? 'max-h-[83px]' : 'max-h-[88px]'} ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -141,6 +143,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const C = (tibiaWidth / 70) * 1.2;
 
     const baseMedial = medialGap + additionalFemurCut + additionalTibiaCut;
+    // We only use baseLateral for logic, but display raw lateralGap in the box per user request
     const baseLateral = lateralGap + additionalFemurCut + additionalTibiaCut;
 
     // Gap match check from validation page
@@ -152,10 +155,12 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const medialDiff = medialGap - anticipatedMedialGap;
     const lateralDiff = lateralGap - anticipatedLateralGap;
     const gapsMatch = medialDiff === 0 && lateralDiff === 0;
+    const showRevisedCut = gapsMatch || additionalLaxity > 0;
 
     const LMT = thickness - additionalLaxity;
 
-    const thetaValue = Math.round((LMT - baseMedial) / C);
+    // Use Math.floor as per request (e.g. 3.4 -> 3)
+    const thetaValue = Math.floor((LMT - baseMedial) / C);
     const recommendedTheta = Math.max(0, Math.min(4, thetaValue));
 
     // Initialize from Context (Persistence) -> Fallback to Recommendation
@@ -256,8 +261,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                 <div className="h-full flex flex-col overflow-hidden">
                     <div className="bg-[#1a1a1a] border border-[#333333] p-1 rounded-xl flex flex-col h-full shadow-2xl overflow-hidden">
 
-                        {/* Section 1: +/- Controls — 40% */}
-                        <div className="flex flex-col justify-evenly px-1" style={{ flex: '0 0 40%' }}>
+                        {/* Section 1: +/- Controls — evenly spaced */}
+                        <div className="flex flex-col justify-between px-1 h-full py-2" style={{ flex: '0 0 40%' }}>
                             {/* Femur Cut */}
                             <div className="flex flex-col items-center">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Additional foundational distal femoral cut resection</label>
@@ -301,26 +306,17 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Section 2: Check Laxity + Revised Tibial Cut — 30% */}
-                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1" style={{ flex: '0 0 30%' }}>
+                        {/* Section 2: Check Laxity — 30% */}
+                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 20%' }}>
                             <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold text-gray-500 uppercase">Laxity Level:</span>
                                 <span className="text-sm font-black text-white uppercase">{lateralLaxity ?? 'Not checked'}</span>
                             </div>
-                            {(gapsMatch || additionalLaxity > 0) && (
-                                <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-lg p-2 text-center w-full">
-                                    <p className="text-[10px] text-gray-200 font-bold uppercase tracking-widest">Revised Functional Tibia Cut (θ)</p>
-                                    <div className="flex items-center justify-center">
-                                        <span className="text-3xl font-black text-[#ff8fa3]">{recommendedTheta}</span>
-                                        <span className="text-xl font-black text-[#ff8fa3] ml-0.5">°</span>
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
                         {/* Section 3: Native CPAK / Phenotype / Simulated CPAK — 30% */}
-                        <div className="flex flex-col justify-evenly border-t border-[#333333] px-1" style={{ flex: '0 0 30%' }}>
+                        <div className="flex flex-col justify-evenly border-t border-[#333333] px-1 py-2" style={{ flex: '0 0 40%' }}>
                             <div className="bg-black/80 border border-[#333333] p-2.5 rounded-lg flex justify-between items-center w-full">
                                 <span className="text-xs font-black text-white uppercase tracking-widest">Native CPAK</span>
                                 <span className="text-xl font-black text-white">
@@ -350,7 +346,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 ml-2 w-[100px]">
                                 <div className="bg-black/80 border-2 border-[#333333] rounded-lg px-3 py-3 text-center shadow-lg w-full">
                                     <p className="text-gray-500 text-[9px] font-black uppercase tracking-wider mb-1">LATERAL</p>
-                                    <p className="text-2xl font-black text-white">{baseLateral}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                    <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                                 </div>
                             </div>
 
@@ -364,7 +360,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                     <line
                                         x1="0" y1={`${54.5 - additionalFemurCut * 1}%`}
                                         x2="100%" y2={`${54.5 - additionalFemurCut * 1}%`}
-                                        stroke="#6D282C" strokeWidth="3"
+                                        stroke="#6D282C" strokeWidth="4"
                                     />
 
                                     <line x1="0" y1="54.5%" x2="100%" y2="54.5%" stroke="#444444" strokeWidth="1.5" strokeDasharray="5,2" />
@@ -372,7 +368,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                     <line
                                         x1="0" y1={`${65 + additionalTibiaCut * 1}%`}
                                         x2="100%" y2={`${65 + additionalTibiaCut * 1}%`}
-                                        stroke="#6D282C" strokeWidth="2"
+                                        stroke="#6D282C" strokeWidth="4"
                                     />
 
                                     {/* Varus Angle Lines - fan out from left pivot on tibia */}
@@ -408,7 +404,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 mr-2 w-[100px]">
                                 <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-lg w-full">
                                     <p className="text-[#ff8fa3] text-[9px] font-black uppercase tracking-wider mb-1">MEDIAL</p>
-                                    <p className="text-2xl font-black text-[#ff8fa3]">{Math.round(finalSimulatedMedialGap)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
+                                    <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                                 </div>
                             </div>
                         </div>
@@ -421,6 +417,16 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-4 h-full">
 
                         <div className="flex-grow flex flex-col gap-3">
+                            {showRevisedCut && (
+                                <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-lg p-2 text-center w-full shrink-0">
+                                    <p className="text-[10px] text-gray-200 font-bold uppercase tracking-widest">Revised Functional Tibia Cut (θ)</p>
+                                    <div className="flex items-center justify-center">
+                                        <span className="text-3xl font-black text-[#ff8fa3]">{recommendedTheta}</span>
+                                        <span className="text-xl font-black text-[#ff8fa3] ml-0.5">°</span>
+                                    </div>
+                                </div>
+                            )}
+
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
                             <p className="text-[8px] text-gray-600 text-center uppercase -mt-1">Click block to simulate</p>
 
@@ -448,6 +454,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                             degree={angle}
                                             isSelected={selectedJig === angle}
                                             isRecommended={recommendedTheta === angle}
+                                            isReduced={showRevisedCut}
                                             onClick={() => handleSelectJig(angle)}
                                         />
                                     </div>

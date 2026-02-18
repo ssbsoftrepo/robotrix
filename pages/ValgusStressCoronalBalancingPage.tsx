@@ -153,7 +153,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                             </h4>
                         </div>
                         <div className="bg-black/40 p-2 rounded-lg border border-green-500/30 w-full backdrop-blur-md relative z-10">
-                            <p className="text-sm text-green-400 font-bold uppercase tracking-wider">
+                            <p className="text-sm text-green-400 font-bold  tracking-wider">
                                 Proceed with Functional Tibia Cut
                             </p>
                         </div>
@@ -169,7 +169,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                         </h4>
                         <div className="flex flex-col gap-1 w-full relative z-10">
                             <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-md text-[#ff8fa3] font-bold leading-tight">
+                                <p className="text-sm text-[#ff8fa3] font-bold leading-tight">
                                     Consider error on<br />90 deg tibial cut
                                 </p>
                             </div>
@@ -179,7 +179,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                                 <div className="h-px bg-[#333333] flex-grow"></div>
                             </div>
                             <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-md text-[#ff8fa3] font-bold leading-tight">
+                                <p className="text-sm text-[#ff8fa3] font-bold leading-tight">
                                     Consider Pre op<br />lateral laxity
                                 </p>
                             </div>
@@ -189,7 +189,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                                 <div className="h-px bg-[#333333] flex-grow"></div>
                             </div>
                             <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
-                                <p className="text-md text-[#ff8fa3] font-bold leading-tight">
+                                <p className="text-sm text-[#ff8fa3] font-bold leading-tight">
                                     Input of inaccurate data from Valgus stress film
                                 </p>
                             </div>

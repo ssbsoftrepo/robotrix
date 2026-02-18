@@ -6,15 +6,19 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
     const {
         setPage,
         implantThickness,
-        valgusResults, // Changed from longLegResults
+        valgusResults,
         valgusIntraOpValidationData,
         setValgusIntraOpValidationData,
     } = useAppContext();
 
     const { medialGap, lateralGap, tibiaWidth } = valgusIntraOpValidationData;
 
+    React.useEffect(() => {
+        if (valgusIntraOpValidationData.medialGap === 16 && valgusIntraOpValidationData.lateralGap === 16) {
+        }
+    }, []);
+
     const thickness = implantThickness ?? 10;
-    // Use valgusResults for MPTA
     const mpta = valgusResults.mpta ?? 86;
     const rawTightness = 86 - mpta;
     const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
@@ -46,6 +50,16 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
         });
     };
 
+    React.useEffect(() => {
+        if (medialGap === 16 && lateralGap === 16) {
+            setValgusIntraOpValidationData({
+                ...valgusIntraOpValidationData,
+                medialGap: anticipatedMedialGap,
+                lateralGap: anticipatedLateralGap
+            });
+        }
+    }, []);
+
     return (
         <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
@@ -67,29 +81,17 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                         </div>
                         <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1] flex items-center gap-3 z-10 min-h-0">
                             <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">1</div>
-                            <p className="text-[18px] text-gray-400 leading-snug text-justify">Assess the Actual medial and lateral extensor gaps</p>
+                            <p className="text-[18px] text-gray-400 leading-snug text-right w-full">Assess the Actual medial and lateral extensor gaps</p>
                         </div>
                         <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1] flex items-center gap-3 z-10 min-h-0">
                             <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">2</div>
-                            <p className="text-[18px] text-gray-400 leading-snug text-justify">Measure the mediolateral tibial width using tibial calipers</p>
+                            <p className="text-[18px] text-gray-400 leading-snug text-right w-full">Measure the mediolateral tibial width using tibial calipers</p>
                         </div>
                     </div>
 
                     {/* Input Fields Section */}
                     <div className="bg-[#1a1a1a] border border-[#333333] p-5 rounded-xl flex-[1] flex flex-col justify-center">
                         <div className="space-y-6">
-                            <div className="flex flex-col gap-2">
-                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Medial Gap (mm)</label>
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
-                                    <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-2xl font-black text-white">{medialGap}</span>
-                                    </div>
-                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
-                                </div>
-                            </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Lateral Gap (mm)</label>
                                 <div className="flex items-center justify-center gap-4">
@@ -99,6 +101,18 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                                         <span className="text-2xl font-black text-white">{lateralGap}</span>
                                     </div>
                                     <button onClick={() => handleUpdateData('lateralGap', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Medial Gap (mm)</label>
+                                <div className="flex items-center justify-center gap-4">
+                                    <button onClick={() => handleUpdateData('medialGap', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
+                                    <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
+                                        <span className="text-2xl font-black text-white">{medialGap}</span>
+                                    </div>
+                                    <button onClick={() => handleUpdateData('medialGap', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
                                         style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
@@ -198,12 +212,12 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                             </h3>
                             <div className="flex items-start mb-3">
                                 <span className="text-7xl font-black text-[#ff8fa3] tracking-tighter leading-none">
-                                    {Math.round(revisedVarusCut)}
+                                    {Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}
                                 </span>
                                 <span className="text-4xl font-black text-[#ff8fa3] mt-1 ml-1">°</span>
                             </div>
                             <p className="text-gray-400 text-sm font-medium text-center max-w-[90%]">
-                                Calculated using patient-specific tibial width (70mm)
+                                Calculated using patient-specific tibial width ({tibiaWidth}mm)
                             </p>
                         </div>
                     ) : (

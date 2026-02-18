@@ -156,14 +156,26 @@ const ValgusStressReportPage: React.FC = () => {
                                    active:scale-[0.98] flex items-center"
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative text-sm font-bold text-gray-300 tracking-wider">RESULT ANALYSIS</span>
+                        <span className="relative text-sm font-bold text-gray-300 tracking-wider">PRE OP</span>
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
+                    </button>
+                    <button
+                        onClick={() => setPage('valgus-intra-operative-validation')}
+                        className="group relative py-2 px-4 bg-[#252525] border border-[#333333] rounded-sm 
+                                   transition-all duration-300 ease-out
+                                   hover:bg-[#333333] hover:border-[#6D282C]/50
+                                   active:scale-[0.98] flex items-center"
+                    >
+                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                        <span className="relative text-sm font-bold text-gray-300 tracking-wider">INTRA OP</span>
                         <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
                         <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
                     </button>
                     <button
                         id="print-report-btn"
                         onClick={handlePrint}
-                        className="group relative py-3 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                        className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
                                    shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                    transition-all duration-300 ease-out
                                    hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
@@ -173,7 +185,7 @@ const ValgusStressReportPage: React.FC = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" className="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                        <span className="relative text-lg font-bold text-white tracking-widest">PRINT REPORT</span>
+                        <span className="relative text-sm font-bold text-white tracking-widest">PRINT REPORT</span>
                         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                         <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                     </button>

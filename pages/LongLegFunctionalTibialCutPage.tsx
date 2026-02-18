@@ -20,7 +20,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* SVG Representation of a Metal Cutting Jig */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[85px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[110px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 {/* Metallic Surface Gradient */}
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -109,7 +109,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
     } = useAppContext();
 
 
-    const [linesYPercent, setLinesYPercent] = useState<number>(33);
+    const [linesYPercent, setLinesYPercent] = useState<number>(32);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const anticipatedVarusCut = useMemo(() => {
@@ -186,7 +186,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
     const lateralGapValue = longLegCoronalBalancingResults?.lateralGap || '--';
     const baseMedialGap = longLegCoronalBalancingResults?.selectedSeries || 0;
 
-    const medialGapValue = Math.round(baseMedialGap + (selectedDegree * 1.2));
+    const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
 
     return (
         <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -329,7 +329,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
                                 <p className="text-center text-gray-500 text-[10px] mb-0 shrink-0">Click block to simulate</p>
 
                                 {/* 0 Degree Neutral Cut Button */}
-                                <div className="flex-1 w-full flex items-center justify-center mb-0">
+                                <div className="h-20 shrink-0 w-full flex items-center justify-center mb-0">
                                     <button
                                         onClick={() => handleSelectDegree(0)}
                                         className={`w-full py-1 rounded-lg border-2 font-bold text-base transition-all shadow-lg flex flex-col items-center justify-center relative h-full ${selectedDegree === 0

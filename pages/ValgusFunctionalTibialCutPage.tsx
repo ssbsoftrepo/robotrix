@@ -21,7 +21,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* SVG Representation of a Metal Cutting Jig */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[120px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[130px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -101,7 +101,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
     } = useAppContext();
 
 
-    const [linesYPercent, setLinesYPercent] = useState<number>(33);
+    const [linesYPercent, setLinesYPercent] = useState<number>(32);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const anticipatedVarusCut = useMemo(() => {
@@ -172,7 +172,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
 
     const lateralGapValue = valgusCoronalBalancingResults?.lateralGap || '--';
     const baseMedialGap = valgusCoronalBalancingResults?.selectedSeries || 0;
-    const medialGapValue = Math.round(baseMedialGap + (selectedDegree * 1.2));
+    const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
 
     return (
         <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -313,7 +313,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 <p className="text-center text-gray-500 text-xs mb-0 shrink-0">Click block to simulate</p>
 
                                 {/* 0 Degree Neutral Cut Button */}
-                                <div className="flex-1 w-full flex items-center justify-center mb-0">
+                                <div className="h-20 shrink-0 w-full flex items-center justify-center mb-0">
                                     <button
                                         onClick={() => handleSelectDegree(0)}
                                         className={`w-full py-2 rounded-lg border-2 font-bold text-lg transition-all shadow-lg flex flex-col items-center justify-center relative h-full ${selectedDegree === 0
@@ -334,14 +334,12 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 {/* Jigs 1-3 ONLY (Removed 4) */}
                                 {[1, 2, 3].map(deg => (
                                     <div key={deg} className="flex-1 w-full flex items-center justify-center">
-                                        <div className="transform scale-90 w-full">
-                                            <CuttingBlock
-                                                degree={deg}
-                                                isRecommended={deg === currentRecommendation}
-                                                isSelected={deg === selectedDegree}
-                                                onClick={() => handleSelectDegree(deg)}
-                                            />
-                                        </div>
+                                        <CuttingBlock
+                                            degree={deg}
+                                            isRecommended={deg === currentRecommendation}
+                                            isSelected={deg === selectedDegree}
+                                            onClick={() => handleSelectDegree(deg)}
+                                        />
                                     </div>
                                 ))}
                             </div>
