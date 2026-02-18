@@ -415,7 +415,7 @@ const SimulationPage: React.FC = () => {
         if (!canvas) return;
 
         const rect = canvas.getBoundingClientRect();
-        const newX = Math.max(50, Math.min(e.touches[0].clientX - rect.left, canvas.width - 50));
+        const newX = Math.max(20, Math.min(e.touches[0].clientX - rect.left, canvas.width - 20));
         setCenterlineX(newX);
     }, [isDraggingCenterline]);
 

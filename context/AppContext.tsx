@@ -91,7 +91,9 @@ export interface CaseData {
     valgusFunctionalLinesY: number;
     longLegFunctionalLinesY: number;
     intraOpValidationData: IntraOpValidationData;
+    valgusIntraOpValidationData: IntraOpValidationData;
     intraOpCoronalBalancingData: IntraOpCoronalBalancingData;
+    valgusIntraOpCoronalBalancingData: IntraOpCoronalBalancingData;
 }
 
 // Combine all context values into a single interface
@@ -167,7 +169,9 @@ interface AppContextType extends CaseData {
     setValgusFunctionalLinesY: (y: number) => void;
     setLongLegFunctionalLinesY: (y: number) => void;
     setIntraOpValidationData: (data: IntraOpValidationData) => void;
+    setValgusIntraOpValidationData: (data: IntraOpValidationData) => void;
     setIntraOpCoronalBalancingData: (data: IntraOpCoronalBalancingData) => void;
+    setValgusIntraOpCoronalBalancingData: (data: IntraOpCoronalBalancingData) => void;
 
     isLoading: boolean;
 }
@@ -229,7 +233,9 @@ const initialCaseData: CaseData = {
     valgusFunctionalLinesY: 30,
     longLegFunctionalLinesY: 30,
     intraOpValidationData: initialIntraOpValidationData,
+    valgusIntraOpValidationData: initialIntraOpValidationData,
     intraOpCoronalBalancingData: initialIntraOpCoronalBalancingData,
+    valgusIntraOpCoronalBalancingData: initialIntraOpCoronalBalancingData,
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -506,7 +512,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setValgusFunctionalLinesY: createSetter('valgusFunctionalLinesY'),
         setLongLegFunctionalLinesY: createSetter('longLegFunctionalLinesY'),
         setIntraOpValidationData: createSetter('intraOpValidationData'),
+        setValgusIntraOpValidationData: createSetter('valgusIntraOpValidationData'),
         setIntraOpCoronalBalancingData: createSetter('intraOpCoronalBalancingData'),
+        setValgusIntraOpCoronalBalancingData: createSetter('valgusIntraOpCoronalBalancingData'),
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

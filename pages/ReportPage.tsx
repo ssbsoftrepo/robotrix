@@ -75,8 +75,8 @@ const ReportPage: React.FC = () => {
     const initialSimFemoralCut = longLegCoronalBalancingResults.simFemoralCut ?? 3;
     const initialSimTibialCut = longLegFunctionalCutDegree ?? 2;
 
-    const simulatedLDFA = nativeLDFA + initialSimFemoralCut + intraOpCoronalBalancingData.additionalFemurCut;
-    const simulatedMPTA = nativeMPTA + initialSimTibialCut + intraOpCoronalBalancingData.additionalTibiaCut;
+    const simulatedLDFA = nativeLDFA + initialSimFemoralCut;
+    const simulatedMPTA = 90 - initialSimTibialCut;
 
     const simulatedAHKA = simulatedMPTA - simulatedLDFA;
     const simulatedJLO = simulatedMPTA + simulatedLDFA;

@@ -7,11 +7,11 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
         setPage,
         implantThickness,
         valgusResults, // Changed from longLegResults
-        intraOpValidationData,
-        setIntraOpValidationData,
+        valgusIntraOpValidationData,
+        setValgusIntraOpValidationData,
     } = useAppContext();
 
-    const { medialGap, lateralGap, tibiaWidth } = intraOpValidationData;
+    const { medialGap, lateralGap, tibiaWidth } = valgusIntraOpValidationData;
 
     const thickness = implantThickness ?? 10;
     // Use valgusResults for MPTA
@@ -40,9 +40,9 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
     const revisedVarusCut = (thickness - medialGap) / C;
 
     const handleUpdateData = (field: string, delta: number) => {
-        setIntraOpValidationData({
-            ...intraOpValidationData,
-            [field]: Math.max(0, (intraOpValidationData as any)[field] + delta)
+        setValgusIntraOpValidationData({
+            ...valgusIntraOpValidationData,
+            [field]: Math.max(0, (valgusIntraOpValidationData as any)[field] + delta)
         });
     };
 

@@ -280,8 +280,17 @@ const PostOpValgusPlanner: React.FC = () => {
     } = useAppContext();
     const [fileName, setFileName] = useState('No file chosen');
 
+    // Landmark visibility is now forced to TRUE for all available landmarks.
+    // Removed visibleLandmarkSets state and effects.
+
     // removed local landmarks and results state
-    const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
+    const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(() => {
+        const initial = new Set<string>();
+        if (landmarks.medialJointSpace || landmarks.lateralJointSpace) initial.add('jointLine');
+        if (landmarks.femurAxisPoint) initial.add('femurAnatomicAxis');
+        if (landmarks.tibiaAxisPoint) initial.add('tibiaAnatomicAxis');
+        return initial;
+    });
     const [isCameraOpen, setIsCameraOpen] = useState(false);
 
     const landmarksRef = useRef(landmarks);
@@ -297,6 +306,10 @@ const PostOpValgusPlanner: React.FC = () => {
     // Zoom and Pan State
     const [zoom, setZoom] = useState(1);
     const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const zoomRef = useRef(1);
+    const panOffsetRef = useRef({ x: 0, y: 0 });
+    useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+    useEffect(() => { panOffsetRef.current = panOffset; }, [panOffset]);
     const isPanningRef = useRef(false);
     const panStartRef = useRef({ x: 0, y: 0 });
     const MIN_ZOOM = 1;
@@ -312,16 +325,8 @@ const PostOpValgusPlanner: React.FC = () => {
     const zoomOut = () => setZoom(z => Math.max(z - 0.2, MIN_ZOOM));
     const resetZoom = () => { setZoom(1); setPanOffset({ x: 0, y: 0 }); };
 
-    // Restore visibleLandmarkSets from existing landmarks
-    useEffect(() => {
-        const newSets = new Set<string>();
-        if (landmarks.medialJointSpace || landmarks.lateralJointSpace) newSets.add('jointLine');
-        if (landmarks.femurAxisPoint) newSets.add('femurAnatomicAxis');
-        if (landmarks.tibiaAxisPoint) newSets.add('tibiaAnatomicAxis');
-        if (newSets.size > 0) {
-            setVisibleLandmarkSets(newSets);
-        }
-    }, []); // Run only on mount to restore state
+    // visibleLandmarkSets is initialized via lazy initializer in useState above.
+    // No syncing useEffect needed — this prevents auto-enable on first visit.
 
     const resetLandmarks = useCallback((canvas: HTMLCanvasElement) => {
         // Use natural dimensions if available
@@ -474,7 +479,6 @@ const PostOpValgusPlanner: React.FC = () => {
             }
         }
         setResults(newResults);
-        return newResults;
     }, [landmarks, visibleLandmarkSets, legSide, setResults]);
 
     const draw = useCallback(() => {
@@ -492,7 +496,8 @@ const PostOpValgusPlanner: React.FC = () => {
         ctx.save();
 
         // 1. Center
-        ctx.translate(canvas.width / 2, canvas.height / 2);
+        const dpr = window.devicePixelRatio || 1;
+        ctx.translate(canvas.width / (2 * dpr), canvas.height / (2 * dpr));
         // 2. Pan
         ctx.translate(panOffset.x, panOffset.y);
         // 3. Zoom
@@ -516,6 +521,7 @@ const PostOpValgusPlanner: React.FC = () => {
         if (visibleLandmarkSets.has('jointLine') && medialJointSpace && lateralJointSpace && jointCenter) {
             const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
             const scaledLineWidth = BASE_LINE_WIDTH / (zoom * scaleX);
+            const scaledFontSize = 16 / (zoom * scaleX);
             ctx.strokeStyle = LANDMARK_COLORS.jointLine; ctx.fillStyle = LANDMARK_COLORS.jointLine; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(medialJointSpace.x, medialJointSpace.y); ctx.lineTo(lateralJointSpace.x, lateralJointSpace.y); ctx.stroke();
             [medialJointSpace, lateralJointSpace].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill(); });
@@ -527,8 +533,6 @@ const PostOpValgusPlanner: React.FC = () => {
             const lOffset = lateralJointSpace.x < medialJointSpace.x ? -scaledOffset * 2 : scaledOffset;
             const boxWidth = 20 / (zoom * scaleX);
             const boxHeight = 22 / (zoom * scaleX);
-            const scaledFontSize = Math.max(12, 16 / (zoom * scaleX));
-
             ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
             ctx.fillRect(medialJointSpace.x + mOffset - 4 / (zoom * scaleX), medialJointSpace.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
             ctx.fillRect(lateralJointSpace.x + lOffset - 4 / (zoom * scaleX), lateralJointSpace.y - 10 / (zoom * scaleX), boxWidth, boxHeight);
@@ -554,7 +558,7 @@ const PostOpValgusPlanner: React.FC = () => {
             ctx.beginPath(); ctx.arc(tibiaAxisPoint.x, tibiaAxisPoint.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
-    }, [landmarks, visibleLandmarkSets, updateCalculations, zoom, panOffset]);
+    }, [landmarks, visibleLandmarkSets, legSide, updateCalculations, zoom, panOffset]);
 
     useEffect(() => { draw(); }, [draw]);
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -652,6 +656,9 @@ const PostOpValgusPlanner: React.FC = () => {
         const image = imageRef.current;
         if (!viewer || !image) return { x: 0, y: 0 };
 
+        const currentZoom = zoomRef.current;
+        const currentPan = panOffsetRef.current;
+
         const viewerRect = viewer.getBoundingClientRect();
         const viewerCenterX = viewerRect.left + viewerRect.width / 2;
         const viewerCenterY = viewerRect.top + viewerRect.height / 2;
@@ -659,8 +666,8 @@ const PostOpValgusPlanner: React.FC = () => {
         const dx = clientX - viewerCenterX;
         const dy = clientY - viewerCenterY;
 
-        const unzoomedX = (dx - panOffset.x) / zoom;
-        const unzoomedY = (dy - panOffset.y) / zoom;
+        const unzoomedX = (dx - currentPan.x) / currentZoom;
+        const unzoomedY = (dy - currentPan.y) / currentZoom;
 
         const imgW = parseFloat(image.style.width) || 0;
         const imgH = parseFloat(image.style.height) || 0;
@@ -672,7 +679,7 @@ const PostOpValgusPlanner: React.FC = () => {
         const naturalY = (unzoomedY + imgH / 2) / scaleY;
 
         return { x: naturalX, y: naturalY };
-    }, [panOffset, zoom]);
+    }, []);
 
     const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
         const pos = getStableCoordinates(e.clientX, e.clientY);
@@ -723,6 +730,7 @@ const PostOpValgusPlanner: React.FC = () => {
     }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
         if (e.touches.length === 2) {
             const dist = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
@@ -739,11 +747,6 @@ const PostOpValgusPlanner: React.FC = () => {
             return;
         }
 
-        if (e.touches.length === 1 && zoom > 1 && !draggingPointRef.current) {
-            isPanningRef.current = true;
-            panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
-        }
-        e.preventDefault();
         const touch = e.touches[0];
         if (!touch) return;
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
@@ -771,6 +774,11 @@ const PostOpValgusPlanner: React.FC = () => {
         if (closestKey) {
             draggingPointRef.current = closestKey;
             isPanningRef.current = false;
+        } else {
+            if (zoom > 1) {
+                isPanningRef.current = true;
+                panStartRef.current = { x: touch.clientX - panOffset.x, y: touch.clientY - panOffset.y };
+            }
         }
     };
 
@@ -813,7 +821,7 @@ const PostOpValgusPlanner: React.FC = () => {
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
         setLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip();
-    }, [updatePip, getStableCoordinates]);
+    }, [updatePip, getStableCoordinates, setLandmarks]);
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
@@ -898,7 +906,7 @@ const PostOpValgusPlanner: React.FC = () => {
                                     )}
                                 </div>
                             )}
-                            <div className="relative flex items-center justify-center" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
+                            <div className="relative flex items-center justify-center" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center', willChange: 'transform' }}>
                                 <img
                                     ref={imageRef}
                                     src={postOpValgusImage}

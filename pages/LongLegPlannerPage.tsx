@@ -336,7 +336,14 @@ const LongLegPlannerPage: React.FC = () => {
 
     const [fileName, setFileName] = useState('No file chosen');
     const [uploadMethod, setUploadMethod] = useState<'file' | 'camera' | null>(null);
-    const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
+    const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(() => {
+        const initial = new Set<string>();
+        if (longLegLandmarks.hipCenter || longLegLandmarks.kneeCenter || longLegLandmarks.ankleCenter) initial.add('hkaLine');
+        if (longLegLandmarks.femurAnatomicAxisPoint) initial.add('femurAnatomicAxis');
+        if (longLegLandmarks.femoralMedial || longLegLandmarks.femoralLateral) initial.add('femoralJointLine');
+        if (longLegLandmarks.tibialMedial || longLegLandmarks.tibialLateral) initial.add('tibialJointLine');
+        return initial;
+    });
     const [activeInstruction, setActiveInstruction] = useState<string[] | null>(null);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
@@ -354,6 +361,10 @@ const LongLegPlannerPage: React.FC = () => {
     const justAdjustedHipRef = useRef(false);
     const [zoom, setZoom] = useState(1);
     const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const zoomRef = useRef(1);
+    const panOffsetRef = useRef({ x: 0, y: 0 });
+    useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+    useEffect(() => { panOffsetRef.current = panOffset; }, [panOffset]);
     const isPanningRef = useRef(false);
     const panStartRef = useRef({ x: 0, y: 0 });
     const MIN_ZOOM = 1;
@@ -371,16 +382,7 @@ const LongLegPlannerPage: React.FC = () => {
     const activeLandmarkRef = useRef<string | null>(null);
     const imageDimensionsRef = useRef({ width: 0, height: 0 });
 
-    useEffect(() => {
-        if (longLegResults && Object.values(longLegResults).some(v => v !== null && v !== '--')) {
-            const newSets = new Set<string>();
-            if (longLegResults.mhka !== null) newSets.add('hkaLine');
-            if (longLegResults.ldfa !== null) newSets.add('femoralJointLine');
-            if (longLegResults.mpta !== null) newSets.add('tibialJointLine');
-            if (longLegResults.vca !== null) newSets.add('femurAnatomicAxis');
-            setVisibleLandmarkSets(newSets);
-        }
-    }, []);
+
 
     useEffect(() => {
         if (prevLegSideRef.current !== legSide) {
@@ -575,7 +577,8 @@ const LongLegPlannerPage: React.FC = () => {
         ctx.save();
 
         // 1. Move to center of canvas
-        ctx.translate(canvas.width / 2, canvas.height / 2);
+        const dpr = window.devicePixelRatio || 1;
+        ctx.translate(canvas.width / (2 * dpr), canvas.height / (2 * dpr));
         // 2. Apply Pan
         ctx.translate(panOffset.x, panOffset.y);
         // 3. Apply Zoom
@@ -605,7 +608,7 @@ const LongLegPlannerPage: React.FC = () => {
         // We also divide by scaleX to counter the natural->display scaling we just applied
         const scaledWidth = BASE_LINE_WIDTH / (zoom * scaleX);
         const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
-        const scaledFontSize = Math.max(12, 16 / (zoom * scaleX)); // Keep text readable
+        const scaledFontSize = 16 / (zoom * scaleX); // Keep text readable
 
         ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
 
@@ -846,6 +849,9 @@ const LongLegPlannerPage: React.FC = () => {
         const image = imageRef.current;
         if (!viewer || !image) return { x: 0, y: 0 };
 
+        const currentZoom = zoomRef.current;
+        const currentPan = panOffsetRef.current;
+
         const viewerRect = viewer.getBoundingClientRect();
 
         // 1. Client CS -> Viewer CS (offset from center)
@@ -856,9 +862,8 @@ const LongLegPlannerPage: React.FC = () => {
         const dy = clientY - viewerCenterY;
 
         // 2. Remove Pan & Zoom
-        // (x - pan) / zoom
-        const unzoomedX = (dx - panOffset.x) / zoom;
-        const unzoomedY = (dy - panOffset.y) / zoom;
+        const unzoomedX = (dx - currentPan.x) / currentZoom;
+        const unzoomedY = (dy - currentPan.y) / currentZoom;
 
         // 3. To Image Display CS
         const imgW = parseFloat(image.style.width) || 0;
@@ -875,7 +880,7 @@ const LongLegPlannerPage: React.FC = () => {
         const naturalY = imageDisplayNameY / scaleY;
 
         return { x: naturalX, y: naturalY };
-    }, [panOffset, zoom]);
+    }, []);
 
     const handleViewerTap = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
         if (!viewerRef.current || !activeLandmarkRef.current) return;
@@ -978,6 +983,7 @@ const LongLegPlannerPage: React.FC = () => {
     const handlePipEnd = useCallback(() => { isDraggingPipRef.current = false; }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
         if (e.touches.length === 2) {
             const dist = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
@@ -1068,7 +1074,7 @@ const LongLegPlannerPage: React.FC = () => {
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
         setLongLegLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip(pos);
-    }, [zoom, panOffset, setLongLegLandmarks, updatePip, getStableCoordinates]);
+    }, [setLongLegLandmarks, updatePip, getStableCoordinates]);
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
@@ -1276,7 +1282,7 @@ const LongLegPlannerPage: React.FC = () => {
                                     style={{
                                         transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
                                         transformOrigin: 'center center',
-                                        transition: 'transform 0.1s ease-out'
+                                        transition: isPanningRef.current || draggingPointRef.current ? 'none' : 'transform 0.1s ease-out'
                                     }}
                                     className="relative flex items-center justify-center"
                                 >

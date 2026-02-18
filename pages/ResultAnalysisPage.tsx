@@ -188,12 +188,24 @@ const ResultAnalysisPage: React.FC = () => {
 
     const getFemoralCut = () => {
         const originalCut = longLegResults.cut;
-        if (!originalCut || originalCut === '--') return '--';
-        if (femurBoundary === 'basic') {
-            if (originalCut === '2° valgus cut') return '3° valgus cut';
-            if (originalCut === '6° valgus cut') return '5° valgus cut';
+        // Re-calculate cut based on loaded LDFA to ensure consistency with new logic
+        if (longLegResults.ldfa !== null) {
+            const classification = getFemurClassification(longLegResults.ldfa);
+            let displayCut = classification.cut;
+
+            // Apply Basic Matrix constraint (3-5) if selected
+            if (femurBoundary === 'basic') {
+                // Parse the degree
+                const match = displayCut.match(/(\d+)°/);
+                if (match) {
+                    const degree = parseInt(match[1]);
+                    if (degree < 3) displayCut = '3° valgus cut';
+                    else if (degree > 5) displayCut = '5° valgus cut';
+                }
+            }
+            return displayCut;
         }
-        return originalCut;
+        return originalCut || '--';
     };
 
     const getTibialCut = () => {

@@ -119,6 +119,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
         kneeType,
         lateralLaxity,
         longLegCoronalBalancingResults,
+        setLongLegFunctionalCutDegree,
+        longLegFunctionalCutDegree,
     } = useAppContext();
 
     const handleCheckLaxity = () => {
@@ -171,6 +173,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
             ...intraOpCoronalBalancingData,
             functionalTibiaCutDegree: angle
         });
+        setLongLegFunctionalCutDegree(angle);
     };
 
     const prevRecommendedTheta = React.useRef(recommendedTheta);
@@ -182,13 +185,18 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                 ...prev,
                 functionalTibiaCutDegree: recommendedTheta
             }));
+            setLongLegFunctionalCutDegree(recommendedTheta);
             prevRecommendedTheta.current = recommendedTheta;
         } else if (functionalTibiaCutDegree === null || functionalTibiaCutDegree === undefined) {
-            setSelectedJig(recommendedTheta);
+            // First visit, use persisted Planner value if available, otherwise recommendation
+            const initialCut = longLegFunctionalCutDegree !== null ? longLegFunctionalCutDegree : recommendedTheta;
+
+            setSelectedJig(initialCut);
             setIntraOpCoronalBalancingData(prev => ({
                 ...prev,
-                functionalTibiaCutDegree: recommendedTheta
+                functionalTibiaCutDegree: initialCut
             }));
+            setLongLegFunctionalCutDegree(initialCut);
         }
     }, [recommendedTheta]);
 
@@ -206,8 +214,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const plannedFemurCut = simFemoralCut ?? 3;
 
     const finalSimulatedMedialGap = baseMedial + (selectedJig * C);
-    const simulatedLDFA = nativeLDFA + plannedFemurCut + additionalFemurCut;
-    const simulatedMPTA = nativeMPTA + selectedJig + additionalTibiaCut;
+    const simulatedLDFA = nativeLDFA + plannedFemurCut;
+    const simulatedMPTA = 90 - selectedJig;
 
     const simulatedAHKA = simulatedMPTA - simulatedLDFA;
     const simulatedJLO = simulatedMPTA + simulatedLDFA;

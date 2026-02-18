@@ -312,7 +312,14 @@ const PostOpPlanner: React.FC = () => {
     const [fileName, setFileName] = useState('No file chosen');
 
     // Removed local state definitions for landmarks and results as they are now mapped to context
-    const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
+    const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(() => {
+        const initial = new Set<string>();
+        if (landmarks.hipCenter || landmarks.kneeCenter || landmarks.ankleCenter) initial.add('hkaLine');
+        if (landmarks.femurAnatomicAxisPoint) initial.add('femurAnatomicAxis');
+        if (landmarks.femoralMedial || landmarks.femoralLateral) initial.add('femoralJointLine');
+        if (landmarks.tibialMedial || landmarks.tibialLateral) initial.add('tibialJointLine');
+        return initial;
+    });
     const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
     const [isCameraOpen, setIsCameraOpen] = useState(false);
 
@@ -332,6 +339,10 @@ const PostOpPlanner: React.FC = () => {
     // Zoom and Pan State
     const [zoom, setZoom] = useState(1);
     const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const zoomRef = useRef(1);
+    const panOffsetRef = useRef({ x: 0, y: 0 });
+    useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+    useEffect(() => { panOffsetRef.current = panOffset; }, [panOffset]);
     const isPanningRef = useRef(false);
     const panStartRef = useRef({ x: 0, y: 0 });
     const MIN_ZOOM = 1;
@@ -349,17 +360,8 @@ const PostOpPlanner: React.FC = () => {
 
     useEffect(() => { localResultsRef.current = results; }, [results]);
 
-    // Restore visibleLandmarkSets from existing landmarks
-    useEffect(() => {
-        const newSets = new Set<string>();
-        if (landmarks.hipCenter || landmarks.kneeCenter || landmarks.ankleCenter) newSets.add('hkaLine');
-        if (landmarks.femurAnatomicAxisPoint) newSets.add('femurAnatomicAxis');
-        if (landmarks.femoralMedial || landmarks.femoralLateral) newSets.add('femoralJointLine');
-        if (landmarks.tibialMedial || landmarks.tibialLateral) newSets.add('tibialJointLine');
-        if (newSets.size > 0) {
-            setVisibleLandmarkSets(newSets);
-        }
-    }, []); // Run only on mount to restore state
+    // visibleLandmarkSets is initialized via lazy initializer in useState above.
+    // No syncing useEffect needed — this prevents auto-enable on first visit.
 
     // Sync landmarks if legSide changes
     useEffect(() => {
@@ -485,7 +487,8 @@ const PostOpPlanner: React.FC = () => {
         ctx.save();
 
         // 1. Center
-        ctx.translate(canvas.width / 2, canvas.height / 2);
+        const dpr = window.devicePixelRatio || 1;
+        ctx.translate(canvas.width / (2 * dpr), canvas.height / (2 * dpr));
         // 2. Pan
         ctx.translate(panOffset.x, panOffset.y);
         // 3. Zoom
@@ -503,7 +506,7 @@ const PostOpPlanner: React.FC = () => {
 
         const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
         const scaledLineWidth = BASE_LINE_WIDTH / (zoom * scaleX);
-        const scaledFontSize = Math.max(12, 16 / (zoom * scaleX));
+        const scaledFontSize = 16 / (zoom * scaleX);
 
         ctx.font = `bold ${scaledFontSize}px Roboto, sans-serif`;
 
@@ -652,6 +655,9 @@ const PostOpPlanner: React.FC = () => {
         const image = imageRef.current;
         if (!viewer || !image) return { x: 0, y: 0 };
 
+        const currentZoom = zoomRef.current;
+        const currentPan = panOffsetRef.current;
+
         const viewerRect = viewer.getBoundingClientRect();
         const viewerCenterX = viewerRect.left + viewerRect.width / 2;
         const viewerCenterY = viewerRect.top + viewerRect.height / 2;
@@ -660,8 +666,8 @@ const PostOpPlanner: React.FC = () => {
         const dy = clientY - viewerCenterY;
 
         // Remove Pan & Zoom
-        const unzoomedX = (dx - panOffset.x) / zoom;
-        const unzoomedY = (dy - panOffset.y) / zoom;
+        const unzoomedX = (dx - currentPan.x) / currentZoom;
+        const unzoomedY = (dy - currentPan.y) / currentZoom;
 
         // Map to Image CS
         const imgW = parseFloat(image.style.width) || 0;
@@ -677,7 +683,7 @@ const PostOpPlanner: React.FC = () => {
         const naturalY = imageDisplayNameY / scaleY;
 
         return { x: naturalX, y: naturalY };
-    }, [panOffset, zoom]);
+    }, []);
 
     const updatePip = useCallback(() => {
         const key = draggingPointRef.current;
@@ -741,7 +747,7 @@ const PostOpPlanner: React.FC = () => {
                 panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
             }
         }
-    }, [landmarks, getStableCoordinates, zoom, panOffset]);
+    }, [landmarks, getStableCoordinates]);
 
     const handleMouseMove = useCallback((e: MouseEvent) => {
         if (isPanningRef.current) {
@@ -786,6 +792,7 @@ const PostOpPlanner: React.FC = () => {
 
     // TOUCH SUPPORT — LANDMARK DRAGGING
     const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+        e.preventDefault();
         if (e.touches.length === 2) {
             const dist = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
@@ -802,13 +809,6 @@ const PostOpPlanner: React.FC = () => {
             return;
         }
 
-        if (e.touches.length === 1 && zoom > 1 && !draggingPointRef.current) {
-            isPanningRef.current = true;
-            panStartRef.current = { x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y };
-            // Don't verify drag logic yet, allow pan
-        }
-
-        e.preventDefault();
         const touch = e.touches[0];
         if (!touch) return;
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
@@ -836,7 +836,7 @@ const PostOpPlanner: React.FC = () => {
         }
         if (closestKey) {
             draggingPointRef.current = closestKey;
-            isPanningRef.current = false; // If we found a point, we are dragging it, not panning
+            isPanningRef.current = false;
         } else {
             if (zoom > 1) {
                 isPanningRef.current = true;
@@ -886,7 +886,7 @@ const PostOpPlanner: React.FC = () => {
         const pos = getStableCoordinates(touch.clientX, touch.clientY);
         setLandmarks(prev => ({ ...prev, [draggingPointRef.current!]: pos }));
         updatePip();
-    }, [updatePip, getStableCoordinates]);
+    }, [updatePip, getStableCoordinates, setLandmarks]);
 
     const handleTouchEnd = useCallback(() => {
         draggingPointRef.current = null;
@@ -1027,7 +1027,7 @@ const PostOpPlanner: React.FC = () => {
                                         )}
                                     </div>
                                 )}
-                                <div className="relative flex items-center justify-center" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center' }}>
+                                <div className="relative flex items-center justify-center" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`, transformOrigin: 'center center', willChange: 'transform' }}>
                                     <img ref={imageRef} src={postOpLongLegImage} alt="Post-op X-ray" className="block max-w-none"
                                         style={{ pointerEvents: 'none', userSelect: 'none' }}
                                         onLoad={() => {

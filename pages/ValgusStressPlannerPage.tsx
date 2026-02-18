@@ -350,7 +350,13 @@ const ValgusStressPlannerPage: React.FC = () => {
 
   const [fileName, setFileName] = useState('No file chosen');
   const [uploadMethod, setUploadMethod] = useState<'file' | 'camera' | null>(null);
-  const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(new Set());
+  const [visibleLandmarkSets, setVisibleLandmarkSets] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    if (valgusLandmarks.medialJointSpace || valgusLandmarks.lateralJointSpace) initial.add('jointLine');
+    if (valgusLandmarks.femurAxisPoint) initial.add('femurAnatomicAxis');
+    if (valgusLandmarks.tibiaAxisPoint) initial.add('tibiaAnatomicAxis');
+    return initial;
+  });
   const [activeInstruction, setActiveInstruction] = useState<string[] | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
@@ -366,6 +372,10 @@ const ValgusStressPlannerPage: React.FC = () => {
   const localResultsRef = useRef(valgusResults);
   const [zoom, setZoom] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const zoomRef = useRef(1);
+  const panOffsetRef = useRef({ x: 0, y: 0 });
+  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  useEffect(() => { panOffsetRef.current = panOffset; }, [panOffset]);
   const isPanningRef = useRef(false);
   const panStartRef = useRef({ x: 0, y: 0 });
   const MIN_ZOOM = 1;
@@ -387,11 +397,7 @@ const ValgusStressPlannerPage: React.FC = () => {
     localResultsRef.current = valgusResults;
   }, [valgusResults]);
 
-  useEffect(() => {
-    if (valgusResults.obliquity !== null) {
-      setVisibleLandmarkSets(new Set(['jointLine', 'femurAnatomicAxis', 'tibiaAnatomicAxis']));
-    }
-  }, []);
+
 
   useEffect(() => {
     if (prevLegSideRef.current !== legSide) {
@@ -572,8 +578,9 @@ const ValgusStressPlannerPage: React.FC = () => {
     // Prepare Transform Matrix
     ctx.save();
 
-    // 1. Move to center of canvas
-    ctx.translate(canvas.width / 2, canvas.height / 2);
+    // 1. Center
+    const dpr = window.devicePixelRatio || 1;
+    ctx.translate(canvas.width / (2 * dpr), canvas.height / (2 * dpr));
     // 2. Apply Pan
     ctx.translate(panOffset.x, panOffset.y);
     // 3. Apply Zoom
@@ -590,7 +597,7 @@ const ValgusStressPlannerPage: React.FC = () => {
 
     const scaledRadius = BASE_HANDLE_RADIUS / (zoom * scaleX);
     const scaledLineWidth = BASE_LINE_WIDTH / (zoom * scaleX);
-    const scaledFontSize = Math.max(12, 16 / (zoom * scaleX));
+    const scaledFontSize = 16 / (zoom * scaleX);
 
     ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
 
@@ -811,6 +818,9 @@ const ValgusStressPlannerPage: React.FC = () => {
     const image = imageRef.current;
     if (!viewer || !image) return { x: 0, y: 0 };
 
+    const currentZoom = zoomRef.current;
+    const currentPan = panOffsetRef.current;
+
     const viewerRect = viewer.getBoundingClientRect();
     const viewerCenterX = viewerRect.left + viewerRect.width / 2;
     const viewerCenterY = viewerRect.top + viewerRect.height / 2;
@@ -819,8 +829,8 @@ const ValgusStressPlannerPage: React.FC = () => {
     const dy = clientY - viewerCenterY;
 
     // Remove Pan & Zoom
-    const unzoomedX = (dx - panOffset.x) / zoom;
-    const unzoomedY = (dy - panOffset.y) / zoom;
+    const unzoomedX = (dx - currentPan.x) / currentZoom;
+    const unzoomedY = (dy - currentPan.y) / currentZoom;
 
     // Map to Image CS
     const imgW = parseFloat(image.style.width) || 0;
@@ -829,8 +839,14 @@ const ValgusStressPlannerPage: React.FC = () => {
     const imageX = unzoomedX + imgW / 2;
     const imageY = unzoomedY + imgH / 2;
 
-    return { x: imageX, y: imageY };
-  }, [panOffset, zoom]);
+    const scaleX = image.naturalWidth ? imgW / image.naturalWidth : 1;
+    const scaleY = image.naturalHeight ? imgH / image.naturalHeight : 1;
+
+    const naturalX = imageX / scaleX;
+    const naturalY = imageY / scaleY;
+
+    return { x: naturalX, y: naturalY };
+  }, []);
 
   const handleViewerTap = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
@@ -960,6 +976,7 @@ const ValgusStressPlannerPage: React.FC = () => {
   }, []);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
     if (e.touches.length === 2) {
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
@@ -1062,7 +1079,7 @@ const ValgusStressPlannerPage: React.FC = () => {
         y: touch.clientY - panStartRef.current.y
       });
     }
-  }, [zoom, panOffset, setValgusLandmarks, updatePip, getStableCoordinates]);
+  }, [setValgusLandmarks, updatePip, getStableCoordinates]);
 
   const handleTouchEnd = useCallback(() => {
     draggingPointRef.current = null;
@@ -1244,7 +1261,7 @@ const ValgusStressPlannerPage: React.FC = () => {
                   style={{
                     transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
                     transformOrigin: 'center center',
-                    transition: 'transform 0.1s ease-out'
+                    transition: isPanningRef.current || draggingPointRef.current ? 'none' : 'transform 0.1s ease-out'
                   }}
                   className="relative flex items-center justify-center"
                 >

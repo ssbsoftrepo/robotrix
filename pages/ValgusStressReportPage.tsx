@@ -25,30 +25,19 @@ const ReportCard: React.FC<{ title: string; children: React.ReactNode; className
     </div>
 );
 
-const getCpakType = (ahka: number, jlo: number): string => {
-    let ahkaClass: 'varus' | 'neutral' | 'valgus';
-    if (ahka < -2) ahkaClass = 'varus';
-    else if (ahka > 2) ahkaClass = 'valgus';
-    else ahkaClass = 'neutral';
+const getCpakClassification = (obliquity: number, ldfa: number | null, mpta: number | null): string => {
+    if (typeof obliquity !== 'number' || isNaN(obliquity)) return '--';
 
-    let jloClass: 'distal' | 'neutral' | 'proximal';
-    if (jlo < 177) jloClass = 'distal';
-    else if (jlo > 183) jloClass = 'proximal';
-    else jloClass = 'neutral';
-
-    if (jloClass === 'distal') {
-        if (ahkaClass === 'varus') return '1';
-        if (ahkaClass === 'neutral') return '2';
-        return '3';
+    if (obliquity >= 3) {
+        return '2';
+    } else if (obliquity >= 1) {
+        return '1';
+    } else {
+        if (ldfa !== null && mpta !== null && Math.round(ldfa) === 90 && Math.round(mpta) === 90) {
+            return '5';
+        }
+        return '4';
     }
-    if (jloClass === 'neutral') {
-        if (ahkaClass === 'varus') return '4';
-        if (ahkaClass === 'neutral') return '5';
-        return '6';
-    }
-    if (ahkaClass === 'varus') return '7';
-    if (ahkaClass === 'neutral') return '8';
-    return '9';
 };
 
 import { printCurrentPage } from '../utils/printer';
@@ -66,8 +55,8 @@ const ValgusStressReportPage: React.FC = () => {
         valgusFunctionalCutDegree,
         valgusFunctionalLinesY,
         legSide,
-        intraOpValidationData,
-        intraOpCoronalBalancingData
+        valgusIntraOpValidationData,
+        valgusIntraOpCoronalBalancingData
     } = useAppContext();
     const patient = patients.find(p => p.id === currentPatientId);
 
@@ -136,12 +125,12 @@ const ValgusStressReportPage: React.FC = () => {
     const initialSimFemoralCut = valgusCoronalBalancingResults.simFemoralCut ?? 3;
     const initialSimTibialCut = selectedDegree;
 
-    const simulatedLDFA = nativeLDFA + initialSimFemoralCut + intraOpCoronalBalancingData.additionalFemurCut;
-    const simulatedMPTA = nativeMPTA + initialSimTibialCut + intraOpCoronalBalancingData.additionalTibiaCut;
+    const simulatedLDFA = nativeLDFA + initialSimFemoralCut;
+    const simulatedMPTA = 90 - initialSimTibialCut;
 
-    const simulatedAHKA = simulatedMPTA - simulatedLDFA;
     const simulatedJLO = simulatedMPTA + simulatedLDFA;
-    const simulatedCPAK = getCpakType(simulatedAHKA, simulatedJLO);
+    const simulatedObliquity = Math.abs(180 - simulatedJLO);
+    const simulatedCPAK = getCpakClassification(simulatedObliquity, simulatedLDFA, simulatedMPTA);
 
     // Determine the image source for print safety
     // Priority: User's functional cut (if base64) > Converted Base64 Background > Default Asset (Web only)
@@ -342,9 +331,9 @@ const ValgusStressReportPage: React.FC = () => {
                             <div>
                                 <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Coronal Balancing Data</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Mes. Lateral Gap" value={`${intraOpValidationData.lateralGap}mm`} />
-                                    <ReportItem label="Mes. Medial Gap" value={`${intraOpValidationData.medialGap}mm`} />
-                                    <ReportItem label="Mes. Tibial Width" value={`${intraOpValidationData.tibiaWidth}mm`} />
+                                    <ReportItem label="Mes. Lateral Gap" value={`${valgusIntraOpValidationData.lateralGap}mm`} />
+                                    <ReportItem label="Mes. Medial Gap" value={`${valgusIntraOpValidationData.medialGap}mm`} />
+                                    <ReportItem label="Mes. Tibial Width" value={`${valgusIntraOpValidationData.tibiaWidth}mm`} />
                                 </div>
                             </div>
 
@@ -367,7 +356,7 @@ const ValgusStressReportPage: React.FC = () => {
                                     </div>
                                     <div className="flex-1 bg-[#252525] border border-[#333333] rounded-lg p-2 text-center">
                                         <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Applied</p>
-                                        <p className="text-sm font-bold text-white">{intraOpCoronalBalancingData.additionalLaxity} mm</p>
+                                        <p className="text-sm font-bold text-white">{valgusIntraOpCoronalBalancingData.additionalLaxity} mm</p>
                                     </div>
                                 </div>
                             </div>
@@ -376,8 +365,8 @@ const ValgusStressReportPage: React.FC = () => {
                             <div>
                                 <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Coronal Balancing Achieved</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Lateral Gap" value={`${Number(lateralGap || 0) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut + intraOpCoronalBalancingData.additionalLaxity}mm`} />
-                                    <ReportItem label="Medial Gap" value={`${(selectedSeries ?? 0) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut}mm`} />
+                                    <ReportItem label="Lateral Gap" value={`${Number(lateralGap || 0) + valgusIntraOpCoronalBalancingData.additionalFemurCut + valgusIntraOpCoronalBalancingData.additionalTibiaCut + valgusIntraOpCoronalBalancingData.additionalLaxity}mm`} />
+                                    <ReportItem label="Medial Gap" value={`${(selectedSeries ?? 0) + valgusIntraOpCoronalBalancingData.additionalFemurCut + valgusIntraOpCoronalBalancingData.additionalTibiaCut}mm`} />
                                 </div>
                             </div>
 

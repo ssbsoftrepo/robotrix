@@ -155,22 +155,31 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
         return `${varusCut}° varus`;
     };
 
-    const getClampedFemoralCut = () => {
-        const originalCut = valgusResults.cut;
-        if (!originalCut || originalCut === '--') return '--';
+    const getFemoralCut = () => {
+        const ldfa = valgusResults.ldfa;
+        if (ldfa === null) return '--';
 
-        // Extract the degree number from strings like "4° valgus cut" or "6° valgus cut (Native...)"
-        const match = originalCut.match(/(\d+)°/);
-        if (!match) return originalCut;
+        // Determine base cut from classification table
+        let cut = '6° valgus cut'; // Default for <= 86
+        if (ldfa > 92) cut = '2° valgus cut';
+        else if (ldfa > 91) cut = '3° valgus cut';
+        else if (ldfa > 88) cut = '4° valgus cut';
+        else if (ldfa > 87) cut = '5° valgus cut';
+        else if (ldfa > 86) cut = '6° valgus cut';
 
-        const degrees = parseInt(match[1]);
-        if (degrees < 3) return "3° valgus cut (clamped to Basic Matrix)";
-        if (degrees > 5) return "5° valgus cut (clamped to Basic Matrix)";
-        return originalCut;
+        // Apply Basic Matrix constraint (3° to 5°) for Valgus Page
+        // "Only Basic Matrix is possible" -> Clamp to 3-5
+        const match = cut.match(/(\d+)°/);
+        if (match) {
+            const degrees = parseInt(match[1]);
+            if (degrees < 3) return "3° valgus cut (clamped to Basic Matrix)";
+            if (degrees > 5) return "5° valgus cut (clamped to Basic Matrix)";
+        }
+        return cut;
     };
 
     const anticipatedTibiaCut = getAnticipatedTibiaCut();
-    const recommendedFemoralCut = getClampedFemoralCut();
+    const recommendedFemoralCut = getFemoralCut();
 
     // Sync calculated values to context for downstream pages
     useEffect(() => {

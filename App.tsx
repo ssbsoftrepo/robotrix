@@ -115,18 +115,18 @@ const App: React.FC = () => {
                 {page !== 'case-management' && (
                     <button
                         onClick={handleHomeClick}
-                        className="group absolute top-1/2 left-6 transform -translate-y-1/2 py-2 px-4 rounded-sm 
+                        onTouchStart={(e) => { e.preventDefault(); handleHomeClick(); }}
+                        className="group absolute top-1/2 left-30 transform -translate-y-1/2 py-2 px-4 rounded-sm 
                                    bg-[#6D282C] border border-[#893338]
                                    shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                    hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
-                                   flex items-center justify-center transition-all duration-300 z-10"
+                                   active:scale-[0.98] active:bg-[#893338]
+                                   flex items-center justify-center transition-all duration-300 z-20 touch-manipulation
+                                   min-h-[44px] min-w-[44px]"
                         title="Go to Home"
                         aria-label="Go to Home"
                     >
-                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative text-white font-bold tracking-wider">Home</span>
-                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                        <span className="text-white font-bold tracking-wider select-none">Home</span>
                     </button>
                 )}
                 <h1 className="relative z-10 text-4xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg">

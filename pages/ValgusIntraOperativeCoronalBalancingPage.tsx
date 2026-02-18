@@ -2,30 +2,19 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
 
-const getCpakType = (ahka: number, jlo: number): string => {
-    let ahkaClass: 'varus' | 'neutral' | 'valgus';
-    if (ahka < -2) ahkaClass = 'varus';
-    else if (ahka > 2) ahkaClass = 'valgus';
-    else ahkaClass = 'neutral';
+const getCpakClassification = (obliquity: number, ldfa: number | null, mpta: number | null): string => {
+    if (typeof obliquity !== 'number' || isNaN(obliquity)) return '--';
 
-    let jloClass: 'distal' | 'neutral' | 'proximal';
-    if (jlo < 177) jloClass = 'distal';
-    else if (jlo > 183) jloClass = 'proximal';
-    else jloClass = 'neutral';
-
-    if (jloClass === 'distal') {
-        if (ahkaClass === 'varus') return '1';
-        if (ahkaClass === 'neutral') return '2';
-        return '3';
+    if (obliquity >= 3) {
+        return '2';
+    } else if (obliquity >= 1) {
+        return '1';
+    } else {
+        if (ldfa !== null && mpta !== null && Math.round(ldfa) === 90 && Math.round(mpta) === 90) {
+            return '5';
+        }
+        return '4';
     }
-    if (jloClass === 'neutral') {
-        if (ahkaClass === 'varus') return '4';
-        if (ahkaClass === 'neutral') return '5';
-        return '6';
-    }
-    if (ahkaClass === 'varus') return '7';
-    if (ahkaClass === 'neutral') return '8';
-    return '9';
 };
 
 const CuttingBlock: React.FC<{
@@ -113,12 +102,14 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
         setPreviousPage,
         valgusResults,
         implantThickness,
-        intraOpValidationData,
-        intraOpCoronalBalancingData,
-        setIntraOpCoronalBalancingData,
+        valgusIntraOpValidationData,
+        valgusIntraOpCoronalBalancingData,
+        setValgusIntraOpCoronalBalancingData,
         kneeType,
         lateralLaxity,
         valgusCoronalBalancingResults,
+        setValgusFunctionalCutDegree,
+        valgusFunctionalCutDegree,
     } = useAppContext();
 
     const handleCheckLaxity = () => {
@@ -126,8 +117,8 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
         setPage('planner-valgus-stress-laxity-check');
     };
 
-    const { additionalFemurCut, additionalTibiaCut, additionalLaxity, functionalTibiaCutDegree } = intraOpCoronalBalancingData;
-    const { medialGap, lateralGap, tibiaWidth } = intraOpValidationData;
+    const { additionalFemurCut, additionalTibiaCut, additionalLaxity, functionalTibiaCutDegree } = valgusIntraOpCoronalBalancingData;
+    const { medialGap, lateralGap, tibiaWidth } = valgusIntraOpValidationData;
     const { simFemoralCut } = valgusCoronalBalancingResults;
 
     const thickness = implantThickness ?? 10;
@@ -162,10 +153,11 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     // Handle Manual Selection
     const handleSelectJig = (angle: number) => {
         setSelectedJig(angle);
-        setIntraOpCoronalBalancingData({
-            ...intraOpCoronalBalancingData,
+        setValgusIntraOpCoronalBalancingData({
+            ...valgusIntraOpCoronalBalancingData,
             functionalTibiaCutDegree: angle
         });
+        setValgusFunctionalCutDegree(angle);
     };
 
     // Track previous recommendation to detect actual input changes
@@ -178,18 +170,22 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
         if (prevRecommendedTheta.current !== recommendedTheta) {
             // Recommendation changed due to input parameter change — follow it
             setSelectedJig(recommendedTheta);
-            setIntraOpCoronalBalancingData(prev => ({
+            setValgusIntraOpCoronalBalancingData(prev => ({
                 ...prev,
                 functionalTibiaCutDegree: recommendedTheta
             }));
+            setValgusFunctionalCutDegree(recommendedTheta);
             prevRecommendedTheta.current = recommendedTheta;
         } else if (functionalTibiaCutDegree === null || functionalTibiaCutDegree === undefined) {
-            // First visit, no persisted value — use recommendation
-            setSelectedJig(recommendedTheta);
-            setIntraOpCoronalBalancingData(prev => ({
+            // First visit, no persisted value — use Planner value if available, otherwise recommendation
+            const initialCut = valgusFunctionalCutDegree !== null ? valgusFunctionalCutDegree : recommendedTheta;
+
+            setSelectedJig(initialCut);
+            setValgusIntraOpCoronalBalancingData(prev => ({
                 ...prev,
-                functionalTibiaCutDegree: recommendedTheta
+                functionalTibiaCutDegree: initialCut
             }));
+            setValgusFunctionalCutDegree(initialCut);
         }
     }, [recommendedTheta]);
 
@@ -198,20 +194,20 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     let nativeCPAK = valgusResults.cpak;
 
     if (!nativeCPAK || ['--', 'N/A'].includes(nativeCPAK)) {
-        const currentAhka = nativeMPTA - nativeLDFA;
         const currentJlo = nativeMPTA + nativeLDFA;
-        nativeCPAK = getCpakType(currentAhka, currentJlo);
+        const derivedObliquity = Math.abs(180 - currentJlo);
+        nativeCPAK = getCpakClassification(derivedObliquity, nativeLDFA, nativeMPTA);
     }
 
     const plannedFemurCut = simFemoralCut ?? 3; // Default for Valgus set to 3 to match Varus and Basic Matrix lower bound
 
     const finalSimulatedMedialGap = baseMedial + (selectedJig * C);
-    const simulatedLDFA = nativeLDFA + plannedFemurCut + additionalFemurCut;
-    const simulatedMPTA = nativeMPTA + selectedJig + additionalTibiaCut;
+    const simulatedLDFA = nativeLDFA + plannedFemurCut;
+    const simulatedMPTA = 90 - selectedJig;
 
-    const simulatedAHKA = simulatedMPTA - simulatedLDFA;
     const simulatedJLO = simulatedMPTA + simulatedLDFA;
-    const simulatedCPAK = getCpakType(simulatedAHKA, simulatedJLO);
+    const simulatedObliquity = Math.abs(180 - simulatedJLO);
+    const simulatedCPAK = getCpakClassification(simulatedObliquity, simulatedLDFA, simulatedMPTA);
 
     const getRetentionStatus = () => {
         const normNative = nativeCPAK.replace('Type ', '');
@@ -226,9 +222,9 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const retentionStatus = getRetentionStatus();
 
     const handleUpdateData = (field: string, delta: number) => {
-        setIntraOpCoronalBalancingData({
-            ...intraOpCoronalBalancingData,
-            [field]: Math.max(0, (intraOpCoronalBalancingData as any)[field] + delta)
+        setValgusIntraOpCoronalBalancingData({
+            ...valgusIntraOpCoronalBalancingData,
+            [field]: Math.max(0, (valgusIntraOpCoronalBalancingData as any)[field] + delta)
         });
     };
 
@@ -347,8 +343,8 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Center - Bone Image */}
-                            <div className="flex-grow flex items-center justify-center relative w-full h-full">
-                                <img src="/intracoronal.png" alt="Simulation" className="h-full w-full object-contain" />
+                            <div className="flex-grow flex items-center justify-center relative w-full h-[80%]">
+                                <img src="/intracoronal.png" alt="Simulation" className="h-full w-full object-cover" />
 
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
                                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
