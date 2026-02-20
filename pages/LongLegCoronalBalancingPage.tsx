@@ -236,7 +236,10 @@ const LongLegCoronalBalancingPage: React.FC = () => {
         longLegResults,
         setLongLegCoronalBalancingResults,
         lateralLaxity,
+        legSide,
     } = useAppContext();
+
+    const isLeftLeg = legSide === 'left';
 
     // Calculation Logic
     const thickness = implantThickness ?? 10;
@@ -300,41 +303,39 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                     <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-black overflow-hidden rounded-xl border border-[#333333]">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="flex items-stretch justify-center w-full h-full gap-0 p-4">
+                            {/* Left Panel - changes based on leg side */}
                             <div className="flex flex-col items-center justify-center text-center shrink-0 mr-[6%] z-10">
                                 <div className="min-h-[5rem] flex items-end justify-center pb-2">
                                     <p className="text-sm font-semibold text-gray-400 leading-snug mb-0">
-                                        Adjust the <br />
-                                        distal femoral &<br />
-                                        proximal tibial cut<br />
-                                        thickness to get
+                                        {isLeftLeg ? (<><br />Anticipated</>) : (<>Adjust the <br />distal femoral &<br />proximal tibial cut<br />thickness to get</>)}
                                     </p>
                                 </div>
                                 <p className="text-base text-[#E0E0E0] font-bold mb-4">
-                                    Lateral Gap
+                                    {isLeftLeg ? 'Medial Gap' : 'Lateral Gap'}
                                 </p>
                                 <div className="w-32 h-32 rounded-full border-[6px] border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(109,40,44,0.6)] backdrop-blur-sm transition-all hover:scale-105">
-                                    <span className="text-4xl font-bold text-white">{thickness}</span>                                    <span className="text-base text-gray-400 font-bold mt-[-2px]">mm</span>
+                                    <span className="text-4xl font-bold text-white">{isLeftLeg ? anticipatedMedialGap : thickness}</span>
+                                    <span className="text-base text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
 
-                            {/* Center - Bone Image */}
+                            {/* Center - Bone Image (changes based on leg side) */}
                             <div className="shrink-0 h-full flex items-center justify-center">
-                                <img src="/center.png" alt="Knee View Reference" className="max-h-full object-contain" />
+                                <img src={isLeftLeg ? '/coronal-left.png' : '/coronal-right.png'} alt="Knee View Reference" className="max-h-full object-contain" />
                             </div>
 
-                            {/* Right Panel - Medial Gap */}
+                            {/* Right Panel - changes based on leg side */}
                             <div className="flex flex-col items-center justify-center text-center shrink-0 ml-[6%] z-10">
                                 <div className="min-h-[5rem] flex items-end justify-center pb-2">
                                     <p className="text-sm font-semibold text-gray-400 leading-snug mb-0">
-                                        <br />
-                                        Anticipated
+                                        {isLeftLeg ? (<>Adjust the <br />distal femoral &<br />proximal tibial cut<br />thickness to get</>) : (<><br />Anticipated</>)}
                                     </p>
                                 </div>
                                 <p className="text-base text-[#E0E0E0] font-bold mb-4">
-                                    Medial Gap
+                                    {isLeftLeg ? 'Lateral Gap' : 'Medial Gap'}
                                 </p>
                                 <div className="w-32 h-32 rounded-full border-[6px] border-[#6D282C] bg-black/80 flex flex-col items-center justify-center shadow-[0_0_30px_rgba(109,40,44,0.6)] backdrop-blur-sm transition-all hover:scale-105">
-                                    <span className="text-4xl font-bold text-gray-100">{anticipatedMedialGap}</span>
+                                    <span className="text-4xl font-bold text-gray-100">{isLeftLeg ? thickness : anticipatedMedialGap}</span>
                                     <span className="text-base text-gray-400 font-bold mt-[-2px]">mm</span>
                                 </div>
                             </div>
@@ -416,7 +417,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                             </div>
                             <div className="bg-black/40 p-2 rounded-lg border border-[#6D282C]/50 backdrop-blur-md hover:border-[#6D282C]/80 transition-colors">
                                 <p className="text-sm text-[#ff8fa3] font-bold leading-tight">
-                                    Input of inaccurate data from long leg film
+                                    Input of inaccurate data<br />from long leg film
                                 </p>
                             </div>
                         </div>

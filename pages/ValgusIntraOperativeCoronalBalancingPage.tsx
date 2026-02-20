@@ -35,7 +35,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* Dynamic height based on isReduced prop (-5px from 88px) */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto ${isReduced ? 'max-h-[83px]' : 'max-h-[88px]'} ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto ${isReduced ? 'max-h-[90px]' : 'max-h-[105px]'} ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -112,7 +112,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
         valgusCoronalBalancingResults,
         setValgusFunctionalCutDegree,
         valgusFunctionalCutDegree,
+        legSide,
     } = useAppContext();
+
+    const isLeftLeg = legSide === 'left';
 
     const handleCheckLaxity = () => {
         setPreviousPage('planner-valgus-stress-coronal-balancing');
@@ -324,56 +327,66 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
 
                         {/* Horizontal layout: Lateral Box - Image - Medial Box */}
                         <div className="flex items-center justify-center gap-2 flex-grow w-full relative">
-                            {/* Left Box - Lateral Gap */}
+                            {/* Left Box - swaps based on leg side */}
                             <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 ml-2 w-[100px]">
-                                <div className="bg-black/80 border-2 border-[#333333] rounded-lg px-3 py-3 text-center shadow-lg w-full">
-                                    <p className="text-gray-500 text-[9px] font-black uppercase tracking-wider mb-1">LATERAL</p>
-                                    <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                <div className={`bg-black/80 border-2 ${isLeftLeg ? 'border-[#6D282C]' : 'border-[#333333]'} rounded-lg px-3 py-3 text-center shadow-lg w-full`}>
+                                    <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-[9px] font-black uppercase tracking-wider mb-1`}>{isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
+                                    {isLeftLeg ? (
+                                        <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
+                                    ) : (
+                                        <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Center - Bone Image */}
                             <div className="flex-grow flex items-center justify-center relative w-full h-[80%]">
-                                <img src="/intracoronal.png" alt="Simulation" className="h-full w-full object-cover" />
+                                <img src={isLeftLeg ? '/intracoronal-left.png' : '/intracoronal-right.png'} alt="Simulation" className="h-full w-full object-cover" />
 
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
-                                    {/* Femur horizontal cut line - at bottom edge of femur */}
-                                    <line
-                                        x1="0" y1={`${54.5 - additionalFemurCut * 1}%`}
-                                        x2="100%" y2={`${54.5 - additionalFemurCut * 1}%`}
-                                        stroke="#6D282C" strokeWidth="4"
-                                    />
-
-                                    {/* Baseline Tibia dotted line - at top edge of tibia */}
-                                    <line x1="0" y1="54.5%" x2="100%" y2="54.5%" stroke="#444444" strokeWidth="1.5" strokeDasharray="5,2" />
-
-                                    {/* Dynamic Tibia horizontal cut - at top edge of tibia */}
-                                    <line
-                                        x1="0" y1={`${65 + additionalTibiaCut * 1}%`}
-                                        x2="100%" y2={`${65 + additionalTibiaCut * 1}%`}
-                                        stroke="#6D282C" strokeWidth="4"
-                                    />
-
-                                    {/* Varus Angle Lines - fan out from left pivot on tibia */}
-                                    <circle cx="0" cy={`${65 + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
-                                    {[0, 1, 2, 3, 4].map((angle) => {
-                                        const isSelected = selectedJig === angle;
-                                        const yOffsetPercent = angle * 2.5;
-                                        const baseY = 65 + additionalTibiaCut * 1;
-                                        return (
+                                {(() => {
+                                    const femurBaseY = isLeftLeg ? 53.5 : 54.5;
+                                    const tibiaBaseY = isLeftLeg ? 63.5 : 65;
+                                    return (
+                                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
+                                            {/* Femur horizontal cut line - at bottom edge of femur */}
                                             <line
-                                                key={angle}
-                                                x1="0" y1={`${baseY}%`}
-                                                x2="100%" y2={`${baseY + yOffsetPercent}%`}
-                                                stroke={isSelected ? "#6D282C" : "#333333"}
-                                                strokeWidth={isSelected ? "4" : "1.5"}
-                                                strokeDasharray={isSelected ? "0" : "5,2"}
-                                                opacity={isSelected ? 1 : 0.6}
+                                                x1="0" y1={`${femurBaseY - additionalFemurCut * 1}%`}
+                                                x2="100%" y2={`${femurBaseY - additionalFemurCut * 1}%`}
+                                                stroke="#6D282C" strokeWidth="4"
                                             />
-                                        );
-                                    })}
-                                </svg>
+
+                                            {/* Baseline Tibia dotted line - at top edge of tibia */}
+                                            <line x1="0" y1={`${femurBaseY}%`} x2="100%" y2={`${femurBaseY}%`} stroke="#444444" strokeWidth="1.5" strokeDasharray="5,2" />
+
+                                            {/* Dynamic Tibia horizontal cut - at top edge of tibia */}
+                                            <line
+                                                x1="0" y1={`${tibiaBaseY + additionalTibiaCut * 1}%`}
+                                                x2="100%" y2={`${tibiaBaseY + additionalTibiaCut * 1}%`}
+                                                stroke="#6D282C" strokeWidth="4"
+                                            />
+
+                                            {/* Varus Angle Lines - pivot side based on leg */}
+                                            <circle cx={isLeftLeg ? '100%' : '0'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
+                                            {[0, 1, 2, 3, 4].map((angle) => {
+                                                const isSelected = selectedJig === angle;
+                                                const yOffsetPercent = angle * 2.5;
+                                                const baseY = tibiaBaseY + additionalTibiaCut * 1;
+                                                return (
+                                                    <line
+                                                        key={angle}
+                                                        x1={isLeftLeg ? '100%' : '0'} y1={`${baseY}%`}
+                                                        x2={isLeftLeg ? '0' : '100%'} y2={`${baseY + yOffsetPercent}%`}
+                                                        stroke={isSelected ? "#6D282C" : "#333333"}
+                                                        strokeWidth={isSelected ? "4" : "1.5"}
+                                                        strokeDasharray={isSelected ? "0" : "5,2"}
+                                                        opacity={isSelected ? 1 : 0.6}
+                                                    />
+                                                );
+                                            })}
+                                        </svg>
+                                    );
+                                })()}
                                 <div className="absolute top-[84%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
                                     <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
                                         <p className="text-gray-500 text-[9px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
@@ -382,11 +395,15 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Right Box - Medial Gap */}
+                            {/* Right Box - swaps based on leg side */}
                             <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 mr-2 w-[100px]">
-                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-lg w-full">
-                                    <p className="text-[#ff8fa3] text-[9px] font-black uppercase tracking-wider mb-1">MEDIAL</p>
-                                    <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
+                                <div className={`bg-black/80 border-2 ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-lg px-3 py-3 text-center shadow-lg w-full`}>
+                                    <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-1`}>{isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
+                                    {isLeftLeg ? (
+                                        <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                    ) : (
+                                        <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
+                                    )}
                                 </div>
                             </div>
                         </div>

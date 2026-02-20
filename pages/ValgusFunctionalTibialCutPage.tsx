@@ -97,8 +97,11 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
         valgusFunctionalCutDegree,
         setValgusFunctionalCutDegree,
         valgusFunctionalLinesY,
-        setValgusFunctionalLinesY
+        setValgusFunctionalLinesY,
+        legSide,
     } = useAppContext();
+
+    const isLeftLeg = legSide === 'left';
 
 
     const [linesYPercent, setLinesYPercent] = useState<number>(32);
@@ -240,13 +243,13 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                             style={{ touchAction: 'none' }}
                         >
 
-                            {/* Gap Info Overlays */}
-                            <div className="absolute top-4 left-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#333333] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(0,0,0,0.8)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105">
+                            {/* Gap Info Overlays - swap based on leg side */}
+                            <div className={`absolute top-4 ${isLeftLeg ? 'right-4' : 'left-4'} z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#333333] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(0,0,0,0.8)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105`}>
                                 <p className="text-[10px] text-gray-400 uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Lateral Gap</p>
                                 <p className="text-2xl font-black text-white leading-none drop-shadow-xl">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
                             </div>
 
-                            <div className="absolute top-4 right-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#6D282C] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(109,40,44,0.3)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105">
+                            <div className={`absolute top-4 ${isLeftLeg ? 'left-4' : 'right-4'} z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#6D282C] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(109,40,44,0.3)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105`}>
                                 <p className="text-[10px] text-[#ff8fa3] uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
                                 <p className="text-2xl font-black text-[#ff8fa3] leading-none drop-shadow-xl">{medialGapValue} <span className="text-sm text-[#ff8fa3]/70 font-bold">mm</span></p>
                             </div>
@@ -260,20 +263,20 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                             </div>
 
                             {/* Image Layer */}
-                            <img src={tibiaCutBg} alt="X-ray Reference" className="w-full h-full object-contain pointer-events-none" />
+                            <img src={isLeftLeg ? '/tibiacut-left.png' : '/tibiacut-right.png'} alt="X-ray Reference" className="w-full h-full object-contain pointer-events-none" />
 
-                            {/* Red Lines Overlay */}
+                            {/* Red Lines Overlay - mirrored based on leg side */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
-                                <circle cx="0" cy={`${linesYPercent}%`} r="6" fill="#6D282C" />
+                                <circle cx={isLeftLeg ? '100%' : '0'} cy={`${linesYPercent}%`} r="6" fill="#6D282C" />
                                 {[0, 1, 2, 3].map(deg => {
                                     const isTarget = deg === selectedDegree;
                                     const yOffsetPercent = deg * 2.5;
                                     return (
                                         <g key={deg}>
                                             <line
-                                                x1="0"
+                                                x1={isLeftLeg ? '100%' : '0'}
                                                 y1={`${linesYPercent}%`}
-                                                x2="100%"
+                                                x2={isLeftLeg ? '0' : '100%'}
                                                 y2={`${linesYPercent + yOffsetPercent}%`}
                                                 stroke={isTarget ? "#6D282C" : "#333333"}
                                                 strokeWidth={isTarget ? "4" : "1.5"}
@@ -282,12 +285,12 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                             />
                                             {isTarget && (
                                                 <text
-                                                    x="95%"
+                                                    x={isLeftLeg ? '5%' : '95%'}
                                                     y={`${linesYPercent + yOffsetPercent - 2}%`}
                                                     fill="#6D282C"
                                                     fontSize="14"
                                                     fontWeight="bold"
-                                                    textAnchor="end"
+                                                    textAnchor={isLeftLeg ? 'start' : 'end'}
                                                 >
                                                     {deg}°
                                                 </text>
