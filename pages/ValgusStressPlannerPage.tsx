@@ -703,7 +703,7 @@ const ValgusStressPlannerPage: React.FC = () => {
         <div className="flex flex-col h-full">
             <CameraModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onCapture={(dataUrl) => handleImageLoad(dataUrl, 'Live Photo.png', 'camera')} />
             <h2 className="text-5xl font-bold mb-8">Valgus Stress Film CPAK Planner</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 flex-grow">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 flex-grow p-4">
                 <div className="lg:col-span-1 gemini-dark-card p-6 rounded-lg space-y-6 flex flex-col">
                     <div>
                         <h3 className="text-xl font-semibold text-gray-300 mb-3">Step 1: Upload X-ray</h3>
