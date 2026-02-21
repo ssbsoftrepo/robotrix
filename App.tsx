@@ -98,7 +98,7 @@ useEffect(() => {
     }
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col p-4 md:p-8">
             <header className="relative flex items-center justify-center p-4 text-center border-b border-gray-700 shadow-md no-print">
                  <h1 className="text-5xl font-bold text-gray-200">
                     ROBOTRIX<span className="text-dark-maroon">+</span>

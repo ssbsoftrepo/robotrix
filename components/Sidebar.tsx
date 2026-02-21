@@ -104,7 +104,7 @@ const Sidebar: React.FC = () => {
 
 
     return (
-        <nav className="w-24 min-h-full bg-[#1e1f20] p-4 flex-col items-center justify-center space-y-6 hidden sm:flex no-print">
+        <nav className="w-24 min-h-full bg-[#1e1f20] p-4 flex-col items-center justify-center space-y-6 flex sm:flex no-print">
             {navItems}
         </nav>
     );
