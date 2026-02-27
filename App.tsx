@@ -21,6 +21,8 @@ import IntraOperativeValidationPage from './pages/IntraOperativeValidationPage';
 import IntraOperativeCoronalBalancingPage from './pages/IntraOperativeCoronalBalancingPage';
 import ValgusIntraOperativeValidationPage from './pages/ValgusIntraOperativeValidationPage';
 import ValgusIntraOperativeCoronalBalancingPage from './pages/ValgusIntraOperativeCoronalBalancingPage';
+import PreOpReportPage from './pages/PreOpReportPage';
+import ValgusPreOpReportPage from './pages/ValgusPreOpReportPage';
 import LandingPage from './pages/LandingPage';
 import { Camera } from '@capacitor/camera';
 import { Filesystem } from '@capacitor/filesystem';
@@ -83,6 +85,10 @@ const App: React.FC = () => {
                 return <ValgusIntraOperativeValidationPage />;
             case 'valgus-intra-operative-coronal-balancing':
                 return <ValgusIntraOperativeCoronalBalancingPage />;
+            case 'pre-op-report':
+                return <PreOpReportPage />;
+            case 'valgus-pre-op-report':
+                return <ValgusPreOpReportPage />;
             case 'simulation':
                 return <SimulationPage />;
             case 'report':
@@ -116,7 +122,7 @@ const App: React.FC = () => {
                     <button
                         onClick={handleHomeClick}
                         onTouchStart={(e) => { e.preventDefault(); handleHomeClick(); }}
-                        className="group absolute top-1/2 right-4 transform -translate-y-1/2 py-2 px-6 rounded-sm 
+                        className="group absolute top-1/2 right-25 transform -translate-y-1/2 py-2 px-6 rounded-sm 
                                    bg-[#6D282C] border border-[#893338]
                                    shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                    hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]

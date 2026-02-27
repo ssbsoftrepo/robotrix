@@ -333,7 +333,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
                     {/* Proceed Button */}
                     <button
-                        onClick={() => setPage('planner-valgus-stress-coronal-balancing')}
+                        onClick={() => setPage('valgus-pre-op-report')}
                         disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
                         className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                    shadow-[0_4px_20px_rgba(109,40,44,0.4)] 

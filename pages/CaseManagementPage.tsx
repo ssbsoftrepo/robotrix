@@ -473,7 +473,7 @@ const CaseManagementPage: React.FC = () => {
     const isPlanSelected = !!currentPlanId;
 
     // Standardized to Maroon palettes
-    const plannerColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C'];
+    const plannerColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C'];
 
     const planners: {
         page: string;
@@ -501,6 +501,17 @@ const CaseManagementPage: React.FC = () => {
                 onClick: () => { setKneeType('valgus'); setPage('planner-long-leg'); },
                 icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125a1.125 1.125 0 00-1.125 1.125v12.75c0 .621.504 1.125 1.125 1.125z" /></svg>
             },
+            {
+                page: 'intra-operative-planning',
+                title: ['Intra-Operative', 'Planning'],
+                onClick: () => setPage('intra-operative-validation'),
+                icon: (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.1-5.1a2.25 2.25 0 113.18-3.18l.9.9 6.36-6.36a2.25 2.25 0 013.18 3.18l-7.44 7.44a2.25 2.25 0 01-3.18 0v.02zM15.75 7.5l1.5 1.5" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 13.5V19.125A2.625 2.625 0 0115.375 21.75h-8.75A2.625 2.625 0 014 19.125V6.375A2.625 2.625 0 016.625 3.75H10.5" />
+                    </svg>
+                )
+            },
             // 2nd Row
             {
                 page: 'simulation',
@@ -523,6 +534,16 @@ const CaseManagementPage: React.FC = () => {
                 title: ['Generate', 'Report'],
                 onClick: () => setIsReportSelectionOpen(true),
                 icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            },
+            {
+                page: 'post-operative-cpak',
+                title: ['Post-Operative', 'CPAK Verification'],
+                onClick: () => setIsResultTypeModalOpen(true),
+                icon: (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                )
             },
             {
                 page: 'view-cases',
@@ -938,7 +959,7 @@ const CaseManagementPage: React.FC = () => {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
                         {planners.map((p, index) => (
                             <PlannerOption
                                 key={p.page}

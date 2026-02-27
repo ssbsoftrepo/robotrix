@@ -450,7 +450,7 @@ const SimulationPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">Resection Simulation</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0]">PRE – OP Resection Simulation</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow min-h-0 px-2 mb-2 relative z-10 overflow-hidden">
                 {/* Column 1: Pre-Op HKA View - 25% */}
@@ -520,7 +520,7 @@ const SimulationPage: React.FC = () => {
             <div className="mt-1 flex justify-between px-2 pb-2 relative z-10">
                 {/* Back Button */}
                 <button
-                    onClick={() => setPage('planner-long-leg-functional-tibial-cut')}
+                    onClick={() => setPage('results-analysis')}
                     className="group relative py-2 px-4 bg-[#252525] border border-[#444444] rounded-sm 
                                shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
                                transition-all duration-300 ease-out
@@ -540,7 +540,7 @@ const SimulationPage: React.FC = () => {
 
                 {/* View Report Button */}
                 <button
-                    onClick={() => setPage('intra-operative-validation')}
+                    onClick={() => setPage('pre-op-report')}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                transition-all duration-300 ease-out
@@ -549,7 +549,7 @@ const SimulationPage: React.FC = () => {
                 >
                     <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
                     <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-widest">
-                        PROCEED INTRA-OP VALIDATION
+                        VIEW PRE-OP REPORT
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>

@@ -72,4 +72,6 @@ export type Page =
     'intra-operative-validation' |
     'intra-operative-coronal-balancing' |
     'valgus-intra-operative-validation' |
-    'valgus-intra-operative-coronal-balancing';
+    'valgus-intra-operative-coronal-balancing' |
+    'pre-op-report' |
+    'valgus-pre-op-report';
