@@ -136,12 +136,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
     const handleConfirmSelection = () => {
         if (!userSelection) return;
         setLateralLaxity(userSelection);
-        if (previousPage) {
-            setPage(previousPage);
-        } else {
-            setPlannerMode('advanced');
-            setPage('planner-long-leg');
-        }
+        setPage('intra-operative-coronal-balancing');
     };
 
     const handleSkip = () => {
@@ -153,13 +148,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
     };
 
     const goBack = () => {
-        if (previousPage) {
-            setPage(previousPage);
-        } else {
-            setLateralLaxity(null);
-            setPlannerMode(null);
-            setPage('case-management');
-        }
+        setPage('intra-operative-coronal-balancing');
     };
 
     const laxityLevels = [

@@ -137,11 +137,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
     const handleConfirmSelection = () => {
         if (!userSelection) return;
         setLateralLaxity(userSelection);
-        if (previousPage) {
-            setPage(previousPage);
-        } else {
-            setPage('planner-valgus-stress');
-        }
+        setPage('valgus-intra-operative-coronal-balancing');
     };
 
     const handleSkip = () => {
@@ -153,12 +149,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
     };
 
     const goBack = () => {
-        if (previousPage) {
-            setPage(previousPage);
-        } else {
-            setLateralLaxity(null);
-            setPage('case-management');
-        }
+        setPage('valgus-intra-operative-coronal-balancing');
     };
 
     const laxityLevels = [

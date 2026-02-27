@@ -107,9 +107,40 @@ const ReportSelectionModal: React.FC<{
     );
 };
 
-
-
-
+const IntraOpSelectionModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onSelect: (type: 'long-leg' | 'valgus-stress') => void;
+}> = ({ isOpen, onClose, onSelect }) => {
+    if (!isOpen) return null;
+    return (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-8 rounded-lg max-w-2xl text-center shadow-2xl w-full border border-[#333333]">
+                <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                <button type="button" onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8">Select Intra-Op Type</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button
+                        onClick={() => onSelect('long-leg')}
+                        className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
+                    >
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Long Leg Film INTRA OP</span>
+                    </button>
+                    <button
+                        onClick={() => onSelect('valgus-stress')}
+                        className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
+                    >
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Valgus Stress Film INTRA OP</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const PlanSelectionModal: React.FC<{
     isOpen: boolean;
@@ -285,6 +316,7 @@ const CaseManagementPage: React.FC = () => {
     const [selectedPatientForResults, setSelectedPatientForResults] = useState<string | null>(null);
 
     const [isReportSelectionOpen, setIsReportSelectionOpen] = useState(false);
+    const [isIntraOpSelectionOpen, setIsIntraOpSelectionOpen] = useState(false);
 
     const [formData, setFormData] = useState<Patient>({
         id: `PID-${Date.now()}`,
@@ -504,7 +536,7 @@ const CaseManagementPage: React.FC = () => {
             {
                 page: 'intra-operative-planning',
                 title: ['Intra-Operative', 'Planning'],
-                onClick: () => setPage('intra-operative-validation'),
+                onClick: () => setIsIntraOpSelectionOpen(true),
                 icon: (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.1-5.1a2.25 2.25 0 113.18-3.18l.9.9 6.36-6.36a2.25 2.25 0 013.18 3.18l-7.44 7.44a2.25 2.25 0 01-3.18 0v.02zM15.75 7.5l1.5 1.5" />
@@ -735,6 +767,19 @@ const CaseManagementPage: React.FC = () => {
                 isOpen={isReportSelectionOpen}
                 onClose={() => setIsReportSelectionOpen(false)}
                 onSelect={handleReportSelection}
+            />
+
+            <IntraOpSelectionModal
+                isOpen={isIntraOpSelectionOpen}
+                onClose={() => setIsIntraOpSelectionOpen(false)}
+                onSelect={(type) => {
+                    setIsIntraOpSelectionOpen(false);
+                    if (type === 'long-leg') {
+                        setPage('intra-operative-validation');
+                    } else {
+                        setPage('valgus-intra-operative-validation');
+                    }
+                }}
             />
 
             <PlanSelectionModal

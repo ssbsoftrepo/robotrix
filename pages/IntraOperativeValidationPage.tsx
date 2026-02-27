@@ -254,7 +254,7 @@ const IntraOperativeValidationPage: React.FC = () => {
             <div className="mt-2 flex justify-between pb-1 shrink-0 px-2 relative z-10">
                 {/* Back Button */}
                 <button
-                    onClick={() => setPage('simulation')}
+                    onClick={() => setPage('pre-op-report')}
                     className="group relative py-2 px-4 bg-[#252525] border border-[#444444] rounded-sm 
                                shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
                                transition-all duration-300 ease-out
