@@ -66,7 +66,8 @@ const ReportPage: React.FC = () => {
         intraOpValidationData,
         intraOpCoronalBalancingData,
         longLegFunctionalCutDegree,
-        lateralLaxity
+        lateralLaxity,
+        implantThickness
     } = useAppContext();
 
     // Logic: Post-Op Simulation (Re-calculated for report)
@@ -121,6 +122,16 @@ const ReportPage: React.FC = () => {
     const displayFemoralCut = getFemoralCut();
     const displayTibialCut = getTibialCut();
     const { lateralGap, selectedSeries } = longLegCoronalBalancingResults;
+
+    const thickness = implantThickness ?? 10;
+    const mpta = longLegResults.mpta ?? 86;
+    const rawTightness = 86 - mpta;
+    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
+    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const anticipatedLateralGap = thickness;
+
+    const finalLateralGap = lateralGap || anticipatedLateralGap;
+    const finalMedialGap = selectedSeries ?? anticipatedMedialGap;
 
     return (
         <div className="relative h-full overflow-y-auto pb-8 flex flex-col bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -241,8 +252,8 @@ const ReportPage: React.FC = () => {
                             <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
                                 <p className="text-xs text-gray-500 font-bold uppercase mb-1">Coronal Balancing Data</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Implant Thickness (Lateral Gap)" value={`${lateralGap || '--'} mm`} />
-                                    <ReportItem label="Anticipated Medial Gap" value={`${selectedSeries ?? '--'} mm`} />
+                                    <ReportItem label="Implant Thickness (Lateral Gap)" value={`${finalLateralGap} mm`} />
+                                    <ReportItem label="Anticipated Medial Gap" value={`${finalMedialGap} mm`} />
                                 </div>
                             </div>
 
@@ -328,8 +339,8 @@ const ReportPage: React.FC = () => {
                             <div>
                                 <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Coronal Balancing Achieved</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Lateral Gap" value={`${Number(lateralGap || 0) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut + intraOpCoronalBalancingData.additionalLaxity}mm`} />
-                                    <ReportItem label="Medial Gap" value={`${(selectedSeries ?? 0) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut}mm`} />
+                                    <ReportItem label="Lateral Gap" value={`${Number(finalLateralGap) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut + intraOpCoronalBalancingData.additionalLaxity}mm`} />
+                                    <ReportItem label="Medial Gap" value={`${finalMedialGap + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut}mm`} />
                                 </div>
                             </div>
 

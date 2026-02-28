@@ -46,7 +46,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* Dynamic height based on isReduced prop (-5px from 88px) */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto ${isReduced ? 'max-h-[90px]' : 'max-h-[105px]'} ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[90px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -159,6 +159,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const lateralDiff = lateralGap - anticipatedLateralGap;
     const gapsMatch = medialDiff === 0 && lateralDiff === 0;
     const showRevisedCut = gapsMatch || additionalLaxity > 0;
+
+    const revisedVarusCut = anticipatedTightness + ((medialDiff - lateralDiff) / C) - (medialDiff / C);
 
     const LMT = thickness - additionalLaxity;
 
@@ -318,21 +320,32 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Section 3: Native CPAK / Phenotype / Simulated CPAK — 30% */}
-                        <div className="flex flex-col justify-evenly border-t border-[#333333] px-1 py-2" style={{ flex: '0 0 40%' }}>
-                            <div className="bg-black/80 border border-[#333333] p-2.5 rounded-lg flex justify-between items-center w-full">
-                                <span className="text-xs font-black text-white uppercase tracking-widest">Native CPAK</span>
-                                <span className="text-xl font-black text-white">
+                        {/* Section 3: Native CPAK / Revised Cut / Simulated CPAK — 40% */}
+                        <div className="flex flex-col justify-center gap-4 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 40%' }}>
+                            <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
+                                <span className="text-sm font-black text-white uppercase tracking-widest">Native CPAK</span>
+                                <span className="text-2xl font-black text-white">
                                     {['--', 'N/A'].includes(nativeCPAK) ? nativeCPAK : `Type ${nativeCPAK}`}
                                 </span>
                             </div>
-                            <div className={`p-2.5 rounded-lg flex justify-between items-center border w-full ${retentionStatus.text === 'Constitutional Match' ? 'bg-green-500/10 border-green-500/30' : 'bg-gray-500/10 border-gray-500/30'}`}>
-                                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Phenotype</span>
-                                <span className={`text-sm font-black uppercase ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>{retentionStatus.text}</span>
-                            </div>
-                            <div className="bg-black/80 border border-[#333333] p-2.5 rounded-lg flex justify-between items-center w-full">
-                                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Simulated CPAK</span>
-                                <span className={`text-xl font-black ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>Type {simulatedCPAK}</span>
+
+                            {gapsMatch && (
+                                <div className="text-center w-full flex justify-between items-center bg-[#6D282C]/10 border border-[#6D282C]/30 px-4 py-3 rounded-xl shadow-lg">
+                                    <span className="text-xs font-black text-gray-300 uppercase tracking-widest leading-tight text-left w-1/2">
+                                        Revised<br />Tibia Cut
+                                    </span>
+                                    <div className="flex items-start justify-end w-1/2">
+                                        <span className="text-4xl font-black text-[#ff8fa3] tracking-tighter leading-none shadow-black filter drop-shadow-md">
+                                            {Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}
+                                        </span>
+                                        <span className="text-2xl font-black text-[#ff8fa3] mt-0 ml-1">°</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
+                                <span className="text-sm font-black text-gray-400 uppercase tracking-widest">Simulated CPAK</span>
+                                <span className={`text-2xl font-black ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>Type {simulatedCPAK}</span>
                             </div>
                         </div>
                     </div>
@@ -346,8 +359,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                         {/* Horizontal layout: Lateral Box - Image - Medial Box */}
                         <div className="flex items-center justify-center gap-2 flex-grow w-full relative">
                             {/* Left Box - swaps based on leg side */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 ml-2 w-[100px]">
-                                <div className={`bg-black/80 border-2 ${isLeftLeg ? 'border-[#6D282C]' : 'border-[#333333]'} rounded-lg px-3 py-3 text-center shadow-lg w-full`}>
+                            <div className="flex flex-col items-center shrink-0 z-20 self-center ml-2 w-[100px]">
+                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-[0_0_15px_rgba(109,40,44,0.3)] w-full">
                                     <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-[9px] font-black uppercase tracking-wider mb-1`}>{isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
@@ -414,8 +427,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Right Box - swaps based on leg side */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 mr-2 w-[100px]">
-                                <div className={`bg-black/80 border-2 ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-lg px-3 py-3 text-center shadow-lg w-full`}>
+                            <div className="flex flex-col items-center shrink-0 z-20 self-center mr-2 w-[100px]">
+                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-[0_0_15px_rgba(109,40,44,0.3)] w-full">
                                     <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-1`}>{isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
@@ -426,7 +439,6 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
                         </div>
 
-
                     </div>
                 </div>
                 {/* Column 3: Jig Selection */}
@@ -434,15 +446,13 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-4 h-full">
 
                         <div className="flex-grow flex flex-col gap-3">
-                            {showRevisedCut && (
-                                <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-lg p-2 text-center w-full shrink-0">
-                                    <p className="text-[10px] text-gray-200 font-bold uppercase tracking-widest">Revised Functional Tibia Cut (θ)</p>
-                                    <div className="flex items-center justify-center">
-                                        <span className="text-3xl font-black text-[#ff8fa3]">{recommendedTheta}</span>
-                                        <span className="text-xl font-black text-[#ff8fa3] ml-0.5">°</span>
-                                    </div>
+                            <div className="bg-black border-2 border-[#333333] rounded-lg p-2.5 text-center w-full shrink-0 shadow-lg">
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Anticipated Functional Tibia Cut</p>
+                                <div className="flex items-center justify-center">
+                                    <span className="text-2xl font-black text-[#ff8fa3]">{anticipatedTightness}°</span>
+                                    <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{anticipatedTightness === 0 ? 'neutral' : 'varus'}</span>
                                 </div>
-                            )}
+                            </div>
 
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
                             <p className="text-[8px] text-gray-600 text-center uppercase -mt-1">Click block to simulate</p>

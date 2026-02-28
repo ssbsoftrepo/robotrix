@@ -53,10 +53,10 @@ const ValgusStressReportPage: React.FC = () => {
         setPage,
         valgusFunctionalTibialCutImage,
         valgusFunctionalCutDegree,
-        valgusFunctionalLinesY,
         legSide,
         valgusIntraOpValidationData,
-        valgusIntraOpCoronalBalancingData
+        valgusIntraOpCoronalBalancingData,
+        implantThickness
     } = useAppContext();
     const patient = patients.find(p => p.id === currentPatientId);
 
@@ -72,8 +72,18 @@ const ValgusStressReportPage: React.FC = () => {
     const { obliquity, femurType, cpak, cut, ldfa, mpta } = valgusResults;
     const { selectedSeries, lateralGap } = valgusCoronalBalancingResults;
 
+    const thickness = implantThickness ?? 10;
+    const mptaVal = mpta ?? 86;
+    const rawTightness = 86 - mptaVal;
+    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
+    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const anticipatedLateralGap = thickness;
+
+    const finalLateralGap = lateralGap || anticipatedLateralGap;
+    const finalMedialGap = selectedSeries ?? anticipatedMedialGap;
+
     // Logic from functional cut page for display consistency
-    const gapDifference = (selectedSeries !== null && lateralGap !== '' && !isNaN(parseFloat(lateralGap))) ? Math.abs(selectedSeries - parseFloat(lateralGap)) : null;
+    const gapDifference = Math.abs(finalMedialGap - Number(finalLateralGap));
     let recommendedTibialRecut = '--';
     if (gapDifference !== null) {
         if (gapDifference >= 4) recommendedTibialRecut = '3° Varus';
@@ -115,8 +125,8 @@ const ValgusStressReportPage: React.FC = () => {
     }, []);
 
     const selectedDegree = valgusFunctionalCutDegree || 0;
-    const lateralGapValue = lateralGap || '--';
-    const baseMedialGap = selectedSeries || 0;
+    const lateralGapValue = finalLateralGap;
+    const baseMedialGap = finalMedialGap;
     const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
 
     // Post-Op Simulation (Re-calculated for report)
@@ -241,8 +251,8 @@ const ValgusStressReportPage: React.FC = () => {
                             <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
                                 <p className="text-xs text-gray-500 font-bold uppercase mb-1">Coronal Balancing Data</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Implant Thickness (Lateral Gap)" value={`${lateralGap || '--'} mm`} />
-                                    <ReportItem label="Anticipated Medial Gap" value={`${selectedSeries ?? '--'} mm`} />
+                                    <ReportItem label="Implant Thickness (Lateral Gap)" value={`${finalLateralGap} mm`} />
+                                    <ReportItem label="Anticipated Medial Gap" value={`${finalMedialGap} mm`} />
                                 </div>
                             </div>
 
@@ -377,8 +387,8 @@ const ValgusStressReportPage: React.FC = () => {
                             <div>
                                 <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Coronal Balancing Achieved</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Lateral Gap" value={`${Number(lateralGap || 0) + valgusIntraOpCoronalBalancingData.additionalFemurCut + valgusIntraOpCoronalBalancingData.additionalTibiaCut + valgusIntraOpCoronalBalancingData.additionalLaxity}mm`} />
-                                    <ReportItem label="Medial Gap" value={`${(selectedSeries ?? 0) + valgusIntraOpCoronalBalancingData.additionalFemurCut + valgusIntraOpCoronalBalancingData.additionalTibiaCut}mm`} />
+                                    <ReportItem label="Lateral Gap" value={`${Number(finalLateralGap) + valgusIntraOpCoronalBalancingData.additionalFemurCut + valgusIntraOpCoronalBalancingData.additionalTibiaCut + valgusIntraOpCoronalBalancingData.additionalLaxity}mm`} />
+                                    <ReportItem label="Medial Gap" value={`${finalMedialGap + valgusIntraOpCoronalBalancingData.additionalFemurCut + valgusIntraOpCoronalBalancingData.additionalTibiaCut}mm`} />
                                 </div>
                             </div>
 

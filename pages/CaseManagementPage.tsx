@@ -128,13 +128,13 @@ const IntraOpSelectionModal: React.FC<{
                         onClick={() => onSelect('long-leg')}
                         className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Long Leg Film INTRA OP</span>
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Long Leg Film Intra-Op</span>
                     </button>
                     <button
                         onClick={() => onSelect('valgus-stress')}
                         className="p-4 rounded-lg border border-[#333333] bg-[#1a1a1a] hover:bg-[#6D282C]/20 hover:border-[#6D282C] transition flex flex-col items-center group"
                     >
-                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Valgus Stress Film INTRA OP</span>
+                        <span className="text-xl font-bold text-gray-200 group-hover:text-[#ff8fa3]">Valgus Stress Film Intra-Op</span>
                     </button>
                 </div>
             </div>

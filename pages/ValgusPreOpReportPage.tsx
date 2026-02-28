@@ -38,6 +38,7 @@ const ValgusPreOpReportPage: React.FC = () => {
         valgusFunctionalTibialCutImage,
         valgusFunctionalCutDegree,
         legSide,
+        implantThickness
     } = useAppContext();
 
     const patient = patients.find(p => p.id === currentPatientId);
@@ -77,8 +78,18 @@ const ValgusPreOpReportPage: React.FC = () => {
     const { obliquity, femurType, cpak, cut, ldfa, mpta } = valgusResults;
     const { selectedSeries, lateralGap } = valgusCoronalBalancingResults;
 
+    const thickness = implantThickness ?? 10;
+    const mptaVal = mpta ?? 86;
+    const rawTightness = 86 - mptaVal;
+    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
+    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const anticipatedLateralGap = thickness;
+
+    const finalLateralGap = lateralGap || anticipatedLateralGap;
+    const finalMedialGap = selectedSeries ?? anticipatedMedialGap;
+
     // Tibial recut logic
-    const gapDifference = (selectedSeries !== null && lateralGap !== '' && !isNaN(parseFloat(lateralGap))) ? Math.abs(selectedSeries - parseFloat(lateralGap)) : null;
+    const gapDifference = Math.abs(finalMedialGap - Number(finalLateralGap));
     let recommendedTibialRecut = '--';
     if (gapDifference !== null) {
         if (gapDifference >= 4) recommendedTibialRecut = '3° Varus';
@@ -88,8 +99,8 @@ const ValgusPreOpReportPage: React.FC = () => {
     }
 
     const selectedDegree = valgusFunctionalCutDegree || 0;
-    const lateralGapValue = lateralGap || '--';
-    const baseMedialGap = selectedSeries || 0;
+    const lateralGapValue = finalLateralGap;
+    const baseMedialGap = finalMedialGap;
     const medialGapValue = (baseMedialGap + (selectedDegree * 1.2)).toFixed(1);
 
     const functionalCutImageSrc = valgusFunctionalTibialCutImage && valgusFunctionalTibialCutImage.startsWith('data:')
@@ -158,8 +169,8 @@ const ValgusPreOpReportPage: React.FC = () => {
                             <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
                                 <p className="text-xs text-gray-500 font-bold uppercase mb-1">Coronal Balancing Data</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Implant Thickness (Lateral Gap)" value={`${lateralGap || '--'} mm`} large />
-                                    <ReportItem label="Anticipated Medial Gap" value={`${selectedSeries ?? '--'} mm`} large />
+                                    <ReportItem label="Implant Thickness (Lateral Gap)" value={`${finalLateralGap} mm`} large />
+                                    <ReportItem label="Anticipated Medial Gap" value={`${finalMedialGap} mm`} large />
                                 </div>
                             </div>
 
@@ -267,7 +278,7 @@ const ValgusPreOpReportPage: React.FC = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
                         </svg>
-                        PRE OP
+                        BACK
                     </span>
                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
                     <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />

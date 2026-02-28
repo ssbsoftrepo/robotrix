@@ -1213,7 +1213,7 @@ const ValgusStressPlannerPage: React.FC = () => {
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 relative z-10">
-        <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tight">Valgus Stress Film CPAK Planner</h2>
+        <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tight">PRE – OP Valgus Stress Film CPAK Planner</h2>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <span className="w-2 h-2 rounded-full bg-[#6D282C] animate-pulse" />
           <span>Active Workspace</span>
@@ -1456,7 +1456,7 @@ const ValgusStressPlannerPage: React.FC = () => {
             setPage('planner-valgus-stress-results');
           }}
           disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
-          className={`group relative py-3 px-8 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
+          className={`group relative py-2 px-6 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
             ${(!valgusResults.cpak || valgusResults.cpak === '--')
               ? 'bg-[#252525] border border-[#333333] text-gray-500 cursor-not-allowed'
               : 'bg-[#6D282C] border border-[#893338] shadow-[0_4px_20px_rgba(109,40,44,0.4)] hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98]'}`}>

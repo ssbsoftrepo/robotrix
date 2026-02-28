@@ -115,33 +115,32 @@ const App: React.FC = () => {
     }
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden">
-            <header className="relative flex items-center justify-center p-2 text-center border-b border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]">
-                <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
-                {page !== 'case-management' && (
-                    <button
-                        onClick={handleHomeClick}
-                        onTouchStart={(e) => { e.preventDefault(); handleHomeClick(); }}
-                        className="group absolute top-1/2 right-25 transform -translate-y-1/2 py-2 px-6 rounded-sm 
-                                   bg-[#6D282C] border border-[#893338]
-                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
-                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
-                                   active:scale-[0.98]
-                                   flex items-center justify-center transition-all duration-300 z-20 touch-manipulation"
-                        title="Go to Home"
-                        aria-label="Go to Home"
-                    >
-                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative text-white font-bold tracking-widest select-none">HOME</span>
-
-                        {/* Corner Accents for Technical Feel */}
-                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    </button>
-                )}
-                <h1 className="relative z-10 text-4xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg">
+        <div className="h-screen flex flex-col">
+            <header
+                className="relative z-50 flex items-center justify-between px-2 pb-2 border-b border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]"
+                style={{ paddingTop: 'max(0.2rem, env(safe-area-inset-top, 0.2rem))' }}
+            >
+                <div className="flex-1" />
+                <h1 className="text-4xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg pointer-events-none select-none relative z-10">
                     ROBOTRIX<span className="text-[#6D282C]">+</span>
                 </h1>
+                <div className="flex-1 flex justify-end pr-3">
+                    {page !== 'case-management' && (
+                        <button
+                            onClick={handleHomeClick}
+                            className="relative z-50 py-2 px-6 rounded-sm 
+                                       bg-[#6D282C] border border-[#893338]
+                                       shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                       hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                       active:scale-[0.98]
+                                       flex items-center justify-center transition-all duration-300 touch-manipulation select-none cursor-pointer"
+                            title="Go to Home"
+                            aria-label="Go to Home"
+                        >
+                            <span className="text-white font-bold tracking-widest select-none">HOME</span>
+                        </button>
+                    )}
+                </div>
             </header>
 
             <div className="flex flex-1 min-h-0">

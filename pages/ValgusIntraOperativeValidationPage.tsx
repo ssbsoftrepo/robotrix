@@ -74,64 +74,27 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-[#E0E0E0]">Intra-Operative Input Screen (Valgus)</h2>
             </div>
 
-            <div className="flex-grow grid grid-cols-[25fr_45fr_30fr] gap-2 min-h-0 px-2 relative z-10">
-                {/* Column 1: Inputs & Instructions */}
+            <div className="flex-grow grid grid-cols-[22fr_52fr_26fr] gap-2 min-h-0 px-2 relative z-10">
+                {/* Column 1: Instructions & Images */}
                 <div className="h-full flex flex-col gap-2 overflow-hidden">
-                    {/* Instructions Section */}
-                    <div className="flex flex-col gap-2 flex-[1] min-h-0">
-                        <div className="w-full flex justify-center">
-                            <span className="px-4 py-1.5 rounded-sm text-xs font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">Actual Gaps</span>
+                    <div className="flex flex-col gap-3 flex-grow min-h-0">
+                        <div className="relative bg-[#2a2a2a]/60 p-2 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-3 flex-[1] min-h-0 shadow-lg justify-center items-center">
+                            <div className="flex items-center gap-2 w-full">
+                                <div className="bg-[#6D282C] text-white w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border border-[#893338]">1</div>
+                                <p className="text-[20px] text-gray-300 leading-snug w-full">Assess the actual medail and lateral extensor gaps</p>
+                            </div>
+                            <div className="w-full flex justify-center shrink min-h-0 items-center">
+                                <img src="/AI_blocks.png" alt="AI Blocks" className="max-h-[160px] max-w-[80%] object-contain drop-shadow-lg" />
+                            </div>
                         </div>
-                        <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1] flex items-center gap-3 z-10 min-h-0">
-                            <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">1</div>
-                            <p className="text-[18px] text-gray-400 leading-snug text-left w-full">Assess the Actual medial and lateral extensor gaps</p>
-                        </div>
-                        <div className="relative bg-[#252525] p-3 rounded-lg border-l-4 border-[#6D282C] hover:bg-[#2a2a2a] transition-colors flex-[1] flex items-center gap-3 z-10 min-h-0">
-                            <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">2</div>
-                            <p className="text-[18px] text-gray-400 leading-snug text-left w-full">Measure the mediolateral tibial width using tibial calipers</p>
-                        </div>
-                    </div>
 
-                    {/* Input Fields Section */}
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-5 rounded-xl flex-[1] flex flex-col justify-center">
-                        <div className="space-y-6">
-                            {/* First gap input: Medial for left knee, Lateral for right knee */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">{isLeftLeg ? 'Medial' : 'Lateral'} Gap (mm)</label>
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'medialGap' : 'lateralGap', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
-                                    <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-2xl font-black text-white">{isLeftLeg ? medialGap : lateralGap}</span>
-                                    </div>
-                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'medialGap' : 'lateralGap', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
-                                </div>
+                        <div className="relative bg-[#2a2a2a]/60 p-2 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-3 flex-[1] min-h-0 shadow-lg justify-center items-center">
+                            <div className="flex items-center gap-3 w-full">
+                                <div className="bg-[#6D282C] text-white w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border border-[#893338]">2</div>
+                                <p className="text-[20px] text-gray-300 leading-snug w-full">Measure the Mediolateral Tibial width using tibial calipers</p>
                             </div>
-                            {/* Second gap input: Lateral for left knee, Medial for right knee */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">{isLeftLeg ? 'Lateral' : 'Medial'} Gap (mm)</label>
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'lateralGap' : 'medialGap', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
-                                    <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-2xl font-black text-white">{isLeftLeg ? lateralGap : medialGap}</span>
-                                    </div>
-                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'lateralGap' : 'medialGap', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Mid Tibia Width (mm)</label>
-                                <div className="flex items-center justify-center gap-4">
-                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
-                                    <div className="w-24 py-3 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-2xl font-black text-white">{tibiaWidth}</span>
-                                    </div>
-                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-2xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
-                                </div>
+                            <div className="w-full flex justify-center shrink min-h-0 items-center">
+                                <img src="/Tibia_calipper.png" alt="Tibia Caliper" className="max-h-[160px] max-w-[80%] object-contain drop-shadow-lg" />
                             </div>
                         </div>
                     </div>
@@ -139,113 +102,150 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
 
                 {/* Column 2: Visual Comparison */}
                 <div className="h-full flex flex-col gap-1 overflow-hidden">
-                    <div className="relative flex-grow bg-black border border-[#333333] rounded-xl flex items-stretch p-2">
+                    <div className="relative flex-grow bg-[#1a1a1a] border border-[#333333] rounded-xl flex items-stretch p-2">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
-                        {/* Left Side - changes based on leg side */}
-                        <div className="flex flex-col items-center z-20 px-3 shrink-0 w-[130px]">
-                            <div className={`bg-black/80 border-2 ${isLeftLeg ? 'border-[#6D282C]' : 'border-[#333333]'} rounded-lg px-3 py-3 text-center shadow-lg w-full mt-4`}>
-                                <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-[9px] font-black uppercase tracking-wider mb-1`}>ANTICIPATED<br />{isLeftLeg ? 'MEDIAL GAP' : 'LATERAL GAP'}</p>
-                                <p className={`text-2xl font-black ${isLeftLeg ? 'text-[#ff8fa3]' : 'text-white'}`}>{isLeftLeg ? anticipatedMedialGap : anticipatedLateralGap}<span className={`text-sm ${isLeftLeg ? 'text-[#ff8fa3]/70' : 'text-gray-400'} ml-1`}>mm</span></p>
+                        {/* Left Side */}
+                        <div className="flex flex-col items-center z-20 px-2 shrink-0 w-[150px]">
+                            <div className={`bg-black/90 border-2 ${isLeftLeg ? 'border-[#6D282C]' : 'border-[#333333]'} rounded-xl p-3 text-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] w-full mt-2`}>
+                                <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-[11px] font-black uppercase tracking-wider mb-1 leading-tight`}>ANTICIPATED<br />{isLeftLeg ? 'MEDIAL GAP' : 'LATERAL GAP'}</p>
+                                <p className={`text-4xl font-black ${isLeftLeg ? 'text-[#ff8fa3]' : 'text-white'}`}>{isLeftLeg ? anticipatedMedialGap : anticipatedLateralGap}<span className={`text-base ${isLeftLeg ? 'text-[#ff8fa3]/70' : 'text-gray-400'} ml-1`}>mm</span></p>
                             </div>
-                            <div className="flex-grow flex flex-col items-center justify-center gap-1">
-                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL {isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
-                                <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(isLeftLeg ? medialDiff : lateralDiff)}`}>
-                                    <span className="text-2xl font-black leading-tight">{isLeftLeg ? medialGap : lateralGap}</span>
-                                    <span className="text-xs font-bold opacity-60">mm</span>
+                            <div className="flex-grow flex flex-col items-center justify-center gap-2">
+                                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">ACTUAL {isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
+                                <div className="flex flex-col items-center gap-3 w-full">
+                                    <div className={`w-28 h-28 rounded-full border-[5px] transition-all duration-500 flex flex-col items-center justify-center bg-[#0a0a0a] shadow-[0_0_20px_rgba(0,0,0,0.8)] ${getStatusColor(isLeftLeg ? medialDiff : lateralDiff)}`}>
+                                        <span className={`text-4xl font-black leading-none`}>{isLeftLeg ? medialGap : lateralGap}</span>
+                                        <span className="text-sm font-bold opacity-70 mt-1">mm</span>
+                                    </div>
+                                    <div className={`px-4 py-1.5 rounded-md text-base font-black uppercase tracking-widest w-[120px] text-center shadow-lg ${isLeftLeg ? (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : medialDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : lateralDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
+                                        {isLeftLeg ? getGapStatus(medialDiff) : getGapStatus(lateralDiff)}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Center - Bone Image (changes based on leg side) */}
-                        <div className="flex-grow flex items-center justify-center z-10 min-w-0">
-                            <img src={isLeftLeg ? '/intraval-left.png' : '/intraval-right.png'} alt="Joint Model" className="max-h-full max-w-full object-contain" />
+                        {/* Center - Bone Image */}
+                        <div className="flex-grow flex items-center justify-center z-10 min-w-0 px-2">
+                            <img src={isLeftLeg ? '/intraval-left.png' : '/intraval-right.png'} alt="Joint Model" className="max-h-[95%] max-w-full object-contain filter drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]" />
                         </div>
 
-                        {/* Right Side - changes based on leg side */}
-                        <div className="flex flex-col items-center z-20 px-3 shrink-0 w-[130px]">
-                            <div className={`bg-black/80 border-2 ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-lg px-3 py-3 text-center shadow-lg w-full mt-4`}>
-                                <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-1`}>ANTICIPATED<br />{isLeftLeg ? 'LATERAL GAP' : 'MEDIAL GAP'}</p>
-                                <p className={`text-2xl font-black ${isLeftLeg ? 'text-white' : 'text-[#ff8fa3]'}`}>{isLeftLeg ? anticipatedLateralGap : anticipatedMedialGap}<span className={`text-sm ${isLeftLeg ? 'text-gray-400' : 'text-[#ff8fa3]/70'} ml-1`}>mm</span></p>
+                        {/* Right Side */}
+                        <div className="flex flex-col items-center z-20 px-2 shrink-0 w-[150px]">
+                            <div className={`bg-black/90 border-2 ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-xl p-3 text-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] w-full mt-2`}>
+                                <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[11px] font-black uppercase tracking-wider mb-1 leading-tight`}>ANTICIPATED<br />{isLeftLeg ? 'LATERAL GAP' : 'MEDIAL GAP'}</p>
+                                <p className={`text-4xl font-black ${isLeftLeg ? 'text-white' : 'text-[#ff8fa3]'}`}>{isLeftLeg ? anticipatedLateralGap : anticipatedMedialGap}<span className={`text-base ${isLeftLeg ? 'text-gray-400' : 'text-[#ff8fa3]/70'} ml-1`}>mm</span></p>
                             </div>
-                            <div className="flex-grow flex flex-col items-center justify-center gap-1">
-                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">ACTUAL {isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
-                                <div className={`w-20 h-20 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm shadow-lg ${getStatusColor(isLeftLeg ? lateralDiff : medialDiff)}`}>
-                                    <span className="text-2xl font-black leading-tight">{isLeftLeg ? lateralGap : medialGap}</span>
-                                    <span className="text-xs font-bold opacity-60">mm</span>
+                            <div className="flex-grow flex flex-col items-center justify-center gap-2">
+                                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">ACTUAL {isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
+                                <div className="flex flex-col items-center gap-3 w-full">
+                                    <div className={`w-28 h-28 rounded-full border-[5px] transition-all duration-500 flex flex-col items-center justify-center bg-[#0a0a0a] shadow-[0_0_20px_rgba(0,0,0,0.8)] ${getStatusColor(isLeftLeg ? lateralDiff : medialDiff)}`}>
+                                        <span className={`text-4xl font-black leading-none`}>{isLeftLeg ? lateralGap : medialGap}</span>
+                                        <span className="text-sm font-bold opacity-70 mt-1">mm</span>
+                                    </div>
+                                    <div className={`px-4 py-1.5 rounded-md text-base font-black uppercase tracking-widest w-[120px] text-center shadow-lg ${isLeftLeg ? (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : lateralDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : medialDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
+                                        {isLeftLeg ? getGapStatus(lateralDiff) : getGapStatus(medialDiff)}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Column 3: Analysis & Formula */}
+                {/* Column 3: Inputs & Formula */}
                 <div className="h-full flex flex-col gap-2 overflow-hidden">
-                    {/* Section 1: Analysis */}
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col flex-[1] min-h-0">
-                        <div className="w-full flex justify-center mb-3">
-                            <span className="px-4 py-1.5 rounded-sm text-xs font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">ANALYSIS</span>
+                    {/* Inputs Section */}
+                    <div className="bg-[#1a1a1a] border border-[#333333] pt-6 pb-2 px-2 rounded-xl flex flex-col flex-[1] min-h-0 justify-center relative mt-2">
+                        <div className="absolute top-0 inset-x-0 w-full flex justify-center mt-1 z-10">
+                            <span className="px-5 py-1.5 rounded-sm text-xs font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase border border-[#893338]">ACTUAL GAPS</span>
                         </div>
-                        <div className="flex-grow flex flex-col gap-3 justify-center">
-                            <div className={`p-4 rounded-lg border border-white/5 flex flex-col items-center justify-center ${getStatusColor(lateralDiff).replace('bg-', 'bg-opacity-5 ')}`}>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <div className={`w-2 h-2 rounded-full ${lateralDiff === 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">LATERAL ANALYSIS</p>
+                        <div className="space-y-2 w-full px-2 mt-2">
+                            {/* First gap input: Medial for left knee, Lateral for right knee */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">{isLeftLeg ? 'MEDIAL' : 'LATERAL'} GAP (MM)</label>
+                                <div className="flex items-center justify-center gap-3">
+                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'medialGap' : 'lateralGap', -1)} className="w-12 h-12 rounded-sm text-white font-bold text-3xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-md flex items-center justify-center pb-1"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.3) 0%, rgba(60,18,22,0.5) 100%)', border: '1px solid #893338' }}>-</button>
+                                    <div className="w-24 py-2 bg-[#0a0a0a] border border-[#333333] flex items-center justify-center rounded-md inset-shadow-sm">
+                                        <span className="text-3xl font-black text-white">{isLeftLeg ? medialGap : lateralGap}</span>
+                                    </div>
+                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'medialGap' : 'lateralGap', 1)} className="w-12 h-12 rounded-sm text-white font-bold text-3xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-md flex items-center justify-center pb-1"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.3) 0%, rgba(60,18,22,0.5) 100%)', border: '1px solid #893338' }}>+</button>
                                 </div>
-                                <p className={`text-xl font-black ${lateralDiff === 0 ? 'text-green-500' : 'text-red-500'}`}>{getGapStatus(lateralDiff)}</p>
                             </div>
-                            <div className={`p-4 rounded-lg border border-white/5 flex flex-col items-center justify-center ${getStatusColor(medialDiff).replace('bg-', 'bg-opacity-5 ')}`}>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <div className={`w-2 h-2 rounded-full ${medialDiff === 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">MEDIAL ANALYSIS</p>
+                            {/* Second gap input: Lateral for left knee, Medial for right knee */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">{isLeftLeg ? 'LATERAL' : 'MEDIAL'} GAP (MM)</label>
+                                <div className="flex items-center justify-center gap-3">
+                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'lateralGap' : 'medialGap', -1)} className="w-12 h-12 rounded-sm text-white font-bold text-3xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-md flex items-center justify-center pb-1"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.3) 0%, rgba(60,18,22,0.5) 100%)', border: '1px solid #893338' }}>-</button>
+                                    <div className="w-24 py-2 bg-[#0a0a0a] border border-[#333333] flex items-center justify-center rounded-md inset-shadow-sm">
+                                        <span className="text-3xl font-black text-white">{isLeftLeg ? lateralGap : medialGap}</span>
+                                    </div>
+                                    <button onClick={() => handleUpdateData(isLeftLeg ? 'lateralGap' : 'medialGap', 1)} className="w-12 h-12 rounded-sm text-white font-bold text-3xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-md flex items-center justify-center pb-1"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.3) 0%, rgba(60,18,22,0.5) 100%)', border: '1px solid #893338' }}>+</button>
                                 </div>
-                                <p className={`text-xl font-black ${medialDiff === 0 ? 'text-green-500' : 'text-red-500'}`}>{getGapStatus(medialDiff)}</p>
+                            </div>
+                            {/* Tibia Width */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">MID TIBIA WIDTH (MM)</label>
+                                <div className="flex items-center justify-center gap-3">
+                                    <button onClick={() => handleUpdateData('tibiaWidth', -1)} className="w-12 h-12 rounded-sm text-white font-bold text-3xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-md flex items-center justify-center pb-1"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.3) 0%, rgba(60,18,22,0.5) 100%)', border: '1px solid #893338' }}>-</button>
+                                    <div className="w-24 py-2 bg-[#0a0a0a] border border-[#333333] flex items-center justify-center rounded-md inset-shadow-sm">
+                                        <span className="text-3xl font-black text-white">{tibiaWidth}</span>
+                                    </div>
+                                    <button onClick={() => handleUpdateData('tibiaWidth', 1)} className="w-12 h-12 rounded-sm text-white font-bold text-3xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-md flex items-center justify-center pb-1"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.3) 0%, rgba(60,18,22,0.5) 100%)', border: '1px solid #893338' }}>+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Section 2: Revised Cut / Error Considerations */}
-                    {medialDiff === 0 && lateralDiff === 0 ? (
-                        <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-xl p-5 flex flex-col items-center justify-center flex-[1] min-h-0">
-                            <h3 className="text-gray-200 text-lg font-bold uppercase tracking-wider mb-4 text-center">
-                                REVISED FUNCTIONAL TIBIA CUT
-                            </h3>
-                            <div className="flex items-start mb-3">
-                                <span className="text-7xl font-black text-[#ff8fa3] tracking-tighter leading-none">
-                                    {Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}
-                                </span>
-                                <span className="text-4xl font-black text-[#ff8fa3] mt-1 ml-1">°</span>
+                    <div className="flex-[1] min-h-0 flex flex-col">
+                        {medialDiff === 0 && lateralDiff === 0 ? (
+                            <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex flex-col items-center justify-center h-full shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+                                <h3 className="text-green-500/90 text-[15px] font-bold uppercase tracking-wider mb-2 text-center">
+                                    REVISED FUNCTIONAL TIBIA CUT
+                                </h3>
+                                <div className="flex items-start mb-1">
+                                    <span className="text-7xl font-black text-green-400 tracking-tighter leading-none filter drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">
+                                        {Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}
+                                    </span>
+                                    <span className="text-5xl font-black text-green-400 mt-0 ml-1">°</span>
+                                </div>
+                                <p className="text-green-500/60 text-sm font-bold text-center">
+                                    Calculated with tibial width ({tibiaWidth}mm)
+                                </p>
                             </div>
-                            <p className="text-gray-400 text-sm font-medium text-center max-w-[90%]">
-                                Calculated using patient-specific tibial width ({tibiaWidth}mm)
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="bg-[#6D282C]/10 border-2 border-[#6D282C]/30 rounded-xl p-5 flex flex-col flex-[1] min-h-0">
-                            <div className="flex items-center gap-3 mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                                <span className="text-amber-500 font-bold text-base">Actual gaps do not match.</span>
-                            </div>
-                            <div className="flex-grow">
-                                <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-3">CONSIDER THE FOLLOWING:</p>
-                                <div className="space-y-2">
-                                    {[
-                                        "Input of inaccurate data",
-                                        "Under/over resection of foundations",
-                                        "Presence of pre-op lateral laxity",
-                                        "Error in Provisional 90° tibial cut"
-                                    ].map((item, index) => (
-                                        <div key={index} className="flex items-center gap-2 bg-black/20 p-2.5 rounded border border-[#6D282C]/20">
-                                            <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-                                            <span className="text-gray-300 text-sm font-bold">{item}</span>
-                                        </div>
-                                    ))}
+                        ) : (
+                            <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-xl p-3 flex flex-col h-full shadow-[0_0_20px_rgba(109,40,44,0.1)]">
+                                <div className="flex items-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span className="text-amber-500 font-bold text-lg leading-tight flex-grow text-center">Actual gaps do not match.</span>
+                                </div>
+                                <div className="flex-grow flex flex-col justify-center">
+                                    <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-2 px-1">CONSIDER THE FOLLOWING:</p>
+                                    <div className="space-y-1.5 px-1">
+                                        {[
+                                            "Input of inaccurate data",
+                                            "Under/over resection of foundations",
+                                            "Presence of pre-op lateral laxity",
+                                            "Error in Provisional 90° tibial cut"
+                                        ].map((item, index) => (
+                                            <div key={index} className="flex items-center gap-2 bg-[#1a1a1a] p-2 rounded border border-[#333333]">
+                                                <span className="w-2 h-2 rounded-full bg-amber-500/80 shrink-0 ml-1" />
+                                                <span className="text-gray-300 text-[14px] font-medium leading-tight">{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 

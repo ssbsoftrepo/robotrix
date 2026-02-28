@@ -1465,7 +1465,7 @@ const LongLegPlannerPage: React.FC = () => {
                         setPage('results-analysis');
                     }}
                     disabled={!longLegResults.cpak || longLegResults.cpak === '--'}
-                    className={`group relative py-3 px-8 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
+                    className={`group relative py-2 px-6 rounded-sm transition-all duration-300 ease-out flex items-center gap-2
                         ${(!longLegResults.cpak || longLegResults.cpak === '--')
                             ? 'bg-[#252525] border border-[#333333] text-gray-500 cursor-not-allowed'
                             : 'bg-[#6D282C] border border-[#893338] shadow-[0_4px_20px_rgba(109,40,44,0.4)] hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)] active:scale-[0.98]'}`}>
