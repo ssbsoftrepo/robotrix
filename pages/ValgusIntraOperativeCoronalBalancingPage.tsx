@@ -35,7 +35,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* Dynamic height based on isReduced prop (-5px from 88px) */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[90px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[93px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -431,7 +431,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
 
                         <div className="flex-grow flex flex-col gap-3">
                             <div className="bg-black border-2 border-[#333333] rounded-lg p-2.5 text-center w-full shrink-0 shadow-lg">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Anticipated Functional Tibia Cut</p>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">PRE-OP Calculated Tibia Cut</p>
                                 <div className="flex items-center justify-center">
                                     <span className="text-2xl font-black text-[#ff8fa3]">{anticipatedTightness}°</span>
                                     <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{anticipatedTightness === 0 ? 'neutral' : 'varus'}</span>

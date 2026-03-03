@@ -1212,7 +1212,7 @@ const ValgusStressPlannerPage: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4 relative z-10">
+      <div className="flex items-center justify-between px-2 pt-2 relative z-10">
         <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tight">PRE – OP Valgus Stress Film CPAK Planner</h2>
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <span className="w-2 h-2 rounded-full bg-[#6D282C] animate-pulse" />
@@ -1220,10 +1220,10 @@ const ValgusStressPlannerPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-4 flex-grow min-h-0 px-4 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-2 flex-grow min-h-0 px-2 relative z-10">
 
         {/* LEFT: X-Ray Canvas (75%) */}
-        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[calc(100vh-200px)] flex items-center justify-center">
+        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-full flex items-center justify-center">
           <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
           {zoom > 1 && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">
@@ -1333,7 +1333,7 @@ const ValgusStressPlannerPage: React.FC = () => {
         </div>
 
         {/* RIGHT: Control & Instrument Panel (25%) */}
-        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-4 flex flex-col gap-4 overflow-y-auto h-[calc(100vh-200px)]">
+        <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-lg p-2 flex flex-col gap-2 overflow-y-auto h-full">
           <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
 
           {/* Upload Section */}

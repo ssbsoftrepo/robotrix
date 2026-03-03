@@ -82,17 +82,17 @@ const IntraOperativeValidationPage: React.FC = () => {
                         <div className="relative bg-[#2a2a2a]/60 p-2 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-3 flex-[1] min-h-0 shadow-lg justify-center items-center">
                             <div className="flex items-center gap-2 w-full">
                                 <div className="bg-[#6D282C] text-white w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border border-[#893338]">1</div>
-                                <p className="text-[20px] text-gray-300 leading-snug w-full">Assess the actual medail and lateral extensor gaps</p>
+                                <p className="text-[20px] text-gray-300 leading-snug w-full">Use Robotrix AI Blocks (Asymmetrical incremental) to gauge Medial and Lateral extension gaps</p>
                             </div>
-                            <div className="w-full flex justify-center shrink min-h-0 items-center">
-                                <img src="/AI_blocks.png" alt="AI Blocks" className="max-h-[160px] max-w-[80%] object-contain drop-shadow-lg" />
+                            <div style={{marginTop: '1rem'}} className="w-full flex justify-center shrink min-h-0 items-center">
+                                <img src="/AI_blocks.png" alt="AI Blocks" className="max-h-[180px] max-w-[85%] object-contain drop-shadow-lg" />
                             </div>
                         </div>
 
                         <div className="relative bg-[#2a2a2a]/60 p-2 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-3 flex-[1] min-h-0 shadow-lg justify-center items-center">
                             <div className="flex items-center gap-3 w-full">
                                 <div className="bg-[#6D282C] text-white w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border border-[#893338]">2</div>
-                                <p className="text-[20px] text-gray-300 leading-snug w-full">Measure the Mediolateral Tibial width using tibial calipers</p>
+                                <p className="text-[20px] text-gray-300 leading-snug w-full">Measure Mid Mediolateral Tibial width using tibial callipers</p>
                             </div>
                             <div className="w-full flex justify-center shrink min-h-0 items-center">
                                 <img src="/Tibia_calipper.png" alt="Tibia Caliper" className="max-h-[160px] max-w-[80%] object-contain drop-shadow-lg" />
@@ -216,7 +216,7 @@ const IntraOperativeValidationPage: React.FC = () => {
                                     </span>
                                     <span className="text-5xl font-black text-green-400 mt-0 ml-1">°</span>
                                 </div>
-                                <p className="text-green-500/60 text-sm font-bold text-center">
+                                <p className="text-green-500/60 text-md font-bold text-center">
                                     Calculated with tibial width ({tibiaWidth}mm)
                                 </p>
                             </div>
