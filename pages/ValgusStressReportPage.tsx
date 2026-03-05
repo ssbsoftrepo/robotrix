@@ -135,7 +135,7 @@ const ValgusStressReportPage: React.FC = () => {
     const initialSimFemoralCut = valgusCoronalBalancingResults.simFemoralCut ?? 3;
     const initialSimTibialCut = selectedDegree;
 
-    const simulatedLDFA = nativeLDFA + initialSimFemoralCut;
+    const simulatedLDFA = 90 - initialSimFemoralCut;
     const simulatedMPTA = 90 - initialSimTibialCut;
 
     const simulatedJLO = simulatedMPTA + simulatedLDFA;
@@ -149,60 +149,18 @@ const ValgusStressReportPage: React.FC = () => {
         : base64TibiaBg;
 
     return (
-        <div className="relative h-full overflow-y-auto pb-8 flex flex-col bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Header */}
-            <div className="flex justify-between items-center mb-4 no-print px-4 pt-1 relative z-10">
-                <h2 className="text-3xl font-extrabold text-[#E0E0E0] tracking-tight">Valgus Surgical Case Report</h2>
-                <div className="flex space-x-2">
-                    <button
-                        onClick={() => setPage('planner-valgus-stress-results')}
-                        className="group relative py-2 px-4 bg-[#252525] border border-[#333333] rounded-sm 
-                                   transition-all duration-300 ease-out
-                                   hover:bg-[#333333] hover:border-[#6D282C]/50
-                                   active:scale-[0.98] flex items-center"
-                    >
-                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative text-sm font-bold text-gray-300 tracking-wider">PRE OP</span>
-                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
-                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
-                    </button>
-                    <button
-                        onClick={() => setPage('valgus-intra-operative-validation')}
-                        className="group relative py-2 px-4 bg-[#252525] border border-[#333333] rounded-sm 
-                                   transition-all duration-300 ease-out
-                                   hover:bg-[#333333] hover:border-[#6D282C]/50
-                                   active:scale-[0.98] flex items-center"
-                    >
-                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <span className="relative text-sm font-bold text-gray-300 tracking-wider">INTRA OP</span>
-                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
-                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-[#ff8fa3]/50" />
-                    </button>
-                    <button
-                        id="print-report-btn"
-                        onClick={handlePrint}
-                        className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
-                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
-                                   transition-all duration-300 ease-out
-                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
-                                   active:scale-[0.98] flex items-center space-x-2"
-                    >
-                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                        <svg xmlns="http://www.w3.org/2000/svg" className="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                        <span className="relative text-sm font-bold text-white tracking-widest">PRINT REPORT</span>
-                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                    </button>
-                </div>
+            <div className="flex justify-between items-center no-print px-4 pt-1 relative z-10 shrink-0">
+                <h2 className="text-3xl font-extrabold text-[#E0E0E0] tracking-tight">POST – OP Valgus Surgical Report</h2>
             </div>
 
-            <div id="report-content" className="space-y-8 flex-grow px-4 relative z-10">
+            {/* Scrollable Content */}
+            <div id="report-content" className="space-y-8 flex-grow px-4 py-4 relative z-10 overflow-y-auto min-h-0">
                 {/* Patient Info Card - Full Width */}
                 {patient && (
                     <ReportCard title="Patient Details" className="border-t-4 border-t-[#6D282C]">
@@ -400,6 +358,68 @@ const ValgusStressReportPage: React.FC = () => {
                         </div>
                     </ReportCard>
                 </div>
+            </div>
+
+            {/* Fixed Bottom Buttons */}
+            <div className="mt-1 flex justify-between px-2 pb-2 relative z-10 shrink-0 no-print">
+                {/* PRE OP - Left with left arrow */}
+                <button
+                    onClick={() => setPage('planner-valgus-stress-results')}
+                    className="group relative py-2 px-4 bg-[#252525] border border-[#444444] rounded-sm 
+                               shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                               transition-all duration-300 ease-out
+                               hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                               active:scale-[0.98] flex items-center"
+                >
+                    <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-gray-200 tracking-wider group-hover:text-white">
+                        {/* <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg> */}
+                        PRE OP
+                    </span>
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                </button>
+
+                {/* PRINT REPORT - Center */}
+                <button
+                    id="print-report-btn"
+                    onClick={handlePrint}
+                    className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
+                               shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                               transition-all duration-300 ease-out
+                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                               active:scale-[0.98] flex items-center space-x-2"
+                >
+                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="relative h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    <span className="relative text-sm font-bold text-white tracking-widest">PRINT REPORT</span>
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                </button>
+
+                {/* INTRA OP - Right with right arrow */}
+                <button
+                    onClick={() => setPage('valgus-intra-operative-validation')}
+                    className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
+                               shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                               transition-all duration-300 ease-out
+                               hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                               active:scale-[0.98] flex items-center"
+                >
+                    <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                    <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-widest">
+                        INTRA OP
+                        {/* <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg> */}
+                    </span>
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                </button>
             </div>
         </div>
     );

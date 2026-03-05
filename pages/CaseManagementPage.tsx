@@ -23,16 +23,16 @@ const PlannerOption: React.FC<{
     return (
         <div
             onClick={!disabled ? onClick : undefined}
-            className={`relative flex flex-col items-center space-y-4 p-6 rounded-lg transition-all duration-300 ${disabled ? disabledClasses : enabledClasses} h-full justify-center`}
+            className={`relative flex flex-col items-center space-y-2 p-4 rounded-lg transition-all duration-300 ${disabled ? disabledClasses : enabledClasses} h-full justify-center`}
             style={style}
         >
             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
             <div
-                className={`h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${disabled ? 'border-gray-700' : 'border-[#333333] group-hover:border-[var(--planner-color)] group-hover:bg-[var(--planner-color)]/10'}`}
+                className={`h-18 w-18 md:h-22 md:w-22 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${disabled ? 'border-gray-700' : 'border-[#333333] group-hover:border-[var(--planner-color)] group-hover:bg-[var(--planner-color)]/10'}`}
             >
-                {React.cloneElement(icon, { className: 'h-12 w-12 md:h-20 md:w-20 text-gray-300 group-hover:text-[var(--planner-color)] transition-colors duration-300' })}
+                {React.cloneElement(icon, { className: 'h-10 w-10 md:h-14 md:w-14 text-gray-300 group-hover:text-[var(--planner-color)] transition-colors duration-300' })}
             </div>
-            <p className="text-lg md:text-xl font-semibold text-center text-gray-300 transition-colors duration-300 group-hover:text-[var(--planner-color)]">{title.map(t => <span key={t} className="block">{t}</span>)}</p>
+            <p className="text-md md:text-lg font-semibold text-center text-gray-300 transition-colors duration-300 group-hover:text-[var(--planner-color)]">{title.map(t => <span key={t} className="block">{t}</span>)}</p>
         </div>
     );
 };
@@ -539,8 +539,7 @@ const CaseManagementPage: React.FC = () => {
                 onClick: () => setIsIntraOpSelectionOpen(true),
                 icon: (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.1-5.1a2.25 2.25 0 113.18-3.18l.9.9 6.36-6.36a2.25 2.25 0 013.18 3.18l-7.44 7.44a2.25 2.25 0 01-3.18 0v.02zM15.75 7.5l1.5 1.5" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 13.5V19.125A2.625 2.625 0 0115.375 21.75h-8.75A2.625 2.625 0 014 19.125V6.375A2.625 2.625 0 016.625 3.75H10.5" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 )
             },

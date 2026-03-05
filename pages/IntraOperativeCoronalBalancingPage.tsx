@@ -45,8 +45,7 @@ const CuttingBlock: React.FC<{
             </div>
         )}
 
-        {/* Dynamic height based on isReduced prop (-5px from 88px) */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[93px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[95px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -124,9 +123,23 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
         setLongLegFunctionalCutDegree,
         longLegFunctionalCutDegree,
         legSide,
+        tibiaBoundary,
     } = useAppContext();
 
     const isLeftLeg = legSide === 'left';
+
+    // PRE-OP Calculated Tibia Cut (same logic as ResultAnalysisPage)
+    const preOpTibiaCut = (() => {
+        const mptaVal = longLegResults.mpta;
+        if (mptaVal === null) return { degree: 0, label: '--' };
+        let varusCut = 0;
+        if (mptaVal <= 85) varusCut = 4;
+        else if (mptaVal <= 87) varusCut = 3;
+        else if (mptaVal <= 88) varusCut = 2;
+        else if (mptaVal <= 90) varusCut = 1;
+        if (tibiaBoundary === 'basic' && varusCut > 2) varusCut = 2;
+        return { degree: varusCut, label: varusCut === 0 ? 'neutral' : 'varus' };
+    })();
 
     const handleCheckLaxity = () => {
         if (kneeType === 'valgus') {
@@ -160,7 +173,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const gapsMatch = medialDiff === 0 && lateralDiff === 0;
     const showRevisedCut = gapsMatch || additionalLaxity > 0;
 
-    const revisedVarusCut = anticipatedTightness + ((medialDiff - lateralDiff) / C) - (medialDiff / C);
+    const revisedVarusCut = (thickness - medialGap) / C;
 
     const LMT = thickness - additionalLaxity;
 
@@ -224,7 +237,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const plannedFemurCut = simFemoralCut ?? 3;
 
     const finalSimulatedMedialGap = baseMedial + (selectedJig * C);
-    const simulatedLDFA = nativeLDFA + plannedFemurCut;
+    const simulatedLDFA = 90 - plannedFemurCut;
     const simulatedMPTA = 90 - selectedJig;
 
     const simulatedAHKA = simulatedMPTA - simulatedLDFA;
@@ -258,7 +271,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">Intra-operative Coronal Balancing(Long Leg)</h2>
+                <h2 className="text-2xl font-bold text-[#E0E0E0]">INTRA – OP Coronal Balancing Screen (Long Leg)</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-[25fr_50fr_25fr] gap-2 min-h-0 p-1 relative z-10">
@@ -321,14 +334,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                         </div>
 
                         {/* Section 3: Native CPAK / Revised Cut / Simulated CPAK — 40% */}
-                        <div className="flex flex-col justify-center gap-4 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 40%' }}>
-                            <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
-                                <span className="text-sm font-black text-white uppercase tracking-widest">Native CPAK</span>
-                                <span className="text-2xl font-black text-white">
-                                    {['--', 'N/A'].includes(nativeCPAK) ? nativeCPAK : `Type ${nativeCPAK}`}
-                                </span>
-                            </div>
-
+                        <div className="flex flex-col justify-center gap-3 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 40%' }}>
                             {gapsMatch && (
                                 <div className="text-center w-full flex justify-between items-center bg-[#6D282C]/10 border border-[#6D282C]/30 px-4 py-3 rounded-xl shadow-lg">
                                     <span className="text-xs font-black text-gray-300 uppercase tracking-widest leading-tight text-left w-1/2">
@@ -342,6 +348,13 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                     </div>
                                 </div>
                             )}
+
+                            <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
+                                <span className="text-sm font-black text-white uppercase tracking-widest">Native CPAK</span>
+                                <span className="text-2xl font-black text-white">
+                                    {['--', 'N/A'].includes(nativeCPAK) ? nativeCPAK : `Type ${nativeCPAK}`}
+                                </span>
+                            </div>
 
                             <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
                                 <span className="text-sm font-black text-gray-400 uppercase tracking-widest">Simulated CPAK</span>
@@ -359,9 +372,9 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                         {/* Horizontal layout: Lateral Box - Image - Medial Box */}
                         <div className="flex items-center justify-center gap-2 flex-grow w-full relative">
                             {/* Left Box - swaps based on leg side */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-center ml-2 w-[100px]">
-                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-[0_0_15px_rgba(109,40,44,0.3)] w-full">
-                                    <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-[9px] font-black uppercase tracking-wider mb-1`}>{isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
+                            <div className="flex flex-col items-center shrink-0 z-20 self-center -mt-12 ml-2 w-[100px]">
+                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-full w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]">
+                                    <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-[9px] font-black uppercase tracking-wider mb-0.5`}>{isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                                     ) : (
@@ -427,9 +440,9 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Right Box - swaps based on leg side */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-center mr-2 w-[100px]">
-                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-lg px-3 py-3 text-center shadow-[0_0_15px_rgba(109,40,44,0.3)] w-full">
-                                    <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-1`}>{isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
+                            <div className="flex flex-col items-center shrink-0 z-20 self-center -mt-12 mr-2 w-[100px]">
+                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-full w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]">
+                                    <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-0.5`}>{isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                                     ) : (
@@ -447,17 +460,17 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
 
                         <div className="flex-grow flex flex-col gap-3">
                             <div className="bg-black border-2 border-[#333333] rounded-lg p-2.5 text-center w-full shrink-0 shadow-lg">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">PRE-OP Calculated Tibia Cut</p>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">PRE –OP Calculated Tibia Cut</p>
                                 <div className="flex items-center justify-center">
-                                    <span className="text-2xl font-black text-[#ff8fa3]">{anticipatedTightness}°</span>
-                                    <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{anticipatedTightness === 0 ? 'neutral' : 'varus'}</span>
+                                    <span className="text-2xl font-black text-[#ff8fa3]">{preOpTibiaCut.degree}°</span>
+                                    <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{preOpTibiaCut.label}</span>
                                 </div>
                             </div>
 
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
                             <p className="text-[8px] text-gray-600 text-center uppercase -mt-1">Click block to simulate</p>
 
-                            <div className="space-y-4 overflow-y-auto pr-1 py-2">
+                            <div className="space-y-2 overflow-y-auto pr-1 py-2">
                                 {/* Neutral jig */}
                                 <div className="px-2">
                                     <button
@@ -493,7 +506,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                 </div>
             </div>
             {/* Footer proceeds to Report */}
-            <div className="mt-2 flex justify-between pb-1 shrink-0 px-2 relative z-10">
+            <div className="flex justify-between pb-1 shrink-0 px-2 relative z-10">
                 {/* Back Button */}
                 <button
                     onClick={() => setPage('intra-operative-validation')}
