@@ -372,8 +372,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                         {/* Horizontal layout: Lateral Box - Image - Medial Box */}
                         <div className="flex items-center justify-center gap-2 flex-grow w-full relative">
                             {/* Left Box - swaps based on leg side */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-center -mt-12 ml-2 w-[100px]">
-                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-full w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]">
+                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 ml-2 w-[100px]">
+                                <div className={`bg-black/80 border-[3px] ${isLeftLeg ? 'border-[#6D282C]' : 'border-[#333333]'} rounded-xl w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]`}>
                                     <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-[9px] font-black uppercase tracking-wider mb-0.5`}>{isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
@@ -440,8 +440,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Right Box - swaps based on leg side */}
-                            <div className="flex flex-col items-center shrink-0 z-20 self-center -mt-12 mr-2 w-[100px]">
-                                <div className="bg-black/80 border-2 border-[#6D282C] rounded-full w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]">
+                            <div className="flex flex-col items-center shrink-0 z-20 self-start mt-4 mr-2 w-[100px]">
+                                <div className={`bg-black/80 border-[3px] ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-xl w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]`}>
                                     <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-0.5`}>{isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
