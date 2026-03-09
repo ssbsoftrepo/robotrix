@@ -72,7 +72,7 @@ const IntraOperativeValidationPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-2xl font-bold text-[#E0E0E0]">INTRA – OP Input Screen (Long Leg)</h2>
+                <h2 className="text-2xl font-bold text-[#E0E0E0]">INTRA – OP INPUT SCREEN (LONG LEG)</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-[22fr_52fr_26fr] gap-2 min-h-0 px-2 relative z-10">
@@ -82,7 +82,7 @@ const IntraOperativeValidationPage: React.FC = () => {
                         <div className="relative bg-[#2a2a2a]/60 p-2 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
                             <div className="flex items-start gap-2 w-full">
                                 <div className="bg-[#6D282C] text-white w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border border-[#893338] mt-0.5">1</div>
-                                <p className="text-[16px] font-bold text-gray-300 leading-snug w-full">Use Robotrix AI Blocks (Asymmetrical incremental) to gauge Medial and Lateral extension gaps</p>
+                                <p className="text-[16px] font-bold text-gray-300 leading-snug w-full uppercase">Use Robotrix AI Blocks (Asymmetrical incremental) to gauge Medial and Lateral extension gaps</p>
                             </div>
                             <div style={{ marginTop: '0.5rem' }} className="w-full flex justify-center shrink min-h-0 items-center">
                                 <img src="/AI_blocks.png" alt="AI Blocks" className="max-h-[150px] max-w-[80%] object-contain drop-shadow-lg" />
@@ -92,7 +92,7 @@ const IntraOperativeValidationPage: React.FC = () => {
                         <div className="relative bg-[#2a2a2a]/60 p-2 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
                             <div className="flex items-start gap-2 w-full">
                                 <div className="bg-[#6D282C] text-white w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border border-[#893338] mt-0.5">2</div>
-                                <p className="text-[16px] font-bold text-gray-300 leading-snug w-full">Measure Mid Mediolateral Tibial width using tibial callipers</p>
+                                <p className="text-[16px] font-bold text-gray-300 leading-snug w-full uppercase">Measure Mid Mediolateral Tibial width using tibial callipers</p>
                             </div>
                             <div className="w-full flex justify-center shrink min-h-0 items-center">
                                 <img src="/calipper.png" alt="Tibia Caliper" className="max-h-[140px] max-w-[75%] object-contain drop-shadow-lg" />
@@ -203,49 +203,32 @@ const IntraOperativeValidationPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Section 2: Revised Cut / Error Considerations */}
+                    {/* Section 2: Error Considerations */}
                     <div className="flex-[55] min-h-0 flex flex-col">
-                        {medialDiff === 0 && lateralDiff === 0 ? (
-                            <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-xl p-3 flex flex-col items-center justify-center h-full shadow-[0_0_20px_rgba(109,40,44,0.1)]">
-                                <h3 className="text-[#ff8fa3]/90 text-[13px] font-bold uppercase tracking-wider mb-2 text-center">
-                                    REVISED FUNCTIONAL TIBIA CUT
-                                </h3>
-                                <div className="flex items-start mb-1">
-                                    <span className="text-6xl font-black text-[#ff8fa3] tracking-tighter leading-none filter drop-shadow-[0_0_10px_rgba(109,40,44,0.5)]">
-                                        {Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}
-                                    </span>
-                                    <span className="text-4xl font-black text-[#ff8fa3] mt-0 ml-1">°</span>
-                                </div>
-                                <p className="text-[#ff8fa3]/60 text-sm font-bold text-center">
-                                    Calculated with tibial width ({tibiaWidth}mm)
-                                </p>
+                        <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-xl p-3 flex flex-col h-full shadow-[0_0_20px_rgba(109,40,44,0.1)]">
+                            <div className="flex items-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <span className="text-amber-500 font-bold text-lg leading-tight flex-grow text-center uppercase">Actual gaps do not match.</span>
                             </div>
-                        ) : (
-                            <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-xl p-3 flex flex-col h-full shadow-[0_0_20px_rgba(109,40,44,0.1)]">
-                                <div className="flex items-center gap-2 mb-2 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-md">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span className="text-amber-500 font-bold text-lg leading-tight flex-grow text-center">Actual gaps do not match.</span>
-                                </div>
-                                <div className="flex-grow flex flex-col justify-center">
-                                    <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-2 px-1">CONSIDER THE FOLLOWING:</p>
-                                    <div className="space-y-1.5 px-1">
-                                        {[
-                                            "Input of inaccurate data",
-                                            "Under/over resection of foundations",
-                                            "Presence of pre-op lateral laxity",
-                                            "Error in Provisional 90° tibial cut"
-                                        ].map((item, index) => (
-                                            <div key={index} className="flex items-center gap-2 bg-[#1a1a1a] p-2 rounded border border-[#333333]">
-                                                <span className="w-2 h-2 rounded-full bg-amber-500/80 shrink-0 ml-1" />
-                                                <span className="text-gray-300 text-[14px] font-medium leading-tight">{item}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                            <div className="flex-grow flex flex-col justify-center">
+                                <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-2 px-1">CONSIDER THE FOLLOWING:</p>
+                                <div className="space-y-1.5 px-1">
+                                    {[
+                                        "Input of inaccurate data",
+                                        "Under/over resection of foundations",
+                                        "Presence of pre-op lateral laxity",
+                                        "Error in Provisional 90° tibial cut"
+                                    ].map((item, index) => (
+                                        <div key={index} className="flex items-center gap-2 bg-[#1a1a1a] p-2 rounded border border-[#333333]">
+                                            <span className="w-2 h-2 rounded-full bg-amber-500/80 shrink-0 ml-1" />
+                                            <span className="text-gray-300 text-[14px] font-medium leading-tight uppercase">{item}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -324,41 +324,25 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Section 2: Check Laxity — 30% */}
+                        {/* Section 2: Check Laxity */}
                         <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 20%' }}>
                             <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-gray-500 uppercase">Laxity Level:</span>
-                                <span className="text-sm font-black text-white uppercase">{lateralLaxity ?? 'Not checked'}</span>
-                            </div>
                         </div>
 
-                        {/* Section 3: Native CPAK / Revised Cut / Simulated CPAK — 40% */}
+                        {/* Section 3: Native CPAK & PRE-OP Calculated Tibia Cut */}
                         <div className="flex flex-col justify-center gap-3 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 40%' }}>
-                            {gapsMatch && (
-                                <div className="text-center w-full flex justify-between items-center bg-[#6D282C]/10 border border-[#6D282C]/30 px-4 py-3 rounded-xl shadow-lg">
-                                    <span className="text-xs font-black text-gray-300 uppercase tracking-widest leading-tight text-left w-1/2">
-                                        Revised<br />Tibia Cut
-                                    </span>
-                                    <div className="flex items-start justify-end w-1/2">
-                                        <span className="text-4xl font-black text-[#ff8fa3] tracking-tighter leading-none shadow-black filter drop-shadow-md">
-                                            {Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}
-                                        </span>
-                                        <span className="text-2xl font-black text-[#ff8fa3] mt-0 ml-1">°</span>
-                                    </div>
+                            <div className="bg-black border-2 border-[#333333] rounded-lg p-2.5 text-center w-full mt-2 shadow-lg">
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">PRE –OP Calculated Tibia Cut</p>
+                                <div className="flex items-center justify-center">
+                                    <span className="text-2xl font-black text-[#ff8fa3]">{preOpTibiaCut.degree}°</span>
+                                    <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{preOpTibiaCut.label}</span>
                                 </div>
-                            )}
-
+                            </div>
                             <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
                                 <span className="text-sm font-black text-white uppercase tracking-widest">Native CPAK</span>
                                 <span className="text-2xl font-black text-white">
                                     {['--', 'N/A'].includes(nativeCPAK) ? nativeCPAK : `Type ${nativeCPAK}`}
                                 </span>
-                            </div>
-
-                            <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
-                                <span className="text-sm font-black text-gray-400 uppercase tracking-widest">Simulated CPAK</span>
-                                <span className={`text-2xl font-black ${retentionStatus.text === 'Constitutional Match' ? 'text-green-500' : 'text-gray-400'}`}>Type {simulatedCPAK}</span>
                             </div>
                         </div>
                     </div>
@@ -384,7 +368,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
 
                             {/* Center - Bone Image */}
-                            <div className="flex-grow flex items-center justify-center relative w-full h-[80%]">
+                            <div className="flex-grow flex items-center justify-center relative w-full h-[90%]">
                                 <img src={isLeftLeg ? '/intracoronal-left.png' : '/intracoronal-right.png'} alt="Simulation" className="h-full w-full object-cover" />
 
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
@@ -431,8 +415,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 })()}
 
                                 {/* Angle indicator box inside bone */}
-                                <div className="absolute top-[84%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
-                                    <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                                <div className="absolute top-[88%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
+                                    <div className="bg-black/60 backdrop-blur-md px-8 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
                                         <p className="text-gray-500 text-[9px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
                                         <p className="text-3xl font-extrabold text-white tracking-tighter">{selectedJig}°</p>
                                     </div>
@@ -452,6 +436,13 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Likely Post-Op CPAK indicator below bone image */}
+                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 z-20">
+                            <div className="bg-black/60 backdrop-blur-md px-6 py-1.5 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)] text-center">
+                                <p className="text-gray-500 text-[9px] uppercase tracking-wider font-bold mb-0">LIKELY POST-OP CPAK</p>
+                                <p className="text-xl font-extrabold text-white tracking-tighter">Type {simulatedCPAK}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {/* Column 3: Jig Selection */}
@@ -459,12 +450,12 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-4 h-full">
 
                         <div className="flex-grow flex flex-col gap-3">
-                            <div className="bg-black border-2 border-[#333333] rounded-lg p-2.5 text-center w-full shrink-0 shadow-lg">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">PRE –OP Calculated Tibia Cut</p>
+                            <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-lg p-2.5 text-center w-full shrink-0 shadow-lg">
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">REVISED FUNCTIONAL TIBIA CUT</p>
                                 <div className="flex items-center justify-center">
-                                    <span className="text-2xl font-black text-[#ff8fa3]">{preOpTibiaCut.degree}°</span>
-                                    <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{preOpTibiaCut.label}</span>
+                                    <span className="text-2xl font-black text-[#ff8fa3]">{Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}°</span>
                                 </div>
+                                {/* <p className="text-[8px] text-gray-600 font-bold text-center mt-1">Calculated with tibial width ({tibiaWidth}mm)</p> */}
                             </div>
 
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
