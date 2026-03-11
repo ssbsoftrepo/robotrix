@@ -8,9 +8,18 @@ const BoundarySelector: React.FC<{
     bone: 'femur' | 'tbia';
     options: { key: 'basic' | 'expanded'; label: string; range: string; }[];
 }> = ({ title, bone, options }) => {
-    const { femurBoundary, setFemurBoundary, tibiaBoundary, setTibiaBoundary } = useAppContext();
+    const { femurBoundary, setFemurBoundary, tibiaBoundary, setTibiaBoundary, setFemoralCutSim, setTibialCutSim } = useAppContext();
     const currentBoundary = bone === 'femur' ? femurBoundary : tibiaBoundary;
-    const setBoundary = bone === 'femur' ? setFemurBoundary : setTibiaBoundary;
+
+    const handleSelectBoundary = (key: 'basic' | 'expanded') => {
+        if (bone === 'femur' && femurBoundary !== key) {
+            setFemurBoundary(key);
+            setFemoralCutSim(null); // Force reset on simulation page
+        } else if (bone === 'tbia' && tibiaBoundary !== key) {
+            setTibiaBoundary(key);
+            setTibialCutSim(null); // Force reset on simulation page
+        }
+    };
 
     return (
         <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
@@ -20,7 +29,7 @@ const BoundarySelector: React.FC<{
                 {options.map(opt => (
                     <div
                         key={opt.key}
-                        onClick={() => setBoundary(opt.key)}
+                        onClick={() => handleSelectBoundary(opt.key)}
                         className={`p-2 border rounded-lg cursor-pointer transition-all flex items-center justify-between ${currentBoundary === opt.key ? 'border-[#6D282C] bg-[#6D282C]/20' : 'border-[#333333] hover:border-[#6D282C]/50 hover:bg-[#252525]'}`}
                     >
                         <div>

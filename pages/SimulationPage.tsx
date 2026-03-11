@@ -141,15 +141,30 @@ const SimulationPage: React.FC = () => {
         return { initialFemoral, initialTibial };
     }, [longLegResults, femurBoundary, tibiaBoundary]);
 
+    const prevBoundaryRef = useRef<{femur: string | null, tibia: string | null}>({ femur: null, tibia: null });
+
     useEffect(() => {
         const { initialFemoral, initialTibial } = getBoundaryAdjustedValues();
 
-        if (femoralCutSim === null) setFemoralCutSim(initialFemoral);
-        if (tibialCutSim === null) setTibialCutSim(initialTibial);
-        if (appliedFemoralCutSim === null) setAppliedFemoralCutSim(0);
-        if (appliedTibialCutSim === null) setAppliedTibialCutSim(0);
+        const isFirstLoad = prevBoundaryRef.current.femur === null;
+        const hasBoundaryChanged = !isFirstLoad && (prevBoundaryRef.current.femur !== femurBoundary || prevBoundaryRef.current.tibia !== tibiaBoundary);
 
-    }, [longLegResults, femurBoundary, tibiaBoundary, femoralCutSim, tibialCutSim, appliedFemoralCutSim, appliedTibialCutSim, setFemoralCutSim, setTibialCutSim, setAppliedFemoralCutSim, setAppliedTibialCutSim, getBoundaryAdjustedValues]);
+        // Update tracking ref
+        prevBoundaryRef.current = { femur: femurBoundary, tibia: tibiaBoundary };
+
+        // Only apply values if the context values are empty (from initial load or cleared by boundary change),
+        // or if the user actually clicked the boundary options in the previous page.
+        if (femoralCutSim === null || tibialCutSim === null || hasBoundaryChanged) {
+            setFemoralCutSim(initialFemoral);
+            setTibialCutSim(initialTibial);
+            setAppliedFemoralCutSim(initialFemoral);
+            setAppliedTibialCutSim(initialTibial);
+            
+            if (canvasRef.current && (hasBoundaryChanged || femoralCutSim === null || tibialCutSim === null)) {
+                setCenterlineX(canvasRef.current.width / 2);
+            }
+        }
+    }, [getBoundaryAdjustedValues, femurBoundary, tibiaBoundary, femoralCutSim, tibialCutSim, setFemoralCutSim, setTibialCutSim, setAppliedFemoralCutSim, setAppliedTibialCutSim]);
 
 
     const resetSimulation = useCallback(() => {
