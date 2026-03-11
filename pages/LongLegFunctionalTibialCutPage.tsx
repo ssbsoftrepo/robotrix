@@ -199,7 +199,7 @@ const LongLegFunctionalTibialCutPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">Functional Tibia Cut (Long Leg)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">Functional Tibia Cut (Long Leg)</h2>
             </div>
 
             <div className="flex flex-col flex-grow relative min-h-0 px-1 relative z-10 overflow-hidden">

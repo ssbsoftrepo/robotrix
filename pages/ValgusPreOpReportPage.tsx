@@ -115,7 +115,7 @@ const ValgusPreOpReportPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print px-4 pt-1 relative z-10 shrink-0">
-                <h2 className="text-3xl font-extrabold text-[#E0E0E0] tracking-tight">PRE – OP Valgus Surgical Report</h2>
+                <h2 className="text-3xl font-extrabold text-[#E0E0E0] tracking-tight uppercase">PRE – OP Valgus Surgical Report</h2>
             </div>
 
             {/* Scrollable Content */}

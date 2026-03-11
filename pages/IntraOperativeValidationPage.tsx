@@ -72,7 +72,7 @@ const IntraOperativeValidationPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-2xl font-bold text-[#E0E0E0]">INTRA – OP INPUT SCREEN (LONG LEG)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">INTRA – OP INPUT SCREEN (LONG LEG)</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-[22fr_52fr_26fr] gap-2 min-h-0 px-2 relative z-10">

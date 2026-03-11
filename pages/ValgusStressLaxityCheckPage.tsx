@@ -176,7 +176,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center mb-1 relative z-10 shrink-0">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">Check for Lateral Laxity (Valgus Stress)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">Check for Lateral Laxity (Valgus Stress)</h2>
                 <div className="flex space-x-2">
                     {/* Cancel Button */}
                     <button
@@ -207,7 +207,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                 <div className="flex-grow-[3] flex flex-col min-w-0 h-full">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <h3 className="text-md font-bold text-[#E0E0E0] text-center relative z-10">Laxity Level Reference Images</h3>
+                        <h3 className="text-md font-bold text-[#E0E0E0] text-center relative z-10 uppercase">Laxity Level Reference Images</h3>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-grow min-h-0">
                         {laxityLevels.map((level, index) => {
@@ -231,7 +231,7 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
                 <div className="flex-grow-[2] flex flex-col min-w-[250px] h-full">
                     <div className="relative bg-[#1a1a1a] border border-[#6D282C]/50 p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <h3 className="text-md font-bold text-[#ff8fa3] text-center relative z-10">Patient X-ray</h3>
+                        <h3 className="text-md font-bold text-[#ff8fa3] text-center relative z-10 uppercase">Patient X-ray</h3>
                     </div>
                     <div className="relative flex flex-col p-1 rounded-lg border border-[#333333] bg-[#1a1a1a] h-full hover:border-[#6D282C]/50 transition-all flex-grow min-h-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />

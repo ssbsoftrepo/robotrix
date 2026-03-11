@@ -81,7 +81,7 @@ const HKAView: React.FC = () => {
     return (
         <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col items-center h-full min-h-0 overflow-hidden">
             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-            <h3 className="text-gray-400 font-semibold mb-1 text-base relative z-10 shrink-0">Pre-Op Alignment</h3>
+            <h3 className="text-gray-400 font-semibold mb-1 text-base relative z-10 shrink-0 uppercase">Pre-Op Alignment</h3>
             <div className="w-full flex-grow flex items-center justify-center bg-black rounded overflow-hidden relative z-10 min-h-0">
                 <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
             </div>
@@ -465,7 +465,7 @@ const SimulationPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">PRE – OP Resection Simulation</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">PRE – OP Resection Simulation</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow min-h-0 px-2 mb-2 relative z-10 overflow-hidden">
                 {/* Column 1: Pre-Op HKA View - 25% */}

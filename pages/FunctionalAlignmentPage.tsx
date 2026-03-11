@@ -62,7 +62,7 @@ const LaxityCheckModal: React.FC<{
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-semibold mb-6">Check for Lateral Laxity</h3>
+                <h3 className="text-2xl font-semibold mb-6 uppercase">Check for Lateral Laxity</h3>
                 <div className="h-96 w-full flex items-center justify-center bg-black rounded-md mb-6 overflow-hidden">
                     {previewImage ? (
                         <img src={previewImage} alt="X-ray Preview" className="object-contain max-w-full max-h-full" />
@@ -152,7 +152,7 @@ const TibialCutAccuracyCheck = () => {
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <LaxityCheckModal isOpen={isLaxityModalOpen} onClose={() => setIsLaxityModalOpen(false)} onSetLaxity={setHasLateralLaxity} />
-            <h2 className="text-4xl font-bold mb-2 text-center shrink-0">Tibial Cut Accuracy Check</h2>
+            <h2 className="text-4xl font-bold mb-2 text-center shrink-0 uppercase">Tibial Cut Accuracy Check</h2>
             <div className="gemini-dark-card p-4 rounded-lg mb-2 grid grid-cols-1 md:grid-cols-2 gap-4 text-center shrink-0">
                 <div>
                     <p className="text-lg text-yellow-500">Long Leg Film CPAK Type</p>
@@ -165,7 +165,7 @@ const TibialCutAccuracyCheck = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-grow min-h-0 overflow-y-auto">
                 <div className="gemini-dark-card p-4 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-2 text-center">1. Anticipated Medial Tightness</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-center uppercase">1. Anticipated Medial Tightness</h3>
                     <div className="space-y-2">
                         {["No medial tightness", "1 mm", "2 mm", "3 mm", "4 mm+"].map((text, index) => (
                             <div key={index} className={`p-2 text-base rounded-md text-center transition ${((index === 4) ? (anticipatedTightness >= 4) : (anticipatedTightness === index)) ? 'bg-green-800 text-white font-bold ring-2 ring-green-500' : 'bg-gray-800 text-gray-300'}`}>
@@ -175,7 +175,7 @@ const TibialCutAccuracyCheck = () => {
                     </div>
                 </div>
                 <div className="gemini-dark-card p-4 rounded-lg flex flex-col justify-center">
-                    <h3 className="text-lg font-semibold mb-2 text-center">2. Assess Medial & Lateral Spaces</h3>
+                    <h3 className="text-lg font-semibold mb-2 text-center uppercase">2. Assess Medial & Lateral Spaces</h3>
                     <p className="text-center text-gray-400 text-sm mb-2">Use the Robotrix+ asymetric incremental blocks.</p>
                     <div className="flex justify-around items-center mt-2 space-x-2">
                         <div>
@@ -196,7 +196,7 @@ const TibialCutAccuracyCheck = () => {
                 </div>
                 <div className="gemini-dark-card p-4 rounded-lg flex flex-col justify-between">
                     <div>
-                        <h3 className="text-lg font-semibold mb-2 text-center">3. Verification</h3>
+                        <h3 className="text-lg font-semibold mb-2 text-center uppercase">3. Verification</h3>
                         <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold py-2 px-4 rounded-lg text-base mb-2">Check Lateral Laxity</button>
                         <div className="text-center bg-gray-900 p-2 rounded-md mb-4">
                             <p className="text-base text-gray-400">Lateral Laxity Status:</p>
@@ -269,7 +269,7 @@ const FunctionalAlignmentPlanner = () => {
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <LaxityCheckModal isOpen={isLaxityModalOpen} onClose={() => setIsLaxityModalOpen(false)} onSetLaxity={setHasLateralLaxity} />
-            <h2 className="text-4xl font-bold mb-4 text-center shrink-0">Functional Alignment Planner</h2>
+            <h2 className="text-4xl font-bold mb-4 text-center shrink-0 uppercase">Functional Alignment Planner</h2>
             <div className="gemini-dark-card p-4 rounded-lg mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-center shrink-0">
                 <div>
                     <p className="text-lg text-yellow-500">Valgus Stress Film CPAK Type</p>
@@ -282,7 +282,7 @@ const FunctionalAlignmentPlanner = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-grow min-h-0 overflow-y-auto">
                 <div className="gemini-dark-card p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold mb-4 text-center">1. Assess Medial & Lateral Spaces</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-center uppercase">1. Assess Medial & Lateral Spaces</h3>
                     <p className="text-center text-gray-400 text-sm mb-4">Use the Robotrix+ asymetric incremental blocks.</p>
                     <div className="flex justify-around items-center mt-4 space-x-4">
                         <div>
@@ -303,7 +303,7 @@ const FunctionalAlignmentPlanner = () => {
                 </div>
                 <div className="gemini-dark-card p-6 rounded-lg flex flex-col justify-between">
                     <div>
-                        <h3 className="text-xl font-semibold mb-4 text-center">2. Determine Functional Recut</h3>
+                        <h3 className="text-xl font-semibold mb-4 text-center uppercase">2. Determine Functional Recut</h3>
                         <button onClick={() => setIsLaxityModalOpen(true)} className="w-full bg-gradient-to-r from-[#6D282C] to-[#893338] hover:from-[#5a2023] hover:to-[#752b2f] text-white font-bold py-3 px-4 rounded-lg text-lg mb-4">Check Lateral Laxity</button>
                         <div className="text-center bg-gray-800/80 p-4 rounded-lg">
                             <p className="text-2xl text-yellow-500">Functional Tibia Recut</p>

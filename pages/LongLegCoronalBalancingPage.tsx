@@ -41,7 +41,7 @@
 
 //             {/* Header */}
 //             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-//                 <h2 className="text-3xl font-bold text-[#E0E0E0]">Coronal Balancing Screen (Long Leg)</h2>
+//                 <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">Coronal Balancing Screen (Long Leg)</h2>
 //             </div>
 
 //             <div className="flex-grow grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-2 min-h-0 px-2 relative z-10">
@@ -271,7 +271,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">Coronal Balancing Screen (Long Leg)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">Coronal Balancing Screen (Long Leg)</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-0.5 min-h-0 px-2 relative z-10">
@@ -375,7 +375,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                         <div className="absolute top-0 left-0 w-full h-1 bg-green-500/50"></div>
                         <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold text-lg shadow-[0_0_15px_rgba(22,163,74,0.4)] shrink-0">✓</div>
                         <div className="flex flex-row items-center justify-center gap-3 mb-2 mt-1">
-                            <h4 className="text-lg font-black text-white tracking-tight text-center leading-tight">
+                            <h4 className="text-lg font-black text-white tracking-tight text-center leading-tight uppercase">
                                 Medial gap matches<br />anticipated gap
                             </h4>
                         </div>
@@ -391,7 +391,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#6D282C]"></div>
                         <div className="w-8 h-8 rounded-full bg-[#6D282C] text-white flex items-center justify-center font-bold text-base mb-2 shadow-[0_0_10px_#6D282C] shrink-0 relative z-10">✕</div>
-                        <h4 className="text-lg font-extrabold text-base mb-2 leading-tight relative z-10">
+                        <h4 className="text-lg font-extrabold text-base mb-2 leading-tight relative z-10 uppercase">
                             Medial gap does not<br />match anticipated gap
                         </h4>
                         <div className="flex flex-col gap-1 w-full relative z-10">

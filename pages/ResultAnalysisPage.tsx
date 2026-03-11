@@ -24,7 +24,7 @@ const BoundarySelector: React.FC<{
     return (
         <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10">{title}</h3>
+            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10 uppercase">{title}</h3>
             <div className="space-y-2 relative z-10">
                 {options.map(opt => (
                     <div
@@ -138,7 +138,7 @@ const StepCard: React.FC<{
         <div className={`${theme.bg} border-2 ${theme.border} rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 ${className}`}>
             <div className="flex-grow text-center md:text-left flex flex-col justify-center items-center md:items-start h-full">
                 {!hideStepBadge && <span className={`inline-block px-4 py-1 rounded-full text-sm font-bold mb-2 ${theme.badge}`}>STEP {step} &gt;</span>}
-                <h4 className="text-xl text-gray-200 font-bold mb-2 leading-tight">{title}</h4>
+                <h4 className="text-xl text-gray-200 font-bold mb-2 leading-tight uppercase">{title}</h4>
                 <div className={`text-3xl font-extrabold ${theme.text} mb-1`}>{value}</div>
 
                 {subTitle && <p className="text-sm text-gray-400 mt-1 font-medium">{subTitle}</p>}
@@ -256,7 +256,7 @@ const ResultAnalysisPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">PRE – OP Long leg Film Analysis</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">PRE – OP Long leg Film Analysis</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-grow min-h-0 px-2 relative z-10 overflow-hidden">

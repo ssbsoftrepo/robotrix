@@ -99,7 +99,7 @@ const StepCard: React.FC<{
         <div className={`${theme.bg} border-2 ${theme.border} rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 ${className}`}>
             <div className="flex-grow text-center md:text-left flex flex-col justify-center items-center md:items-start h-full">
                 {!hideStepBadge && <span className={`inline-block px-4 py-1 rounded-full text-sm font-bold mb-2 ${theme.badge}`}>STEP {step} &gt;</span>}
-                <h4 className="text-xl text-gray-200 font-bold mb-2 leading-tight">{title}</h4>
+                <h4 className="text-xl text-gray-200 font-bold mb-2 leading-tight uppercase">{title}</h4>
                 <div className={`text-3xl font-extrabold ${theme.text} mb-1`}>{value}</div>
 
                 {subTitle && <p className="text-sm text-gray-400 mt-1 font-medium">{subTitle}</p>}
@@ -200,7 +200,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">PRE – OP Valgus Stress Analysis</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">PRE – OP Valgus Stress Analysis</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-grow min-h-0 px-2 relative z-10 overflow-hidden">
@@ -246,7 +246,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
                         <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10">Distal Femur cut</h3>
+                            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10 uppercase">Distal Femur cut</h3>
                             <div className="mt-1 relative z-10">
                                 <BoundarySelector
                                     title="Basic matrix"
@@ -257,7 +257,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
                         <div className="relative bg-[#1a1a1a] border border-[#333333] p-3 rounded-lg flex-1 flex flex-col justify-center min-h-0">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10">Proximal tibial cut</h3>
+                            <h3 className="text-center font-bold text-lg text-[#E0E0E0] mb-2 relative z-10 uppercase">Proximal tibial cut</h3>
                             <div className="mt-1 relative z-10">
                                 <BoundarySelector
                                     title="Basic matrix"
@@ -271,7 +271,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                 {/* Column 3: Steps & Recommendations (Widest ~42%) */}
                 <div className="lg:col-span-5 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     <div className="p-1 rounded-lg bg-transparent flex-grow flex flex-col gap-3 min-h-0">
-                        <h3 className="text-2xl font-bold text-gray-100 text-center hidden">Recommendations</h3>
+                        <h3 className="text-2xl font-bold text-gray-100 text-center hidden uppercase">Recommendations</h3>
 
                         {/* STEP 1 */}
                         <StepCard

@@ -52,7 +52,7 @@ const ResultTypeModal: React.FC<{
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8">Select Verification Type</h3>
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8 uppercase">Select Verification Type</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
@@ -87,7 +87,7 @@ const ReportSelectionModal: React.FC<{
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8">Select Report Type</h3>
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8 uppercase">Select Report Type</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
@@ -122,7 +122,7 @@ const IntraOpSelectionModal: React.FC<{
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8">Select Intra-Op Type</h3>
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-8 uppercase">Select Intra-Op Type</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                         onClick={() => onSelect('long-leg')}
@@ -190,7 +190,7 @@ const PlanSelectionModal: React.FC<{
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-6 relative z-10">
+                <h3 className="text-2xl font-bold text-[#E0E0E0] mb-6 relative z-10 uppercase">
                     {intent === 'load' ? 'Select or Create a Plan' : 'Select a Plan'}
                 </h3>
 
@@ -601,7 +601,7 @@ const CaseManagementPage: React.FC = () => {
         return (
             <div className="mt-10 p-6 relative z-10">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-3xl font-semibold text-[#E0E0E0]">Past Cases</h3>
+                    <h3 className="text-3xl font-semibold text-[#E0E0E0] uppercase">Past Cases</h3>
                     <button
                         onClick={() => { setView('main'); setSearchTerm(''); }}
                         className="group relative py-2 px-4 bg-[#6D282C] border border-[#893338] rounded-sm 
@@ -800,7 +800,7 @@ const CaseManagementPage: React.FC = () => {
                                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <h3 className="text-2xl font-bold text-[#E0E0E0] mb-4">Delete Case?</h3>
+                            <h3 className="text-2xl font-bold text-[#E0E0E0] mb-4 uppercase">Delete Case?</h3>
                             <p className="text-gray-400 mb-6">
                                 Are you sure you want to delete this case? This action cannot be undone and all associated data will be permanently removed.
                             </p>
@@ -855,7 +855,7 @@ const CaseManagementPage: React.FC = () => {
                         {/* Box 1: LDFA Mode */}
                         <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-4 rounded-lg border border-[#333333] w-full shadow-2xl">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10">1. Select LDFA Calculation Method</h3>
+                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10 uppercase">1. Select LDFA Calculation Method</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
                                 <button
                                     onClick={() => setTempLdfa('native')}
@@ -877,7 +877,7 @@ const CaseManagementPage: React.FC = () => {
                         {/* Box 2: Implant Thickness */}
                         <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-4 rounded-lg border border-[#333333] w-full shadow-2xl">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10">2. Select minimum composite thickness</h3>
+                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10 uppercase">2. Select minimum composite thickness</h3>
                             <div className="grid grid-cols-4 gap-4 relative z-10">
                                 {[18, 19, 20, 21].map(thickness => (
                                     <button
@@ -918,11 +918,11 @@ const CaseManagementPage: React.FC = () => {
 
             {view === 'list' ? renderListView() : (
                 <div className="p-6 relative z-10">
-                    <h2 className="text-5xl font-bold mb-8 text-start text-[#E0E0E0]">Surgical Planner</h2>
+                    <h2 className="text-5xl font-bold mb-8 text-start text-[#E0E0E0] uppercase">Surgical Planner</h2>
                     <div className="flex justify-center">
                         <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg mb-10 w-full max-w-6xl">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-2xl font-semibold mb-2 text-[#E0E0E0] text-center relative z-10">
+                            <h3 className="text-2xl font-semibold mb-2 text-[#E0E0E0] text-center relative z-10 uppercase">
                                 Patient Details
                             </h3>
                             <form

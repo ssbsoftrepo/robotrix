@@ -17,7 +17,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
 
                 {/* Brand Header */}
                 <div className="space-y-4">
-                    <h1 className="text-7xl md:text-9xl font-black text-[#E0E0E0] tracking-tighter leading-none drop-shadow-lg">
+                    <h1 className="text-7xl md:text-9xl font-black text-[#E0E0E0] tracking-tighter leading-none drop-shadow-lg uppercase">
                         ROBOTRIX<span className="text-[#6D282C]">+</span>
                     </h1>
                     <div className="h-1 w-32 bg-[#2C2C2C] mx-auto rounded-full" />

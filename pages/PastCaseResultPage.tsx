@@ -240,7 +240,7 @@ const CameraModal: React.FC<{
             <div className="bg-[#1e1f20] border border-[#6D282C] p-4 rounded-lg relative w-full max-w-3xl text-center shadow-2xl">
                 {!capturedImage ? (
                     <>
-                        <h3 className="text-xl font-semibold mb-4">Live Capture with Alignment Grid</h3>
+                        <h3 className="text-xl font-semibold mb-4 uppercase">Live Capture with Alignment Grid</h3>
                         <div className="relative inline-block border-2 border-[#6D282C]">
                             <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto rounded"></video>
                             <canvas ref={overlayRef} className="absolute top-0 left-0 w-full h-full"></canvas>
@@ -252,7 +252,7 @@ const CameraModal: React.FC<{
                     </>
                 ) : (
                     <>
-                        <h3 className="text-xl font-semibold mb-4">Crop Captured Image</h3>
+                        <h3 className="text-xl font-semibold mb-4 uppercase">Crop Captured Image</h3>
                         <div className="relative inline-block border-2 border-[#893338] overflow-hidden select-none touch-none" onMouseMove={handleCropMouseMove} onTouchMove={handleCropMouseMove} onMouseUp={() => setActiveInteraction(null)} onTouchEnd={() => setActiveInteraction(null)}>
                             <img src={capturedImage} alt="Captured" className="w-full h-auto pointer-events-none" />
                             <div ref={cropBoxRef} onMouseDown={(e) => handleCropMouseDown(e, 'move')} onTouchStart={(e) => handleCropMouseDown(e, 'move')} className="absolute border-2 border-dashed border-white bg-white/20 cursor-move" style={{ left: `${cropRect.x}%`, top: `${cropRect.y}%`, width: `${cropRect.width}%`, height: `${cropRect.height}%` }}>
@@ -1086,7 +1086,7 @@ const PostOpPlanner: React.FC = () => {
 
                     <div className="flex-grow flex flex-col min-h-0">
                         <div className="flex justify-between items-center mb-1">
-                            <h4 className="text-sm font-semibold text-[#E0E0E0]">Markings</h4>
+                            <h4 className="text-sm font-semibold text-[#E0E0E0] uppercase">Markings</h4>
                             <button onClick={handleResetAll} className="text-[10px] text-red-400 hover:text-red-300 uppercase font-bold tracking-wider">Reset</button>
                         </div>
                         <div className="flex-grow overflow-y-auto space-y-1 pr-1 custom-scrollbar">
@@ -1156,7 +1156,7 @@ const PastCaseResultPage: React.FC = () => {
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="flex justify-between items-center mb-1 no-print px-2 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0]">Long Leg Result Verification</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">Long Leg Result Verification</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-0.5 flex-grow min-h-0 px-0.5 pb-0 relative z-10 overflow-hidden">

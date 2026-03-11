@@ -277,7 +277,7 @@ const CameraModal: React.FC<{
             <div className="bg-[#1e1f20] border border-[#6D282C] p-4 rounded-lg relative w-full max-w-3xl text-center">
                 {!capturedImage ? (
                     <>
-                        <h3 className="text-xl font-semibold mb-4">Live Capture with Alignment Grid</h3>
+                        <h3 className="text-xl font-semibold mb-4 uppercase">Live Capture with Alignment Grid</h3>
                         <div className="relative inline-block border-2 border-[#6D282C]">
                             <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto rounded"></video>
                             <canvas ref={overlayRef} className="absolute top-0 left-0 w-full h-full"></canvas>
@@ -289,7 +289,7 @@ const CameraModal: React.FC<{
                     </>
                 ) : (
                     <>
-                        <h3 className="text-xl font-semibold mb-4">Crop Captured Image</h3>
+                        <h3 className="text-xl font-semibold mb-4 uppercase">Crop Captured Image</h3>
                         <div className="relative inline-block border-2 border-[#893338] overflow-hidden select-none touch-none" onMouseMove={handleCropMouseMove} onTouchMove={handleCropMouseMove} onMouseUp={() => setActiveInteraction(null)} onTouchEnd={() => setActiveInteraction(null)}>
                             <img src={capturedImage} alt="Captured" className="w-full h-auto pointer-events-none" />
                             <div ref={cropBoxRef} onMouseDown={(e) => handleCropMouseDown(e, 'move')} onTouchStart={(e) => handleCropMouseDown(e, 'move')} className="absolute border-2 border-dashed border-white bg-white/20 cursor-move" style={{ left: `${cropRect.x}%`, top: `${cropRect.y}%`, width: `${cropRect.width}%`, height: `${cropRect.height}%` }}>
@@ -1208,7 +1208,7 @@ const LongLegPlannerPage: React.FC = () => {
     if (kneeType === 'valgus') {
         return (
             <div className="flex flex-col h-full items-center justify-center">
-                <h2 className="text-3xl font-bold mb-8 text-center">Long leg film Planner for VALGUS KNEE</h2>
+                <h2 className="text-3xl font-bold mb-8 text-center uppercase">Long leg film Planner for VALGUS KNEE</h2>
                 <div className="gemini-dark-card p-12 rounded-lg text-center">
                     <p className="text-3xl text-yellow-400">Updates Coming Soon</p>
                     <p className="text-xl text-gray-300 mt-4">This planner is currently under development. Please check back later.</p>
@@ -1229,7 +1229,7 @@ const LongLegPlannerPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex items-center justify-between px-2 pt-2 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tight">PRE - OP Long leg Functional alignment</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] tracking-tight uppercase">PRE - OP Long leg Functional alignment</h2>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                     <span className="w-2 h-2 rounded-full bg-[#6D282C] animate-pulse" />
                     <span>Active Workspace</span>
