@@ -33,14 +33,12 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
 
     const getStatusColor = (diff: number) => {
         if (diff === 0) return 'text-green-500 border-green-500 bg-green-500/10';
-        if (diff > 0) return 'text-amber-500 border-amber-500 bg-amber-500/10'; // Loose
-        return 'text-red-500 border-red-500 bg-red-500/10'; // Tight
+        return 'text-red-500 border-red-500 bg-red-500/10'; // No Match
     };
 
     const getGapStatus = (diff: number) => {
         if (diff === 0) return 'MATCH';
-        if (diff > 0) return `LOOSE (${diff}mm)`;
-        return `TIGHT (${Math.abs(diff)}mm)`;
+        return 'NO MATCH';
     };
 
     const C = (tibiaWidth / 70) * 1.2;
@@ -71,7 +69,7 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
 
             {/* Header */}
             <div className="flex justify-between items-center no-print shrink-0 px-2 py-1 relative z-10">
-                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">INTRA – OP INPUT SCREEN (VALGUS)</h2>
+                <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">INTRA – OP INPUT SCREEN</h2>
             </div>
 
             <div className="flex-grow grid grid-cols-[22fr_52fr_26fr] gap-2 min-h-0 px-2 relative z-10">
@@ -118,7 +116,7 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                                         <span className={`text-3xl font-black leading-none`}>{isLeftLeg ? medialGap : lateralGap}</span>
                                         <span className="text-xs font-bold opacity-70 mt-0.5">mm</span>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-md text-sm font-black uppercase tracking-widest w-[110px] text-center shadow-lg ${isLeftLeg ? (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : medialDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : lateralDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
+                                    <div className={`px-3 py-1 rounded-md text-sm font-black uppercase tracking-widest w-[110px] text-center shadow-lg ${isLeftLeg ? (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
                                         {isLeftLeg ? getGapStatus(medialDiff) : getGapStatus(lateralDiff)}
                                     </div>
                                 </div>
@@ -143,7 +141,7 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                                         <span className={`text-3xl font-black leading-none`}>{isLeftLeg ? lateralGap : medialGap}</span>
                                         <span className="text-xs font-bold opacity-70 mt-0.5">mm</span>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-md text-sm font-black uppercase tracking-widest w-[110px] text-center shadow-lg ${isLeftLeg ? (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : lateralDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : medialDiff > 0 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
+                                    <div className={`px-3 py-1 rounded-md text-sm font-black uppercase tracking-widest w-[110px] text-center shadow-lg ${isLeftLeg ? (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
                                         {isLeftLeg ? getGapStatus(lateralDiff) : getGapStatus(medialDiff)}
                                     </div>
                                 </div>

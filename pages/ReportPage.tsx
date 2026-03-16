@@ -210,18 +210,18 @@ const ReportPage: React.FC = () => {
                             <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
                                 <p className="text-xs text-gray-500 font-bold uppercase mb-1">Coronal Balancing Data</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Implant Thickness (Lateral Gap)" value={`${finalLateralGap} mm`} />
+                                    <ReportItem label="Minimum Composite Implant thickness (Lateral Gap)" value={`${finalLateralGap} mm`} />
                                     <ReportItem label="Anticipated Medial Gap" value={`${finalMedialGap} mm`} />
                                 </div>
                             </div>
 
                             <div className="space-y-2 mt-1">
                                 <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
-                                    <span className="text-gray-400 text-sm font-medium">Rec. Femoral Cut</span>
+                                    <span className="text-gray-400 text-sm font-medium">Recommended Femoral Cut</span>
                                     <span className="text-xl font-extrabold text-[#ff8fa3]">{displayFemoralCut}</span>
                                 </div>
                                 <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
-                                    <span className="text-gray-400 text-sm font-medium">Rec. Tibial Cut</span>
+                                    <span className="text-gray-400 text-sm font-medium">Recommended Tibial Cut</span>
                                     <span className="text-xl font-extrabold text-[#ff8fa3]">{displayTibialCut}</span>
                                 </div>
                             </div>
