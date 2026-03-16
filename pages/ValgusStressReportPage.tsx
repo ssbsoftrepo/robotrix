@@ -135,8 +135,8 @@ const ValgusStressReportPage: React.FC = () => {
     const initialSimFemoralCut = valgusCoronalBalancingResults.simFemoralCut ?? 3;
     const initialSimTibialCut = selectedDegree;
 
-    const simulatedLDFA = 90 - initialSimFemoralCut;
-    const simulatedMPTA = 90 - initialSimTibialCut;
+    const simulatedLDFA = nativeLDFA - initialSimFemoralCut;
+    const simulatedMPTA = nativeMPTA - initialSimTibialCut;
 
     const simulatedJLO = simulatedMPTA + simulatedLDFA;
     const simulatedObliquity = Math.abs(180 - simulatedJLO);

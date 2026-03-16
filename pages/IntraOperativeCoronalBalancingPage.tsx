@@ -159,8 +159,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const C = (tibiaWidth / 70) * 1.2;
 
     const baseMedial = medialGap + additionalFemurCut + additionalTibiaCut;
-    // We only use baseLateral for logic, but display raw lateralGap in the box per user request
     const baseLateral = lateralGap + additionalFemurCut + additionalTibiaCut;
+    const displayedLateralGap = baseLateral;
 
     // Gap match check from validation page
     const mpta = longLegResults.mpta ?? 86;
@@ -173,15 +173,13 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const gapsMatch = medialDiff === 0 && lateralDiff === 0;
     const showRevisedCut = gapsMatch || additionalLaxity > 0;
 
-    const revisedVarusCut = (thickness - medialGap) / C;
-
     const LMT = thickness - additionalLaxity;
 
-    // Use Math.floor as per request (e.g. 3.4 -> 3)
-    const thetaValue = Math.floor((LMT - baseMedial) / C);
+    const revisedVarusCut = (LMT - baseMedial) / C;
+
+    const thetaValue = Math.round((LMT - baseMedial) / C);
     const recommendedTheta = Math.max(0, Math.min(4, thetaValue));
 
-    // Initialize from Context (Persistence) -> Fallback to Recommendation
     const [selectedJig, setSelectedJig] = React.useState<number>(() => {
         if (functionalTibiaCutDegree !== null && functionalTibiaCutDegree !== undefined) {
             return functionalTibiaCutDegree;
@@ -189,31 +187,18 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
         return recommendedTheta;
     });
 
-    // Handle Manual Selection
     const handleSelectJig = (angle: number) => {
         setSelectedJig(angle);
-        setIntraOpCoronalBalancingData({
-            ...intraOpCoronalBalancingData,
+        setIntraOpCoronalBalancingData(prev => ({
+            ...prev,
             functionalTibiaCutDegree: angle
-        });
+        }));
         setLongLegFunctionalCutDegree(angle);
     };
 
-    const prevRecommendedTheta = React.useRef(recommendedTheta);
-
     React.useEffect(() => {
-        if (prevRecommendedTheta.current !== recommendedTheta) {
-            setSelectedJig(recommendedTheta);
-            setIntraOpCoronalBalancingData(prev => ({
-                ...prev,
-                functionalTibiaCutDegree: recommendedTheta
-            }));
-            setLongLegFunctionalCutDegree(recommendedTheta);
-            prevRecommendedTheta.current = recommendedTheta;
-        } else if (functionalTibiaCutDegree === null || functionalTibiaCutDegree === undefined) {
-            // First visit, use persisted Planner value if available, otherwise recommendation
+        if (functionalTibiaCutDegree === null || functionalTibiaCutDegree === undefined) {
             const initialCut = longLegFunctionalCutDegree !== null ? longLegFunctionalCutDegree : recommendedTheta;
-
             setSelectedJig(initialCut);
             setIntraOpCoronalBalancingData(prev => ({
                 ...prev,
@@ -221,13 +206,12 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
             }));
             setLongLegFunctionalCutDegree(initialCut);
         }
-    }, [recommendedTheta]);
+    }, []);
 
     const nativeLDFA = longLegResults.ldfa ?? 87;
     const nativeMPTA = longLegResults.mpta ?? 87;
     let nativeCPAK = longLegResults.cpak;
 
-    // Fallback calculation if CPAK is not present
     if (!nativeCPAK || ['--', 'N/A'].includes(nativeCPAK)) {
         const currentAhka = nativeMPTA - nativeLDFA;
         const currentJlo = nativeMPTA + nativeLDFA;
@@ -237,8 +221,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const plannedFemurCut = simFemoralCut ?? 3;
 
     const finalSimulatedMedialGap = baseMedial + (selectedJig * C);
-    const simulatedLDFA = 90 - plannedFemurCut;
-    const simulatedMPTA = 90 - selectedJig;
+    const simulatedLDFA = nativeLDFA - plannedFemurCut;
+    const simulatedMPTA = nativeMPTA - selectedJig;
 
     const simulatedAHKA = simulatedMPTA - simulatedLDFA;
     const simulatedJLO = simulatedMPTA + simulatedLDFA;
@@ -257,12 +241,11 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const retentionStatus = getRetentionStatus();
 
     const handleUpdateData = (field: string, delta: number) => {
-        setIntraOpCoronalBalancingData({
-            ...intraOpCoronalBalancingData,
-            [field]: Math.max(0, (intraOpCoronalBalancingData as any)[field] + delta)
-        });
+        setIntraOpCoronalBalancingData(prev => ({
+            ...prev,
+            [field]: Math.max(0, (prev as any)[field] + delta)
+        }));
     };
-
     return (
         <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
@@ -362,7 +345,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                                     ) : (
-                                        <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                        <p className="text-2xl font-black text-white">{displayedLateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                                     )}
                                 </div>
                             </div>
@@ -428,7 +411,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 <div className={`bg-black/80 border-[3px] ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-xl w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]`}>
                                     <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-0.5`}>{isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
                                     {isLeftLeg ? (
-                                        <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                        <p className="text-2xl font-black text-white">{displayedLateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                                     ) : (
                                         <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                                     )}

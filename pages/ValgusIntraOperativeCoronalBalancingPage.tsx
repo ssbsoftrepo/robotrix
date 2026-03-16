@@ -144,8 +144,8 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const C = (tibiaWidth / 70) * 1.2;
 
     const baseMedial = medialGap + additionalFemurCut + additionalTibiaCut;
-    // We only use baseLateral for logic, but display raw lateralGap in the box per user request
     const baseLateral = lateralGap + additionalFemurCut + additionalTibiaCut;
+    const displayedLateralGap = baseLateral;
 
     // Gap match check from validation page
     const mptaVal = valgusResults.mpta ?? 86;
@@ -158,15 +158,13 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const gapsMatch = medialDiff === 0 && lateralDiff === 0;
     const showRevisedCut = gapsMatch || additionalLaxity > 0;
 
-    const revisedVarusCut = (thickness - medialGap) / C;
-
     const LMT = thickness - additionalLaxity;
 
-    // Use Math.floor as per request (e.g. 3.4 -> 3)
-    const thetaValue = Math.floor((LMT - baseMedial) / C);
+    const revisedVarusCut = (LMT - baseMedial) / C;
+
+    const thetaValue = Math.round((LMT - baseMedial) / C);
     const recommendedTheta = Math.max(0, Math.min(4, thetaValue));
 
-    // Initialize from Context (Persistence) -> Fallback to Recommendation
     const [selectedJig, setSelectedJig] = React.useState<number>(() => {
         if (functionalTibiaCutDegree !== null && functionalTibiaCutDegree !== undefined) {
             return functionalTibiaCutDegree;
@@ -177,27 +175,17 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     // Handle Manual Selection
     const handleSelectJig = (angle: number) => {
         setSelectedJig(angle);
-        setValgusIntraOpCoronalBalancingData({
-            ...valgusIntraOpCoronalBalancingData,
+        setValgusIntraOpCoronalBalancingData(prev => ({
+            ...prev,
             functionalTibiaCutDegree: angle
-        });
+        }));
         setValgusFunctionalCutDegree(angle);
     };
 
-    const prevRecommendedTheta = React.useRef(recommendedTheta);
-
+    // Only initialize jig on first visit — don't auto-reset when additional cuts change
     React.useEffect(() => {
-        if (prevRecommendedTheta.current !== recommendedTheta) {
-            setSelectedJig(recommendedTheta);
-            setValgusIntraOpCoronalBalancingData(prev => ({
-                ...prev,
-                functionalTibiaCutDegree: recommendedTheta
-            }));
-            setValgusFunctionalCutDegree(recommendedTheta);
-            prevRecommendedTheta.current = recommendedTheta;
-        } else if (functionalTibiaCutDegree === null || functionalTibiaCutDegree === undefined) {
+        if (functionalTibiaCutDegree === null || functionalTibiaCutDegree === undefined) {
             const initialCut = valgusFunctionalCutDegree !== null ? valgusFunctionalCutDegree : recommendedTheta;
-
             setSelectedJig(initialCut);
             setValgusIntraOpCoronalBalancingData(prev => ({
                 ...prev,
@@ -205,7 +193,8 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
             }));
             setValgusFunctionalCutDegree(initialCut);
         }
-    }, [recommendedTheta]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const nativeLDFA = valgusResults.ldfa ?? 87;
     const nativeMPTA = valgusResults.mpta ?? 87;
@@ -220,8 +209,8 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const plannedFemurCut = simFemoralCut ?? 3;
 
     const finalSimulatedMedialGap = baseMedial + (selectedJig * C);
-    const simulatedLDFA = 90 - plannedFemurCut;
-    const simulatedMPTA = 90 - selectedJig;
+    const simulatedLDFA = nativeLDFA - plannedFemurCut;
+    const simulatedMPTA = nativeMPTA - selectedJig;
 
     const simulatedJLO = simulatedMPTA + simulatedLDFA;
     const simulatedObliquity = Math.abs(180 - simulatedJLO);
@@ -240,10 +229,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const retentionStatus = getRetentionStatus();
 
     const handleUpdateData = (field: string, delta: number) => {
-        setValgusIntraOpCoronalBalancingData({
-            ...valgusIntraOpCoronalBalancingData,
-            [field]: Math.max(0, (valgusIntraOpCoronalBalancingData as any)[field] + delta)
-        });
+        setValgusIntraOpCoronalBalancingData(prev => ({
+            ...prev,
+            [field]: Math.max(0, (prev as any)[field] + delta)
+        }));
     };
 
     return (
@@ -345,7 +334,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                     {isLeftLeg ? (
                                         <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                                     ) : (
-                                        <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                        <p className="text-2xl font-black text-white">{displayedLateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                                     )}
                                 </div>
                             </div>
@@ -411,7 +400,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 <div className={`bg-black/80 border-[3px] ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-xl w-[90px] h-[90px] flex flex-col items-center justify-center text-center shadow-[0_0_15px_rgba(109,40,44,0.3)]`}>
                                     <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-[9px] font-black uppercase tracking-wider mb-0.5`}>{isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
                                     {isLeftLeg ? (
-                                        <p className="text-2xl font-black text-white">{lateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
+                                        <p className="text-2xl font-black text-white">{displayedLateralGap}<span className="text-sm text-gray-400 ml-1">mm</span></p>
                                     ) : (
                                         <p className="text-2xl font-black text-[#ff8fa3]">{finalSimulatedMedialGap.toFixed(1)}<span className="text-sm text-[#ff8fa3]/70 ml-1">mm</span></p>
                                     )}
