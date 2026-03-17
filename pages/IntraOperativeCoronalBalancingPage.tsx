@@ -40,12 +40,12 @@ const CuttingBlock: React.FC<{
         className={`relative flex flex-col items-center transition-all duration-300 cursor-pointer w-full ${isSelected ? 'scale-105 z-10' : 'opacity-60 hover:opacity-100'}`}
     >
         {isRecommended && (
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
+            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
                 RECOMMENDED
             </div>
         )}
 
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[95px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[105px] mt-2 ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -175,9 +175,10 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
 
     const LMT = thickness - additionalLaxity;
 
-    const revisedVarusCut = (LMT - baseMedial) / C;
+    // Use only the base gap without the additional parallel cuts (which shouldn't affect the angle)
+    const revisedVarusCut = (LMT - medialGap) / C;
 
-    const thetaValue = Math.round((LMT - baseMedial) / C);
+    const thetaValue = Math.round((LMT - medialGap) / C);
     const recommendedTheta = Math.max(0, Math.min(4, thetaValue));
 
     const [selectedJig, setSelectedJig] = React.useState<number>(() => {
@@ -206,7 +207,14 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
             }));
             setLongLegFunctionalCutDegree(initialCut);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Update the jig selection automatically ONLY when additionalLaxity changes
+    React.useEffect(() => {
+        handleSelectJig(recommendedTheta);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [additionalLaxity]);
 
     const nativeLDFA = longLegResults.ldfa ?? 87;
     const nativeMPTA = longLegResults.mpta ?? 87;
@@ -263,8 +271,16 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-[#333333] p-1 rounded-xl flex flex-col h-full shadow-2xl overflow-hidden">
 
                         {/* Section 1: +/- Controls — evenly spaced */}
-                        <div className="flex flex-col justify-between px-1 h-full py-2" style={{ flex: '0 0 40%' }}>
+                        <div className="flex flex-col justify-between gap-2 px-1 h-full py-2" style={{ flex: '0 0 55%' }}>
                             {/* Femur Cut */}
+                            <div className="relative bg-[#2a2a2a]/60 p-1 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
+                                <div className="flex items-start gap-2  w-full">
+                                    <div className="bg-[#6D282C] text-white w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border border-[#893338] mt-0.5">1</div>
+                                    <p className="text-[16px] font-bold text-gray-300 leading-snug w-full uppercase">Aim for lateral
+                                        space to match the minimum composite
+                                        implant thickness of your TKR system</p>
+                                </div>
+                            </div>
                             <div className="flex flex-col items-center">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Additional foundational distal femoral cut resection</label>
                                 <div className="flex items-center justify-center gap-3 w-full">
@@ -306,26 +322,26 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-
                         {/* Section 2: Check Laxity */}
-                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 20%' }}>
+                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 10%' }}>
                             <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
                         </div>
 
-                        {/* Section 3: Native CPAK & PRE-OP Calculated Tibia Cut */}
-                        <div className="flex flex-col justify-center gap-3 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 40%' }}>
-                            <div className="bg-black border-2 border-[#333333] rounded-lg p-2.5 text-center w-full mt-2 shadow-lg">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">PRE –OP Calculated Tibia Cut</p>
+                        {/* Section 3: Pre-Op & Revised Tibia Cut */}
+                        <div className="flex flex-col justify-center gap-2 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 35%' }}>
+                            <div className="bg-black border-2 border-[#333333] rounded-lg p-2 text-center w-full mt-1 shadow-lg">
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 leading-tight">PRE OP CALCULATED FUNCTIONAL TIBIA CUT</p>
                                 <div className="flex items-center justify-center">
                                     <span className="text-2xl font-black text-[#ff8fa3]">{preOpTibiaCut.degree}°</span>
                                     <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{preOpTibiaCut.label}</span>
                                 </div>
                             </div>
-                            <div className="bg-black/80 border border-[#333333] px-4 py-3.5 rounded-xl flex justify-between items-center w-full shadow-lg">
-                                <span className="text-sm font-black text-white uppercase tracking-widest">Native CPAK</span>
-                                <span className="text-2xl font-black text-white">
-                                    {['--', 'N/A'].includes(nativeCPAK) ? nativeCPAK : `Type ${nativeCPAK}`}
-                                </span>
+                            <p className="text-[10px] text-gray-600 font-bold text-center uppercase tracking-widest">Post Gap Assessment</p>
+                            <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-lg p-2 text-center w-full shrink-0 shadow-lg">
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">REVISED FUNCTIONAL TIBIA CUT</p>
+                                <div className="flex items-center justify-center">
+                                    <span className="text-2xl font-black text-[#ff8fa3]">{Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}°</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -357,7 +373,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
                                 {(() => {
                                     const femurBaseY = isLeftLeg ? 53.5 : 54.5;
-                                    const tibiaBaseY = isLeftLeg ? 63.5 : 65;
+                                    const tibiaBaseY = isLeftLeg ? 62 : 64.5;
                                     return (
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
 
@@ -430,29 +446,23 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                 </div>
                 {/* Column 3: Jig Selection */}
                 <div className="h-full flex flex-col gap-1">
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-4 h-full">
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-1 h-full">
 
-                        <div className="flex-grow flex flex-col gap-3">
-                            <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-lg p-2.5 text-center w-full shrink-0 shadow-lg">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">REVISED FUNCTIONAL TIBIA CUT</p>
-                                <div className="flex items-center justify-center">
-                                    <span className="text-2xl font-black text-[#ff8fa3]">{Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}°</span>
-                                </div>
-                                {/* <p className="text-[8px] text-gray-600 font-bold text-center mt-1">Calculated with tibial width ({tibiaWidth}mm)</p> */}
-                            </div>
+                        <div className="flex-grow flex flex-col gap-1">
+
 
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
-                            <p className="text-[8px] text-gray-600 text-center uppercase -mt-1">Click block to simulate</p>
+                            <p className="text-[8px] text-gray-600 text-center uppercase -mt-1">Try virtual tibia cutting blocks before choosing</p>
 
-                            <div className="space-y-2 overflow-y-auto pr-1 py-2">
+                            <div className="space-y-3 overflow-y-auto pr-1 py-1">
                                 {/* Neutral jig */}
-                                <div className="px-2">
+                                <div className="px-1 mt-2">
                                     <button
                                         onClick={() => handleSelectJig(0)}
-                                        className={`w-full py-2 rounded-sm border transition-all flex flex-col items-center bg-[#1A1A1A] relative ${selectedJig === 0 ? 'border-[#ff8fa3] shadow-lg scale-[1.02]' : 'border-[#333333] opacity-60 hover:opacity-100'}`}
+                                        className={`w-full py-4 rounded-sm border transition-all flex flex-col items-center bg-[#1A1A1A] relative ${selectedJig === 0 ? 'border-[#ff8fa3] shadow-lg scale-[1.02]' : 'border-[#333333] opacity-60 hover:opacity-100'}`}
                                     >
                                         {recommendedTheta === 0 && (
-                                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
+                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[10px] font-bold px-1 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
                                                 RECOMMENDED
                                             </div>
                                         )}
