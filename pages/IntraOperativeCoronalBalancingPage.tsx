@@ -275,8 +275,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             {/* Femur Cut */}
                             <div className="relative bg-[#2a2a2a]/60 p-1 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
                                 <div className="flex items-start gap-2  w-full">
-                                    <div className="bg-[#6D282C] text-white w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold shadow-lg border border-[#893338] mt-0.5">1</div>
-                                    <p className="text-[16px] font-bold text-gray-300 leading-snug w-full uppercase">Aim for lateral
+                                    <p className="text-[13px] font-bold text-gray-300 leading-snug w-full uppercase">Aim for lateral
                                         space to match the minimum composite
                                         implant thickness of your TKR system</p>
                                 </div>
@@ -392,7 +391,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                             />
 
                                             {/* Varus Angle Lines - pivot side based on leg */}
-                                            <circle cx={isLeftLeg ? '100%' : '0'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
+                                            <circle cx={isLeftLeg ? '80%' : '19%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
                                             {[0, 1, 2, 3, 4].map((angle) => {
                                                 const isSelected = selectedJig === angle;
                                                 const yOffsetPercent = angle * 2.5;
@@ -400,8 +399,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                                 return (
                                                     <line
                                                         key={angle}
-                                                        x1={isLeftLeg ? '100%' : '0'} y1={`${baseY}%`}
-                                                        x2={isLeftLeg ? '0' : '100%'} y2={`${baseY + yOffsetPercent}%`}
+                                                        x1={isLeftLeg ? '80%' : '19%'} y1={`${baseY}%`}
+                                                        x2={isLeftLeg ? '23%' : '81%'} y2={`${baseY + yOffsetPercent}%`}
                                                         stroke={isSelected ? "#6D282C" : "#333333"}
                                                         strokeWidth={isSelected ? "4" : "1.5"}
                                                         strokeDasharray={isSelected ? "0" : "5,2"}
@@ -449,10 +448,8 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                     <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-1 h-full">
 
                         <div className="flex-grow flex flex-col gap-1">
-
-
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
-                            <p className="text-[8px] text-gray-600 text-center uppercase -mt-1">Try virtual tibia cutting blocks before choosing</p>
+                            <p className="text-[10px] font-bold text-gray-600 text-center uppercase -mt-1">Try virtual tibia cutting blocks before choosing</p>
 
                             <div className="space-y-3 overflow-y-auto pr-1 py-1">
                                 {/* Neutral jig */}
