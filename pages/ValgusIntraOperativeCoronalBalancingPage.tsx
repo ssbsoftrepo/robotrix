@@ -35,7 +35,7 @@ const CuttingBlock: React.FC<{
         )}
 
         {/* Dynamic height based on isReduced prop (-5px from 88px) */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[105px] mt-2 ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[98px] mt-2 ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -263,7 +263,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                             {/* Femur Cut */}
                             <div className="relative bg-[#2a2a2a]/60 p-1 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
                                 <div className="flex items-start gap-2  w-full">
-                                    <p className="text-[13px] font-bold text-gray-300 leading-snug w-full uppercase">Aim for lateral
+                                    <p className="text-[13px] font-bold text-center text-gray-300 leading-snug w-full uppercase">Aim for lateral
                                         space to match the minimum composite
                                         implant thickness of your TKR system</p>
                                 </div>
@@ -382,16 +382,16 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                             />
 
                                             {/* Varus Angle Lines - pivot side based on leg */}
-                                            <circle cx={isLeftLeg ? '80%' : '20%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
+                                            <circle cx={isLeftLeg ? '80%' : '19%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
                                             {[0, 1, 2, 3, 4].map((angle) => {
                                                 const isSelected = selectedJig === angle;
-                                                const yOffsetPercent = angle * 2.5;
                                                 const baseY = tibiaBaseY + additionalTibiaCut * 1;
+                                                const yOffsetPercent = isLeftLeg ? (angle * 2.5 * (80 / 57)) : (angle * 2.5 * (81 / 62));
                                                 return (
                                                     <line
                                                         key={angle}
                                                         x1={isLeftLeg ? '80%' : '19%'} y1={`${baseY}%`}
-                                                        x2={isLeftLeg ? '23%' : '81%'} y2={`${baseY + yOffsetPercent}%`}
+                                                        x2={isLeftLeg ? '0%' : '100%'} y2={`${baseY + yOffsetPercent}%`}
                                                         stroke={isSelected ? "#6D282C" : "#333333"}
                                                         strokeWidth={isSelected ? "4" : "1.5"}
                                                         strokeDasharray={isSelected ? "0" : "5,2"}
@@ -439,7 +439,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
 
                         <div className="flex-grow flex flex-col gap-1">
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>
-                            <p className="text-[10px] font-bold text-gray-600 text-center uppercase -mt-1">Try virtual tibia cutting blocks before choosing</p>
+                            <p className="text-[12px] font-bold text-gray-300 text-center uppercase -mt-1">Try virtual tibia cutting blocks before choosing</p>
 
                             <div className="space-y-3 overflow-y-auto pr-1 py-1">
                                 {/* Neutral jig */}
