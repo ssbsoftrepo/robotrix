@@ -42,7 +42,7 @@ const IntraOperativeValidationPage: React.FC = () => {
         return 'NO MATCH';
     };
 
-    const C = (tibiaWidth / 70) * 1.2;
+    const C = tibiaWidth < 55 ? 0.8 : tibiaWidth < 70 ? 1.0 : 1.2;
     const revisedVarusCut = (thickness - medialGap) / C;
 
     const handleUpdateData = (field: string, delta: number) => {

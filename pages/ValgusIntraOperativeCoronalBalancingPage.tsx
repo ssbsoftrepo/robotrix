@@ -141,7 +141,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     const { simFemoralCut } = valgusCoronalBalancingResults;
 
     const thickness = implantThickness ?? 10;
-    const C = (tibiaWidth / 70) * 1.2;
+    const C = tibiaWidth < 55 ? 0.8 : tibiaWidth < 70 ? 1.0 : 1.2;
 
     const baseMedial = medialGap + additionalFemurCut + additionalTibiaCut;
     const baseLateral = lateralGap + additionalFemurCut + additionalTibiaCut;
