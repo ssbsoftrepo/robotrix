@@ -155,7 +155,7 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                     {/* Inputs Section */}
                     <div className="bg-[#1a1a1a] border border-[#333333] pt-2 pb-2 px-2 rounded-xl flex flex-col flex-[45] min-h-0 justify-center relative mt-2">
                         <div className="absolute top-0 inset-x-0 w-full flex justify-center mt-2 z-10">
-                            <span className="px-4 py-2 rounded-sm text-[10px] font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase border border-[#893338]">ACTUAL GAPS</span>
+                            <span className="px-4 py-2 rounded-sm text-[10px] font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase border border-[#893338]">ENTER ACTUAL GAPS</span>
                         </div>
                         <div className="space-y-4 w-full px-1 mt-2">
                             {/* First gap input: Medial for left knee, Lateral for right knee */}
@@ -207,14 +207,14 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
-                                <span className="text-amber-500 font-bold text-lg leading-tight flex-grow text-center uppercase">Actual gaps do not match.</span>
+                                <span className="text-amber-500 font-bold text-lg leading-tight flex-grow text-center uppercase">If Actual gaps do not match.</span>
                             </div>
                             <div className="flex-grow flex flex-col justify-center">
-                                <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-2 px-1">CONSIDER THE FOLLOWING:</p>
-                                <div className="space-y-1.5 px-1">
+                                <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-1 px-1">CONSIDER THE FOLLOWING:</p>
+                                <div className="space-y-1 px-1">
                                     {[
                                         "Input of inaccurate data",
-                                        "Under/over resection of foundations",
+                                        "Under/over resections foundational Femoral cut Thickness",
                                         "Presence of pre-op lateral laxity",
                                         "Error in Provisional 90° tibial cut"
                                     ].map((item, index) => (

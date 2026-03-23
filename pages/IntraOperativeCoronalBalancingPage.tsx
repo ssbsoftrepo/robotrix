@@ -372,7 +372,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
                                 {(() => {
                                     const femurBaseY = isLeftLeg ? 53.5 : 54.5;
-                                    const tibiaBaseY = isLeftLeg ? 62 : 64.5;
+                                    const tibiaBaseY = isLeftLeg ? 59.5 : 61.8;
                                     return (
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
 
@@ -391,7 +391,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                             />
 
                                             {/* Varus Angle Lines - pivot side based on leg */}
-                                            <circle cx={isLeftLeg ? '80%' : '19%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
+                                            <circle cx={isLeftLeg ? '80%' : '20%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
                                             {[0, 1, 2, 3, 4].map((angle) => {
                                                 const isSelected = selectedJig === angle;
                                                 const baseY = tibiaBaseY + additionalTibiaCut * 1;
