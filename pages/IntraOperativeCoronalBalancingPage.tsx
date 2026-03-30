@@ -391,7 +391,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                             />
 
                                             {/* Varus Angle Lines - pivot side based on leg */}
-                                            <circle cx={isLeftLeg ? '80%' : '20%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
+                                            <circle cx={isLeftLeg ? '77%' : '22.3%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
                                             {[0, 1, 2, 3, 4].map((angle) => {
                                                 const isSelected = selectedJig === angle;
                                                 const baseY = tibiaBaseY + additionalTibiaCut * 1;
@@ -399,7 +399,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                                                 return (
                                                     <line
                                                         key={angle}
-                                                        x1={isLeftLeg ? '80%' : '19%'} y1={`${baseY}%`}
+                                                        x1={isLeftLeg ? '77%' : '22.3%'} y1={`${baseY}%`}
                                                         x2={isLeftLeg ? '0%' : '100%'} y2={`${baseY + yOffsetPercent}%`}
                                                         stroke={isSelected ? "#6D282C" : "#333333"}
                                                         strokeWidth={isSelected ? "4" : "1.5"}

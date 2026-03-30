@@ -361,7 +361,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 {/* Simulation Cut Lines - positioned to overlay on bone */}
                                 {(() => {
                                     const femurBaseY = isLeftLeg ? 53.5 : 54.5;
-                                    const tibiaBaseY = isLeftLeg ? 59.5 : 61.8;
+                                    const tibiaBaseY = isLeftLeg ? 60.3 : 62.5;
                                     return (
                                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
                                             {/* Femur horizontal cut line - at bottom edge of femur */}
@@ -382,7 +382,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                             />
 
                                             {/* Varus Angle Lines - pivot side based on leg */}
-                                            <circle cx={isLeftLeg ? '80%' : '20%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
+                                            <circle cx={isLeftLeg ? '77%' : '22.3%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
                                             {[0, 1, 2, 3, 4].map((angle) => {
                                                 const isSelected = selectedJig === angle;
                                                 const baseY = tibiaBaseY + additionalTibiaCut * 1;
@@ -390,7 +390,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                                 return (
                                                     <line
                                                         key={angle}
-                                                        x1={isLeftLeg ? '80%' : '19%'} y1={`${baseY}%`}
+                                                        x1={isLeftLeg ? '77%' : '22.3%'} y1={`${baseY}%`}
                                                         x2={isLeftLeg ? '0%' : '100%'} y2={`${baseY + yOffsetPercent}%`}
                                                         stroke={isSelected ? "#6D282C" : "#333333"}
                                                         strokeWidth={isSelected ? "4" : "1.5"}
