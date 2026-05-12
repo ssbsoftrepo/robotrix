@@ -38,8 +38,6 @@ const Sidebar: React.FC = () => {
     const { page, setPage, setCurrentPatientId, setPlannerMode, plannerMode } = useAppContext();
     
     const handleHomeClick = () => {
-        setCurrentPatientId(null);
-        setPlannerMode(null);
         setPage('case-management');
     };
 

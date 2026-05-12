@@ -295,10 +295,11 @@ const PlanSelectionModal: React.FC<{
 
 
 const CaseManagementPage: React.FC = () => {
-    const { patients, savePatient, deletePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness } = useAppContext();
+    const { patients, savePatient, deletePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness, legSide } = useAppContext();
     const [view, setView] = useState<'main' | 'list'>('main');
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [activePlanName, setActivePlanName] = useState<string | null>(null);
 
 
     const [isLdfaModalOpen, setIsLdfaModalOpen] = useState(false);
@@ -338,13 +339,17 @@ const CaseManagementPage: React.FC = () => {
         }
     }, [currentPatientId]);
 
+    // Fetch active plan name when a plan is loaded
     useEffect(() => {
-        setCurrentPatientId(null);
-        setCurrentPlanId(null);
-        setPlannerMode(null);
-        setLdfaMode(null);
-        setImplantThickness(null);
-    }, []);
+        if (currentPatientId && currentPlanId) {
+            getPlansForPatient(currentPatientId).then(plans => {
+                const plan = plans.find(p => p.id === currentPlanId);
+                setActivePlanName(plan?.name || 'Plan');
+            });
+        } else {
+            setActivePlanName(null);
+        }
+    }, [currentPatientId, currentPlanId]);
 
 
     useEffect(() => {
@@ -501,8 +506,22 @@ const CaseManagementPage: React.FC = () => {
         setDeleteConfirmId(null);
     };
 
+    const handleNewCase = () => {
+        setCurrentPatientId(null);
+        setCurrentPlanId(null);
+        setPlannerMode(null);
+        setLdfaMode(null);
+        setImplantThickness(null);
+    };
+
+    const handleSwitchCase = () => {
+        setView('list');
+    };
+
     const isPatientSelected = !!currentPatientId;
     const isPlanSelected = !!currentPlanId;
+    const activePatient = currentPatientId ? patients.find(p => p.id === currentPatientId) : null;
+    const hasActiveCase = isPatientSelected && isPlanSelected;
 
     // Standardized to Maroon palettes
     const plannerColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C', '#6D282C'];
@@ -919,88 +938,172 @@ const CaseManagementPage: React.FC = () => {
             {view === 'list' ? renderListView() : (
                 <div className="p-6 relative z-10">
                     <h2 className="text-5xl font-bold mb-8 text-start text-[#E0E0E0] uppercase">Surgical Planner</h2>
-                    <div className="flex justify-center">
-                        <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg mb-10 w-full max-w-6xl">
-                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-2xl font-semibold mb-2 text-[#E0E0E0] text-center relative z-10 uppercase">
-                                Patient Details
-                            </h3>
-                            <form
-                                onSubmit={handleSubmit}
-                                className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end max-w-4xl mx-auto justify-items-center relative z-10"
-                            >
-                                <div className="md:col-span-3 w-full">
-                                    <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
-                                        Patient Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="firstName"
-                                        value={formData.firstName}
-                                        onChange={handleInputChange}
-                                        className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]"
-                                        placeholder="Enter full name"
-                                        required
-                                    />
-                                </div>
 
-                                <div className="md:col-span-3 w-full">
-                                    <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
-                                        Patient ID
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="id"
-                                        value={currentPatientId ? formData.id : suggestedId}
-                                        onChange={handleInputChange}
-                                        disabled={!!currentPatientId}
-                                        className="w-full h-14 p-3 rounded-md text-lg bg-[#1a1a1a] border border-[#333333] text-gray-400"
-                                        placeholder="Auto-generated ID"
-                                        required
-                                    />
-                                </div>
+                    {/* Active Case — shown when a case + plan is loaded */}
+                    {hasActiveCase && activePatient ? (
+                        <div className="flex justify-center">
+                            <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg mb-10 w-full max-w-6xl">
+                                <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                                <h3 className="text-2xl font-semibold mb-2 text-[#E0E0E0] text-center relative z-10 uppercase">
+                                    Patient Details
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end max-w-5xl mx-auto justify-items-center relative z-10">
+                                    <div className="md:col-span-3 w-full">
+                                        <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                            Patient Name
+                                        </label>
+                                        <div className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 flex items-center">
+                                            {activePatient.firstName} {activePatient.lastName}
+                                        </div>
+                                    </div>
 
-                                <div className="md:col-span-3 w-full">
-                                    <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
-                                        Date
-                                    </label>
-                                    <input
-                                        type="date"
-                                        id="date"
-                                        value={formData.date}
-                                        onChange={handleInputChange}
-                                        className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]"
-                                    />
-                                </div>
+                                    <div className="md:col-span-2 w-full">
+                                        <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                            Patient ID
+                                        </label>
+                                        <div className="w-full h-14 p-3 rounded-md text-lg bg-[#1a1a1a] border border-[#333333] text-gray-400 flex items-center">
+                                            {activePatient.id}
+                                        </div>
+                                    </div>
 
-                                <div className="md:col-span-3 w-full">
-                                    <button
-                                        type="submit"
-                                        className="group relative w-full h-14 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
-                                                   shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
-                                                   transition-all duration-300 ease-out
-                                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
-                                                   active:scale-[0.98]"
+                                    <div className="md:col-span-2 w-full">
+                                        <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                            Plan
+                                        </label>
+                                        <div className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 flex items-center font-medium">
+                                            {activePlanName || 'Plan'}
+                                        </div>
+                                    </div>
+
+                                    <div className="md:col-span-2 w-full">
+                                        <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                            Date
+                                        </label>
+                                        <div className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 flex items-center">
+                                            {formatDate(activePatient.date)}
+                                        </div>
+                                    </div>
+
+                                    <div className="md:col-span-3 w-full flex gap-2">
+                                        <button
+                                            onClick={handleSwitchCase}
+                                            type="button"
+                                            className="group relative flex-1 h-14 bg-[#252525] border border-[#444444] rounded-sm 
+                                                       shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                                       transition-all duration-300 ease-out
+                                                       hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                                       active:scale-[0.98] flex items-center justify-center"
+                                        >
+                                            <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                            <span className="relative text-sm font-bold text-gray-200 tracking-wider group-hover:text-white">SWITCH</span>
+                                            <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                            <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                        </button>
+                                        <button
+                                            onClick={handleNewCase}
+                                            type="button"
+                                            className="group relative flex-1 h-14 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                                       shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                                                       transition-all duration-300 ease-out
+                                                       hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                                                       active:scale-[0.98] flex items-center justify-center"
+                                        >
+                                            <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                            <span className="relative text-sm font-bold text-white tracking-wider">+ NEW</span>
+                                            <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                            <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        /* Patient Form — shown when NO active case */
+                        <>
+                            <div className="flex justify-center">
+                                <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg mb-10 w-full max-w-6xl">
+                                    <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
+                                    <h3 className="text-2xl font-semibold mb-2 text-[#E0E0E0] text-center relative z-10 uppercase">
+                                        Patient Details
+                                    </h3>
+                                    <form
+                                        onSubmit={handleSubmit}
+                                        className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end max-w-4xl mx-auto justify-items-center relative z-10"
                                     >
-                                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                                        <span className="relative text-lg font-bold text-white tracking-widest transition-colors">
-                                            {isPatientSelected ? 'UPDATE DETAILS' : 'SAVE DETAILS'}
-                                        </span>
-                                        {/* Corner Accents for Technical Feel */}
-                                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                                        <div className="md:col-span-3 w-full">
+                                            <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                                Patient Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="firstName"
+                                                value={formData.firstName}
+                                                onChange={handleInputChange}
+                                                className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]"
+                                                placeholder="Enter full name"
+                                                required
+                                            />
+                                        </div>
 
-                    {!isPlanSelected && (
-                        <div className="text-center p-4 mb-6 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
-                            <p className="text-[#ff8fa3] text-lg">
-                                {currentPatientId ? 'Please select a plan to continue.' : 'Please enter and save patient details to begin planning.'}
-                            </p>
-                        </div>
+                                        <div className="md:col-span-3 w-full">
+                                            <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                                Patient ID
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="id"
+                                                value={currentPatientId ? formData.id : suggestedId}
+                                                onChange={handleInputChange}
+                                                disabled={!!currentPatientId}
+                                                className="w-full h-14 p-3 rounded-md text-lg bg-[#1a1a1a] border border-[#333333] text-gray-400"
+                                                placeholder="Auto-generated ID"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="md:col-span-3 w-full">
+                                            <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                                Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                id="date"
+                                                value={formData.date}
+                                                onChange={handleInputChange}
+                                                className="w-full h-14 p-3 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]"
+                                            />
+                                        </div>
+
+                                        <div className="md:col-span-3 w-full">
+                                            <button
+                                                type="submit"
+                                                className="group relative w-full h-14 px-8 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                                           shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
+                                                           transition-all duration-300 ease-out
+                                                           hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_30px_rgba(109,40,44,0.6)]
+                                                           active:scale-[0.98]"
+                                            >
+                                                <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                                <span className="relative text-lg font-bold text-white tracking-widest transition-colors">
+                                                    {isPatientSelected ? 'UPDATE DETAILS' : 'SAVE DETAILS'}
+                                                </span>
+                                                {/* Corner Accents for Technical Feel */}
+                                                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {!isPlanSelected && (
+                                <div className="text-center p-4 mb-6 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
+                                    <p className="text-[#ff8fa3] text-lg">
+                                        {currentPatientId ? 'Please select a plan to continue.' : 'Please enter and save patient details to begin planning.'}
+                                    </p>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">

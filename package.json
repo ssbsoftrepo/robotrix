@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run test && vite build",
+    "build": "npm run test:run && vite build",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run"
@@ -28,10 +28,10 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^7.4.4",
+    "@capacitor/cli": "^7.6.4",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.23",
@@ -40,6 +40,6 @@
     "tailwindcss": "^4.1.18",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.1.6"
   }
 }

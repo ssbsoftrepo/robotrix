@@ -782,8 +782,8 @@ const PostOpPlanner: React.FC = () => {
         const viewerRect = viewer.getBoundingClientRect();
         let newX = e.clientX - viewerRect.left - pipDragOffset.current.x;
         let newY = e.clientY - viewerRect.top - pipDragOffset.current.y;
-        const pipWidth = pipViewerRef.current?.offsetWidth || 160;
-        const pipHeight = pipViewerRef.current?.offsetHeight || 160;
+        const pipWidth = pipViewerRef.current?.offsetWidth || 176;
+        const pipHeight = pipViewerRef.current?.offsetHeight || 176;
         newX = Math.max(0, Math.min(newX, viewerRect.width - pipWidth));
         newY = Math.max(0, Math.min(newY, viewerRect.height - pipHeight));
         setPipPosition({ x: newX, y: newY });
@@ -958,16 +958,28 @@ const PostOpPlanner: React.FC = () => {
 
     const toggleLandmarkSet = (setName: keyof typeof landmarkInstructions) => {
         const newSets = new Set(visibleLandmarkSets);
-        if (newSets.has(setName)) newSets.delete(setName);
-        else newSets.add(setName);
+        if (newSets.has(setName)) {
+            newSets.delete(setName);
+        } else {
+            newSets.add(setName);
+
+            // Auto-zoom to knee joint when selecting femoral or tibial joint lines
+            if (setName === 'femoralJointLine' || setName === 'tibialJointLine') {
+                const canvas = canvasRef.current;
+                if (canvas) {
+                    setZoom(2.2);
+                    setPanOffset({ x: 0, y: -canvas.height * 0.1 });
+                }
+            }
+        }
         setVisibleLandmarkSets(newSets);
     };
 
     const landmarkButtons = [
         { key: 'hkaLine', text: 'HKA Line' },
         { key: 'femurAnatomicAxis', text: 'Femur Anatomic Axis', mode: 'corrected' },
-        { key: 'femoralJointLine', text: 'Femoral Joint Line' },
-        { key: 'tibialJointLine', text: 'Tibial Joint Line' },
+        { key: 'femoralJointLine', text: 'Femoral Articulating Line' },
+        { key: 'tibialJointLine', text: 'Tibial Articulating Line' },
     ];
 
     const handleResetAll = () => {
@@ -979,9 +991,9 @@ const PostOpPlanner: React.FC = () => {
     return (
         <div className="relative flex flex-col h-full rounded-lg">
             <CameraModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onCapture={(dataUrl) => { setPostOpLongLegImage(dataUrl); setFileName('Camera Capture'); }} />
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow h-full min-h-0 max-h-full overflow-hidden">
-                {/* Viewer - Left side (75%) */}
-                <div className="lg:col-span-3 relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
+            <div className="grid grid-cols-1 lg:grid-cols-[70fr_30fr] gap-2 flex-grow h-full min-h-0 max-h-full overflow-hidden">
+                {/* Viewer - Left side (70%) */}
+                <div className="relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
                     {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
                     {postOpLongLegImage && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
@@ -1041,8 +1053,9 @@ const PostOpPlanner: React.FC = () => {
                                 <canvas ref={canvasRef} onTouchStart={handleTouchStart} className="absolute inset-0 w-full h-full cursor-crosshair touch-none" style={{ pointerEvents: 'auto' }} onMouseDown={handleMouseDown} />
                             </div>
                             <div ref={pipViewerRef} onMouseDown={handlePipStart}
-                                onTouchStart={handlePipStart} className="absolute w-24 h-24 border-2 border-dark-maroon bg-black rounded-full cursor-grab active:cursor-grabbing shadow-lg top-2 right-2 z-10" style={{ top: `${pipPosition.y}px`, left: `${pipPosition.x}px` }}>
-                                <canvas ref={pipCanvasRef} width="128" height="128" className="rounded-full w-full h-full"></canvas>
+                                onTouchStart={handlePipStart} className="absolute w-44 h-44 rounded-full border-4 border-cyan-400 bg-black shadow-[0_0_30px_rgba(34,211,238,0.3)] cursor-grab touch-none z-50" style={{ top: pipPosition.y, left: pipPosition.x, willChange: 'top, left', transition: 'none' }}>
+                                <canvas ref={pipCanvasRef} width={176} height={176} className="rounded-full"></canvas>
+                                <div className="absolute inset-0 rounded-full border-2 border-cyan-400/30 pointer-events-none" />
                             </div>
                         </>
                     ) : (
@@ -1053,20 +1066,9 @@ const PostOpPlanner: React.FC = () => {
                     )}
                 </div>
 
-                {/* Controls - Right side (25%) */}
-                <div className="lg:col-span-1 flex flex-col space-y-1.5 h-full overflow-y-auto pr-1 order-2 lg:order-none">
+                {/* Controls - Right side (30%) */}
+                <div className="flex flex-col space-y-1.5 h-full overflow-y-auto pr-1 order-2 lg:order-none">
                     <div className="shrink-0">
-                        {/* <h4 className="text-sm font-semibold text-[#E0E0E0] mb-1">Post-Op Image</h4>
-                        <div className="flex gap-1 mb-1">
-                            <label htmlFor="postop-xray-upload" className="cursor-pointer text-center py-2 px-2 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider flex-1 transition shadow-sm">
-                                UPLOAD X-Ray
-                            </label>
-                            <button onClick={() => setIsCameraOpen(true)} className="py-2 px-2 rounded-sm font-bold text-xs bg-[#6D282C] border border-[#893338] hover:bg-[#893338] text-white tracking-wider flex-1 transition shadow-sm">
-                                LIVE CAPTURE
-                            </button>
-                        </div>
-                        <input type="file" id="postop-xray-upload" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                        <span className="text-[10px] text-gray-500 truncate inline-block w-full">{fileName}</span> */}
                         <section className="relative z-10">
                             <h3 className="text-sm font-semibold mb-2 text-gray-400 uppercase tracking-wider">Upload X-ray</h3>
                             <div className="grid grid-cols-2 gap-2">

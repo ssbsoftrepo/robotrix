@@ -254,12 +254,13 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
             </div>
 
             <div className="flex-grow grid grid-cols-[25fr_50fr_25fr] gap-2 min-h-0 p-1 relative z-10">
-                {/* Column 1: Simulation Controls */}
+                {/* Column 1: Lateral Balancing */}
                 <div className="h-full flex flex-col overflow-hidden">
                     <div className="bg-[#1a1a1a] border border-[#333333] p-1 rounded-xl flex flex-col h-full shadow-2xl overflow-hidden">
+                        <h3 className="text-center text-sm font-black text-[#ff8fa3] uppercase tracking-widest py-2 border-b border-[#333333]">Lateral Balancing</h3>
 
                         {/* Section 1: +/- Controls — evenly spaced */}
-                        <div className="flex flex-col justify-between gap-2 px-1 h-full py-2" style={{ flex: '0 0 55%' }}>
+                        <div className="flex flex-col justify-between gap-2 px-1 h-full py-2" style={{ flex: '0 0 60%' }}>
                             {/* Femur Cut */}
                             <div className="relative bg-[#2a2a2a]/60 p-1 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
                                 <div className="flex items-start gap-2  w-full">
@@ -281,6 +282,9 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Separator */}
+                            <div className="w-full border-t border-[#333333] my-1" />
+
                             {/* Tibia Cut */}
                             <div className="flex flex-col items-center">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Additional provisional 90 deg tibial cut resection</label>
@@ -294,6 +298,9 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                         style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
+
+                            {/* Separator */}
+                            <div className="w-full border-t border-[#333333] my-1" />
 
                             {/* Laxity */}
                             <div className="flex flex-col items-center">
@@ -309,26 +316,18 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-
                         {/* Section 2: Check Laxity */}
                         <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 10%' }}>
                             <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
                         </div>
 
-                        {/* Section 3: Pre-Op & Revised Tibia Cut */}
-                        <div className="flex flex-col justify-center gap-2 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 35%' }}>
+                        {/* Section 3: Pre-Op Tibia Cut */}
+                        <div className="flex flex-col justify-center gap-2 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 20%' }}>
                             <div className="bg-black border-2 border-[#333333] rounded-lg p-2 text-center w-full mt-1 shadow-lg">
                                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 leading-tight">PRE OP CALCULATED FUNCTIONAL TIBIA CUT</p>
                                 <div className="flex items-center justify-center">
                                     <span className="text-2xl font-black text-[#ff8fa3]">{preOpTibiaCut.degree}°</span>
                                     <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{preOpTibiaCut.label}</span>
-                                </div>
-                            </div>
-                            <p className="text-[10px] text-gray-600 font-bold text-center uppercase tracking-widest">Post Gap Assessment</p>
-                            <div className="bg-[#6D282C]/10 border border-[#6D282C]/30 rounded-lg p-2 text-center w-full shrink-0 shadow-lg">
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">REVISED FUNCTIONAL TIBIA CUT</p>
-                                <div className="flex items-center justify-center">
-                                    <span className="text-2xl font-black text-[#ff8fa3]">{Math.min(4, Math.max(0, Math.round(revisedVarusCut)))}°</span>
                                 </div>
                             </div>
                         </div>
@@ -433,9 +432,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Column 3: Jig Selection */}
+                {/* Column 3: Medial Balancing */}
                 <div className="h-full flex flex-col gap-1">
                     <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-1 h-full">
+                        <h3 className="text-center text-sm font-black text-[#ff8fa3] uppercase tracking-widest pb-2 border-b border-[#333333]">Medial Balancing</h3>
 
                         <div className="flex-grow flex flex-col gap-1">
                             <p className="text-[10px] font-black text-gray-500 uppercase text-center mt-0 tracking-widest">Robotrix+ Universal Jigs</p>

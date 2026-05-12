@@ -105,8 +105,6 @@ const App: React.FC = () => {
     };
 
     const handleHomeClick = () => {
-        setCurrentPatientId(null);
-        setPlannerMode(null);
         setPage('case-management');
     };
 
