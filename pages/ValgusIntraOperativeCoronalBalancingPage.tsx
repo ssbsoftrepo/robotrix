@@ -260,7 +260,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                         <h3 className="text-center text-sm font-black text-[#ff8fa3] uppercase tracking-widest py-2 border-b border-[#333333]">Lateral Balancing</h3>
 
                         {/* Section 1: +/- Controls — evenly spaced */}
-                        <div className="flex flex-col justify-between gap-2 px-1 h-full py-2" style={{ flex: '0 0 60%' }}>
+                        <div className="flex flex-col justify-start gap-4 px-1 h-full py-4" style={{ flex: '0 0 50%' }}>
                             {/* Femur Cut */}
                             <div className="relative bg-[#2a2a2a]/60 p-1 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
                                 <div className="flex items-start gap-2  w-full">
@@ -298,10 +298,15 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                         style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Separator */}
-                            <div className="w-full border-t border-[#333333] my-1" />
+                        {/* Section 2: Check Laxity */}
+                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 10%' }}>
+                            <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
+                        </div>
 
+                        {/* Section 3: Laxity Adjustment */}
+                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 16%' }}>
                             {/* Laxity */}
                             <div className="flex flex-col items-center">
                                 <label className="text-gray-500 text-[10px] font-black uppercase tracking-widest text-center">Apply Pre-op lateral laxity</label>
@@ -316,13 +321,9 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        {/* Section 2: Check Laxity */}
-                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 10%' }}>
-                            <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
-                        </div>
 
                         {/* Section 3: Pre-Op Tibia Cut */}
-                        <div className="flex flex-col justify-center gap-2 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 20%' }}>
+                        <div className="flex flex-col justify-center gap-2 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 18%' }}>
                             <div className="bg-black border-2 border-[#333333] rounded-lg p-2 text-center w-full mt-1 shadow-lg">
                                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1 leading-tight">PRE OP CALCULATED FUNCTIONAL TIBIA CUT</p>
                                 <div className="flex items-center justify-center">
