@@ -276,11 +276,39 @@ const CameraModal: React.FC<{
 };
 
 
-const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
-    const vec1 = { x: p2.x - p1.x, y: p2.y - p1.y };
-    const vec2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+const resolveMedialLateral = (
+    p1: Point,
+    p2: Point,
+    kneeCenter: Point,
+    legSide: string
+) => {
+    const isP1Medial =
+        legSide === 'right'
+            ? p1.x > kneeCenter.x
+            : p1.x < kneeCenter.x;
 
-    const angle = angleBetweenVectors(vec1, vec2);
+    return {
+        medial: isP1Medial ? p1 : p2,
+        lateral: isP1Medial ? p2 : p1,
+    };
+};
+
+const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point, isLdfa: boolean, legSide: string) => {
+    // p1->p2 is the mechanical axis
+    const axisVec = { x: p2.x - p1.x, y: p2.y - p1.y };
+    // p3->p4 is the joint line (Medial to Lateral)
+    const jointVec = { x: p4.x - p3.x, y: p4.y - p3.y };
+
+    const axisAway = { x: -axisVec.x, y: -axisVec.y };
+    const sideVec = isLdfa ? jointVec : { x: -jointVec.x, y: -jointVec.y };
+
+    const dot = axisAway.x * sideVec.x + axisAway.y * sideVec.y;
+    const mag1 = Math.sqrt(axisAway.x * axisAway.x + axisAway.y * axisAway.y);
+    const mag2 = Math.sqrt(sideVec.x * sideVec.x + sideVec.y * sideVec.y);
+
+    if (mag1 === 0 || mag2 === 0) return 0;
+
+    let angle = Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2)))) * (180 / Math.PI);
     return angle;
 };
 
@@ -430,30 +458,16 @@ const PostOpPlanner: React.FC = () => {
             newResults.vca = angleBetweenVectors(mechAxisVec, anatomicAxisVec);
         }
         if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femoralJointLine') && femoralMedial && femoralLateral) {
-            const isLeftKnee = legSide === 'left';
-            const sortedFemoral = [femoralMedial, femoralLateral].sort((a, b) => a.x - b.x);
-            const leftFemoral = sortedFemoral[0];
-            const rightFemoral = sortedFemoral[1];
-
-            // Left Leg: Medial is Right (Inner). Right Leg: Medial is Left (Inner).
-            const medialFemoralCondyle = isLeftKnee ? rightFemoral : leftFemoral;
-            const lateralFemoralCondyle = isLeftKnee ? leftFemoral : rightFemoral;
+            const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(femoralMedial, femoralLateral, kneeCenter, legSide);
 
             // For LDFA
-            newResults.ldfa = calculateLineAngle(hipCenter, kneeCenter, medialFemoralCondyle, lateralFemoralCondyle);
+            newResults.ldfa = calculateLineAngle(hipCenter, kneeCenter, trueMedial, trueLateral, true, legSide);
         }
         if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('tibialJointLine') && tibialMedial && tibialLateral) {
-            const isLeftKnee = legSide === 'left';
-            const sortedTibial = [tibialMedial, tibialLateral].sort((a, b) => a.x - b.x);
-            const leftTibial = sortedTibial[0];
-            const rightTibial = sortedTibial[1];
-
-            // Left Leg: Medial is Right (Inner). Right Leg: Medial is Left (Inner).
-            const medialTibialCondyle = isLeftKnee ? rightTibial : leftTibial;
-            const lateralTibialCondyle = isLeftKnee ? leftTibial : rightTibial;
+            const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(tibialMedial, tibialLateral, kneeCenter, legSide);
 
             // For MPTA
-            newResults.mpta = calculateLineAngle(ankleCenter, kneeCenter, lateralTibialCondyle, medialTibialCondyle);
+            newResults.mpta = calculateLineAngle(ankleCenter, kneeCenter, trueMedial, trueLateral, false, legSide);
         }
 
         if (newResults.ldfa != null && newResults.mpta != null) {

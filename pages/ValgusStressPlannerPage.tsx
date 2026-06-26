@@ -37,20 +37,36 @@ const calculateClinicalAngle = (
   axisPt: Point,
   sidePt: Point
 ) => {
-  const thetaAxis = Math.atan2(axisPt.y - centerPt.y, axisPt.x - centerPt.x);
+  // axis points from center away.
+  const axisVec = { x: axisPt.x - centerPt.x, y: axisPt.y - centerPt.y };
+  // side points from center to side
+  const sideVec = { x: sidePt.x - centerPt.x, y: sidePt.y - centerPt.y };
+  
+  const dot = axisVec.x * sideVec.x + axisVec.y * sideVec.y;
+  const mag1 = Math.sqrt(axisVec.x * axisVec.x + axisVec.y * axisVec.y);
+  const mag2 = Math.sqrt(sideVec.x * sideVec.x + sideVec.y * sideVec.y);
+  
+  if (mag1 === 0 || mag2 === 0) return 0;
+  
+  let angle = Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2)))) * (180 / Math.PI);
+  return angle;
+};
 
-  const thetaSide = Math.atan2(sidePt.y - centerPt.y, sidePt.x - centerPt.x);
+const resolveMedialLateral = (
+    p1: Point,
+    p2: Point,
+    kneeCenter: Point,
+    legSide: string
+) => {
+    const isP1Medial =
+        legSide === 'right'
+            ? p1.x > kneeCenter.x
+            : p1.x < kneeCenter.x;
 
-  let diff = thetaAxis - thetaSide;
-
-  let deg = diff * (180 / Math.PI);
-
-  deg = Math.abs(deg);
-  if (deg > 180) {
-    deg = 360 - deg;
-  }
-
-  return deg;
+    return {
+        medial: isP1Medial ? p1 : p2,
+        lateral: isP1Medial ? p2 : p1,
+    };
 };
 
 const getFemurClassification = (ldfa: number) => {
@@ -487,8 +503,9 @@ const ValgusStressPlannerPage: React.FC = () => {
       };
 
       if (visibleLandmarkSets.has('jointLine')) {
-        const dy = medialPoint.y - lateralPoint.y;
-        const dx = medialPoint.x - lateralPoint.x;
+        const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(medialPoint, lateralPoint, jointCenter, legSide);
+        const dy = trueMedial.y - trueLateral.y;
+        const dx = trueMedial.x - trueLateral.x;
         let angleDeg = Math.abs(Math.atan2(dy, dx) * (180 / Math.PI));
         if (angleDeg > 180) angleDeg = 360 - angleDeg;
         if (angleDeg > 90) angleDeg = 180 - angleDeg;
@@ -500,18 +517,20 @@ const ValgusStressPlannerPage: React.FC = () => {
       visibleLandmarkSets.has('femurAnatomicAxis') &&
       femurAxisPoint &&
       jointCenter &&
-      lateralPoint
+      medialPoint && lateralPoint
     ) {
-      newResults.ldfa = calculateClinicalAngle(jointCenter, femurAxisPoint, lateralPoint);
+      const { lateral: trueLateral } = resolveMedialLateral(medialPoint, lateralPoint, jointCenter, legSide);
+      newResults.ldfa = calculateClinicalAngle(jointCenter, femurAxisPoint, trueLateral);
     }
 
     if (
       visibleLandmarkSets.has('tibiaAnatomicAxis') &&
       tibiaAxisPoint &&
       jointCenter &&
-      medialPoint
+      medialPoint && lateralPoint
     ) {
-      newResults.mpta = calculateClinicalAngle(jointCenter, tibiaAxisPoint, medialPoint);
+      const { medial: trueMedial } = resolveMedialLateral(medialPoint, lateralPoint, jointCenter, legSide);
+      newResults.mpta = calculateClinicalAngle(jointCenter, tibiaAxisPoint, trueMedial);
     }
     if (
       newResults.ldfa !== null &&

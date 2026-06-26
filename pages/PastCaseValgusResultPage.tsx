@@ -245,11 +245,44 @@ const getValgusCpakType = (obliquity: number, ldfa: number | null, mpta: number 
     }
 };
 
-const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
-    const vec1 = { x: p2.x - p1.x, y: p2.y - p1.y };
-    const vec2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+const resolveMedialLateral = (
+    p1: Point,
+    p2: Point,
+    kneeCenter: Point,
+    legSide: string
+) => {
+    const isP1Medial =
+        legSide === 'right'
+            ? p1.x > kneeCenter.x
+            : p1.x < kneeCenter.x;
 
-    const angle = angleBetweenVectors(vec1, vec2);
+    return {
+        medial: isP1Medial ? p1 : p2,
+        lateral: isP1Medial ? p2 : p1,
+    };
+};
+
+const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point, isLdfa: boolean, legSide: string) => {
+    // p1->p2 is the axis (e.g. femurAxis->jointCenter or tibiaAxis->jointCenter)
+    // Wait, in PastCaseValgus, the points passed are:
+    // (femurAxisPoint, jointCenter, trueMedial, trueLateral)
+    // So p1->p2 is axis -> jointCenter.
+    // For LDFA, axis -> jointCenter is DOWN. We need AWAY from jointCenter, so UP (p1 - p2).
+    // For MPTA, axis -> jointCenter is UP (tibia to joint). We need AWAY from jointCenter, so DOWN (p1 - p2).
+    // So axisAway is p1 - p2!
+    const axisAway = { x: p1.x - p2.x, y: p1.y - p2.y };
+    // p3->p4 is trueMedial -> trueLateral
+    const jointVec = { x: p4.x - p3.x, y: p4.y - p3.y };
+
+    const sideVec = isLdfa ? jointVec : { x: -jointVec.x, y: -jointVec.y };
+
+    const dot = axisAway.x * sideVec.x + axisAway.y * sideVec.y;
+    const mag1 = Math.sqrt(axisAway.x * axisAway.x + axisAway.y * axisAway.y);
+    const mag2 = Math.sqrt(sideVec.x * sideVec.x + sideVec.y * sideVec.y);
+
+    if (mag1 === 0 || mag2 === 0) return 0;
+
+    let angle = Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2)))) * (180 / Math.PI);
     return angle;
 };
 
@@ -426,27 +459,14 @@ const PostOpValgusPlanner: React.FC = () => {
         }
 
         if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAxisPoint && jointCenter && lateralJointSpace && medialJointSpace) {
-            const isLeftKnee = legSide === 'left';
-            const sortedPoints = [medialJointSpace, lateralJointSpace].sort((a, b) => a.x - b.x);
-            const leftPoint = sortedPoints[0];
-            const rightPoint = sortedPoints[1];
+            const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(medialJointSpace, lateralJointSpace, jointCenter, legSide);
 
-            // Left Leg: Medial is Right (Inner). Right Leg: Medial is Left (Inner).
-            const trueMedial = isLeftKnee ? rightPoint : leftPoint;
-            const trueLateral = isLeftKnee ? leftPoint : rightPoint;
-
-            newResults.ldfa = calculateLineAngle(femurAxisPoint, jointCenter, trueMedial, trueLateral);
+            newResults.ldfa = calculateLineAngle(femurAxisPoint, jointCenter, trueMedial, trueLateral, true, legSide);
         }
         if (visibleLandmarkSets.has('tibiaAnatomicAxis') && tibiaAxisPoint && jointCenter && medialJointSpace && lateralJointSpace) {
-            const isLeftKnee = legSide === 'left';
-            const sortedPoints = [medialJointSpace, lateralJointSpace].sort((a, b) => a.x - b.x);
-            const leftPoint = sortedPoints[0];
-            const rightPoint = sortedPoints[1];
+            const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(medialJointSpace, lateralJointSpace, jointCenter, legSide);
 
-            const trueMedial = isLeftKnee ? rightPoint : leftPoint;
-            const trueLateral = isLeftKnee ? leftPoint : rightPoint;
-
-            newResults.mpta = calculateLineAngle(tibiaAxisPoint, jointCenter, trueLateral, trueMedial);
+            newResults.mpta = calculateLineAngle(tibiaAxisPoint, jointCenter, trueMedial, trueLateral, false, legSide);
         }
 
         if (newResults.ldfa !== null && newResults.mpta !== null && newResults.obliquity !== null) {

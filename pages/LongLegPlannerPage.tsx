@@ -63,11 +63,47 @@ const angleBetweenVectors = (v1: Point, v2: Point) => {
 };
 
 
-const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point) => {
-    const vec1 = { x: p2.x - p1.x, y: p2.y - p1.y };
-    const vec2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point, isLdfa: boolean, legSide: LegSide) => {
+    // p1->p2 is the mechanical axis (e.g. hip->knee for LDFA, ankle->knee for MPTA)
+    // p3 is Medial, p4 is Lateral on the joint line
+    const axisVec = { x: p2.x - p1.x, y: p2.y - p1.y };
+    const jointVec = { x: p4.x - p3.x, y: p4.y - p3.y }; // Medial to Lateral
 
-    const angle = angleBetweenVectors(vec1, vec2);
+    // We want the angle inside the bone, on the lateral side (LDFA) or medial side (MPTA).
+    // Let's use atan2 to get the absolute angle between the lines.
+    const thetaAxis = Math.atan2(axisVec.y, axisVec.x);
+    let thetaJoint = Math.atan2(jointVec.y, jointVec.x);
+
+    // Ensure we are taking the angle that corresponds to the correct side.
+    // To do this robustly, we can calculate the 4 angles around the intersection,
+    // and pick the one that is inside the bone and on the correct side.
+    
+    // Actually, we can just use the absolute angle between the axis and the lateral/medial vector.
+    // For LDFA, we want the angle on the lateral side.
+    // The vector from the joint center to the lateral point is what we need.
+    // If p3=Medial, p4=Lateral, then joint center is approx (p3+p4)/2.
+    // Vector to lateral is `p4 - center` = `(p4 - p3)/2`. So jointVec points towards Lateral.
+    // For MPTA, we want the angle on the medial side.
+    // Vector to medial is `p3 - center` = `(p3 - p4)/2` = `-jointVec`.
+    
+    // The axis points towards the joint (e.g. hip->knee or ankle->knee).
+    // To get the angle INSIDE the bone, we need the axis vector pointing AWAY from the joint.
+    // So we flip axisVec.
+    const axisAway = { x: -axisVec.x, y: -axisVec.y };
+    
+    // The side vector points from center to the side of interest.
+    const sideVec = isLdfa ? jointVec : { x: -jointVec.x, y: -jointVec.y };
+    
+    // Now just compute the angle between axisAway and sideVec!
+    // Since sideVec might be pointing left or right depending on legSide, but it always points towards the correct anatomical side because p3=Medial, p4=Lateral.
+    const dot = axisAway.x * sideVec.x + axisAway.y * sideVec.y;
+    const mag1 = Math.sqrt(axisAway.x * axisAway.x + axisAway.y * axisAway.y);
+    const mag2 = Math.sqrt(sideVec.x * sideVec.x + sideVec.y * sideVec.y);
+    
+    if (mag1 === 0 || mag2 === 0) return 0;
+    
+    let angle = Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2)))) * (180 / Math.PI);
+    
     return angle;
 };
 
@@ -484,7 +520,9 @@ const LongLegPlannerPage: React.FC = () => {
             femoralMedial &&
             femoralLateral
         ) {
-            newResults.ldfa = calculateLineAngle(hipCenter, kneeCenter, femoralMedial, femoralLateral);
+            // First determine true Medial and true Lateral based on screen positions and legSide
+            const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(femoralMedial, femoralLateral, kneeCenter, legSide);
+            newResults.ldfa = calculateLineAngle(hipCenter, kneeCenter, trueMedial, trueLateral, true, legSide);
         } else {
             newResults.ldfa = null;
         }
@@ -495,7 +533,8 @@ const LongLegPlannerPage: React.FC = () => {
             tibialMedial &&
             tibialLateral
         ) {
-            newResults.mpta = calculateLineAngle(ankleCenter, kneeCenter, tibialLateral, tibialMedial);
+            const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(tibialMedial, tibialLateral, kneeCenter, legSide);
+            newResults.mpta = calculateLineAngle(ankleCenter, kneeCenter, trueMedial, trueLateral, false, legSide);
         } else {
             newResults.mpta = null;
         }
@@ -507,8 +546,9 @@ const LongLegPlannerPage: React.FC = () => {
 
             let obliquity = 0;
             if (femoralMedial && femoralLateral) {
-                const dy = femoralMedial.y - femoralLateral.y;
-                const dx = femoralMedial.x - femoralLateral.x;
+                const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(femoralMedial, femoralLateral, kneeCenter, legSide);
+                const dy = trueMedial.y - trueLateral.y;
+                const dx = trueMedial.x - trueLateral.x;
                 let angleDeg = Math.abs(Math.atan2(dy, dx) * (180 / Math.PI));
                 if (angleDeg > 180) angleDeg = 360 - angleDeg;
                 if (angleDeg > 90) angleDeg = 180 - angleDeg;
