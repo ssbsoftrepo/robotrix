@@ -178,26 +178,16 @@ const SimulationPage: React.FC = () => {
         }
     }, [getBoundaryAdjustedValues, setFemoralCutSim, setTibialCutSim, setAppliedFemoralCutSim, setAppliedTibialCutSim]);
 
-    const postOpMHKA = useMemo(() => {
-        if (!isLoaded || Object.keys(originalScaledLandmarksRef.current).length === 0) return null;
-
-        const originalLandmarks = originalScaledLandmarksRef.current;
-        const { hipCenter: originalHip, kneeCenter: originalKnee, ankleCenter: originalAnkle } = originalLandmarks;
-        if (!originalHip || !originalKnee || !originalAnkle) return null;
-
-        const lateralDirection = legSide === 'left' ? 1 : -1;
-        const femoralRad = (appliedFemoralCutSim ?? 0) * (Math.PI / 180);
-        const dxFemoral = Math.abs(originalKnee.y - originalHip.y) * Math.tan(femoralRad);
-        const tibialRad = (appliedTibialCutSim ?? 0) * (Math.PI / 180);
-        const dxTibial = Math.abs(originalAnkle.y - originalKnee.y) * Math.tan(tibialRad);
-        const totalDx = (-dxFemoral - dxTibial) * lateralDirection;
-        const newKnee = { x: originalKnee.x + totalDx, y: originalKnee.y };
-
-        const femurVec = { x: originalHip.x - newKnee.x, y: originalHip.y - newKnee.y };
-        const tibiaVec = { x: originalAnkle.x - newKnee.x, y: originalAnkle.y - newKnee.y };
-        return 180 - angleBetweenVectors(femurVec, tibiaVec);
-
-    }, [isLoaded, appliedFemoralCutSim, appliedTibialCutSim, legSide]);
+    const postOpMHKAStr = useMemo(() => {
+        if (appliedFemoralCutSim === null || appliedTibialCutSim === null) return '--';
+        const ama = longLegResults.ama ?? 0;
+        const femur = appliedFemoralCutSim ?? 0;
+        const tibia = appliedTibialCutSim ?? 0;
+        const result = femur - tibia - ama;
+        if (result < 0) return `${Math.abs(result).toFixed(1)}° varus`;
+        if (result > 0) return `${result.toFixed(1)}° valgus`;
+        return '0° neutral';
+    }, [appliedFemoralCutSim, appliedTibialCutSim, longLegResults.ama]);
 
 
     const draw = useCallback(() => {
@@ -211,9 +201,16 @@ const SimulationPage: React.FC = () => {
         const originalLandmarks = originalScaledLandmarksRef.current;
         const { hipCenter: originalHip, kneeCenter: originalKnee, ankleCenter: originalAnkle } = originalLandmarks;
         const lateralDirection = legSide === 'left' ? 1 : -1;
-        const femoralRad = (appliedFemoralCutSim ?? 0) * (Math.PI / 180);
+        const ama = longLegResults.ama ?? 0;
+        const ldfa = longLegResults.ldfa ?? 90;
+        const mpta = longLegResults.mpta ?? 90;
+        const hipPivotAngle = (appliedFemoralCutSim ?? 0) - ama + (ldfa - 90);
+        const anklePivotAngle = (appliedTibialCutSim ?? 0) + (ldfa - 90);
+
+        const femoralRad = hipPivotAngle * (Math.PI / 180);
         const dxFemoral = Math.abs(originalKnee.y - originalHip.y) * Math.tan(femoralRad);
-        const tibialRad = (appliedTibialCutSim ?? 0) * (Math.PI / 180);
+        
+        const tibialRad = anklePivotAngle * (Math.PI / 180);
         const dxTibial = Math.abs(originalAnkle.y - originalKnee.y) * Math.tan(tibialRad);
         const totalDx = (-dxFemoral - dxTibial) * lateralDirection;
         const newKnee = { x: originalKnee.x + totalDx, y: originalKnee.y };
@@ -299,7 +296,7 @@ const SimulationPage: React.FC = () => {
 
         setSimAfterImage(canvas.toDataURL('image/png'));
 
-    }, [appliedFemoralCutSim, appliedTibialCutSim, legSide, isLoaded, centerlineX, isSplitView, setSimAfterImage, postOpMHKA]);
+    }, [appliedFemoralCutSim, appliedTibialCutSim, legSide, isLoaded, centerlineX, isSplitView, setSimAfterImage, postOpMHKAStr, longLegResults]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -507,7 +504,7 @@ const SimulationPage: React.FC = () => {
                     </div>
                     <div className="bg-[#6D282C]/20 border-2 border-[#6D282C] p-2 rounded-md text-center relative z-10">
                         <p className="text-sm text-[#ff8fa3]">Post-Simulation mHKA</p>
-                        <p className="font-bold text-2xl text-[#ff8fa3]">{postOpMHKA?.toFixed(1) ?? '--'}°</p>
+                        <p className="font-bold text-2xl text-[#ff8fa3]">{postOpMHKAStr}</p>
                     </div>
                     <div className="flex-grow"></div>
                     <div className="relative z-10">

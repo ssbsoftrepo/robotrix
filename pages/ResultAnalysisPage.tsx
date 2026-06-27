@@ -169,52 +169,36 @@ const ResultAnalysisPage: React.FC = () => {
         if (tibiaBoundary === null) setTibiaBoundary('expanded');
     }, [femurBoundary, tibiaBoundary, setFemurBoundary, setTibiaBoundary]);
 
-    const getFemurClassification = (ldfa: number) => {
-        if (ldfa > 92) return { type: 'Significant varoid femur', cut: '2° valgus cut' };
-        if (ldfa > 91) return { type: 'Mild varoid femur', cut: '3° valgus cut' };
-        if (ldfa > 88) return { type: 'Median (neutral) femur', cut: '4° valgus cut' };
-        if (ldfa > 87) return { type: 'Mild valgoid femur', cut: '5° valgus cut' };
-        if (ldfa > 86) return { type: 'Significant valgoid femur', cut: '6° valgus cut' };
-        return {
-            type: 'Significant valgoid femur',
-            cut: '6° valgus cut (Native LDFA out of boundary)'
-        };
-    };
-
     const getFemoralCut = () => {
-        const originalCut = longLegResults.cut;
-        // Re-calculate cut based on loaded LDFA to ensure consistency with new logic
-        if (longLegResults.ldfa !== null) {
-            const classification = getFemurClassification(longLegResults.ldfa);
-            let displayCut = classification.cut;
-
-            // Apply Basic Matrix constraint (3-5) if selected
+        const { ldfa, ama } = longLegResults;
+        if (ldfa !== null) {
+            const amaValue = ama ?? 0;
+            let rawCut = Math.round((90 - ldfa) + amaValue);
+            
             if (femurBoundary === 'basic') {
-                // Parse the degree
-                const match = displayCut.match(/(\d+)°/);
-                if (match) {
-                    const degree = parseInt(match[1]);
-                    if (degree < 3) displayCut = '3° valgus cut';
-                    else if (degree > 5) displayCut = '5° valgus cut';
-                }
+                rawCut = Math.max(3, Math.min(5, rawCut));
+            } else {
+                rawCut = Math.max(2, Math.min(6, rawCut));
             }
-            return displayCut;
+            return `${rawCut}° valgus cut`;
         }
-        return originalCut || '--';
+        return '--';
     };
 
     const getTibialCut = () => {
         const mpta = longLegResults.mpta;
         if (mpta === null) return '--';
-        let varusCut = 0;
-        if (mpta <= 85) varusCut = 4;  // Significant varoid (includes out of boundary ≤84)
-        else if (mpta <= 87) varusCut = 3;  // Moderate varoid: 85 < MPTA ≤ 87
-        else if (mpta <= 88) varusCut = 2;  // Mild varoid: 87 < MPTA ≤ 88
-        else if (mpta <= 90) varusCut = 1;  // Neutral tibia: 88 < MPTA ≤ 90
-        // MPTA > 90 = 0° (valgoid tibia / neutral cut)
-        if (tibiaBoundary === 'basic' && varusCut > 2) varusCut = 2;
-        if (varusCut === 0) return '0° (neutral cut)';
-        return `${varusCut}° varus`;
+        
+        let rawCut = Math.round(90 - mpta);
+        
+        if (tibiaBoundary === 'basic') {
+            rawCut = Math.max(0, Math.min(2, rawCut));
+        } else {
+            rawCut = Math.max(0, Math.min(4, rawCut));
+        }
+        
+        if (rawCut === 0) return '0° (neutral cut)';
+        return `${rawCut}° varus`;
     };
 
     const displayFemoralCut = getFemoralCut();
@@ -309,7 +293,7 @@ const ResultAnalysisPage: React.FC = () => {
                             bone="tbia"
                             options={[
                                 { key: 'basic', label: 'Basic matrix', range: '0-2 deg varus' },
-                                { key: 'expanded', label: 'Expanded matrix', range: '0 to 4 deg varus' }
+                                { key: 'expanded', label: 'Expanded matrix', range: '0-4 deg varus' }
                             ]}
                         />
                     </div>

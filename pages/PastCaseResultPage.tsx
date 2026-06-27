@@ -398,29 +398,7 @@ const PostOpPlanner: React.FC = () => {
         }
     }, [legSide]);
 
-    useEffect(() => {
-        if (ldfaMode !== 'corrected') return;
-        if (justAdjustedHipRef.current) { justAdjustedHipRef.current = false; return; }
 
-        const femurAnatomicPoint = landmarks.femurAnatomicAxisPoint;
-        if (femurAnatomicPoint && visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femurAnatomicAxis')) {
-            const { kneeCenter, hipCenter } = landmarks;
-            if (!kneeCenter || !hipCenter) return;
-            const TARGET_VCA_DEG = 4;
-            const TARGET_VCA_RAD = TARGET_VCA_DEG * (Math.PI / 180);
-            const V_anatomic = { x: femurAnatomicPoint.x - kneeCenter.x, y: femurAnatomicPoint.y - kneeCenter.y };
-            const angle_anatomic = Math.atan2(V_anatomic.x, -V_anatomic.y);
-            const rotationDirection = legSide === 'left' ? -1 : 1;
-            const angle_mech = angle_anatomic + (rotationDirection * TARGET_VCA_RAD);
-            const kneeToHipY = hipCenter.y - kneeCenter.y;
-            const newKneeToHipX = -kneeToHipY * Math.tan(angle_mech);
-            const newHipX = kneeCenter.x + newKneeToHipX;
-            if (Math.abs(newHipX - hipCenter.x) > 0.5) {
-                justAdjustedHipRef.current = true;
-                setLandmarks(prev => ({ ...prev, hipCenter: { x: newHipX, y: hipCenter.y } }));
-            }
-        }
-    }, [landmarks, visibleLandmarkSets, legSide, ldfaMode]);
 
     const resetLandmarks = useCallback((canvas: HTMLCanvasElement) => {
         // Use natural dimensions if available
@@ -452,10 +430,12 @@ const PostOpPlanner: React.FC = () => {
             const tibiaVec = { x: ankleCenter.x - kneeCenter.x, y: ankleCenter.y - kneeCenter.y };
             newResults.mhka = 180 - angleBetweenVectors(femurVec, tibiaVec);
         }
-        if (ldfaMode === 'corrected' && visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint) {
+        if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint) {
             const mechAxisVec = { x: hipCenter.x - kneeCenter.x, y: hipCenter.y - kneeCenter.y };
             const anatomicAxisVec = { x: femurAnatomicAxisPoint.x - kneeCenter.x, y: femurAnatomicAxisPoint.y - kneeCenter.y };
-            newResults.vca = angleBetweenVectors(mechAxisVec, anatomicAxisVec);
+            newResults.ama = angleBetweenVectors(mechAxisVec, anatomicAxisVec);
+        } else {
+            newResults.ama = null;
         }
         if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femoralJointLine') && femoralMedial && femoralLateral) {
             const { medial: trueMedial, lateral: trueLateral } = resolveMedialLateral(femoralMedial, femoralLateral, kneeCenter, legSide);
@@ -531,7 +511,7 @@ const PostOpPlanner: React.FC = () => {
             ctx.beginPath(); ctx.moveTo(hipCenter.x, hipCenter.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.lineTo(ankleCenter.x, ankleCenter.y); ctx.stroke();
             [hipCenter, kneeCenter, ankleCenter].forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, scaledRadius, 0, Math.PI * 2); ctx.fill(); });
         }
-        if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint && kneeCenter) {
+        if (visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint && kneeCenter) {
             ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.fillStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = scaledLineWidth;
             ctx.beginPath(); ctx.moveTo(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
             ctx.beginPath(); ctx.arc(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y, scaledRadius, 0, Math.PI * 2); ctx.fill();
@@ -991,7 +971,7 @@ const PostOpPlanner: React.FC = () => {
 
     const landmarkButtons = [
         { key: 'hkaLine', text: 'HKA Line' },
-        { key: 'femurAnatomicAxis', text: 'Femur Anatomic Axis', mode: 'corrected' },
+        { key: 'femurAnatomicAxis', text: 'Femur Anatomic Axis' },
         { key: 'femoralJointLine', text: 'Femoral Articulating Line' },
         { key: 'tibialJointLine', text: 'Tibial Articulating Line' },
     ];
@@ -999,7 +979,7 @@ const PostOpPlanner: React.FC = () => {
     const handleResetAll = () => {
         if (canvasRef.current) resetLandmarks(canvasRef.current);
         setVisibleLandmarkSets(new Set());
-        setResults({ ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', vca: null });
+        setResults({ ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', ama: null });
     };
 
     return (
@@ -1049,6 +1029,11 @@ const PostOpPlanner: React.FC = () => {
                                         {results.ahka != null && (
                                             <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
                                                 aHKA: {results.ahka.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {results.ama != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                AMA: {results.ama.toFixed(1)}°
                                             </div>
                                         )}
                                     </div>
@@ -1107,7 +1092,7 @@ const PostOpPlanner: React.FC = () => {
                         </div>
                         <div className="flex-grow overflow-y-auto space-y-1 pr-1 custom-scrollbar">
                             {landmarkButtons.map((btn, idx) => {
-                                if ((btn.mode as string) && btn.mode !== ldfaMode) return null;
+
                                 const isSelected = visibleLandmarkSets.has(btn.key);
                                 const btnColor = LANDMARK_COLORS[btn.key as keyof typeof LANDMARK_COLORS];
                                 return (

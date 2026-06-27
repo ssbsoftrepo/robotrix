@@ -484,8 +484,7 @@ const CaseManagementPage: React.FC = () => {
     };
 
     const handleLongLegConfigConfirm = () => {
-        if (tempLdfa && tempThickness) {
-            setLdfaMode(tempLdfa);
+        if (tempThickness) {
             setImplantThickness(tempThickness);
             setIsLongLegConfigOpen(false);
             setPage('planner-long-leg');
@@ -871,34 +870,12 @@ const CaseManagementPage: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Box 1: LDFA Mode */}
+                        {/* Box: Implant Thickness */}
                         <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-4 rounded-lg border border-[#333333] w-full shadow-2xl">
                             <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10 uppercase">1. Select LDFA Calculation Method</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                                <button
-                                    onClick={() => setTempLdfa('native')}
-                                    className={`p-4 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'native' ? 'border-[#6D282C] bg-[#6D282C]/30' : 'border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] hover:border-[#6D282C]/50'}`}
-                                >
-                                    <span className="block font-bold text-xl mb-2 text-gray-200">Native (Uncorrected)</span>
-                                    <span className="block text-sm leading-relaxed whitespace-normal text-gray-400">You take the actual mechanical axis from the real hip center including coxa vara/valga.</span>
-                                </button>
-                                <button
-                                    onClick={() => setTempLdfa('corrected')}
-                                    className={`p-4 rounded-lg border text-center items-center transition-all h-full flex flex-col ${tempLdfa === 'corrected' ? 'border-[#6D282C] bg-[#6D282C]/30' : 'border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] hover:border-[#6D282C]/50'}`}
-                                >
-                                    <span className="block font-bold text-xl mb-2 text-gray-200">Corrected</span>
-                                    <span className="block text-sm leading-relaxed whitespace-normal text-gray-400">You normalize the femoral head center to eliminate coxa vara/valga effect.</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Box 2: Implant Thickness */}
-                        <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-4 rounded-lg border border-[#333333] w-full shadow-2xl">
-                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10 uppercase">2. Select minimum composite thickness</h3>
-                            <div className="grid grid-cols-4 gap-4 relative z-10">
-                                {[18, 19, 20, 21].map(thickness => (
+                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10 uppercase">Select minimum composite thickness</h3>
+                            <div className="grid grid-cols-3 gap-4 relative z-10">
+                                {[18, 19, 20].map(thickness => (
                                     <button
                                         key={thickness}
                                         onClick={() => setTempThickness(thickness)}
@@ -914,7 +891,7 @@ const CaseManagementPage: React.FC = () => {
 
                         <div className="pt-4">
                             <button
-                                disabled={!tempLdfa || !tempThickness}
+                                disabled={!tempThickness}
                                 onClick={handleLongLegConfigConfirm}
                                 className="group relative py-3 px-10 bg-[#6D282C] border border-[#893338] rounded-sm 
                                            shadow-[0_4px_20px_rgba(109,40,44,0.4)] 

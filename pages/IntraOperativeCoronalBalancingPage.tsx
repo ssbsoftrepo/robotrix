@@ -157,17 +157,16 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
 
     const thickness = implantThickness ?? 10;
     const C = tibiaWidth < 55 ? 0.8 : tibiaWidth < 70 ? 1.0 : 1.2;
+    const plannedFemurCut = simFemoralCut ?? 3;
 
     const baseMedial = medialGap + additionalFemurCut + additionalTibiaCut;
     const baseLateral = lateralGap + additionalFemurCut + additionalTibiaCut;
     const displayedLateralGap = baseLateral;
 
     // Gap match check from validation page
-    const mpta = longLegResults.mpta ?? 86;
-    const rawTightness = 86 - mpta;
-    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
-    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const ama = longLegResults.ama ?? 0;
     const anticipatedLateralGap = thickness;
+    const anticipatedMedialGap = Math.round(anticipatedLateralGap - (tibiaWidth * Math.tan((ama - plannedFemurCut) * Math.PI / 180)));
     const medialDiff = medialGap - anticipatedMedialGap;
     const lateralDiff = lateralGap - anticipatedLateralGap;
     const gapsMatch = medialDiff === 0 && lateralDiff === 0;
@@ -226,11 +225,9 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
         nativeCPAK = getCpakType(currentAhka, currentJlo);
     }
 
-    const plannedFemurCut = simFemoralCut ?? 3;
-
     const finalSimulatedMedialGap = baseMedial + (selectedJig * C);
-    const simulatedLDFA = nativeLDFA - plannedFemurCut;
-    const simulatedMPTA = nativeMPTA - selectedJig;
+    const simulatedLDFA = 90 - plannedFemurCut + ama;
+    const simulatedMPTA = 90 - selectedJig;
 
     const simulatedAHKA = simulatedMPTA - simulatedLDFA;
     const simulatedJLO = simulatedMPTA + simulatedLDFA;

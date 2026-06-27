@@ -76,8 +76,8 @@ const ReportPage: React.FC = () => {
     const initialSimFemoralCut = longLegCoronalBalancingResults.simFemoralCut ?? 3;
     const initialSimTibialCut = longLegFunctionalCutDegree ?? 2;
 
-    const simulatedLDFA = nativeLDFA - initialSimFemoralCut;
-    const simulatedMPTA = nativeMPTA - initialSimTibialCut;
+    const simulatedLDFA = 90 - initialSimFemoralCut + (longLegResults.ama ?? 0);
+    const simulatedMPTA = 90 - initialSimTibialCut;
 
     const simulatedAHKA = simulatedMPTA - simulatedLDFA;
     const simulatedJLO = simulatedMPTA + simulatedLDFA;
@@ -124,11 +124,10 @@ const ReportPage: React.FC = () => {
     const { lateralGap, selectedSeries } = longLegCoronalBalancingResults;
 
     const thickness = implantThickness ?? 10;
-    const mpta = longLegResults.mpta ?? 86;
-    const rawTightness = 86 - mpta;
-    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
-    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const ama = longLegResults.ama ?? 0;
+    const tibiaWidth = intraOpValidationData.tibiaWidth ?? 70;
     const anticipatedLateralGap = thickness;
+    const anticipatedMedialGap = Math.round(anticipatedLateralGap - (tibiaWidth * Math.tan((ama - initialSimFemoralCut) * Math.PI / 180)));
 
     const finalLateralGap = lateralGap || anticipatedLateralGap;
     const finalMedialGap = selectedSeries ?? anticipatedMedialGap;

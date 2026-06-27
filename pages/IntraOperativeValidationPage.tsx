@@ -10,6 +10,7 @@ const IntraOperativeValidationPage: React.FC = () => {
         intraOpValidationData,
         setIntraOpValidationData,
         legSide,
+        longLegCoronalBalancingResults,
     } = useAppContext();
 
     const isLeftLeg = legSide === 'left';
@@ -23,11 +24,10 @@ const IntraOperativeValidationPage: React.FC = () => {
 
 
     const thickness = implantThickness ?? 10;
-    const mpta = longLegResults.mpta ?? 86;
-    const rawTightness = 86 - mpta;
-    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
-    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const femurCut = longLegCoronalBalancingResults.simFemoralCut ?? 3;
+    const ama = longLegResults.ama ?? 0;
     const anticipatedLateralGap = thickness;
+    const anticipatedMedialGap = Math.round(anticipatedLateralGap - (tibiaWidth * Math.tan((ama - femurCut) * Math.PI / 180)));
 
     const medialDiff = medialGap - anticipatedMedialGap;
     const lateralDiff = lateralGap - anticipatedLateralGap;

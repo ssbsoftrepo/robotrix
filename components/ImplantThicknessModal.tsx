@@ -32,8 +32,8 @@ const ImplantThicknessModal: React.FC<ImplantThicknessModalProps> = ({ isOpen, o
                     </svg>
                 </button>
                 <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 relative z-10">Select minimum composite thickness of TKR system</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
-                    {[18, 19, 20, 21].map((thickness) => (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+                    {[18, 19, 20].map((thickness) => (
                         <button
                             key={thickness}
                             onClick={() => handleSelect(thickness)}

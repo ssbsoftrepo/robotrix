@@ -437,29 +437,7 @@ const LongLegPlannerPage: React.FC = () => {
     }, [legSide, setLongLegLandmarks]);
 
 
-    useEffect(() => {
-        if (ldfaMode !== 'corrected') return;
-        if (justAdjustedHipRef.current) { justAdjustedHipRef.current = false; return; }
 
-        const femurAnatomicPoint = longLegLandmarks.femurAnatomicAxisPoint;
-        if (femurAnatomicPoint && visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femurAnatomicAxis')) {
-            const { kneeCenter, hipCenter } = longLegLandmarks;
-            if (!kneeCenter || !hipCenter) return;
-            const TARGET_VCA_DEG = 4;
-            const TARGET_VCA_RAD = TARGET_VCA_DEG * (Math.PI / 180);
-            const V_anatomic = { x: femurAnatomicPoint.x - kneeCenter.x, y: femurAnatomicPoint.y - kneeCenter.y };
-            const angle_anatomic = Math.atan2(V_anatomic.x, -V_anatomic.y);
-            const rotationDirection = legSide === 'left' ? -1 : 1;
-            const angle_mech = angle_anatomic + (rotationDirection * TARGET_VCA_RAD);
-            const kneeToHipY = hipCenter.y - kneeCenter.y;
-            const newKneeToHipX = -kneeToHipY * Math.tan(angle_mech);
-            const newHipX = kneeCenter.x + newKneeToHipX;
-            if (Math.abs(newHipX - hipCenter.x) > 0.5) {
-                justAdjustedHipRef.current = true;
-                setLongLegLandmarks({ ...longLegLandmarks, hipCenter: { x: newHipX, y: hipCenter.y } });
-            }
-        }
-    }, [longLegLandmarks, visibleLandmarkSets, legSide, setLongLegLandmarks, ldfaMode]);
 
 
     const resetLandmarks = useCallback((width: number, height: number) => {
@@ -585,10 +563,12 @@ const LongLegPlannerPage: React.FC = () => {
             };
         }
 
-        if (ldfaMode === 'corrected' && visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint) {
+        if (visibleLandmarkSets.has('hkaLine') && visibleLandmarkSets.has('femurAnatomicAxis') && femurAnatomicAxisPoint) {
             const mechAxisVec = { x: hipCenter.x - kneeCenter.x, y: hipCenter.y - kneeCenter.y };
             const anatomicAxisVec = { x: femurAnatomicAxisPoint.x - kneeCenter.x, y: femurAnatomicAxisPoint.y - kneeCenter.y };
-            newResults.vca = angleBetweenVectors(mechAxisVec, anatomicAxisVec);
+            newResults.ama = angleBetweenVectors(mechAxisVec, anatomicAxisVec);
+        } else {
+            newResults.ama = null;
         }
 
         if (JSON.stringify(newResults) !== JSON.stringify(localResultsRef.current)) {
@@ -671,7 +651,7 @@ const LongLegPlannerPage: React.FC = () => {
             });
         }
 
-        if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis')) {
+        if (visibleLandmarkSets.has('femurAnatomicAxis')) {
             if (femurAnatomicAxisPoint && kneeCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis;
                 ctx.lineWidth = scaledWidth;
@@ -879,7 +859,7 @@ const LongLegPlannerPage: React.FC = () => {
             resetLandmarks(canvasRef.current.width / (window.devicePixelRatio || 1), canvasRef.current.height / (window.devicePixelRatio || 1));
         }
         setVisibleLandmarkSets(new Set()); setActiveInstruction(null);
-        setLongLegResults({ ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', vca: null });
+        setLongLegResults({ ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', ama: null });
         setFemurBoundary(null); setTibiaBoundary(null);
         setLongLegCanvasDataUrl(null);
     };
@@ -1138,7 +1118,7 @@ const LongLegPlannerPage: React.FC = () => {
 
     const landmarkButtons = [
         { key: 'hkaLine', text: 'HKA Line' },
-        { key: 'femurAnatomicAxis', text: 'Femur Anatomic Axis', mode: 'corrected' },
+        { key: 'femurAnatomicAxis', text: 'Femur Anatomic Axis' },
         { key: 'femoralJointLine', text: 'Femoral Articulating Line' },
         { key: 'tibialJointLine', text: 'Tibial Articulating Line' },
     ];
@@ -1182,7 +1162,7 @@ const LongLegPlannerPage: React.FC = () => {
             });
         }
 
-        if (ldfaMode === 'corrected' && visibleLandmarkSets.has('femurAnatomicAxis')) {
+        if (visibleLandmarkSets.has('femurAnatomicAxis')) {
             if (femurAnatomicAxisPoint && kneeCenter) {
                 ctx.strokeStyle = LANDMARK_COLORS.femurAnatomicAxis; ctx.lineWidth = lineWidth;
                 ctx.beginPath(); ctx.moveTo(femurAnatomicAxisPoint.x, femurAnatomicAxisPoint.y); ctx.lineTo(kneeCenter.x, kneeCenter.y); ctx.stroke();
@@ -1293,26 +1273,31 @@ const LongLegPlannerPage: React.FC = () => {
                         </div>
                     ) : (
                         <div className="relative w-full h-full flex items-center justify-center">
-                            {(longLegResults.ldfa !== null || longLegResults.mpta !== null || longLegResults.mhka !== null) && (
+                            {(longLegResults.ldfa != null || longLegResults.mpta != null || longLegResults.mhka != null) && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
-                                    {longLegResults.ldfa !== null && (
+                                    {longLegResults.ldfa != null && (
                                         <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
                                             LDFA: {longLegResults.ldfa.toFixed(1)}°
                                         </div>
                                     )}
-                                    {longLegResults.mpta !== null && (
+                                    {longLegResults.mpta != null && (
                                         <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
                                             MPTA: {longLegResults.mpta.toFixed(1)}°
                                         </div>
                                     )}
-                                    {longLegResults.mhka !== null && (
+                                    {longLegResults.mhka != null && (
                                         <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
                                             mHKA: {longLegResults.mhka.toFixed(1)}°
                                         </div>
                                     )}
-                                    {longLegResults.ahka !== null && (
+                                    {longLegResults.ahka != null && (
                                         <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
                                             aHKA: {longLegResults.ahka.toFixed(1)}°
+                                        </div>
+                                    )}
+                                    {longLegResults.ama != null && (
+                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            AMA: {longLegResults.ama.toFixed(1)}°
                                         </div>
                                     )}
                                 </div>
@@ -1430,7 +1415,7 @@ const LongLegPlannerPage: React.FC = () => {
                             <MetricItem label="aHKA" value={`${longLegResults.ahka?.toFixed(1) ?? '--'}°`} />
                             <MetricItem label="mHKA" value={`${longLegResults.mhka?.toFixed(1) ?? '--'}°`} highlight /> */}
                             <MetricItem label="JLO" value={`${longLegResults.jlo?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="LDFA Method" value={ldfaMode === 'corrected' ? 'Corrected' : 'Native'} highlight />
+
                         </div>
                     </section>
 
@@ -1441,7 +1426,6 @@ const LongLegPlannerPage: React.FC = () => {
                         </div>
                         <div className="flex flex-col gap-2 mb-3">
                             {landmarkButtons
-                                .filter(btn => !btn.mode || btn.mode === ldfaMode)
                                 .map((btn, idx) => {
                                     const active = visibleLandmarkSets.has(btn.key);
                                     const btnColor = LANDMARK_COLORS[btn.key as keyof typeof LANDMARK_COLORS];

@@ -31,7 +31,7 @@ export interface LongLegResults {
     cpak: string;
     cut: string;
     recommendedVarusCut: string;
-    vca: number | null;
+    ama: number | null;
 }
 
 export interface ValgusResults {
