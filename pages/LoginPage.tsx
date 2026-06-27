@@ -10,6 +10,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [toast, setToast] = useState<{ message: string; show: boolean } | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,7 +34,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 setError('Authentication failed. Invalid response from server.');
             }
         } catch (err: any) {
-            setError(err.message || 'Login failed. Please check your credentials.');
+            const msg = err.message || 'Login failed. Please check your credentials.';
+            setError(msg);
+            if (msg.toLowerCase().includes('inactive')) {
+                setToast({ message: msg, show: true });
+                setTimeout(() => {
+                    setToast(prev => prev ? { ...prev, show: false } : null);
+                }, 5000);
+            }
         } finally {
             setLoading(false);
         }
@@ -41,6 +49,22 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
     return (
         <div className="relative min-h-screen w-full overflow-y-auto bg-gradient-to-br from-[#1E1E1E] to-[#121212] flex flex-col justify-between items-center p-4 md:p-8 select-none">
+            {/* Toast Notification */}
+            {toast && toast.show && (
+                <div className="fixed bottom-6 right-6 left-6 md:left-auto md:max-w-sm bg-[#161616] border-l-4 border-red-600 shadow-[0_10px_30px_rgba(0,0,0,0.8)] p-4 rounded-sm transition-all duration-300 flex items-start space-x-3 z-50 border border-y-[#2c2c2c] border-r-[#2c2c2c]">
+                    <span className="text-red-500 text-base mt-0.5">⚠️</span>
+                    <div className="flex-1 text-left">
+                        <h4 className="text-xs font-bold text-red-500 tracking-wider uppercase">Hospital Inactive</h4>
+                        <p className="text-xs text-[#E0E0E0] mt-1 font-medium">{toast.message}</p>
+                    </div>
+                    <button 
+                        onClick={() => setToast(null)}
+                        className="text-gray-500 hover:text-white text-xs font-bold transition-colors focus:outline-none cursor-pointer"
+                    >
+                        ✕
+                    </button>
+                </div>
+            )}
             {/* Cinematic Overhead Surgical Lamp Effect */}
             <div className="absolute top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/10 rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/5 rounded-full blur-[80px] pointer-events-none" />

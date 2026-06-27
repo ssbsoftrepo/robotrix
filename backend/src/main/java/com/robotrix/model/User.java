@@ -27,6 +27,21 @@ public class User extends TenantScopedEntity {
     @Column(nullable = false)
     private String role; // e.g. "USER", "ADMIN"
 
+    @Column(name = "mobile_number")
+    private String mobileNumber;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "consultant_id")
+    private String consultantId;
+
+    @Column(nullable = false)
+    private boolean active = true;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 }

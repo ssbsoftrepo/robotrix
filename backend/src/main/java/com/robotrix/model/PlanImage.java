@@ -25,7 +25,6 @@ public class PlanImage extends TenantScopedEntity {
     @Column(name = "mime_type", nullable = false)
     private String mimeType;
 
-    @Lob
     @Column(name = "image_data", columnDefinition = "bytea", nullable = false)
     private byte[] imageData;
 }

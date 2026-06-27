@@ -23,7 +23,7 @@ public class DatabaseSeeder implements CommandLineRunner {
         if (userRepository.findByUsernameGlobal("superadmin").isEmpty()) {
             User superAdmin = new User();
             superAdmin.setUsername("superadmin");
-            superAdmin.setPasswordHash(passwordEncoder.encode("superadmin123"));
+            superAdmin.setPasswordHash(passwordEncoder.encode("admin@123"));
             superAdmin.setRole("SUPERADMIN");
             superAdmin.setTenantId(null);
             
@@ -31,7 +31,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("--- ROBOTRIX BACKEND SEEDING ---");
             System.out.println("Platform SuperAdmin created successfully!");
             System.out.println("Username: superadmin");
-            System.out.println("Password: superadmin123");
+            System.out.println("Password: admin@123");
             System.out.println("--------------------------------");
         }
     }

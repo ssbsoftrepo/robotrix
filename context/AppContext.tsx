@@ -254,20 +254,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     // Authentication States
-    const [token, setToken] = useState<string | null>(localStorage.getItem('robotrix_token'));
-    const [role, setRole] = useState<string | null>(localStorage.getItem('robotrix_role'));
-    const [username, setUsername] = useState<string | null>(localStorage.getItem('robotrix_username'));
-    const [hospitalName, setHospitalName] = useState<string | null>(localStorage.getItem('robotrix_tenant'));
+    const [token, setToken] = useState<string | null>(sessionStorage.getItem('robotrix_token'));
+    const [role, setRole] = useState<string | null>(sessionStorage.getItem('robotrix_role'));
+    const [username, setUsername] = useState<string | null>(sessionStorage.getItem('robotrix_username'));
+    const [hospitalName, setHospitalName] = useState<string | null>(sessionStorage.getItem('robotrix_tenant'));
 
     const login = useCallback((newToken: string, newRole: string, newUsername: string, tenantId: string | null) => {
-        localStorage.setItem('robotrix_token', newToken);
-        localStorage.setItem('robotrix_role', newRole);
-        localStorage.setItem('robotrix_username', newUsername);
+        sessionStorage.setItem('robotrix_token', newToken);
+        sessionStorage.setItem('robotrix_role', newRole);
+        sessionStorage.setItem('robotrix_username', newUsername);
         if (tenantId) {
-            localStorage.setItem('robotrix_tenant', tenantId);
+            sessionStorage.setItem('robotrix_tenant', tenantId);
             setHospitalName(tenantId);
         } else {
-            localStorage.removeItem('robotrix_tenant');
+            sessionStorage.removeItem('robotrix_tenant');
             setHospitalName(null);
         }
         setToken(newToken);
@@ -276,10 +276,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, []);
 
     const logout = useCallback(() => {
-        localStorage.removeItem('robotrix_token');
-        localStorage.removeItem('robotrix_role');
-        localStorage.removeItem('robotrix_username');
-        localStorage.removeItem('robotrix_tenant');
+        sessionStorage.removeItem('robotrix_token');
+        sessionStorage.removeItem('robotrix_role');
+        sessionStorage.removeItem('robotrix_username');
+        sessionStorage.removeItem('robotrix_tenant');
         setToken(null);
         setRole(null);
         setUsername(null);

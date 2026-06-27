@@ -141,7 +141,12 @@ public class AuthController {
         if (user.getTenantId() != null) {
             Optional<Tenant> tenantOpt = tenantRepository.findById(user.getTenantId());
             if (tenantOpt.isPresent()) {
-                hospitalName = tenantOpt.get().getName();
+                Tenant tenant = tenantOpt.get();
+                if (!tenant.isActive()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Hospital '" + tenant.getName() + "' is inactive.");
+                }
+                hospitalName = tenant.getName();
             }
         }
 

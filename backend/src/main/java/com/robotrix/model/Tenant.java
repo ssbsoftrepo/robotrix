@@ -17,6 +17,9 @@ public class Tenant {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @Column(unique = true, nullable = false)
+    private String hid;
+
     private boolean active = true;
 
     @Column(name = "created_at")

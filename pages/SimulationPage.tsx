@@ -141,7 +141,7 @@ const SimulationPage: React.FC = () => {
         return { initialFemoral, initialTibial };
     }, [longLegResults, femurBoundary, tibiaBoundary]);
 
-    const prevBoundaryRef = useRef<{femur: string | null, tibia: string | null}>({ femur: null, tibia: null });
+    const prevBoundaryRef = useRef<{ femur: string | null, tibia: string | null }>({ femur: null, tibia: null });
 
     useEffect(() => {
         const { initialFemoral, initialTibial } = getBoundaryAdjustedValues();
@@ -159,7 +159,7 @@ const SimulationPage: React.FC = () => {
             setTibialCutSim(initialTibial);
             setAppliedFemoralCutSim(initialFemoral);
             setAppliedTibialCutSim(initialTibial);
-            
+
             if (canvasRef.current && (hasBoundaryChanged || femoralCutSim === null || tibialCutSim === null)) {
                 setCenterlineX(canvasRef.current.width / 2);
             }
@@ -209,7 +209,7 @@ const SimulationPage: React.FC = () => {
 
         const femoralRad = hipPivotAngle * (Math.PI / 180);
         const dxFemoral = Math.abs(originalKnee.y - originalHip.y) * Math.tan(femoralRad);
-        
+
         const tibialRad = anklePivotAngle * (Math.PI / 180);
         const dxTibial = Math.abs(originalAnkle.y - originalKnee.y) * Math.tan(tibialRad);
         const totalDx = (-dxFemoral - dxTibial) * lateralDirection;

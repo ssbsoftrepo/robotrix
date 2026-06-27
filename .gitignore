@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Gradle / Java build artifacts
+backend/build/
+backend/.gradle/
+backend/bin/
+backend/*.log
+

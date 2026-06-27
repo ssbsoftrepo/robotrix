@@ -2,6 +2,7 @@
 CREATE TABLE tenants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) UNIQUE NOT NULL,
+    hid VARCHAR(100) UNIQUE NOT NULL,
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -10,11 +11,15 @@ CREATE TABLE tenants (
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
-    username VARCHAR(100) NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL, -- 'SUPERADMIN', 'HOSPITAL_ADMIN', 'DOCTOR'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT unique_username_per_tenant UNIQUE (tenant_id, username)
+    mobile_number VARCHAR(20),
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    consultant_id VARCHAR(50),
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 3. Create Patients Table
@@ -23,9 +28,11 @@ CREATE TABLE patients (
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
+    pid VARCHAR(100) NOT NULL,
     age INT,
     gender VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_pid_per_tenant UNIQUE (tenant_id, pid)
 );
 
 -- 4. Create Surgery Plans Table
