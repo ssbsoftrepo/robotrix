@@ -23,7 +23,9 @@ import ValgusIntraOperativeValidationPage from './pages/ValgusIntraOperativeVali
 import ValgusIntraOperativeCoronalBalancingPage from './pages/ValgusIntraOperativeCoronalBalancingPage';
 import PreOpReportPage from './pages/PreOpReportPage';
 import ValgusPreOpReportPage from './pages/ValgusPreOpReportPage';
-import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import HospitalAdminDashboard from './pages/HospitalAdminDashboard';
 import { Camera } from '@capacitor/camera';
 import { Filesystem } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
@@ -44,8 +46,7 @@ async function requestAllPermissions() {
 
 
 const App: React.FC = () => {
-    const { page, setPage, setCurrentPatientId, setPlannerMode } = useAppContext();
-    const [showIntro, setShowIntro] = useState(true);
+    const { page, setPage, token, role, hospitalName, login, logout } = useAppContext();
 
     useEffect(() => {
         // Only run on native Android/iOS
@@ -53,6 +54,22 @@ const App: React.FC = () => {
             requestAllPermissions();
         }
     }, []);
+
+    // 1. Session check: if not authenticated, render Login Page
+    if (!token) {
+        return <LoginPage onLoginSuccess={login} />;
+    }
+
+    // 2. Super Admin Dashboard routing
+    if (role === 'SUPERADMIN') {
+        return <SuperAdminDashboard onLogout={logout} />;
+    }
+
+    // 3. Hospital Admin Dashboard routing
+    if (role === 'HOSPITAL_ADMIN') {
+        return <HospitalAdminDashboard hospitalName={hospitalName || 'Clinic'} onLogout={logout} />;
+    }
+
     const renderPage = () => {
         switch (page) {
             case 'case-management':
@@ -108,10 +125,6 @@ const App: React.FC = () => {
         setPage('case-management');
     };
 
-    if (showIntro) {
-        return <LandingPage onEnter={() => setShowIntro(false)} />;
-    }
-
     return (
         <div className="h-screen flex flex-col">
             <header
@@ -122,7 +135,7 @@ const App: React.FC = () => {
                 <h1 className="text-4xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg pointer-events-none select-none relative z-10">
                     ROBOTRIX<span className="text-[#6D282C]">+</span>
                 </h1>
-                <div className="flex-1 flex justify-end pr-3">
+                <div className="flex-1 flex justify-end pr-3 gap-3">
                     {page !== 'case-management' && (
                         <button
                             onClick={handleHomeClick}
@@ -138,6 +151,18 @@ const App: React.FC = () => {
                             <span className="text-white font-bold tracking-widest select-none">HOME</span>
                         </button>
                     )}
+                    <button
+                        onClick={logout}
+                        className="relative z-50 py-2 px-6 rounded-sm 
+                                   bg-transparent border border-[#333] hover:border-[#6D282C]
+                                   text-[#888] hover:text-white
+                                   active:scale-[0.98]
+                                   flex items-center justify-center transition-all duration-300 touch-manipulation select-none cursor-pointer"
+                        title="Logout"
+                        aria-label="Logout"
+                    >
+                        <span className="font-bold tracking-widest select-none">LOGOUT</span>
+                    </button>
                 </div>
             </header>
 

@@ -156,7 +156,7 @@ const ReportPage: React.FC = () => {
                             </div>
                             <div>
                                 <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">ID / Case Number</p>
-                                <p className="text-lg text-gray-200 mt-0.5">{patient.id}</p>
+                                <p className="text-lg text-gray-200 mt-0.5">{patient.pid || patient.id}</p>
                             </div>
                             <div>
                                 <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">Date</p>

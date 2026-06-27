@@ -333,11 +333,12 @@ const CaseManagementPage: React.FC = () => {
 
     useEffect(() => {
         if (!currentPatientId) {
-            getNextPatientIdPreview().then(setSuggestedId);
+            const nextCount = patients.length + 1;
+            setSuggestedId(`PID-${nextCount.toString().padStart(4, '0')}`);
         } else {
             setSuggestedId('');
         }
-    }, [currentPatientId]);
+    }, [currentPatientId, patients]);
 
     // Fetch active plan name when a plan is loaded
     useEffect(() => {
@@ -380,26 +381,19 @@ const CaseManagementPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        let patientId: string;
-
-        if (currentPatientId) {
-            patientId = currentPatientId;
-        } else {
-            patientId = await getNextPatientId();
-        }
-
         const patientToSave: Patient = {
             ...formData,
-            id: patientId,
+            id: currentPatientId || '',
         };
 
-        await savePatient(patientToSave);
-        await setCurrentPatientId(patientId, patientToSave);
-
-        if (!currentPatientId) {
-            const planId = await createNewPlan(patientId, 'Initial Plan');
-            await setCurrentPlanId(planId, patientToSave);
-            setPlannerMode('advanced');
+        const saved = await savePatient(patientToSave);
+        if (saved) {
+            await setCurrentPatientId(saved.id, saved);
+            if (!currentPatientId) {
+                const planId = await createNewPlan(saved.id, 'Initial Plan');
+                await setCurrentPlanId(planId, saved);
+                setPlannerMode('advanced');
+            }
         }
     };
 
@@ -680,7 +674,7 @@ const CaseManagementPage: React.FC = () => {
                             <div key={p.id} className="relative bg-[#1a1a1a] border border-[#333333] p-6 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center hover:border-[#6D282C]/50 transition">
                                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                                 <div className="relative z-10">
-                                    <p className="font-semibold text-2xl text-gray-200">{p.firstName} {p.lastName} (ID: {p.id})</p>
+                                    <p className="font-semibold text-2xl text-gray-200">{p.firstName} {p.lastName} (ID: {p.pid || p.id})</p>
                                     <p className="text-lg text-gray-500 mt-2">{formatDate(p.date)}</p>
                                 </div>
                                 <div className="flex space-x-4 mt-4 md:mt-0 relative z-10">
@@ -939,7 +933,7 @@ const CaseManagementPage: React.FC = () => {
                                             Patient ID
                                         </label>
                                         <div className="w-full h-14 p-3 rounded-md text-lg bg-[#1a1a1a] border border-[#333333] text-gray-400 flex items-center">
-                                            {activePatient.id}
+                                            {activePatient.pid || activePatient.id}
                                         </div>
                                     </div>
 
@@ -1029,9 +1023,9 @@ const CaseManagementPage: React.FC = () => {
                                             <input
                                                 type="text"
                                                 id="id"
-                                                value={currentPatientId ? formData.id : suggestedId}
+                                                value={currentPatientId ? (formData.pid || formData.id) : suggestedId}
                                                 onChange={handleInputChange}
-                                                disabled={!!currentPatientId}
+                                                disabled={true}
                                                 className="w-full h-14 p-3 rounded-md text-lg bg-[#1a1a1a] border border-[#333333] text-gray-400"
                                                 placeholder="Auto-generated ID"
                                                 required

@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { Patient, Page, LongLegResults, ValgusResults, LegSide, Landmarks, FunctionalPlannerMode, KneeType } from '../types';
 import { savePatients, getPatients, saveCaseData, loadCaseData, updatePlanLegSide } from '../utils/storage';
+import { api } from '../services/api';
 
 export interface CoronalBalancingResults {
     selectedSeries: number | null;
@@ -103,7 +104,7 @@ interface AppContextType extends CaseData {
     previousPage: Page | null;
     setPreviousPage: (page: Page | null) => void;
     patients: Patient[];
-    savePatient: (patient: Patient) => void;
+    savePatient: (patient: Patient) => Promise<Patient | undefined>;
     deletePatient: (patientId: string) => void;
     currentPatientId: string | null;
     setCurrentPatientId: (id: string | null) => void;
@@ -174,6 +175,12 @@ interface AppContextType extends CaseData {
     setValgusIntraOpCoronalBalancingData: (data: IntraOpCoronalBalancingData) => void;
 
     isLoading: boolean;
+    token: string | null;
+    role: string | null;
+    username: string | null;
+    hospitalName: string | null;
+    login: (token: string, role: string, username: string, tenantId: string | null) => void;
+    logout: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -246,30 +253,115 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    // Authentication States
+    const [token, setToken] = useState<string | null>(localStorage.getItem('robotrix_token'));
+    const [role, setRole] = useState<string | null>(localStorage.getItem('robotrix_role'));
+    const [username, setUsername] = useState<string | null>(localStorage.getItem('robotrix_username'));
+    const [hospitalName, setHospitalName] = useState<string | null>(localStorage.getItem('robotrix_tenant'));
+
+    const login = useCallback((newToken: string, newRole: string, newUsername: string, tenantId: string | null) => {
+        localStorage.setItem('robotrix_token', newToken);
+        localStorage.setItem('robotrix_role', newRole);
+        localStorage.setItem('robotrix_username', newUsername);
+        if (tenantId) {
+            localStorage.setItem('robotrix_tenant', tenantId);
+            setHospitalName(tenantId);
+        } else {
+            localStorage.removeItem('robotrix_tenant');
+            setHospitalName(null);
+        }
+        setToken(newToken);
+        setRole(newRole);
+        setUsername(newUsername);
+    }, []);
+
+    const logout = useCallback(() => {
+        localStorage.removeItem('robotrix_token');
+        localStorage.removeItem('robotrix_role');
+        localStorage.removeItem('robotrix_username');
+        localStorage.removeItem('robotrix_tenant');
+        setToken(null);
+        setRole(null);
+        setUsername(null);
+        setHospitalName(null);
+        setPatients([]);
+        _setCurrentPatientId(null);
+        setCurrentPlanId(null);
+        setCaseData(initialCaseData);
+    }, []);
+
     // All data for the currently loaded patient is in this state object.
     const [caseData, setCaseData] = useState<CaseData>(initialCaseData);
 
-    // Load patients list on mount
+    // Fetch patients list from server
     useEffect(() => {
-        getPatients().then(setPatients);
-    }, []);
-
-    // Reactively sync legSide logic REMOVED. Leg Side is now Plan-specific.
-
-    // Persist case data to IDB whenever it changes for the current patient/plan
-    useEffect(() => {
-        if (currentPlanId) {
-            saveCaseData(currentPlanId, caseData);
-        } else if (currentPatientId) {
-            // See note below about legacy saving behavior
+        if (token && role === 'DOCTOR') {
+            api.getPatients()
+                .then((data: any) => {
+                    if (Array.isArray(data)) {
+                        const mapped = data.map((p: any) => {
+                            const nameParts = (p.name || '').trim().split(' ');
+                            const firstName = nameParts[0] || '';
+                            const lastName = nameParts.slice(1).join(' ') || '';
+                            return {
+                                id: String(p.id),
+                                pid: p.pid || `PID-${String(p.id).padStart(4, '0')}`,
+                                firstName,
+                                lastName,
+                                age: p.age ? String(p.age) : '',
+                                gender: p.gender || 'Male',
+                                date: p.createdAt ? p.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
+                            };
+                        });
+                        setPatients(mapped);
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load patients from server', err);
+                });
+        } else {
+            setPatients([]);
         }
-    }, [caseData, currentPlanId]);
+    }, [token, role]);
+
+    // Save case data locally instantly, and sync to remote database with a debounce
+    useEffect(() => {
+        if (!currentPlanId) return;
+
+        // 1. Instantly save to IndexedDB local storage
+        saveCaseData(currentPlanId, caseData);
+
+        // 2. Debounce HTTP save to Spring Boot database (3s)
+        const handler = setTimeout(async () => {
+            if (role !== 'DOCTOR' || !currentPatientId) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('patientId', currentPatientId);
+                formData.append('legSide', caseData.legSide);
+                formData.append('caseDataJson', JSON.stringify(caseData));
+
+                // If there's a longLegImageSrc that is base64, append it
+                if (caseData.longLegImageSrc && caseData.longLegImageSrc.startsWith('data:')) {
+                    const res = await fetch(caseData.longLegImageSrc);
+                    const blob = await res.blob();
+                    formData.append('image', blob, 'longleg.png');
+                    formData.append('imageType', 'longleg');
+                }
+
+                await api.savePlan(formData);
+                console.log('Successfully auto-saved plan and image to remote database.');
+            } catch (e) {
+                console.error('Failed to auto-save plan to server', e);
+            }
+        }, 3000);
+
+        return () => clearTimeout(handler);
+    }, [caseData, currentPlanId, currentPatientId, role]);
 
     const deletePatient = useCallback((patientId: string) => {
         setPatients(currentPatients => {
-            const newPatientsList = currentPatients.filter(p => p.id !== patientId);
-            savePatients(newPatientsList);
-            return newPatientsList;
+            return currentPatients.filter(p => p.id !== patientId);
         });
         // Clear current patient if we're deleting it
         if (currentPatientId === patientId) {
@@ -279,54 +371,48 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [currentPatientId]);
 
-    const savePatient = useCallback((patientToSave: Patient) => {
-        setPatients(currentPatients => {
-            const index = currentPatients.findIndex(p => p.id === patientToSave.id);
-            const isNewPatient = index === -1;
-            const newPatientsList = [...currentPatients];
+    const savePatient = useCallback(async (patientToSave: Patient) => {
+        if (role !== 'DOCTOR') return;
 
-            if (isNewPatient) {
-                newPatientsList.push(patientToSave);
-            } else {
-                newPatientsList[index] = patientToSave;
-            }
+        try {
+            const fullName = `${patientToSave.firstName || ''} ${patientToSave.lastName || ''}`.trim();
+            const savedPatient = await api.createPatient({
+                name: fullName || 'Unknown',
+                age: patientToSave.age ? parseInt(patientToSave.age, 10) : null,
+                gender: patientToSave.gender
+            });
 
-            savePatients(newPatientsList);
+            const nameParts = (savedPatient.name || '').trim().split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
 
-            // We also need to Initialize case data for new patient or update legside
-            // Async load check not needed here as we are in sync flow usually, 
-            // but strictly speaking we should probably just save the current caseData if it matches ID,
-            // or load/mix.
-            // Original logic was: load base, merge, save.
-            // Since this is usually used to CREATE/UPDATE patient metadata, 
-            // case data might not be loaded yet if we are in case management page?
-            // Actually savePatient is called when creating a NEW patient usually.
+            const mappedSavedPatient: Patient = {
+                id: String(savedPatient.id),
+                pid: savedPatient.pid || `PID-${String(savedPatient.id).padStart(4, '0')}`,
+                firstName,
+                lastName,
+                age: savedPatient.age ? String(savedPatient.age) : '',
+                gender: savedPatient.gender || 'Male',
+                date: savedPatient.createdAt ? savedPatient.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
+            };
 
-            // Let's assume for new patient we just want to ensure entry exists.
-            // We can fire-and-forget the case data update
-
-            (async () => {
-                let currentData = initialCaseData;
-                // If we are currently editing this patient, use state
-                if (currentPatientId === patientToSave.id) {
-                    currentData = caseData;
+            // Update local state
+            setPatients(currentPatients => {
+                const index = currentPatients.findIndex(p => p.id === mappedSavedPatient.id);
+                const newPatientsList = [...currentPatients];
+                if (index === -1) {
+                    newPatientsList.push(mappedSavedPatient);
                 } else {
-                    // Try to load existing
-                    const existing = await loadCaseData(patientToSave.id);
-                    if (existing) currentData = existing;
+                    newPatientsList[index] = mappedSavedPatient;
                 }
-
-                const updatedCaseData = {
-                    ...initialCaseData, // Ensure defaults
-                    ...currentData,
-                    // legSide: patientToSave.legSide.toLowerCase() as LegSide, // REMOVED: Patient no longer has legSide
-                };
-                await saveCaseData(patientToSave.id, updatedCaseData);
-            })();
-
-            return newPatientsList;
-        });
-    }, [caseData, currentPatientId]);
+                return newPatientsList;
+            });
+            return mappedSavedPatient;
+        } catch (e) {
+            console.error('Failed to register patient on server', e);
+            return undefined;
+        }
+    }, [role]);
 
 
     const setCurrentPatientId = async (id: string | null, overridePatient?: Patient) => {
@@ -458,6 +544,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         currentPlanId,
         setCurrentPlanId: setPlanAndLoad,
         isLoading,
+        token,
+        role,
+        username,
+        hospitalName,
+        login,
+        logout,
         ...caseData,
         setLegSide: handleSetLegSide,
         setPlannerMode: createSetter('plannerMode'),
