@@ -1,101 +1,8 @@
-
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { Patient, Page, LongLegResults, ValgusResults, LegSide, Landmarks, FunctionalPlannerMode, KneeType } from '../types';
-import { savePatients, getPatients, saveCaseData, loadCaseData, updatePlanLegSide } from '../utils/storage';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
+import { Patient, Page, LongLegResults, ValgusResults, LegSide, Landmarks, FunctionalPlannerMode, KneeType, CaseData, CoronalBalancingResults, IntraOpValidationData, IntraOpCoronalBalancingData, initialCaseData } from '../types';
+import { savePatients, getPatients, saveCaseData, loadCaseData, updatePlanLegSide, getPlansForPatient } from '../utils/storage';
 import { api } from '../services/api';
 
-export interface CoronalBalancingResults {
-    selectedSeries: number | null;
-    lateralGap: string;
-    medialRelease: number;
-    simFemoralCut: number;
-    simTibialCut: number;
-    simResectionDepth: number;
-}
-
-export interface IntraOpValidationData {
-    medialGap: number;
-    lateralGap: number;
-    tibiaWidth: number;
-}
-
-export interface IntraOpCoronalBalancingData {
-    additionalFemurCut: number;
-    additionalTibiaCut: number;
-    additionalLaxity: number;
-    functionalTibiaCutDegree: number | null;
-}
-
-// Centralized data structure for a single case
-export interface CaseData {
-    legSide: LegSide;
-    plannerMode: 'basic' | 'advanced' | null;
-    kneeType: KneeType | null;
-    ldfaMode: 'native' | 'corrected' | null;
-    femurBoundary: 'basic' | 'expanded' | null;
-    tibiaBoundary: 'basic' | 'expanded' | null;
-    functionalPlannerMode: FunctionalPlannerMode;
-    lateralLaxity: string | null;
-    implantThickness: number | null;
-
-    longLegImageSrc: string | null;
-    longLegLandmarks: Landmarks;
-    longLegResults: LongLegResults;
-    longLegCanvasDataUrl: string | null;
-
-    valgusImageSrc: string | null;
-    valgusLandmarks: Landmarks;
-    valgusResults: ValgusResults;
-    valgusCanvasDataUrl: string | null;
-
-    simAfterImage: string | null;
-    femoralCutSim: number | null;
-    tibialCutSim: number | null;
-    appliedFemoralCutSim: number | null;
-    appliedTibialCutSim: number | null;
-
-    valgusCoronalBalancingResults: CoronalBalancingResults;
-    longLegCoronalBalancingResults: CoronalBalancingResults;
-
-    // Image Persistence
-    coronalBalancingSimImage: string | null;
-    postOpLongLegImage: string | null;
-    postOpLongLegLandmarks: Landmarks;
-    postOpLongLegResults: Partial<LongLegResults>;
-
-    postOpValgusImage: string | null;
-    postOpValgusLandmarks: Landmarks;
-    postOpValgusResults: Partial<ValgusResults>;
-
-    // New persisted images
-    longLegCoronalBalancingMainImage: string | null;
-    longLegCoronalBalancingBlockImage: string | null;
-    longLegFunctionalTibialCutImage: string | null;
-
-    // Valgus specific persisted images
-    valgusCoronalBalancingMainImage: string | null;
-    valgusCoronalBalancingBlockImage: string | null;
-    valgusFunctionalTibialCutImage: string | null;
-
-    resultAnalysisFemoralImage: string | null;
-    resultAnalysisTibialImage: string | null;
-
-    // Laxity Reference Images
-    valgusLaxityReferenceImages: Record<string, string | null>;
-    longLegLaxityReferenceImages: Record<string, string | null>;
-
-    // Functional Cut Degrees for Report
-    valgusFunctionalCutDegree: number | null;
-    longLegFunctionalCutDegree: number | null;
-
-    // Line Positions Persistence
-    valgusFunctionalLinesY: number;
-    longLegFunctionalLinesY: number;
-    intraOpValidationData: IntraOpValidationData;
-    valgusIntraOpValidationData: IntraOpValidationData;
-    intraOpCoronalBalancingData: IntraOpCoronalBalancingData;
-    valgusIntraOpCoronalBalancingData: IntraOpCoronalBalancingData;
-}
 
 // Combine all context values into a single interface
 interface AppContextType extends CaseData {
@@ -185,65 +92,7 @@ interface AppContextType extends CaseData {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Initial states for complex objects
-const initialLongLegResults: LongLegResults = { ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', ama: null };
-const initialValgusResults: ValgusResults = { obliquity: null, femurType: '--', femurTypeByObliquity: '--', cpak: '--', cut: '--', ldfa: null, mpta: null };
-const initialCoronalBalancingResults: CoronalBalancingResults = { selectedSeries: null, lateralGap: '', medialRelease: 0, simFemoralCut: 3.0, simTibialCut: 0.0, simResectionDepth: 20 };
-const initialIntraOpValidationData: IntraOpValidationData = { medialGap: 16, lateralGap: 16, tibiaWidth: 70 };
-const initialIntraOpCoronalBalancingData: IntraOpCoronalBalancingData = { additionalFemurCut: 0, additionalTibiaCut: 0, additionalLaxity: 0, functionalTibiaCutDegree: null };
 
-// The single source of truth for a new/cleared case
-const initialCaseData: CaseData = {
-    legSide: 'left',
-    plannerMode: null,
-    kneeType: null,
-    ldfaMode: null,
-    femurBoundary: null,
-    tibiaBoundary: null,
-    functionalPlannerMode: 'tibial_check',
-    lateralLaxity: null,
-    implantThickness: null,
-    longLegImageSrc: null,
-    longLegLandmarks: {},
-    longLegResults: initialLongLegResults,
-    longLegCanvasDataUrl: null,
-    valgusImageSrc: null,
-    valgusLandmarks: {},
-    valgusResults: initialValgusResults,
-    valgusCanvasDataUrl: null,
-    simAfterImage: null,
-    femoralCutSim: null,
-    tibialCutSim: null,
-    appliedFemoralCutSim: null,
-    appliedTibialCutSim: null,
-    valgusCoronalBalancingResults: initialCoronalBalancingResults,
-    longLegCoronalBalancingResults: initialCoronalBalancingResults,
-    coronalBalancingSimImage: null,
-    postOpLongLegImage: null,
-    postOpLongLegLandmarks: {},
-    postOpLongLegResults: {},
-    postOpValgusImage: null,
-    postOpValgusLandmarks: {},
-    postOpValgusResults: {},
-    longLegCoronalBalancingMainImage: null,
-    longLegCoronalBalancingBlockImage: null,
-    longLegFunctionalTibialCutImage: null,
-    valgusCoronalBalancingMainImage: null,
-    valgusCoronalBalancingBlockImage: null,
-    valgusFunctionalTibialCutImage: null,
-    resultAnalysisFemoralImage: null,
-    resultAnalysisTibialImage: null,
-    valgusLaxityReferenceImages: {},
-    longLegLaxityReferenceImages: {},
-    valgusFunctionalCutDegree: null,
-    longLegFunctionalCutDegree: null,
-    valgusFunctionalLinesY: 30,
-    longLegFunctionalLinesY: 30,
-    intraOpValidationData: initialIntraOpValidationData,
-    valgusIntraOpValidationData: initialIntraOpValidationData,
-    intraOpCoronalBalancingData: initialIntraOpCoronalBalancingData,
-    valgusIntraOpCoronalBalancingData: initialIntraOpCoronalBalancingData,
-};
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [page, setPage] = useState<Page>('case-management');
@@ -252,12 +101,33 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [currentPatientId, _setCurrentPatientId] = useState<string | null>(null);
     const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const loadedPlanIdRef = useRef<string | null>(null);
 
     // Authentication States
-    const [token, setToken] = useState<string | null>(sessionStorage.getItem('robotrix_token'));
-    const [role, setRole] = useState<string | null>(sessionStorage.getItem('robotrix_role'));
-    const [username, setUsername] = useState<string | null>(sessionStorage.getItem('robotrix_username'));
-    const [hospitalName, setHospitalName] = useState<string | null>(sessionStorage.getItem('robotrix_tenant'));
+    const [token, setToken] = useState<string | null>(() => {
+        const storedToken = sessionStorage.getItem('robotrix_token');
+        if (storedToken) {
+            try {
+                const payloadBase64 = storedToken.split('.')[1];
+                const payloadJson = JSON.parse(atob(payloadBase64));
+                const exp = payloadJson.exp;
+                if (exp && Date.now() >= exp * 1000) {
+                    sessionStorage.removeItem('robotrix_token');
+                    sessionStorage.removeItem('robotrix_role');
+                    sessionStorage.removeItem('robotrix_username');
+                    sessionStorage.removeItem('robotrix_tenant');
+                    return null;
+                }
+                return storedToken;
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    });
+    const [role, setRole] = useState<string | null>(() => token ? sessionStorage.getItem('robotrix_role') : null);
+    const [username, setUsername] = useState<string | null>(() => token ? sessionStorage.getItem('robotrix_username') : null);
+    const [hospitalName, setHospitalName] = useState<string | null>(() => token ? sessionStorage.getItem('robotrix_tenant') : null);
 
     const login = useCallback((newToken: string, newRole: string, newUsername: string, tenantId: string | null) => {
         sessionStorage.setItem('robotrix_token', newToken);
@@ -273,6 +143,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setToken(newToken);
         setRole(newRole);
         setUsername(newUsername);
+        setPage('case-management');
     }, []);
 
     const logout = useCallback(() => {
@@ -288,7 +159,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         _setCurrentPatientId(null);
         setCurrentPlanId(null);
         setCaseData(initialCaseData);
+        setPage('case-management');
+        loadedPlanIdRef.current = null;
     }, []);
+
+    useEffect(() => {
+        const handleAuthError = () => {
+            logout();
+        };
+        window.addEventListener('auth-error', handleAuthError);
+        return () => {
+            window.removeEventListener('auth-error', handleAuthError);
+        };
+    }, [logout]);
 
     // All data for the currently loaded patient is in this state object.
     const [caseData, setCaseData] = useState<CaseData>(initialCaseData);
@@ -324,50 +207,48 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     }, [token, role]);
 
-    // Save case data locally instantly, and sync to remote database with a debounce
+    // Sync to remote database with a debounce
     useEffect(() => {
-        if (!currentPlanId) return;
+        if (isLoading || !currentPlanId || !currentPatientId || role !== 'DOCTOR') return;
 
-        // 1. Instantly save to IndexedDB local storage
-        saveCaseData(currentPlanId, caseData);
+        // Skip saving if the plan ID has changed but the data is not yet loaded for it
+        if (currentPlanId !== loadedPlanIdRef.current) return;
 
-        // 2. Debounce HTTP save to Spring Boot database (3s)
         const handler = setTimeout(async () => {
-            if (role !== 'DOCTOR' || !currentPatientId) return;
-
             try {
-                const formData = new FormData();
-                formData.append('patientId', currentPatientId);
-                formData.append('legSide', caseData.legSide);
-                formData.append('caseDataJson', JSON.stringify(caseData));
+                const plans = await getPlansForPatient(currentPatientId);
+                const currentPlan = plans.find(p => p.id === currentPlanId);
+                const planName = currentPlan?.name || 'Plan';
 
-                // If there's a longLegImageSrc that is base64, append it
-                if (caseData.longLegImageSrc && caseData.longLegImageSrc.startsWith('data:')) {
-                    const res = await fetch(caseData.longLegImageSrc);
-                    const blob = await res.blob();
-                    formData.append('image', blob, 'longleg.png');
-                    formData.append('imageType', 'longleg');
-                }
+                const caseDataWithMeta = {
+                    ...caseData,
+                    planName,
+                };
 
-                await api.savePlan(formData);
-                console.log('Successfully auto-saved plan and image to remote database.');
+                await saveCaseData(currentPlanId, caseDataWithMeta, currentPatientId);
             } catch (e) {
                 console.error('Failed to auto-save plan to server', e);
             }
-        }, 3000);
+        }, 1500);
 
         return () => clearTimeout(handler);
-    }, [caseData, currentPlanId, currentPatientId, role]);
+    }, [caseData, currentPlanId, currentPatientId, role, isLoading]);
 
-    const deletePatient = useCallback((patientId: string) => {
-        setPatients(currentPatients => {
-            return currentPatients.filter(p => p.id !== patientId);
-        });
-        // Clear current patient if we're deleting it
-        if (currentPatientId === patientId) {
-            _setCurrentPatientId(null);
-            setCurrentPlanId(null);
-            setCaseData(initialCaseData);
+    const deletePatient = useCallback(async (patientId: string) => {
+        try {
+            await api.deletePatient(patientId);
+            setPatients(currentPatients => {
+                return currentPatients.filter(p => p.id !== patientId);
+            });
+            // Clear current patient if we're deleting it
+            if (currentPatientId === patientId) {
+                _setCurrentPatientId(null);
+                setCurrentPlanId(null);
+                setCaseData(initialCaseData);
+                loadedPlanIdRef.current = null;
+            }
+        } catch (e) {
+            console.error('Failed to delete patient from server', e);
         }
     }, [currentPatientId]);
 
@@ -445,6 +326,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 // Should not happen for existing plans, but for new ones
                 setCaseData(initialCaseData);
             }
+            loadedPlanIdRef.current = planId;
         } catch (error) {
             console.error("Error loading plan data", error);
             setCaseData(initialCaseData);
@@ -503,6 +385,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 // REMOVED: Logic that forced patient.legSide overwrite
 
                 setCaseData(nextCaseData);
+                loadedPlanIdRef.current = planId; // Set the ref to the loaded plan ID
 
             } catch (e) {
                 console.error("Error loading plan", e);
@@ -510,6 +393,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             } finally {
                 setIsLoading(false);
             }
+        } else {
+            loadedPlanIdRef.current = null;
         }
     };
 

@@ -294,9 +294,7 @@ const SimulationPage: React.FC = () => {
             ctx.stroke();
         }
 
-        setSimAfterImage(canvas.toDataURL('image/png'));
-
-    }, [appliedFemoralCutSim, appliedTibialCutSim, legSide, isLoaded, centerlineX, isSplitView, setSimAfterImage, postOpMHKAStr, longLegResults]);
+    }, [appliedFemoralCutSim, appliedTibialCutSim, legSide, isLoaded, centerlineX, isSplitView, postOpMHKAStr, longLegResults]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -360,6 +358,14 @@ const SimulationPage: React.FC = () => {
             draw();
         }
     }, [isLoaded, draw]);
+
+    useEffect(() => {
+        return () => {
+            if (canvasRef.current) {
+                setSimAfterImage(canvasRef.current.toDataURL('image/png'));
+            }
+        };
+    }, [setSimAfterImage]);
 
     const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -532,7 +538,12 @@ const SimulationPage: React.FC = () => {
             <div className="mt-1 flex justify-between px-2 pb-2 relative z-10">
                 {/* Back Button */}
                 <button
-                    onClick={() => setPage('results-analysis')}
+                    onClick={() => {
+                        if (canvasRef.current) {
+                            setSimAfterImage(canvasRef.current.toDataURL('image/png'));
+                        }
+                        setPage('results-analysis');
+                    }}
                     className="group relative py-2 px-4 bg-[#252525] border border-[#444444] rounded-sm 
                                shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
                                transition-all duration-300 ease-out
@@ -552,7 +563,12 @@ const SimulationPage: React.FC = () => {
 
                 {/* View Report Button */}
                 <button
-                    onClick={() => setPage('pre-op-report')}
+                    onClick={() => {
+                        if (canvasRef.current) {
+                            setSimAfterImage(canvasRef.current.toDataURL('image/png'));
+                        }
+                        setPage('pre-op-report');
+                    }}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
                                transition-all duration-300 ease-out

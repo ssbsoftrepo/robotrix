@@ -153,10 +153,12 @@ const PlanSelectionModal: React.FC<{
     const [loading, setLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [newPlanName, setNewPlanName] = useState('');
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (isOpen && patientId) {
             setLoading(true);
+            setError(null);
             getPlansForPatient(patientId).then(p => {
                 setPlans(p);
                 setLoading(false);
@@ -166,7 +168,16 @@ const PlanSelectionModal: React.FC<{
 
     const handleCreate = async () => {
         if (!newPlanName.trim()) return;
+
+        const normalized = newPlanName.trim().toLowerCase();
+        const planExists = plans.some(p => p.name.trim().toLowerCase() === normalized);
+        if (planExists) {
+            setError('A plan with this name already exists for this patient.');
+            return;
+        }
+
         setLoading(true);
+        setError(null);
         try {
             const newId = await createNewPlan(patientId, newPlanName);
             onSelectPlan(newId);
@@ -174,6 +185,7 @@ const PlanSelectionModal: React.FC<{
             setIsCreating(false);
         } catch (e) {
             console.error(e);
+            setError('Failed to create plan.');
         } finally {
             setLoading(false);
         }
@@ -234,11 +246,15 @@ const PlanSelectionModal: React.FC<{
                         <label className="block text-gray-400 mb-2">Plan Name</label>
                         <input
                             value={newPlanName}
-                            onChange={(e) => setNewPlanName(e.target.value)}
-                            className="w-full p-3 rounded bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C] mb-4"
+                            onChange={(e) => {
+                                setNewPlanName(e.target.value);
+                                setError(null);
+                            }}
+                            className="w-full p-3 rounded bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C] mb-2"
                             placeholder="e.g. Pre-op Planning 1"
                             autoFocus
                         />
+                        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
                         <div className="flex space-x-3">
                             {/* Create Plan - Primary Button */}
                             <button
@@ -257,7 +273,10 @@ const PlanSelectionModal: React.FC<{
                             </button>
                             {/* Cancel - Secondary Button */}
                             <button
-                                onClick={() => setIsCreating(false)}
+                                onClick={() => {
+                                    setIsCreating(false);
+                                    setError(null);
+                                }}
                                 className="group relative flex-1 py-3 bg-[#252525] border border-[#444444] rounded-sm 
                                            shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
                                            transition-all duration-300 ease-out

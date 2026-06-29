@@ -35,10 +35,10 @@ public class SurgeryController {
     @Autowired
     private PlanImageRepository planImageRepository;
 
-    // 1. Get User's Patients (Tenant and User scoped)
+    // 1. Get Hospital's Patients (Tenant-scoped)
     @GetMapping("/patients")
     public ResponseEntity<List<Patient>> getPatients(@AuthenticationPrincipal RobotrixUserDetails principal) {
-        List<Patient> patients = patientRepository.findByUserId(principal.getId());
+        List<Patient> patients = patientRepository.findByTenantId(principal.getTenantId());
         return ResponseEntity.ok(patients);
     }
 
@@ -48,8 +48,12 @@ public class SurgeryController {
             @RequestBody PatientDto patientDto,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         
-        long count = patientRepository.countByTenantIdGlobal(principal.getTenantId());
-        String pid = String.format("PID-%04d", count + 1);
+        long nextId = patientRepository.countByTenantIdGlobal(principal.getTenantId()) + 1;
+        String pid = String.format("PID-%04d", nextId);
+        while (patientRepository.existsByTenantIdAndPid(principal.getTenantId(), pid)) {
+            nextId++;
+            pid = String.format("PID-%04d", nextId);
+        }
         
         Patient patient = new Patient();
         patient.setTenantId(principal.getTenantId());
@@ -63,43 +67,117 @@ public class SurgeryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(patient);
     }
 
-    // 3. Save Plan and upload binary image BLOB
+    // 2b. Delete Patient (Enforces tenant scope and cascades to plans/images via database constraint)
+    @DeleteMapping("/patients/{id}")
+    @Transactional
+    public ResponseEntity<?> deletePatient(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal RobotrixUserDetails principal) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+        if (!patient.getTenantId().equals(principal.getTenantId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
+        patientRepository.delete(patient);
+        return ResponseEntity.ok(java.util.Map.of("message", "Patient deleted successfully"));
+    }
+
+    // 3. Save Plan and upload binary image BLOBs
     @PostMapping(value = "/plans", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @Transactional
     public ResponseEntity<?> savePlan(
             @RequestParam("patientId") Long patientId,
             @RequestParam("legSide") String legSide,
             @RequestParam("caseDataJson") String caseDataJson,
-            @RequestParam(value = "imageType", required = false) String imageType,
-            @RequestPart(value = "image", required = false) MultipartFile imageFile,
+            @RequestParam(value = "planId", required = false) Long planId,
+            org.springframework.web.multipart.MultipartHttpServletRequest request,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         try {
             Patient patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
 
-            // Check if patient belongs to the same user
-            if (!patient.getUser().getId().equals(principal.getId())) {
+            // Check if patient belongs to the same tenant (hospital)
+            if (!patient.getTenantId().equals(principal.getTenantId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access to this patient");
             }
 
-            SurgeryPlan plan = new SurgeryPlan();
-            plan.setTenantId(principal.getTenantId());
-            plan.setPatient(patient);
-            plan.setUser(principal.getUserEntity());
-            plan.setLegSide(legSide);
-            plan.setCaseData(caseDataJson);
+            SurgeryPlan plan;
+            if (planId != null) {
+                plan = surgeryPlanRepository.findById(planId)
+                        .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+                if (!plan.getTenantId().equals(principal.getTenantId())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+                }
+                plan.setLegSide(legSide);
+                plan.setCaseData(caseDataJson);
+                plan.setUpdatedAt(java.time.LocalDateTime.now());
+            } else {
+                // Check if a plan with the same name already exists for this patient
+                String newPlanName = "";
+                try {
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(caseDataJson);
+                    if (node.has("planName")) {
+                        newPlanName = node.get("planName").asText().trim();
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+
+                if (!newPlanName.isEmpty()) {
+                    List<SurgeryPlan> existingPlans = surgeryPlanRepository.findByPatientId(patientId);
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    for (SurgeryPlan existingPlan : existingPlans) {
+                        try {
+                            com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(existingPlan.getCaseData());
+                            if (node.has("planName")) {
+                                String name = node.get("planName").asText().trim();
+                                if (name.equalsIgnoreCase(newPlanName)) {
+                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                            .body("A plan with this name already exists for this patient.");
+                                }
+                            }
+                        } catch (Exception e) {
+                            // Ignore
+                        }
+                    }
+                }
+
+                plan = new SurgeryPlan();
+                plan.setTenantId(principal.getTenantId());
+                plan.setPatient(patient);
+                plan.setUser(principal.getUserEntity());
+                plan.setLegSide(legSide);
+                plan.setCaseData(caseDataJson);
+                plan.setCreatedAt(java.time.LocalDateTime.now());
+                plan.setUpdatedAt(java.time.LocalDateTime.now());
+            }
             
             surgeryPlanRepository.save(plan);
 
-            if (imageFile != null && !imageFile.isEmpty()) {
-                PlanImage planImage = new PlanImage();
-                planImage.setTenantId(principal.getTenantId());
-                planImage.setPlan(plan);
-                planImage.setImageType(imageType != null ? imageType : "original");
-                planImage.setMimeType(imageFile.getContentType());
-                planImage.setImageData(imageFile.getBytes());
+            // Handle dynamic image uploads
+            java.util.Map<String, MultipartFile> fileMap = request.getFileMap();
+            for (java.util.Map.Entry<String, MultipartFile> entry : fileMap.entrySet()) {
+                String imageType = entry.getKey();
+                MultipartFile imageFile = entry.getValue();
                 
-                planImageRepository.save(planImage);
+                if (imageFile != null && !imageFile.isEmpty()) {
+                    // Check if an image with this type already exists for the plan
+                    Optional<PlanImage> existingImageOpt = planImageRepository.findByPlanIdAndImageType(plan.getId(), imageType);
+                    PlanImage planImage;
+                    if (existingImageOpt.isPresent()) {
+                        planImage = existingImageOpt.get();
+                    } else {
+                        planImage = new PlanImage();
+                        planImage.setTenantId(principal.getTenantId());
+                        planImage.setPlan(plan);
+                        planImage.setImageType(imageType);
+                    }
+                    planImage.setMimeType(imageFile.getContentType());
+                    planImage.setImageData(imageFile.getBytes());
+                    
+                    planImageRepository.save(planImage);
+                }
             }
 
             return ResponseEntity.status(HttpStatus.CREATED).body(plan.getId());
@@ -107,6 +185,7 @@ public class SurgeryController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving plan: " + e.getMessage());
         }
     }
+
 
     // 4. Download Binary Image
     @GetMapping("/images/{planId}/{imageType}")

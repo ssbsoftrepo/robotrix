@@ -1,17 +1,5 @@
-
-import { get, set, del } from 'idb-keyval';
-import { Patient } from '../types';
-import { saveImageToFilesystem, loadImageFromFilesystem, deleteImageFromFilesystem } from './filesystem';
-
-const PATIENTS_KEY = 'cpakPatients';
-const PATIENT_COUNTER_KEY = 'cpakPatientCounter';
-export const savePatients = async (patients: Patient[]) => {
-    try {
-        await set(PATIENTS_KEY, patients);
-    } catch (e) {
-        console.error('Failed to save patients to IDB', e);
-    }
-};
+import { Patient, initialCaseData } from '../types';
+import { api } from '../services/api';
 
 export interface PlanMetadata {
     id: string;
@@ -22,122 +10,28 @@ export interface PlanMetadata {
     legSide?: 'left' | 'right';
 }
 
-const PLAN_INDEX_PREFIX = 'patientPlans_';
-
-// Helper to update a single plan's leg side in the index
-export const updatePlanLegSide = async (patientId: string, planId: string, legSide: 'left' | 'right') => {
-    try {
-        const plans = (await get<PlanMetadata[]>(`${PLAN_INDEX_PREFIX}${patientId}`)) || [];
-        const planIndex = plans.findIndex(p => p.id === planId);
-        if (planIndex !== -1) {
-            plans[planIndex].legSide = legSide;
-            plans[planIndex].updatedAt = new Date().toISOString();
-            await set(`${PLAN_INDEX_PREFIX}${patientId}`, plans);
-        }
-    } catch (e) {
-        console.error(`Failed to update leg side for plan ${planId}`, e);
-    }
-};
-
-export const getNextPatientId = async (): Promise<string> => {
-    try {
-        const currentCounter = (await get<number>(PATIENT_COUNTER_KEY)) || 0;
-        const nextCounter = currentCounter + 1;
-        await set(PATIENT_COUNTER_KEY, nextCounter);
-
-        // Format as PID-0001, PID-0002, etc.
-        return `PID-${nextCounter.toString().padStart(4, '0')}`;
-    } catch (e) {
-        console.error('Failed to generate next patient ID, falling back to timestamp', e);
-        // Fallback in case of error
-        return `PID-${Date.now()}`;
-    }
-};
-
-export const getNextPatientIdPreview = async (): Promise<string> => {
-    try {
-        const currentCounter = (await get<number>(PATIENT_COUNTER_KEY)) || 0;
-        const nextCounter = currentCounter + 1;
-        return `PID-${nextCounter.toString().padStart(4, '0')}`;
-    } catch (e) {
-        console.error('Failed to preview next patient ID', e);
-        return `PID-????`;
-    }
-};
-
-export const getPlansForPatient = async (patientId: string): Promise<PlanMetadata[]> => {
-    try {
-        const plans = await get<PlanMetadata[]>(`${PLAN_INDEX_PREFIX}${patientId}`);
-        if (plans && plans.length > 0) return plans;
-        const legacyData = await get(`caseData_${patientId}`);
-        const lsLegacyData = localStorage.getItem(`caseData_${patientId}`);
-
-        if ((legacyData || lsLegacyData) && (legacyData?.longLegImageSrc || legacyData?.valgusImageSrc || (lsLegacyData && (lsLegacyData.includes('longLegImageSrc') || lsLegacyData.includes('valgusImageSrc'))))) {
-            // Virtual "Default Plan" - Only if it has actual images/data
-            return [{
-                id: `legacy_${patientId}`,
-                patientId,
-                name: 'Default Plan',
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            }];
-        }
-
-        return [];
-    } catch (e) {
-        console.error(`Failed to load plans for patient ${patientId}`, e);
-        return [];
-    }
-};
-
-export const createNewPlan = async (patientId: string, name: string): Promise<string> => {
-    const planId = `plan_${Date.now()}`;
-    const newPlan: PlanMetadata = {
-        id: planId,
-        patientId,
-        name,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        legSide: 'left'
-    };
-
-    try {
-        const currentPlans = (await get<PlanMetadata[]>(`${PLAN_INDEX_PREFIX}${patientId}`)) || [];
-
-        if (currentPlans.length === 0) {
-            const legacyData = await get(`caseData_${patientId}`);
-            const lsLegacyData = localStorage.getItem(`caseData_${patientId}`);
-            if ((legacyData || lsLegacyData) && (legacyData?.longLegImageSrc || legacyData?.valgusImageSrc || (lsLegacyData && (lsLegacyData.includes('longLegImageSrc') || lsLegacyData.includes('valgusImageSrc'))))) {
-                const legacyPlan: PlanMetadata = {
-                    id: `legacy_${patientId}`,
-                    patientId,
-                    name: 'Default Plan',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                currentPlans.push(legacyPlan);
-            }
-        }
-
-        currentPlans.push(newPlan);
-        await set(`${PLAN_INDEX_PREFIX}${patientId}`, currentPlans);
-        return planId;
-    } catch (e) {
-        console.error(`Failed to create plan for patient ${patientId}`, e);
-        throw e;
-    }
+export const savePatients = async (patients: Patient[]) => {
+    // No-op: patients are managed and saved on the server database.
 };
 
 export const getPatients = async (): Promise<Patient[]> => {
     try {
-        const patients = await get<Patient[]>(PATIENTS_KEY);
-        if (patients) return patients;
-
-        const lsPatients = localStorage.getItem(PATIENTS_KEY);
-        if (lsPatients) {
-            const parsed = JSON.parse(lsPatients);
-            await set(PATIENTS_KEY, parsed);
-            return parsed;
+        const response = await api.getPatients();
+        if (Array.isArray(response)) {
+            return response.map((p: any) => {
+                const nameParts = (p.name || '').trim().split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                return {
+                    id: String(p.id),
+                    pid: p.pid || `PID-${String(p.id).padStart(4, '0')}`,
+                    firstName,
+                    lastName,
+                    age: p.age ? String(p.age) : '',
+                    gender: p.gender || 'Male',
+                    date: p.createdAt ? p.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
+                };
+            });
         }
         return [];
     } catch (e) {
@@ -146,22 +40,75 @@ export const getPatients = async (): Promise<Patient[]> => {
     }
 };
 
+export const getNextPatientId = async (): Promise<string> => {
+    return 'PID-????';
+};
 
+export const getNextPatientIdPreview = async (): Promise<string> => {
+    return 'PID-????';
+};
 
-const FILE_PREFIX = 'filesystem:';
+export const getPlansForPatient = async (patientId: string): Promise<PlanMetadata[]> => {
+    try {
+        const serverPlans = await api.getPlansForPatient(patientId);
+        if (Array.isArray(serverPlans)) {
+            return serverPlans.map((sp: any) => {
+                let caseDataObj: any = {};
+                try {
+                    caseDataObj = typeof sp.caseData === 'string' ? JSON.parse(sp.caseData) : sp.caseData;
+                } catch (e) {
+                    console.error('Failed to parse caseData from server plan', e);
+                }
+                const planId = String(sp.id);
+                const planName = caseDataObj.planName || `Plan ${sp.id}`;
+                return {
+                    id: planId,
+                    patientId,
+                    name: planName,
+                    createdAt: sp.createdAt || new Date().toISOString(),
+                    updatedAt: sp.updatedAt || new Date().toISOString(),
+                    legSide: sp.legSide || 'left'
+                };
+            });
+        }
+        return [];
+    } catch (e) {
+        console.error(`Failed to load plans for patient ${patientId}`, e);
+        return [];
+    }
+};
 
-// Helper to check if a string is a base64 image
-const isBase64Image = (str: string) => str.startsWith('data:image');
+export const createNewPlan = async (patientId: string, name: string): Promise<string> => {
+    try {
+        const initialData = {
+            ...initialCaseData,
+            planName: name,
+        };
+        const formData = new FormData();
+        formData.append('patientId', patientId);
+        formData.append('legSide', 'left');
+        formData.append('caseDataJson', JSON.stringify(initialData));
 
-// Helper to check if a string is a file reference
-const isFileRef = (str: string) => str.startsWith(FILE_PREFIX);
+        const response = await api.savePlan(formData);
+        return String(response);
+    } catch (e) {
+        console.error(`Failed to create plan for patient ${patientId}`, e);
+        throw e;
+    }
+};
 
-// Recursive function to process data before saving
-const processForSave = async (data: any): Promise<any> => {
+export const updatePlanLegSide = async (patientId: string, planId: string, legSide: 'left' | 'right') => {
+    // No-op because the auto-save effect will automatically sync updated legSide to DB.
+};
+
+const isBase64Image = (str: string) => typeof str === 'string' && str.startsWith('data:image');
+const isDbImageRef = (str: string) => typeof str === 'string' && str.startsWith('dbimage:');
+
+const processForSave = async (data: any, files: { [key: string]: Blob }, path: string = ''): Promise<any> => {
     if (data === null || data === undefined) return data;
 
     if (Array.isArray(data)) {
-        return Promise.all(data.map(item => processForSave(item)));
+        return Promise.all(data.map((item, index) => processForSave(item, files, `${path}_${index}`)));
     }
 
     if (typeof data === 'object') {
@@ -169,18 +116,22 @@ const processForSave = async (data: any): Promise<any> => {
         for (const key in data) {
             if (Object.prototype.hasOwnProperty.call(data, key)) {
                 const value = data[key];
+                const currentPath = path ? `${path}_${key}` : key;
 
                 if (typeof value === 'string' && isBase64Image(value)) {
                     try {
-                        const fileName = await saveImageToFilesystem(value);
-                        newData[key] = `${FILE_PREFIX}${fileName}`;
+                        const res = await fetch(value);
+                        const blob = await res.blob();
+                        files[currentPath] = blob;
+                        newData[key] = `dbimage:${currentPath}`;
                     } catch (e) {
-                        console.error(`Failed to save image for key ${key}`, e);
+                        console.error(`Failed to process base64 image at ${currentPath}`, e);
                         newData[key] = value;
                     }
+                } else if (typeof value === 'object') {
+                    newData[key] = await processForSave(value, files, currentPath);
                 } else {
-                    // Recurse
-                    newData[key] = await processForSave(value);
+                    newData[key] = value;
                 }
             }
         }
@@ -190,11 +141,11 @@ const processForSave = async (data: any): Promise<any> => {
     return data;
 };
 
-const processForLoad = async (data: any): Promise<any> => {
+const processForLoad = async (data: any, planId: string): Promise<any> => {
     if (data === null || data === undefined) return data;
 
     if (Array.isArray(data)) {
-        return Promise.all(data.map(item => processForLoad(item)));
+        return Promise.all(data.map(item => processForLoad(item, planId)));
     }
 
     if (typeof data === 'object') {
@@ -203,19 +154,24 @@ const processForLoad = async (data: any): Promise<any> => {
             if (Object.prototype.hasOwnProperty.call(data, key)) {
                 const value = data[key];
 
-                // If value is a file reference, load it
-                if (typeof value === 'string' && isFileRef(value)) {
-                    const fileName = value.replace(FILE_PREFIX, '');
+                if (typeof value === 'string' && isDbImageRef(value)) {
+                    const imageType = value.replace('dbimage:', '');
                     try {
-                        const imageContent = await loadImageFromFilesystem(fileName);
-                        newData[key] = imageContent || null; // If load fails, maybe null?
+                        const blob = await api.getPlanImage(planId, imageType);
+                        if (blob instanceof Blob) {
+                            const base64 = await blobToBase64(blob);
+                            newData[key] = base64;
+                        } else {
+                            newData[key] = null;
+                        }
                     } catch (e) {
-                        console.error(`Failed to load image for key ${key}`, e);
+                        console.error(`Failed to load db image ${imageType} for plan ${planId}`, e);
                         newData[key] = null;
                     }
+                } else if (typeof value === 'object') {
+                    newData[key] = await processForLoad(value, planId);
                 } else {
-                    // Recurse
-                    newData[key] = await processForLoad(value);
+                    newData[key] = value;
                 }
             }
         }
@@ -225,90 +181,52 @@ const processForLoad = async (data: any): Promise<any> => {
     return data;
 };
 
-
-// Helper to get correct storage key
-const getStorageKey = (id: string) => {
-    if (id.startsWith('legacy_')) {
-        return `caseData_${id.replace('legacy_', '')}`;
-    } else if (id.startsWith('plan_')) {
-        return `caseData_${id}`;
-    }
-    // Fallback for direct patient ID usage
-    return `caseData_${id}`;
+const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
 };
 
-export const saveCaseData = async (id: string, caseData: any) => {
+export const saveCaseData = async (id: string, caseData: any, patientId: string) => {
     try {
-        const key = getStorageKey(id);
-        // Process data to offload images
-        const optimizedData = await processForSave(caseData);
-        await set(key, optimizedData);
+        const files: { [key: string]: Blob } = {};
+        const optimizedData = await processForSave(caseData, files);
+        
+        // Construct FormData to send to the backend
+        const formData = new FormData();
+        formData.append('patientId', patientId);
+        formData.append('legSide', caseData.legSide || 'left');
+        formData.append('planId', id);
+        formData.append('caseDataJson', JSON.stringify(optimizedData));
+
+        // Append all the Blobs to the FormData
+        for (const [key, blob] of Object.entries(files)) {
+            formData.append(key, blob, `${key}.png`);
+        }
+
+        await api.savePlan(formData);
+        console.log(`Successfully saved case data and images to DB for plan ID ${id}`);
     } catch (e) {
         console.error(`Failed to save case data for ${id}`, e);
     }
 };
 
-
-
 export const loadCaseData = async (id: string): Promise<any | null> => {
-
-    let storageKey = `caseData_${id}`;
-
-    if (id.startsWith('legacy_')) {
-        const realPatientId = id.replace('legacy_', '');
-        storageKey = `caseData_${realPatientId}`;
-    } else if (id.startsWith('plan_')) {
-        storageKey = `caseData_${id}`;
+    try {
+        const caseData = await api.getPlanDetails(id);
+        if (caseData) {
+            return await processForLoad(caseData, id);
+        }
+        return null;
+    } catch (e) {
+        console.error(`Failed to load case data for plan ${id}`, e);
+        return null;
     }
-
-    return loadDataByKey(storageKey, id);
 };
 
-const loadDataByKey = async (storageKey: string, debugId: string): Promise<any | null> => {
-    try {
-        let data = await get(storageKey);
-        // Fallback for migration inside helper if needed, but the main logic is:
-        if (!data && !debugId.startsWith('plan_')) {
-            // Try LS for legacy IDs
-            const lsData = localStorage.getItem(storageKey);
-            if (lsData) {
-                data = JSON.parse(lsData);
-                localStorage.removeItem(storageKey);
-            }
-        }
-
-        if (data) {
-            return await processForLoad(data);
-        }
-        return null;
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
-}
-
 export const clearCaseData = async (patientId: string) => {
-    try {
-        const data = await get(`caseData_${patientId}`);
-        if (data) {
-            // Helper to find and delete
-            const deleteFilesParams = async (obj: any) => {
-                if (!obj) return;
-                if (typeof obj === 'object') {
-                    for (const key in obj) {
-                        const val = obj[key];
-                        if (typeof val === 'string' && isFileRef(val)) {
-                            await deleteImageFromFilesystem(val.replace(FILE_PREFIX, ''));
-                        } else if (typeof val === 'object') {
-                            await deleteFilesParams(val);
-                        }
-                    }
-                }
-            };
-            await deleteFilesParams(data);
-        }
-        await del(`caseData_${patientId}`);
-    } catch (e) {
-        console.error("Error clearing case data", e);
-    }
+    // No-op: we do not maintain case data locally.
 };

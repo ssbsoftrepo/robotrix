@@ -59,4 +59,4 @@ CREATE TABLE plan_images (
 
 -- Seed SuperAdmin User
 INSERT INTO users (username, password_hash, role, active)
-VALUES ('superadmin', '$2a$10$n27IK0xeK8MWXpb2C0M.8.G5PMP68CDlL5NZtEy2PlMzXX.Km9kZe', 'SUPERADMIN', TRUE);
+VALUES ('superadmin', '$2a$10$O3.tqwMF36Lsvg1bA7B4DOd3QzL4hPMrxssIEBp4j8er0wPuSFuc2', 'SUPERADMIN', TRUE);

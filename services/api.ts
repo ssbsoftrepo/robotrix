@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8081';
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8081';
 
 export const getAuthToken = () => sessionStorage.getItem('robotrix_token');
 export const setAuthToken = (token: string) => sessionStorage.setItem('robotrix_token', token);
@@ -28,6 +28,10 @@ async function request(path: string, options: RequestInit = {}) {
 
     if (!response.ok) {
         const text = await response.text();
+        if (response.status === 401 || response.status === 403) {
+            removeAuthToken();
+            window.dispatchEvent(new Event('auth-error'));
+        }
         throw new Error(text || 'Request failed');
     }
 
@@ -51,6 +55,7 @@ export const api = {
     createDoctor: (body: any) => request('/api/hospitaladmin/users', { method: 'POST', body: JSON.stringify(body) }),
     getPatients: () => request('/api/patients'),
     createPatient: (body: any) => request('/api/patients', { method: 'POST', body: JSON.stringify(body) }),
+    deletePatient: (id: string | number) => request(`/api/patients/${id}`, { method: 'DELETE' }),
     savePlan: (formData: FormData) => request('/api/plans', { method: 'POST', body: formData }),
     getPlanImage: (planId: number | string, imageType: string) => request(`/api/images/${planId}/${imageType}`),
     getPlansForPatient: (patientId: number | string) => request(`/api/patients/${patientId}/plans`),

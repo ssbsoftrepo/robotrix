@@ -57,3 +57,7 @@ tasks.withType<JavaCompile> {
 tasks.named<BootJar>("bootJar") {
     archiveFileName.set("robotrix-backend.jar")
 }
+
+tasks.test {
+    useJUnitPlatform()
+}
