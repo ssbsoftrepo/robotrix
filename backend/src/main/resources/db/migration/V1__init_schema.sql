@@ -56,3 +56,7 @@ CREATE TABLE plan_images (
     mime_type VARCHAR(100) NOT NULL,
     image_data BYTEA NOT NULL
 );
+
+-- Seed SuperAdmin User
+INSERT INTO users (username, password_hash, role, active)
+VALUES ('superadmin', '$2a$10$n27IK0xeK8MWXpb2C0M.8.G5PMP68CDlL5NZtEy2PlMzXX.Km9kZe', 'SUPERADMIN', TRUE);

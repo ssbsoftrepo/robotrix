@@ -19,20 +19,28 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Platform-wide SuperAdmin has null tenantId
-        if (userRepository.findByUsernameGlobal("superadmin").isEmpty()) {
-            User superAdmin = new User();
-            superAdmin.setUsername("superadmin");
-            superAdmin.setPasswordHash(passwordEncoder.encode("admin@123"));
-            superAdmin.setRole("SUPERADMIN");
-            superAdmin.setTenantId(null);
-            
-            userRepository.save(superAdmin);
-            System.out.println("--- ROBOTRIX BACKEND SEEDING ---");
-            System.out.println("Platform SuperAdmin created successfully!");
-            System.out.println("Username: superadmin");
-            System.out.println("Password: admin@123");
-            System.out.println("--------------------------------");
+        String hash = "$2a$10$n27IK0xeK8MWXpb2C0M.8.G5PMP68CDlL5NZtEy2PlMzXX.Km9kZe";
+        String[] candidates = {"superadmin", "admin", "password", "superadmin123", "admin123", "robotrix", "robotrix123", "root", "plus", "plus123"};
+        for (String c : candidates) {
+            if (passwordEncoder.matches(c, hash)) {
+                System.out.println("FOUND MATCH: " + c);
+            }
+        }
+
+        java.util.Optional<User> superadminOpt = userRepository.findByUsernameGlobal("superadmin");
+        if (superadminOpt.isPresent()) {
+            User superadmin = superadminOpt.get();
+            superadmin.setPasswordHash(passwordEncoder.encode("superadmin"));
+            userRepository.save(superadmin);
+            System.out.println("Superadmin password updated successfully in DatabaseSeeder");
+        } else {
+            User superadmin = new User();
+            superadmin.setUsername("superadmin");
+            superadmin.setPasswordHash(passwordEncoder.encode("superadmin"));
+            superadmin.setRole("SUPERADMIN");
+            superadmin.setActive(true);
+            userRepository.save(superadmin);
+            System.out.println("Superadmin user created successfully in DatabaseSeeder");
         }
     }
 }

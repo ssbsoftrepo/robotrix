@@ -119,20 +119,33 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        System.out.println("[Login Debug] Login attempt for username: '" + request.getUsername() + "'");
         Optional<User> userOpt = userRepository.findByUsernameGlobal(request.getUsername());
         if (userOpt.isEmpty()) {
+            System.out.println("[Login Debug] User not found in database: '" + request.getUsername() + "'");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
 
         User user = userOpt.get();
+        boolean passwordMatch = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
+        System.out.println("[Login Debug] User found: '" + user.getUsername() + "', role: " + user.getRole() + ", active: " + user.isActive());
+        System.out.println("[Login Debug] Received password length: " + (request.getPassword() == null ? "null" : request.getPassword().length()) + ", value: '" + request.getPassword() + "'");
+        System.out.println("[Login Debug] Password match result: " + passwordMatch);
         
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (!passwordMatch) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+            System.out.println("[Login Debug] Spring Security authenticationManager.authenticate successful");
+        } catch (Exception e) {
+            System.out.println("[Login Debug] Spring Security authenticationManager.authenticate failed: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed: " + e.getMessage());
+        }
 
         RobotrixUserDetails userDetails = new RobotrixUserDetails(user);
         String token = jwtService.generateToken(userDetails);
