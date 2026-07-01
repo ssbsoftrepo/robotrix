@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { useAppContext } from '../context/AppContext';
 
 interface HospitalAdminDashboardProps {
     hospitalName: string;
@@ -24,6 +25,7 @@ interface Toast {
 }
 
 const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospitalName, onLogout }) => {
+    const { username } = useAppContext();
     // List & Loading states
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [loadingDoctors, setLoadingDoctors] = useState(true);
@@ -261,12 +263,39 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                             {hospitalName || 'Tenant'} Administration
                         </p>
                     </div>
-                    <button
-                        onClick={onLogout}
-                        className="py-2 px-5 bg-transparent border border-[#333] hover:border-[#6D282C] text-[#888] hover:text-white font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95"
-                    >
-                        LOGOUT
-                    </button>
+                    <div className="flex items-center gap-3 bg-[#1e1e1e]/60 border border-[#333] px-3.5 py-1.5 rounded-full relative z-50">
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            strokeWidth={2} 
+                            stroke="#888888" 
+                            className="w-4 h-4"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-[#E0E0E0] select-none tracking-wide">
+                            {username}
+                        </span>
+                        <div className="w-[1px] h-3.5 bg-[#333]" />
+                        <button
+                            onClick={onLogout}
+                            className="text-[#888888] hover:text-[#6D282C] active:scale-[0.9] transition-all duration-300 cursor-pointer flex items-center justify-center"
+                            title="Logout"
+                            aria-label="Logout"
+                        >
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                strokeWidth={2} 
+                                stroke="currentColor" 
+                                className="w-4 h-4"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </header>
 
