@@ -49,14 +49,43 @@ public class SurgeryController {
         return entityTenantId.equals(principalTenantId);
     }
 
-    // 1. Get Hospital's Patients (Tenant-scoped)
+    private boolean isOwner(Patient patient, RobotrixUserDetails principal) {
+        if (patient == null || principal == null) {
+            return false;
+        }
+        return patient.getUser() != null && patient.getUser().getId().equals(principal.getId());
+    }
+
+    private boolean isOwner(SurgeryPlan plan, RobotrixUserDetails principal) {
+        if (plan == null || principal == null) {
+            return false;
+        }
+        return plan.getUser() != null && plan.getUser().getId().equals(principal.getId());
+    }
+
+    // 1. Get Hospital's Patients (Tenant-scoped, filtered by doctor)
     @GetMapping("/patients")
     public ResponseEntity<List<Patient>> getPatients(@AuthenticationPrincipal RobotrixUserDetails principal) {
         if (principal == null || principal.getTenantId() == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        List<Patient> patients = patientRepository.findByTenantId(principal.getTenantId());
+        List<Patient> patients = patientRepository.findByUserId(principal.getId());
         return ResponseEntity.ok(patients);
+    }
+
+    // 1b. Get Next PID for Hospital's Patients (Tenant-scoped)
+    @GetMapping("/patients/next-pid")
+    public ResponseEntity<?> getNextPid(@AuthenticationPrincipal RobotrixUserDetails principal) {
+        if (principal == null || principal.getTenantId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
+        long nextId = patientRepository.countByTenantIdGlobal(principal.getTenantId()) + 1;
+        String pid = String.format("PID-%04d", nextId);
+        while (patientRepository.existsByTenantIdAndPid(principal.getTenantId(), pid)) {
+            nextId++;
+            pid = String.format("PID-%04d", nextId);
+        }
+        return ResponseEntity.ok(java.util.Map.of("pid", pid));
     }
 
     // 2. Create Patient (Assigned to active tenant/user)
@@ -95,7 +124,7 @@ public class SurgeryController {
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
-        if (!isSameTenant(patient, principal)) {
+        if (!isSameTenant(patient, principal) || !isOwner(patient, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         }
         patientRepository.delete(patient);
@@ -116,8 +145,8 @@ public class SurgeryController {
             Patient patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
 
-            // Check if patient belongs to the same tenant (hospital)
-            if (!isSameTenant(patient, principal)) {
+            // Check if patient belongs to the same tenant (hospital) and doctor
+            if (!isSameTenant(patient, principal) || !isOwner(patient, principal)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access to this patient");
             }
 
@@ -125,7 +154,7 @@ public class SurgeryController {
             if (planId != null) {
                 plan = surgeryPlanRepository.findById(planId)
                         .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
-                if (!isSameTenant(plan, principal)) {
+                if (!isSameTenant(plan, principal) || !isOwner(plan, principal)) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
                 }
                 plan.setLegSide(legSide);
@@ -214,17 +243,21 @@ public class SurgeryController {
             @PathVariable String imageType,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         
+        Optional<SurgeryPlan> planOpt = surgeryPlanRepository.findById(planId);
+        if (planOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        SurgeryPlan plan = planOpt.get();
+        if (!isSameTenant(plan, principal) || !isOwner(plan, principal)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Optional<PlanImage> planImageOpt = planImageRepository.findByPlanIdAndImageType(planId, imageType);
         if (planImageOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         PlanImage planImage = planImageOpt.get();
-        // Row level check: Make sure image belongs to user's tenant
-        if (!isSameTenant(planImage, principal)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(planImage.getMimeType()))
                 .body(planImage.getImageData());
@@ -236,11 +269,16 @@ public class SurgeryController {
             @PathVariable Long patientId,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         
-        List<SurgeryPlan> plans = surgeryPlanRepository.findByPatientId(patientId);
-        // Verify tenant mapping
-        if (!plans.isEmpty() && !isSameTenant(plans.get(0), principal)) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElse(null);
+        if (patient == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!isSameTenant(patient, principal) || !isOwner(patient, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+        List<SurgeryPlan> plans = surgeryPlanRepository.findByPatientId(patientId);
         return ResponseEntity.ok(plans);
     }
 
@@ -256,7 +294,7 @@ public class SurgeryController {
         }
 
         SurgeryPlan plan = planOpt.get();
-        if (!isSameTenant(plan, principal)) {
+        if (!isSameTenant(plan, principal) || !isOwner(plan, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

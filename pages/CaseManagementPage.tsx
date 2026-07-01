@@ -6,6 +6,7 @@ import { getPlansForPatient, createNewPlan, PlanMetadata, getNextPatientId, getN
 import { formatDate } from '../utils/date';
 import LdfaModeModal from '../components/LdfaModeModal';
 import ImplantThicknessModal from '../components/ImplantThicknessModal';
+import { api } from '../services/api';
 
 const PlannerOption: React.FC<{
     onClick: () => void,
@@ -352,8 +353,17 @@ const CaseManagementPage: React.FC = () => {
 
     useEffect(() => {
         if (!currentPatientId) {
-            const nextCount = patients.length + 1;
-            setSuggestedId(`PID-${nextCount.toString().padStart(4, '0')}`);
+            api.getNextPid()
+                .then((res: any) => {
+                    if (res && res.pid) {
+                        setSuggestedId(res.pid);
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to fetch next PID', err);
+                    const nextCount = patients.length + 1;
+                    setSuggestedId(`PID-${nextCount.toString().padStart(4, '0')}`);
+                });
         } else {
             setSuggestedId('');
         }

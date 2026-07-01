@@ -54,6 +54,7 @@ export const api = {
     createHospital: (body: any) => request('/api/superadmin/hospitals', { method: 'POST', body: JSON.stringify(body) }),
     createDoctor: (body: any) => request('/api/hospitaladmin/users', { method: 'POST', body: JSON.stringify(body) }),
     getPatients: () => request('/api/patients'),
+    getNextPid: () => request('/api/patients/next-pid'),
     createPatient: (body: any) => request('/api/patients', { method: 'POST', body: JSON.stringify(body) }),
     deletePatient: (id: string | number) => request(`/api/patients/${id}`, { method: 'DELETE' }),
     savePlan: (formData: FormData) => request('/api/plans', { method: 'POST', body: formData }),
