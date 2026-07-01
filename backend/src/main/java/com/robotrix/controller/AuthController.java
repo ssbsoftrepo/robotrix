@@ -129,7 +129,6 @@ public class AuthController {
         User user = userOpt.get();
         boolean passwordMatch = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
         System.out.println("[Login Debug] User found: '" + user.getUsername() + "', role: " + user.getRole() + ", active: " + user.isActive());
-        System.out.println("[Login Debug] Received password length: " + (request.getPassword() == null ? "null" : request.getPassword().length()) + ", value: '" + request.getPassword() + "'");
         System.out.println("[Login Debug] Password match result: " + passwordMatch);
         
         if (!passwordMatch) {

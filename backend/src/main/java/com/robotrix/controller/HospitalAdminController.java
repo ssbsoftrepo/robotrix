@@ -12,6 +12,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import com.robotrix.model.TenantScopedEntity;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/hospitaladmin")
@@ -25,10 +27,25 @@ public class HospitalAdminController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private boolean isSameTenant(TenantScopedEntity entity, RobotrixUserDetails principal) {
+        if (entity == null || principal == null) {
+            return false;
+        }
+        UUID entityTenantId = entity.getTenantId();
+        UUID principalTenantId = principal.getTenantId();
+        if (entityTenantId == null || principalTenantId == null) {
+            return false;
+        }
+        return entityTenantId.equals(principalTenantId);
+    }
+
     @PostMapping("/users")
     public ResponseEntity<?> createUser(
             @RequestBody UserCreateRequest request,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
+        if (principal == null || principal.getTenantId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied: Missing tenant context"));
+        }
         
         String username = request.getUsername();
         if (username == null || username.trim().length() < 4 || !username.trim().equals(username.trim().toLowerCase()) || !username.trim().matches("^[a-z0-9_.-]+$")) {
@@ -92,6 +109,9 @@ public class HospitalAdminController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "search", defaultValue = "") String search,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
+        if (principal == null || principal.getTenantId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied: Missing tenant context"));
+        }
         
         org.springframework.data.domain.PageRequest pageRequest = org.springframework.data.domain.PageRequest.of(page, size);
         org.springframework.data.domain.Page<User> userPage = userRepository.findDoctorsWithSearch(search, pageRequest);
@@ -131,7 +151,7 @@ public class HospitalAdminController {
         }
         
         User user = userOpt.get();
-        if (!user.getTenantId().equals(principal.getTenantId())) {
+        if (!isSameTenant(user, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied: User belongs to a different hospital"));
         }
         

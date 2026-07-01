@@ -53,10 +53,7 @@ const App: React.FC = () => {
         role,
         hospitalName,
         login,
-        logout,
-        showIdleModal,
-        idleCountdown,
-        keepSessionAlive
+        logout
     } = useAppContext();
 
     useEffect(() => {
@@ -190,45 +187,6 @@ const App: React.FC = () => {
     return (
         <>
             {renderContent()}
-            {showIdleModal && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/75 backdrop-blur-md">
-                    <div className="relative w-full max-w-md p-6 bg-[#1a1a1a] border border-[#333333] rounded-lg shadow-[0_10px_50px_rgba(0,0,0,0.8)] text-center">
-                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#6D282C] rounded-t-lg" />
-                        
-                        <div className="mb-4 flex justify-center text-[#ff4d4d]">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        
-                        <h2 className="text-2xl font-black text-[#E0E0E0] tracking-wider mb-2">
-                            SESSION EXPIRING
-                        </h2>
-                        
-                        <p className="text-sm text-gray-400 mb-6 leading-relaxed">
-                            You have been inactive for 9 minutes. To protect medical records and patient data, you will be automatically logged out in:
-                            <span className="block text-4xl font-extrabold text-[#ff4d4d] mt-3 tracking-widest font-mono">
-                                {idleCountdown}s
-                            </span>
-                        </p>
-                        
-                        <div className="flex flex-col gap-3">
-                            <button
-                                onClick={keepSessionAlive}
-                                className="w-full py-3 bg-[#6D282C] border border-[#893338] rounded-sm text-white font-bold tracking-widest shadow-[0_4px_15px_rgba(109,40,44,0.4)] transition-all duration-300 hover:bg-[#893338] hover:shadow-[0_0_20px_rgba(109,40,44,0.6)] active:scale-[0.98] cursor-pointer"
-                            >
-                                STAY LOGGED IN
-                            </button>
-                            <button
-                                onClick={logout}
-                                className="w-full py-3 bg-transparent border border-[#333333] rounded-sm text-gray-400 font-bold tracking-widest hover:text-white hover:border-[#6D282C] transition-all duration-300 active:scale-[0.98] cursor-pointer"
-                            >
-                                LOGOUT NOW
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </>
     );
 };

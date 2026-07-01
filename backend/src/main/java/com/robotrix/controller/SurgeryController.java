@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
+import com.robotrix.model.TenantScopedEntity;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -35,9 +37,24 @@ public class SurgeryController {
     @Autowired
     private PlanImageRepository planImageRepository;
 
+    private boolean isSameTenant(TenantScopedEntity entity, RobotrixUserDetails principal) {
+        if (entity == null || principal == null) {
+            return false;
+        }
+        UUID entityTenantId = entity.getTenantId();
+        UUID principalTenantId = principal.getTenantId();
+        if (entityTenantId == null || principalTenantId == null) {
+            return false;
+        }
+        return entityTenantId.equals(principalTenantId);
+    }
+
     // 1. Get Hospital's Patients (Tenant-scoped)
     @GetMapping("/patients")
     public ResponseEntity<List<Patient>> getPatients(@AuthenticationPrincipal RobotrixUserDetails principal) {
+        if (principal == null || principal.getTenantId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         List<Patient> patients = patientRepository.findByTenantId(principal.getTenantId());
         return ResponseEntity.ok(patients);
     }
@@ -47,6 +64,9 @@ public class SurgeryController {
     public ResponseEntity<?> createPatient(
             @RequestBody PatientDto patientDto,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
+        if (principal == null || principal.getTenantId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
         
         long nextId = patientRepository.countByTenantIdGlobal(principal.getTenantId()) + 1;
         String pid = String.format("PID-%04d", nextId);
@@ -75,7 +95,7 @@ public class SurgeryController {
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
-        if (!patient.getTenantId().equals(principal.getTenantId())) {
+        if (!isSameTenant(patient, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         }
         patientRepository.delete(patient);
@@ -97,7 +117,7 @@ public class SurgeryController {
                     .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
 
             // Check if patient belongs to the same tenant (hospital)
-            if (!patient.getTenantId().equals(principal.getTenantId())) {
+            if (!isSameTenant(patient, principal)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access to this patient");
             }
 
@@ -105,7 +125,7 @@ public class SurgeryController {
             if (planId != null) {
                 plan = surgeryPlanRepository.findById(planId)
                         .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
-                if (!plan.getTenantId().equals(principal.getTenantId())) {
+                if (!isSameTenant(plan, principal)) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
                 }
                 plan.setLegSide(legSide);
@@ -169,7 +189,7 @@ public class SurgeryController {
                         planImage = existingImageOpt.get();
                     } else {
                         planImage = new PlanImage();
-                        planImage.setTenantId(principal.getTenantId());
+                        planImage.setTenantId(principal != null ? principal.getTenantId() : null);
                         planImage.setPlan(plan);
                         planImage.setImageType(imageType);
                     }
@@ -201,7 +221,7 @@ public class SurgeryController {
 
         PlanImage planImage = planImageOpt.get();
         // Row level check: Make sure image belongs to user's tenant
-        if (!planImage.getTenantId().equals(principal.getTenantId())) {
+        if (!isSameTenant(planImage, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -218,7 +238,7 @@ public class SurgeryController {
         
         List<SurgeryPlan> plans = surgeryPlanRepository.findByPatientId(patientId);
         // Verify tenant mapping
-        if (!plans.isEmpty() && !plans.get(0).getTenantId().equals(principal.getTenantId())) {
+        if (!plans.isEmpty() && !isSameTenant(plans.get(0), principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(plans);
@@ -236,7 +256,7 @@ public class SurgeryController {
         }
 
         SurgeryPlan plan = planOpt.get();
-        if (!plan.getTenantId().equals(principal.getTenantId())) {
+        if (!isSameTenant(plan, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

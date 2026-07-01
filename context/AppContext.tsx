@@ -88,9 +88,6 @@ interface AppContextType extends CaseData {
     hospitalName: string | null;
     login: (token: string, role: string, username: string, tenantId: string | null) => void;
     logout: () => void;
-    showIdleModal: boolean;
-    idleCountdown: number;
-    keepSessionAlive: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -108,17 +105,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     // Authentication States
     const [token, setToken] = useState<string | null>(() => {
-        const storedToken = sessionStorage.getItem('robotrix_token');
+        const storedToken = localStorage.getItem('robotrix_token');
         if (storedToken) {
             try {
                 const payloadBase64 = storedToken.split('.')[1];
                 const payloadJson = JSON.parse(atob(payloadBase64));
                 const exp = payloadJson.exp;
                 if (exp && Date.now() >= exp * 1000) {
-                    sessionStorage.removeItem('robotrix_token');
-                    sessionStorage.removeItem('robotrix_role');
-                    sessionStorage.removeItem('robotrix_username');
-                    sessionStorage.removeItem('robotrix_tenant');
+                    localStorage.removeItem('robotrix_token');
+                    localStorage.removeItem('robotrix_role');
+                    localStorage.removeItem('robotrix_username');
+                    localStorage.removeItem('robotrix_tenant');
                     return null;
                 }
                 return storedToken;
@@ -128,19 +125,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
         return null;
     });
-    const [role, setRole] = useState<string | null>(() => token ? sessionStorage.getItem('robotrix_role') : null);
-    const [username, setUsername] = useState<string | null>(() => token ? sessionStorage.getItem('robotrix_username') : null);
-    const [hospitalName, setHospitalName] = useState<string | null>(() => token ? sessionStorage.getItem('robotrix_tenant') : null);
+    const [role, setRole] = useState<string | null>(() => token ? localStorage.getItem('robotrix_role') : null);
+    const [username, setUsername] = useState<string | null>(() => token ? localStorage.getItem('robotrix_username') : null);
+    const [hospitalName, setHospitalName] = useState<string | null>(() => token ? localStorage.getItem('robotrix_tenant') : null);
 
     const login = useCallback((newToken: string, newRole: string, newUsername: string, tenantId: string | null) => {
-        sessionStorage.setItem('robotrix_token', newToken);
-        sessionStorage.setItem('robotrix_role', newRole);
-        sessionStorage.setItem('robotrix_username', newUsername);
+        localStorage.setItem('robotrix_token', newToken);
+        localStorage.setItem('robotrix_role', newRole);
+        localStorage.setItem('robotrix_username', newUsername);
         if (tenantId) {
-            sessionStorage.setItem('robotrix_tenant', tenantId);
+            localStorage.setItem('robotrix_tenant', tenantId);
             setHospitalName(tenantId);
         } else {
-            sessionStorage.removeItem('robotrix_tenant');
+            localStorage.removeItem('robotrix_tenant');
             setHospitalName(null);
         }
         setToken(newToken);
@@ -149,21 +146,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setPage('case-management');
     }, []);
 
-    const [showIdleModal, setShowIdleModal] = useState<boolean>(false);
-    const [idleCountdown, setIdleCountdown] = useState<number>(60);
-    const lastActivityTimeRef = useRef<number>(Date.now());
 
-    const keepSessionAlive = useCallback(() => {
-        lastActivityTimeRef.current = Date.now();
-        setShowIdleModal(false);
-        setIdleCountdown(60);
-    }, []);
 
     const logout = useCallback(() => {
-        sessionStorage.removeItem('robotrix_token');
-        sessionStorage.removeItem('robotrix_role');
-        sessionStorage.removeItem('robotrix_username');
-        sessionStorage.removeItem('robotrix_tenant');
+        localStorage.removeItem('robotrix_token');
+        localStorage.removeItem('robotrix_role');
+        localStorage.removeItem('robotrix_username');
+        localStorage.removeItem('robotrix_tenant');
         setToken(null);
         setRole(null);
         setUsername(null);
@@ -174,7 +163,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCaseData(initialCaseData);
         setPage('case-management');
         loadedPlanIdRef.current = null;
-        setShowIdleModal(false);
     }, []);
 
     useEffect(() => {
@@ -187,55 +175,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         };
     }, [logout]);
 
-    // Auto-logout after 10 minutes (warning popup at 9 minutes, counting down 60 seconds)
-    useEffect(() => {
-        if (!token) {
-            setShowIdleModal(false);
-            return;
-        }
 
-        // Reset activity tracking on mount/login
-        lastActivityTimeRef.current = Date.now();
-
-        const interval = setInterval(() => {
-            if (!showIdleModal) {
-                const inactiveSeconds = Math.floor((Date.now() - lastActivityTimeRef.current) / 1000);
-                if (inactiveSeconds >= 9 * 60) {
-                    setShowIdleModal(true);
-                    setIdleCountdown(60);
-                }
-            } else {
-                setIdleCountdown(prev => {
-                    if (prev <= 1) {
-                        clearInterval(interval);
-                        logout();
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }
-        }, 1000);
-
-        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-        const handleActivity = () => {
-            if (showIdleModal) return; // ignore activity when warning is active
-            const now = Date.now();
-            if (now - lastActivityTimeRef.current > 1000) {
-                lastActivityTimeRef.current = now;
-            }
-        };
-
-        events.forEach(event => {
-            window.addEventListener(event, handleActivity);
-        });
-
-        return () => {
-            clearInterval(interval);
-            events.forEach(event => {
-                window.removeEventListener(event, handleActivity);
-            });
-        };
-    }, [token, showIdleModal, logout]);
 
     // All data for the currently loaded patient is in this state object.
     const [caseData, setCaseData] = useState<CaseData>(initialCaseData);
@@ -499,9 +439,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         hospitalName,
         login,
         logout,
-        showIdleModal,
-        idleCountdown,
-        keepSessionAlive,
         ...caseData,
         setLegSide: handleSetLegSide,
         setPlannerMode: createSetter('plannerMode'),

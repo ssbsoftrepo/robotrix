@@ -1,12 +1,12 @@
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8081';
 
-export const getAuthToken = () => sessionStorage.getItem('robotrix_token');
-export const setAuthToken = (token: string) => sessionStorage.setItem('robotrix_token', token);
+export const getAuthToken = () => localStorage.getItem('robotrix_token');
+export const setAuthToken = (token: string) => localStorage.setItem('robotrix_token', token);
 export const removeAuthToken = () => {
-    sessionStorage.removeItem('robotrix_token');
-    sessionStorage.removeItem('robotrix_role');
-    sessionStorage.removeItem('robotrix_username');
-    sessionStorage.removeItem('robotrix_tenant');
+    localStorage.removeItem('robotrix_token');
+    localStorage.removeItem('robotrix_role');
+    localStorage.removeItem('robotrix_username');
+    localStorage.removeItem('robotrix_tenant');
 };
 
 async function request(path: string, options: RequestInit = {}) {
