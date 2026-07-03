@@ -152,7 +152,7 @@ const PlanSelectionModal: React.FC<{
     const [plans, setPlans] = useState<PlanMetadata[]>([]);
     const [loading, setLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
-    const [newPlanName, setNewPlanName] = useState('');
+    const [newLegSide, setNewLegSide] = useState<'left' | 'right'>('left');
 
     useEffect(() => {
         if (isOpen && patientId) {
@@ -165,12 +165,11 @@ const PlanSelectionModal: React.FC<{
     }, [isOpen, patientId]);
 
     const handleCreate = async () => {
-        if (!newPlanName.trim()) return;
         setLoading(true);
         try {
-            const newId = await createNewPlan(patientId, newPlanName);
+            const newId = await createNewPlan(patientId, newLegSide);
             onSelectPlan(newId);
-            setNewPlanName('');
+            setNewLegSide('left');
             setIsCreating(false);
         } catch (e) {
             console.error(e);
@@ -231,19 +230,25 @@ const PlanSelectionModal: React.FC<{
 
                 {isCreating && (
                     <div className="mb-6 relative z-10">
-                        <label className="block text-gray-400 mb-2">Plan Name</label>
-                        <input
-                            value={newPlanName}
-                            onChange={(e) => setNewPlanName(e.target.value)}
-                            className="w-full p-3 rounded bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C] mb-4"
-                            placeholder="e.g. Pre-op Planning 1"
-                            autoFocus
-                        />
+                        <label className="block text-gray-400 mb-2">Select Leg Side</label>
+                        <div className="flex gap-4 mb-4">
+                            <button
+                                onClick={() => setNewLegSide('left')}
+                                className={`flex-1 p-3 rounded border transition-colors font-bold ${newLegSide === 'left' ? 'border-[#6D282C] bg-[#6D282C]/20 text-[#ff8fa3]' : 'border-[#333333] bg-[#1a1a1a] text-gray-400 hover:border-[#444444]'}`}
+                            >
+                                Left Leg
+                            </button>
+                            <button
+                                onClick={() => setNewLegSide('right')}
+                                className={`flex-1 p-3 rounded border transition-colors font-bold ${newLegSide === 'right' ? 'border-[#6D282C] bg-[#6D282C]/20 text-[#ff8fa3]' : 'border-[#333333] bg-[#1a1a1a] text-gray-400 hover:border-[#444444]'}`}
+                            >
+                                Right Leg
+                            </button>
+                        </div>
                         <div className="flex space-x-3">
                             {/* Create Plan - Primary Button */}
                             <button
                                 onClick={handleCreate}
-                                disabled={!newPlanName.trim()}
                                 className="group relative flex-1 py-3 bg-[#6D282C] border border-[#893338] rounded-sm 
                                            shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
                                            transition-all duration-300 ease-out
@@ -397,7 +402,8 @@ const CaseManagementPage: React.FC = () => {
         await setCurrentPatientId(patientId, patientToSave);
 
         if (!currentPatientId) {
-            const planId = await createNewPlan(patientId, 'Initial Plan');
+            const defaultLegSide = legSide === 'right' ? 'right' : 'left';
+            const planId = await createNewPlan(patientId, defaultLegSide);
             await setCurrentPlanId(planId, patientToSave);
             setPlannerMode('advanced');
         }

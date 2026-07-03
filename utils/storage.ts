@@ -31,6 +31,7 @@ export const updatePlanLegSide = async (patientId: string, planId: string, legSi
         const planIndex = plans.findIndex(p => p.id === planId);
         if (planIndex !== -1) {
             plans[planIndex].legSide = legSide;
+            plans[planIndex].name = legSide === 'left' ? 'Left Leg' : 'Right Leg';
             plans[planIndex].updatedAt = new Date().toISOString();
             await set(`${PLAN_INDEX_PREFIX}${patientId}`, plans);
         }
@@ -90,15 +91,16 @@ export const getPlansForPatient = async (patientId: string): Promise<PlanMetadat
     }
 };
 
-export const createNewPlan = async (patientId: string, name: string): Promise<string> => {
+export const createNewPlan = async (patientId: string, legSide: 'left' | 'right'): Promise<string> => {
     const planId = `plan_${Date.now()}`;
+    const name = legSide === 'left' ? 'Left Leg' : 'Right Leg';
     const newPlan: PlanMetadata = {
         id: planId,
         patientId,
         name,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        legSide: 'left'
+        legSide
     };
 
     try {
