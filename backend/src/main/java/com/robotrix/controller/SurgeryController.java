@@ -161,36 +161,7 @@ public class SurgeryController {
                 plan.setCaseData(caseDataJson);
                 plan.setUpdatedAt(java.time.LocalDateTime.now());
             } else {
-                // Check if a plan with the same name already exists for this patient
-                String newPlanName = "";
-                try {
-                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                    com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(caseDataJson);
-                    if (node.has("planName")) {
-                        newPlanName = node.get("planName").asText().trim();
-                    }
-                } catch (Exception e) {
-                    // Ignore
-                }
 
-                if (!newPlanName.isEmpty()) {
-                    List<SurgeryPlan> existingPlans = surgeryPlanRepository.findByPatientId(patientId);
-                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                    for (SurgeryPlan existingPlan : existingPlans) {
-                        try {
-                            com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(existingPlan.getCaseData());
-                            if (node.has("planName")) {
-                                String name = node.get("planName").asText().trim();
-                                if (name.equalsIgnoreCase(newPlanName)) {
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                            .body("A plan with this name already exists for this patient.");
-                                }
-                            }
-                        } catch (Exception e) {
-                            // Ignore
-                        }
-                    }
-                }
 
                 plan = new SurgeryPlan();
                 plan.setTenantId(principal.getTenantId());
@@ -238,9 +209,10 @@ public class SurgeryController {
 
     // 4. Download Binary Image
     @GetMapping("/images/{planId}/{imageType}")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> getPlanImage(
-            @PathVariable Long planId, 
-            @PathVariable String imageType,
+            @PathVariable("planId") Long planId, 
+            @PathVariable("imageType") String imageType,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         
         Optional<SurgeryPlan> planOpt = surgeryPlanRepository.findById(planId);
@@ -265,8 +237,9 @@ public class SurgeryController {
 
     // 5. Get Plans for Patient
     @GetMapping("/patients/{patientId}/plans")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<SurgeryPlan>> getPlansForPatient(
-            @PathVariable Long patientId,
+            @PathVariable("patientId") Long patientId,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         
         Patient patient = patientRepository.findById(patientId)
@@ -284,8 +257,9 @@ public class SurgeryController {
 
     // 6. Get Plan details (caseData json string)
     @GetMapping("/plans/{planId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getPlanDetails(
-            @PathVariable Long planId,
+            @PathVariable("planId") Long planId,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
         
         Optional<SurgeryPlan> planOpt = surgeryPlanRepository.findById(planId);

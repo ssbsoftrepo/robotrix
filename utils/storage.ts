@@ -78,15 +78,17 @@ export const getPlansForPatient = async (patientId: string): Promise<PlanMetadat
     }
 };
 
-export const createNewPlan = async (patientId: string, name: string): Promise<string> => {
+export const createNewPlan = async (patientId: string, legSide: 'left' | 'right'): Promise<string> => {
     try {
+        const name = legSide === 'left' ? 'Left Leg' : 'Right Leg';
         const initialData = {
             ...initialCaseData,
             planName: name,
+            legSide,
         };
         const formData = new FormData();
         formData.append('patientId', patientId);
-        formData.append('legSide', 'left');
+        formData.append('legSide', legSide);
         formData.append('caseDataJson', JSON.stringify(initialData));
 
         const response = await api.savePlan(formData);

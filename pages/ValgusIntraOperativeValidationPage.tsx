@@ -25,8 +25,9 @@ const ValgusIntraOperativeValidationPage: React.FC = () => {
     const mpta = valgusResults.mpta ?? 86;
     const rawTightness = 86 - mpta;
     const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
-    const anticipatedMedialGap = thickness - anticipatedTightness;
+    const anticipatedMedialGapRaw = thickness - anticipatedTightness;
     const anticipatedLateralGap = thickness;
+    const anticipatedMedialGap = Math.max(15, Math.min(anticipatedMedialGapRaw, anticipatedLateralGap));
 
     const medialDiff = medialGap - anticipatedMedialGap;
     const lateralDiff = lateralGap - anticipatedLateralGap;

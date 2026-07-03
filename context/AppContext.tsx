@@ -220,9 +220,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         const handler = setTimeout(async () => {
             try {
-                const plans = await getPlansForPatient(currentPatientId);
-                const currentPlan = plans.find(p => p.id === currentPlanId);
-                const planName = currentPlan?.name || 'Plan';
+                const planName = caseData.legSide === 'left' ? 'Left Leg' : 'Right Leg';
 
                 const caseDataWithMeta = {
                     ...caseData,
@@ -413,7 +411,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     // Special setter for LegSide - just updates case data now
     const handleSetLegSide = useCallback((side: LegSide) => {
-        setCaseData(prev => ({ ...prev, legSide: side }));
+        const newPlanName = side === 'left' ? 'Left Leg' : 'Right Leg';
+        setCaseData(prev => ({ ...prev, legSide: side, planName: newPlanName }));
         // Sync to plan metadata for list display
         if (currentPatientId && currentPlanId && currentPlanId.startsWith('plan_')) {
             updatePlanLegSide(currentPatientId, currentPlanId, side);

@@ -27,7 +27,8 @@ const IntraOperativeValidationPage: React.FC = () => {
     const femurCut = longLegCoronalBalancingResults.simFemoralCut ?? 3;
     const ama = longLegResults.ama ?? 0;
     const anticipatedLateralGap = thickness;
-    const anticipatedMedialGap = Math.round(anticipatedLateralGap - (tibiaWidth * Math.tan((ama - femurCut) * Math.PI / 180)));
+    const anticipatedMedialGapRaw = Math.round(anticipatedLateralGap - (tibiaWidth * Math.tan((ama - femurCut) * Math.PI / 180)));
+    const anticipatedMedialGap = Math.max(15, Math.min(anticipatedMedialGapRaw, anticipatedLateralGap));
 
     const medialDiff = medialGap - anticipatedMedialGap;
     const lateralDiff = lateralGap - anticipatedLateralGap;
