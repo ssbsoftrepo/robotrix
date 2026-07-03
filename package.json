@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "clean": "rm -rf dist",
     "dev": "vite",
-    "build": "npm run test:run && vite build",
+    "build": "npm run clean && npm run test:run && vite build",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run"
