@@ -72,6 +72,10 @@ public class HospitalAdminController {
             return ResponseEntity.badRequest().body(Map.of("message", "Mobile number is mandatory"));
         }
 
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
+        }
+
         String mobile = request.getMobileNumber().replaceAll("\\D", "");
         if (mobile.length() != 10) {
             return ResponseEntity.badRequest().body(Map.of("message", "Mobile number must be exactly 10 digits"));
@@ -88,6 +92,7 @@ public class HospitalAdminController {
         doctor.setFirstName(request.getFirstName().trim());
         doctor.setLastName(request.getLastName().trim());
         doctor.setMobileNumber(mobile);
+        doctor.setEmail(request.getEmail().trim());
 
         // Generate hospital-specific sequence for Consultant ID: CON-0001, CON-0002 etc.
         java.util.UUID tenantId = principal.getTenantId();
@@ -123,6 +128,7 @@ public class HospitalAdminController {
             dto.setFirstName(user.getFirstName());
             dto.setLastName(user.getLastName());
             dto.setMobileNumber(user.getMobileNumber());
+            dto.setEmail(user.getEmail());
             dto.setConsultantId(user.getConsultantId());
             dto.setActive(user.isActive());
             dto.setCreatedAt(user.getCreatedAt());
@@ -175,6 +181,11 @@ public class HospitalAdminController {
         user.setLastName(request.getLastName().trim());
         user.setMobileNumber(mobile);
 
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
+        }
+        user.setEmail(request.getEmail().trim());
+
         if (request.getActive() != null) {
             user.setActive(request.getActive());
         }
@@ -191,6 +202,7 @@ public class HospitalAdminController {
         private String firstName;
         private String lastName;
         private String mobileNumber;
+        private String email;
     }
 
     @Data
@@ -198,6 +210,7 @@ public class HospitalAdminController {
         private String firstName;
         private String lastName;
         private String mobileNumber;
+        private String email;
         private Boolean active;
     }
 
@@ -208,6 +221,7 @@ public class HospitalAdminController {
         private String firstName;
         private String lastName;
         private String mobileNumber;
+        private String email;
         private String consultantId;
         private boolean active;
         private java.time.LocalDateTime createdAt;

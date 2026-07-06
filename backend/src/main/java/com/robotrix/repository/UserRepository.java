@@ -32,4 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT * FROM users WHERE tenant_id = :tenantId AND consultant_id = :consultantId LIMIT 1", nativeQuery = true)
     Optional<User> findByTenantIdAndConsultantIdNative(@Param("tenantId") java.util.UUID tenantId, @Param("consultantId") String consultantId);
+
+    @Query(value = "SELECT * FROM users WHERE email = :email LIMIT 1", nativeQuery = true)
+    Optional<User> findByEmailGlobal(@Param("email") String email);
 }

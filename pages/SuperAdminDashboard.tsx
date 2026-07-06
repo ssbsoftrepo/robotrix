@@ -12,6 +12,7 @@ interface Hospital {
     name: string;
     adminName: string;
     adminMobileNumber: string;
+    adminEmail: string;
     active: boolean;
     subscriptionExpiresAt: string | null;
     lastRenewedAt: string | null;
@@ -42,12 +43,14 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
     const [adminUsername, setAdminUsername] = useState('');
     const [adminPassword, setAdminPassword] = useState('');
     const [adminMobileNumber, setAdminMobileNumber] = useState('');
+    const [adminEmail, setAdminEmail] = useState('');
     const [loading, setLoading] = useState(false);
 
     // Edit Form states
     const [editHospital, setEditHospital] = useState<Hospital | null>(null);
     const [editName, setEditName] = useState('');
     const [editMobileNumber, setEditMobileNumber] = useState('');
+    const [editEmail, setEditEmail] = useState('');
     const [editActive, setEditActive] = useState(true);
     const [editLoading, setEditLoading] = useState(false);
 
@@ -144,7 +147,8 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                 hospitalName,
                 adminUsername,
                 adminPassword,
-                adminMobileNumber
+                adminMobileNumber,
+                adminEmail
             });
 
             showToast('success', `Hospital "${hospitalName}" and admin user "${adminUsername}" registered successfully!`);
@@ -152,6 +156,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
             setAdminUsername('');
             setAdminPassword('');
             setAdminMobileNumber('');
+            setAdminEmail('');
             setIsModalOpen(false);
             fetchHospitals(0);
         } catch (err: any) {
@@ -210,6 +215,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
         setEditHospital(h);
         setEditName(h.name);
         setEditMobileNumber(h.adminMobileNumber || '');
+        setEditEmail(h.adminEmail || '');
         setEditActive(h.active);
     };
 
@@ -222,6 +228,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
             await api.updateHospital(editHospital.id, {
                 hospitalName: editName,
                 adminMobileNumber: editMobileNumber,
+                adminEmail: editEmail,
                 active: editActive
             });
 
@@ -365,6 +372,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                             <th className="px-6 py-4">Hospital Name</th>
                                             <th className="px-6 py-4">Admin Name</th>
                                             <th className="px-6 py-4">Admin Mobile</th>
+                                            <th className="px-6 py-4">Admin Email</th>
                                             <th className="px-6 py-4 text-center">Status</th>
                                             <th className="px-6 py-4 text-center">Subscription</th>
                                             <th className="px-6 py-4">Expires</th>
@@ -385,6 +393,9 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-300">
                                                     {h.adminMobileNumber || <span className="text-gray-600 font-light italic">None</span>}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-300 select-all font-mono text-xs">
+                                                    {h.adminEmail || <span className="text-gray-600 font-light italic">None</span>}
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <span
@@ -560,6 +571,21 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                 />
                             </div>
 
+                            {/* Admin Email */}
+                            <div className="space-y-1">
+                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    Admin Email
+                                </label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={adminEmail}
+                                    onChange={(e) => setAdminEmail(e.target.value)}
+                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                    placeholder="e.g. admin@hospital.com"
+                                />
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={loading || usernameStatus !== 'available'}
@@ -626,6 +652,21 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                     onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); if (v.length <= 10) setEditMobileNumber(v); }}
                                     className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-cyan-500 transition-colors"
                                     placeholder="e.g. 9999999999"
+                                />
+                            </div>
+
+                            {/* Admin Email */}
+                            <div className="space-y-1">
+                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    Admin Email
+                                </label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={editEmail}
+                                    onChange={(e) => setEditEmail(e.target.value)}
+                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                                    placeholder="e.g. admin@hospital.com"
                                 />
                             </div>
 

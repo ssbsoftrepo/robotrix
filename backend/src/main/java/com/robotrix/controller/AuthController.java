@@ -39,6 +39,9 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private com.robotrix.service.AuthForgotPasswordService forgotPasswordService;
+
     @GetMapping("/check-username")
     public ResponseEntity<?> checkUsername(@RequestParam(value = "username") String username) {
         if (username == null || username.trim().isEmpty()) {
@@ -72,6 +75,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "Username must be at least 4 characters, lowercase, and contain only valid characters (a-z, 0-9, _, -, .)"));
         }
 
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
+        }
+
         if (userRepository.existsByUsernameGlobal(username.trim())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Username already exists"));
         }
@@ -87,6 +94,7 @@ public class AuthController {
         user.setTenantId(tenant.getId());
         user.setUsername(username.trim());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setEmail(request.getEmail().trim());
         user.setRole("ADMIN");
         userRepository.save(user);
 
@@ -105,6 +113,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "Username must be at least 4 characters, lowercase, and contain only valid characters (a-z, 0-9, _, -, .)"));
         }
 
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
+        }
+
         if (userRepository.existsByUsernameGlobal(username.trim())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Username already exists"));
         }
@@ -113,6 +125,7 @@ public class AuthController {
         user.setTenantId(request.getTenantId());
         user.setUsername(username.trim());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setEmail(request.getEmail().trim());
         user.setRole("USER");
         userRepository.save(user);
 
@@ -174,6 +187,7 @@ public class AuthController {
         private String tenantName;
         private String username;
         private String password;
+        private String email;
     }
 
     @Data
@@ -181,6 +195,7 @@ public class AuthController {
         private UUID tenantId;
         private String username;
         private String password;
+        private String email;
     }
 
     @Data
@@ -194,7 +209,56 @@ public class AuthController {
     public static class AuthResponse {
         private final String token;
         private final String username;
-        private final UUID tenantId;
+        private final java.util.UUID tenantId;
         private final String hospitalName;
+    }
+
+    @PostMapping("/forgot-password/request")
+    public ResponseEntity<?> requestOtp(@RequestBody ForgotPasswordRequest req) {
+        try {
+            forgotPasswordService.requestForgotPasswordOtp(req.getEmail());
+            return ResponseEntity.ok(Map.of("message", "OTP sent to your email successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password/verify")
+    public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest req) {
+        try {
+            forgotPasswordService.verifyOtp(req.getEmail(), req.getOtp());
+            return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest req) {
+        try {
+            forgotPasswordService.resetPassword(req.getEmail(), req.getOtp(), req.getNewPassword(), req.getConfirmPassword());
+            return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @Data
+    public static class ForgotPasswordRequest {
+        private String email;
+    }
+
+    @Data
+    public static class VerifyOtpRequest {
+        private String email;
+        private String otp;
+    }
+
+    @Data
+    public static class ResetPasswordRequest {
+        private String email;
+        private String otp;
+        private String newPassword;
+        private String confirmPassword;
     }
 }

@@ -37,6 +37,10 @@ public class SuperAdminController {
             return ResponseEntity.badRequest().body("Hospital already exists");
         }
 
+        if (request.getAdminEmail() == null || request.getAdminEmail().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Admin email is mandatory");
+        }
+
         // Create Tenant
         Tenant tenant = new Tenant();
         tenant.setName(request.getHospitalName());
@@ -61,6 +65,7 @@ public class SuperAdminController {
         admin.setUsername(request.getAdminUsername());
         admin.setPasswordHash(passwordEncoder.encode(request.getAdminPassword()));
         admin.setMobileNumber(request.getAdminMobileNumber());
+        admin.setEmail(request.getAdminEmail().trim());
         admin.setRole("HOSPITAL_ADMIN");
         userRepository.save(admin);
 
@@ -92,6 +97,7 @@ public class SuperAdminController {
                 .ifPresent(user -> {
                     dto.setAdminName(user.getUsername());
                     dto.setAdminMobileNumber(user.getMobileNumber());
+                    dto.setAdminEmail(user.getEmail());
                 });
             return dto;
         }).collect(java.util.stream.Collectors.toList());
@@ -124,12 +130,18 @@ public class SuperAdminController {
             tenantRepository.save(tenant);
         }
         
-        // Update admin mobile number
+        // Update admin mobile number & email
         java.util.Optional<User> adminOpt = userRepository.findHospitalAdminByTenantId(id);
         if (adminOpt.isPresent()) {
             User admin = adminOpt.get();
             if (request.getAdminMobileNumber() != null) {
                 admin.setMobileNumber(request.getAdminMobileNumber().trim());
+            }
+            if (request.getAdminEmail() != null) {
+                if (request.getAdminEmail().trim().isEmpty()) {
+                    return ResponseEntity.badRequest().body("Admin email is mandatory");
+                }
+                admin.setEmail(request.getAdminEmail().trim());
             }
             userRepository.save(admin);
         }
@@ -213,6 +225,7 @@ public class SuperAdminController {
         private String name;
         private String adminName;
         private String adminMobileNumber;
+        private String adminEmail;
         private boolean active;
         private LocalDateTime subscriptionExpiresAt;
         private LocalDateTime lastRenewedAt;
@@ -234,12 +247,14 @@ public class SuperAdminController {
         private String adminUsername;
         private String adminPassword;
         private String adminMobileNumber;
+        private String adminEmail;
     }
 
     @Data
     public static class HospitalUpdateRequest {
         private String hospitalName;
         private String adminMobileNumber;
+        private String adminEmail;
         private Boolean active;
     }
 

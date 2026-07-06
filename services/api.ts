@@ -75,4 +75,7 @@ export const api = {
         return request(url);
     },
     updateDoctor: (id: number | string, body: any) => request(`/api/hospitaladmin/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+    forgotPasswordRequest: (email: string) => request('/api/auth/forgot-password/request', { method: 'POST', body: JSON.stringify({ email }) }),
+    forgotPasswordVerify: (email: string, otp: string) => request('/api/auth/forgot-password/verify', { method: 'POST', body: JSON.stringify({ email, otp }) }),
+    forgotPasswordReset: (body: any) => request('/api/auth/forgot-password/reset', { method: 'POST', body: JSON.stringify(body) }),
 };

@@ -13,6 +13,7 @@ interface Doctor {
     firstName: string;
     lastName: string;
     mobileNumber: string;
+    email: string;
     consultantId: string;
     active: boolean;
     createdAt: string;
@@ -43,6 +44,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
+    const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -51,6 +53,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
     const [editFirstName, setEditFirstName] = useState('');
     const [editLastName, setEditLastName] = useState('');
     const [editMobileNumber, setEditMobileNumber] = useState('');
+    const [editEmail, setEditEmail] = useState('');
     const [editActive, setEditActive] = useState(true);
     const [editLoading, setEditLoading] = useState(false);
 
@@ -158,7 +161,8 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                 password: consultantPassword,
                 firstName: firstName,
                 lastName: lastName,
-                mobileNumber: mobileNumber
+                mobileNumber: mobileNumber,
+                email: email
             });
 
             showToast('success', `Consultant account for "${consultantUsername}" created successfully!`);
@@ -167,6 +171,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
             setFirstName('');
             setLastName('');
             setMobileNumber('');
+            setEmail('');
             setIsModalOpen(false);
             fetchDoctors(0);
         } catch (err: any) {
@@ -181,6 +186,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
         setEditFirstName(d.firstName || '');
         setEditLastName(d.lastName || '');
         setEditMobileNumber(d.mobileNumber || '');
+        setEditEmail(d.email || '');
         setEditActive(d.active);
     };
 
@@ -200,6 +206,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                 firstName: editFirstName,
                 lastName: editLastName,
                 mobileNumber: editMobileNumber,
+                email: editEmail,
                 active: editActive
             });
 
@@ -367,6 +374,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                             <th className="px-6 py-4">First Name</th>
                                             <th className="px-6 py-4">Last Name</th>
                                             <th className="px-6 py-4">Mobile Number</th>
+                                            <th className="px-6 py-4">Email</th>
                                             <th className="px-6 py-4">Created Date</th>
                                             <th className="px-6 py-4 text-center">Status</th>
                                             <th className="px-6 py-4 text-center">Actions</th>
@@ -389,6 +397,9 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-300">
                                                     {d.mobileNumber || '—'}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-300 select-all font-mono text-xs">
+                                                    {d.email || '—'}
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-400">
                                                     {d.createdAt ? new Date(d.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
@@ -558,6 +569,21 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                 />
                             </div>
 
+                            {/* Email Address */}
+                            <div className="space-y-1">
+                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                    placeholder="Enter email address"
+                                />
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={loading || usernameStatus !== 'available'}
@@ -641,6 +667,21 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                     onChange={(e) => setEditMobileNumber(e.target.value.replace(/\D/g, ''))}
                                     className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
                                     placeholder="Enter 10-digit mobile number"
+                                />
+                            </div>
+
+                            {/* Email Address */}
+                            <div className="space-y-1">
+                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={editEmail}
+                                    onChange={(e) => setEditEmail(e.target.value)}
+                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                    placeholder="Enter email address"
                                 />
                             </div>
 
