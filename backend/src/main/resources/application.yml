@@ -27,7 +27,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: ssbsoftrepo@gmail.com
-    password: dummy_app_passwordvgdw zdaw tzkv gtmk
+    password: vgdw zdaw tzkv gtmk
     properties:
       mail:
         smtp:
