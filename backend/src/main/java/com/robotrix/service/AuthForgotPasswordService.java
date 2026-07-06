@@ -47,15 +47,10 @@ public class AuthForgotPasswordService {
         otpEntity.setVerified(false);
         otpRepository.save(otpEntity);
 
-        // Log the OTP (crucial for local testing / dummy config as requested by the user!)
-        log.info("--------------------------------------------------");
-        log.info("GENERATED PASSWORD RESET OTP: {} FOR EMAIL: {}", otp, trimmedEmail);
-        log.info("--------------------------------------------------");
-
         // Send OTP via SMTP
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("dummy.email@gmail.com");
+            message.setFrom("ssbsoftrepo@gmail.com");
             message.setTo(trimmedEmail);
             message.setSubject("Robotrix+ — Password Reset OTP");
             message.setText("You requested to reset your password.\n\n" +
