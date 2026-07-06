@@ -370,12 +370,10 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                     <thead>
                                         <tr className="border-b border-[#232323] text-[10px] font-bold tracking-wider text-gray-500 uppercase">
                                             <th className="px-6 py-4">Consultant ID</th>
-                                            <th className="px-6 py-4">Username</th>
                                             <th className="px-6 py-4">First Name</th>
                                             <th className="px-6 py-4">Last Name</th>
                                             <th className="px-6 py-4">Mobile Number</th>
                                             <th className="px-6 py-4">Email</th>
-                                            <th className="px-6 py-4">Created Date</th>
                                             <th className="px-6 py-4 text-center">Status</th>
                                             <th className="px-6 py-4 text-center">Actions</th>
                                         </tr>
@@ -385,9 +383,6 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                             <tr key={d.id} className="hover:bg-[#1c1c1c]/50 transition-colors">
                                                 <td className="px-6 py-4 font-bold text-emerald-400 tracking-wider">
                                                     {d.consultantId || 'N/A'}
-                                                </td>
-                                                <td className="px-6 py-4 font-medium text-white">
-                                                    {d.username}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     {d.firstName || '—'}
@@ -400,9 +395,6 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-300 select-all font-mono text-xs">
                                                     {d.email || '—'}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-400">
-                                                    {d.createdAt ? new Date(d.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <span
