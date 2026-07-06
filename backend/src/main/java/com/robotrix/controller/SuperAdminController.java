@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @RestController
@@ -46,6 +49,9 @@ public class SuperAdminController {
             hid = String.format("HID-%04d", nextId);
         }
         tenant.setHid(hid);
+
+        // Set subscription: 1 year from now
+        tenant.setSubscriptionExpiresAt(LocalDateTime.now().plusYears(1));
         
         tenantRepository.save(tenant);
 
@@ -63,9 +69,9 @@ public class SuperAdminController {
 
     @GetMapping("/hospitals")
     public ResponseEntity<?> getHospitals(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String search) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "search", required = false) String search) {
         
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
         org.springframework.data.domain.Page<Tenant> tenantPage = tenantRepository.searchTenants(
@@ -79,6 +85,9 @@ public class SuperAdminController {
             dto.setHid(tenant.getHid());
             dto.setName(tenant.getName());
             dto.setActive(tenant.isActive());
+            dto.setSubscriptionExpiresAt(tenant.getSubscriptionExpiresAt());
+            dto.setLastRenewedAt(tenant.getLastRenewedAt());
+            dto.setSubscriptionStatus(computeSubscriptionStatus(tenant));
             userRepository.findHospitalAdminByTenantId(tenant.getId())
                 .ifPresent(user -> {
                     dto.setAdminName(user.getUsername());
@@ -125,7 +134,7 @@ public class SuperAdminController {
             userRepository.save(admin);
         }
 
-        // Update active status
+        // Update active status (manual toggle — does NOT affect subscription timer)
         if (request.getActive() != null) {
             tenant.setActive(request.getActive());
             tenantRepository.save(tenant);
@@ -148,6 +157,55 @@ public class SuperAdminController {
         return ResponseEntity.ok(tenant);
     }
 
+    /**
+     * Renew a hospital's subscription for another year from TODAY.
+     * This also re-activates the hospital if it was auto-deactivated due to expiry.
+     * Manual deactivation is separate — if admin manually disabled it AND subscription
+     * expired, renewal re-enables it (the assumption being: payment was made, hospital
+     * should be operational).
+     */
+    @PostMapping("/hospitals/{id}/renew")
+    public ResponseEntity<?> renewSubscription(@PathVariable("id") UUID id) {
+        java.util.Optional<Tenant> tenantOpt = tenantRepository.findById(id);
+        if (tenantOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Tenant tenant = tenantOpt.get();
+        LocalDateTime now = LocalDateTime.now();
+
+        tenant.setSubscriptionExpiresAt(now.plusYears(1));
+        tenant.setLastRenewedAt(now);
+        tenant.setActive(true); // Re-enable if it was deactivated (by expiry or manually)
+        tenantRepository.save(tenant);
+
+        java.util.Map<String, Object> responseMap = new java.util.HashMap<>();
+        responseMap.put("message", "Subscription renewed successfully for 1 year");
+        responseMap.put("expiresAt", tenant.getSubscriptionExpiresAt().toString());
+        return ResponseEntity.ok(responseMap);
+    }
+
+    /**
+     * Computes a human-readable subscription status for display purposes.
+     * - EXPIRED: subscription_expires_at is in the past
+     * - EXPIRING_SOON: less than 30 days remaining
+     * - ACTIVE: more than 30 days remaining
+     */
+    private String computeSubscriptionStatus(Tenant tenant) {
+        if (tenant.getSubscriptionExpiresAt() == null) {
+            return "EXPIRED";
+        }
+        LocalDateTime now = LocalDateTime.now();
+        if (tenant.getSubscriptionExpiresAt().isBefore(now) || tenant.getSubscriptionExpiresAt().isEqual(now)) {
+            return "EXPIRED";
+        }
+        long daysRemaining = ChronoUnit.DAYS.between(now, tenant.getSubscriptionExpiresAt());
+        if (daysRemaining <= 30) {
+            return "EXPIRING_SOON";
+        }
+        return "ACTIVE";
+    }
+
     @Data
     public static class HospitalDto {
         private UUID id;
@@ -156,6 +214,9 @@ public class SuperAdminController {
         private String adminName;
         private String adminMobileNumber;
         private boolean active;
+        private LocalDateTime subscriptionExpiresAt;
+        private LocalDateTime lastRenewedAt;
+        private String subscriptionStatus; // "ACTIVE", "EXPIRING_SOON", "EXPIRED"
     }
 
     @Data

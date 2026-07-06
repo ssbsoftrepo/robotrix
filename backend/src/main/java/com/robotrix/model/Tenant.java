@@ -24,4 +24,20 @@ public class Tenant {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "subscription_expires_at")
+    private LocalDateTime subscriptionExpiresAt;
+
+    @Column(name = "last_renewed_at")
+    private LocalDateTime lastRenewedAt;
+
+    /**
+     * A hospital is effectively operational only when it is both
+     * manually active AND its subscription has not expired.
+     * This is the single source of truth for "can this hospital operate?".
+     */
+    public boolean isEffectivelyActive() {
+        return active && subscriptionExpiresAt != null
+                && subscriptionExpiresAt.isAfter(LocalDateTime.now());
+    }
 }

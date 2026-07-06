@@ -63,7 +63,7 @@ public class TenantResolutionFilter extends OncePerRequestFilter {
                     boolean tenantActive = true;
                     if (userDetails.getTenantId() != null) {
                         tenantActive = tenantRepository.findById(userDetails.getTenantId())
-                                .map(Tenant::isActive)
+                                .map(Tenant::isEffectivelyActive)
                                 .orElse(false);
                     }
 

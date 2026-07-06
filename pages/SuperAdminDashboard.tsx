@@ -13,6 +13,9 @@ interface Hospital {
     adminName: string;
     adminMobileNumber: string;
     active: boolean;
+    subscriptionExpiresAt: string | null;
+    lastRenewedAt: string | null;
+    subscriptionStatus: string;
 }
 
 interface Toast {
@@ -168,6 +171,38 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
             showToast('error', `Failed to toggle status for hospital "${name}"`);
         } finally {
             setActionLoading(null);
+        }
+    };
+
+    const handleRenewSubscription = async (id: string, name: string) => {
+        setActionLoading(id);
+        try {
+            await api.renewSubscription(id);
+            showToast('success', `Subscription renewed for "${name}" — active for 1 year from today.`);
+            await fetchHospitals(currentPage);
+        } catch (err: any) {
+            showToast('error', `Failed to renew subscription for "${name}"`);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return 'N/A';
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    };
+
+    const getSubscriptionBadge = (status: string) => {
+        switch (status) {
+            case 'ACTIVE':
+                return { label: 'ACTIVE', cls: 'bg-emerald-950/20 text-emerald-400 border-emerald-900/50' };
+            case 'EXPIRING_SOON':
+                return { label: 'EXPIRING SOON', cls: 'bg-yellow-950/20 text-yellow-400 border-yellow-900/50' };
+            case 'EXPIRED':
+                return { label: 'EXPIRED', cls: 'bg-red-950/20 text-red-400 border-red-900/50' };
+            default:
+                return { label: 'UNKNOWN', cls: 'bg-gray-950/20 text-gray-400 border-gray-900/50' };
         }
     };
 
@@ -331,6 +366,8 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                             <th className="px-6 py-4">Admin Name</th>
                                             <th className="px-6 py-4">Admin Mobile</th>
                                             <th className="px-6 py-4 text-center">Status</th>
+                                            <th className="px-6 py-4 text-center">Subscription</th>
+                                            <th className="px-6 py-4">Expires</th>
                                             <th className="px-6 py-4 text-center">Actions</th>
                                         </tr>
                                     </thead>
@@ -361,12 +398,36 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    <button
-                                                        onClick={() => handleEditClick(h)}
-                                                        className="py-1.5 px-4 bg-[#1a1a1a] hover:bg-[#2b2b2b] border border-[#333] hover:border-[#6D282C] text-gray-400 hover:text-white font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95"
-                                                    >
-                                                        EDIT
-                                                    </button>
+                                                    {(() => {
+                                                        const badge = getSubscriptionBadge(h.subscriptionStatus);
+                                                        return (
+                                                            <span className={`inline-flex items-center justify-center px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase rounded-sm border select-none min-w-[110px] ${badge.cls}`}>
+                                                                {badge.label}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </td>
+                                                <td className="px-6 py-4 text-xs text-gray-400 font-mono">
+                                                    {formatDate(h.subscriptionExpiresAt)}
+                                                </td>
+                                                <td className="px-6 py-4 text-center">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <button
+                                                            onClick={() => handleEditClick(h)}
+                                                            className="py-1.5 px-4 bg-[#1a1a1a] hover:bg-[#2b2b2b] border border-[#333] hover:border-[#6D282C] text-gray-400 hover:text-white font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95"
+                                                        >
+                                                            EDIT
+                                                        </button>
+                                                        {(h.subscriptionStatus === 'EXPIRED' || h.subscriptionStatus === 'EXPIRING_SOON') && (
+                                                            <button
+                                                                onClick={() => handleRenewSubscription(h.id, h.name)}
+                                                                disabled={actionLoading === h.id}
+                                                                className="py-1.5 px-4 bg-emerald-950/30 hover:bg-emerald-900/40 border border-emerald-800/50 hover:border-emerald-600 text-emerald-400 hover:text-emerald-300 font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {actionLoading === h.id ? '...' : 'RENEW'}
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

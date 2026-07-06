@@ -68,6 +68,7 @@ export const api = {
     },
     updateHospital: (id: string, body: any) => request(`/api/superadmin/hospitals/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     toggleHospital: (id: string) => request(`/api/superadmin/hospitals/${id}/toggle`, { method: 'POST' }),
+    renewSubscription: (id: string) => request(`/api/superadmin/hospitals/${id}/renew`, { method: 'POST' }),
     getDoctors: (page: number, size: number, search?: string) => {
         let url = `/api/hospitaladmin/users?page=${page}&size=${size}`;
         if (search) url += `&search=${encodeURIComponent(search)}`;

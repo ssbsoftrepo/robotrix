@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @GetMapping("/check-username")
-    public ResponseEntity<?> checkUsername(@RequestParam String username) {
+    public ResponseEntity<?> checkUsername(@RequestParam(value = "username") String username) {
         if (username == null || username.trim().isEmpty()) {
             return ResponseEntity.ok(Map.of("available", false, "message", "Username is required"));
         }
@@ -78,6 +79,7 @@ public class AuthController {
         // Create Tenant
         Tenant tenant = new Tenant();
         tenant.setName(request.getTenantName());
+        tenant.setSubscriptionExpiresAt(LocalDateTime.now().plusYears(1));
         tenantRepository.save(tenant);
 
         // Create Admin User for this Tenant
@@ -154,9 +156,11 @@ public class AuthController {
             Optional<Tenant> tenantOpt = tenantRepository.findById(user.getTenantId());
             if (tenantOpt.isPresent()) {
                 Tenant tenant = tenantOpt.get();
-                if (!tenant.isActive()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body("Hospital '" + tenant.getName() + "' is inactive.");
+                if (!tenant.isEffectivelyActive()) {
+                    String reason = !tenant.isActive() 
+                        ? "Your hospital account is currently inactive. Please contact the administrator."
+                        : "Your hospital subscription has expired. Please contact the administrator to renew.";
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(reason);
                 }
                 hospitalName = tenant.getName();
             }

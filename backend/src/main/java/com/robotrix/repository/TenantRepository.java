@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,4 +28,11 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID> {
         @Param("search") String search,
         Pageable pageable
     );
+
+    /**
+     * Finds all tenants that are still marked active but whose subscription
+     * has expired. Used by the daily cron job to auto-deactivate.
+     */
+    @Query("SELECT t FROM Tenant t WHERE t.active = true AND t.subscriptionExpiresAt <= :now")
+    List<Tenant> findExpiredActiveTenants(@Param("now") LocalDateTime now);
 }
