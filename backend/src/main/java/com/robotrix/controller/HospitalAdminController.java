@@ -76,6 +76,10 @@ public class HospitalAdminController {
             return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
         }
 
+        if (userRepository.findByEmailGlobal(request.getEmail().trim()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+        }
+
         String mobile = request.getMobileNumber().replaceAll("\\D", "");
         if (mobile.length() != 10) {
             return ResponseEntity.badRequest().body(Map.of("message", "Mobile number must be exactly 10 digits"));
@@ -184,7 +188,12 @@ public class HospitalAdminController {
         if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
         }
-        user.setEmail(request.getEmail().trim());
+        String newEmail = request.getEmail().trim();
+        java.util.Optional<User> existingUserWithEmail = userRepository.findByEmailGlobal(newEmail);
+        if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(id)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+        }
+        user.setEmail(newEmail);
 
         if (request.getActive() != null) {
             user.setActive(request.getActive());

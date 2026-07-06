@@ -35,7 +35,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
-    const [pageSize] = useState(10);
+    const [pageSize] = useState(5);
     const [searchQuery, setSearchQuery] = useState('');
 
     // Creation Form states
@@ -368,36 +368,32 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                 <table className="w-full text-left border-collapse min-w-[700px]">
                                     <thead>
                                         <tr className="bg-[#1b1b1b] border-b border-[#2b2b2b] text-[10px] font-bold tracking-widest text-[#888888] uppercase">
-                                            <th className="px-6 py-4">Hospital ID</th>
-                                            <th className="px-6 py-4">Hospital Name</th>
-                                            <th className="px-6 py-4">Admin Name</th>
-                                            <th className="px-6 py-4">Admin Mobile</th>
-                                            <th className="px-6 py-4">Admin Email</th>
-                                            <th className="px-6 py-4 text-center">Status</th>
-                                            <th className="px-6 py-4 text-center">Subscription</th>
-                                            <th className="px-6 py-4">Expires</th>
-                                            <th className="px-6 py-4 text-center">Actions</th>
+                                            <th className="px-4 py-3">Hospital ID</th>
+                                            <th className="px-4 py-3">Hospital Name</th>
+                                            <th className="px-4 py-3">Admin Mobile</th>
+                                            <th className="px-4 py-3">Admin Email</th>
+                                            <th className="px-4 py-3 text-center">Status</th>
+                                            <th className="px-4 py-3 text-center">Subscription</th>
+                                            <th className="px-4 py-3">Expires</th>
+                                            <th className="px-4 py-3 text-center">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#232323] text-sm text-[#CCCCCC]">
                                         {hospitals.map((h) => (
                                             <tr key={h.id} className="hover:bg-[#1c1c1c]/50 transition-colors">
-                                                <td className="px-6 py-4 font-mono font-bold text-[12px] text-cyan-400 select-all">
+                                                <td className="px-4 py-3 font-mono font-bold text-[12px] text-cyan-400 select-all">
                                                     {h.hid || 'N/A'}
                                                 </td>
-                                                <td className="px-6 py-4 font-bold text-white">
+                                                <td className="px-4 py-3 font-bold text-white">
                                                     {h.name}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-300">
-                                                    {h.adminName || <span className="text-gray-600 font-light italic">None</span>}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-300">
+                                                <td className="px-4 py-3 text-gray-300">
                                                     {h.adminMobileNumber || <span className="text-gray-600 font-light italic">None</span>}
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-300 select-all font-mono text-xs">
+                                                <td className="px-4 py-3 text-gray-300 select-all font-mono text-xs">
                                                     {h.adminEmail || <span className="text-gray-600 font-light italic">None</span>}
                                                 </td>
-                                                <td className="px-6 py-4 text-center">
+                                                <td className="px-4 py-3 text-center">
                                                     <span
                                                         className={`inline-flex items-center justify-center px-4 py-2 text-xs font-bold tracking-widest uppercase rounded-sm border select-none min-w-[110px] ${
                                                             h.active
@@ -408,7 +404,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                                         {h.active ? 'ACTIVE' : 'INACTIVE'}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-center">
+                                                <td className="px-4 py-3 text-center">
                                                     {(() => {
                                                         const badge = getSubscriptionBadge(h.subscriptionStatus);
                                                         return (
@@ -418,14 +414,14 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                                         );
                                                     })()}
                                                 </td>
-                                                <td className="px-6 py-4 text-xs text-gray-400 font-mono">
+                                                <td className="px-4 py-3 text-xs text-gray-400 font-mono">
                                                     {formatDate(h.subscriptionExpiresAt)}
                                                 </td>
-                                                <td className="px-6 py-4 text-center">
+                                                <td className="px-4 py-3 text-center">
                                                     <div className="flex items-center justify-center gap-2">
                                                         <button
                                                             onClick={() => handleEditClick(h)}
-                                                            className="py-1.5 px-4 bg-[#1a1a1a] hover:bg-[#2b2b2b] border border-[#333] hover:border-[#6D282C] text-gray-400 hover:text-white font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95"
+                                                            className="py-1 px-3 bg-[#1a1a1a] hover:bg-[#2b2b2b] border border-[#333] hover:border-[#6D282C] text-gray-400 hover:text-white font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95"
                                                         >
                                                             EDIT
                                                         </button>
@@ -433,7 +429,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                                             <button
                                                                 onClick={() => handleRenewSubscription(h.id, h.name)}
                                                                 disabled={actionLoading === h.id}
-                                                                className="py-1.5 px-4 bg-emerald-950/30 hover:bg-emerald-900/40 border border-emerald-800/50 hover:border-emerald-600 text-emerald-400 hover:text-emerald-300 font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                className="py-1 px-3 bg-emerald-950/30 hover:bg-emerald-900/40 border border-emerald-800/50 hover:border-emerald-600 text-emerald-400 hover:text-emerald-300 font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             >
                                                                 {actionLoading === h.id ? '...' : 'RENEW'}
                                                             </button>
@@ -486,7 +482,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                     />
                     
                     {/* Modal Card */}
-                    <div className="relative z-10 max-w-md w-full bg-[#161616] border border-[#2b2b2b] p-6 md:p-8 rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden">
+                    <div className="relative z-10 max-w-xl w-full bg-[#161616] border border-[#2b2b2b] p-6 md:p-8 rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-[#6D282C]" />
                         
                         <div className="flex items-center justify-between mb-6">
@@ -502,88 +498,90 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                         </div>
 
                         <form onSubmit={handleCreateHospital} className="space-y-4">
-                            {/* Hospital Name */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Hospital Name
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={hospitalName}
-                                    onChange={(e) => setHospitalName(e.target.value)}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="e.g. Apollo Hospital"
-                                />
-                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Hospital Name */}
+                                <div className="md:col-span-2 space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Hospital Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={hospitalName}
+                                        onChange={(e) => setHospitalName(e.target.value)}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="e.g. Apollo Hospital"
+                                    />
+                                </div>
 
-                            {/* Admin Username */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Admin Username
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={adminUsername}
-                                    onChange={(e) => setAdminUsername(e.target.value.toLowerCase())}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="Admin username"
-                                />
-                                {statusMessage && (
-                                    <p className={`text-[11px] mt-1 font-semibold ${
-                                        usernameStatus === 'available' ? 'text-green-500' :
-                                        usernameStatus === 'checking' ? 'text-yellow-500' : 'text-red-500'
-                                    }`}>
-                                        {statusMessage}
-                                    </p>
-                                )}
-                            </div>
+                                {/* Admin Username */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Admin Username
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={adminUsername}
+                                        onChange={(e) => setAdminUsername(e.target.value.toLowerCase())}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="Admin username"
+                                    />
+                                    {statusMessage && (
+                                        <p className={`text-[11px] mt-1 font-semibold ${
+                                            usernameStatus === 'available' ? 'text-green-500' :
+                                            usernameStatus === 'checking' ? 'text-yellow-500' : 'text-red-500'
+                                        }`}>
+                                            {statusMessage}
+                                        </p>
+                                    )}
+                                </div>
 
-                            {/* Admin Password */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Admin Password
-                                </label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={adminPassword}
-                                    onChange={(e) => setAdminPassword(e.target.value)}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="Admin secure password"
-                                />
-                            </div>
+                                {/* Admin Password */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Admin Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={adminPassword}
+                                        onChange={(e) => setAdminPassword(e.target.value)}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="Admin secure password"
+                                    />
+                                </div>
 
-                            {/* Admin Mobile Number */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Admin Mobile Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    required
-                                    maxLength={10}
-                                    value={adminMobileNumber}
-                                    onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); if (v.length <= 10) setAdminMobileNumber(v); }}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="e.g. 9999999999"
-                                />
-                            </div>
+                                {/* Admin Email */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Admin Email
+                                    </label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={adminEmail}
+                                        onChange={(e) => setAdminEmail(e.target.value)}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="e.g. admin@hospital.com"
+                                    />
+                                </div>
 
-                            {/* Admin Email */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Admin Email
-                                </label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={adminEmail}
-                                    onChange={(e) => setAdminEmail(e.target.value)}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="e.g. admin@hospital.com"
-                                />
+                                {/* Admin Mobile Number */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Admin Mobile Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        required
+                                        maxLength={10}
+                                        value={adminMobileNumber}
+                                        onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); if (v.length <= 10) setAdminMobileNumber(v); }}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="e.g. 9999999999"
+                                    />
+                                </div>
                             </div>
 
                             <button

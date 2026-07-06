@@ -30,6 +30,7 @@ public class User extends TenantScopedEntity {
     @Column(name = "mobile_number")
     private String mobileNumber;
 
+    @Column(unique = true)
     private String email;
 
     @Column(name = "first_name")

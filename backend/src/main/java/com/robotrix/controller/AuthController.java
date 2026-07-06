@@ -79,6 +79,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
         }
 
+        if (userRepository.findByEmailGlobal(request.getEmail().trim()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+        }
+
         if (userRepository.existsByUsernameGlobal(username.trim())) {
             return ResponseEntity.badRequest().body(Map.of("message", "Username already exists"));
         }
@@ -115,6 +119,10 @@ public class AuthController {
 
         if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
+        }
+
+        if (userRepository.findByEmailGlobal(request.getEmail().trim()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
         }
 
         if (userRepository.existsByUsernameGlobal(username.trim())) {

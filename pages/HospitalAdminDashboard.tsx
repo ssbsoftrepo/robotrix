@@ -469,7 +469,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                     />
                     
                     {/* Modal Card */}
-                    <div className="relative z-10 max-w-md w-full bg-[#161616] border border-[#2b2b2b] p-6 md:p-8 rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-y-auto max-h-[90vh]">
+                    <div className="relative z-10 max-w-xl w-full bg-[#161616] border border-[#2b2b2b] p-6 md:p-8 rounded-sm shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-y-auto max-h-[90vh]">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-[#6D282C]" />
                         
                         <div className="flex items-center justify-between mb-6">
@@ -485,103 +485,105 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                         </div>
 
                         <form onSubmit={handleCreateConsultant} className="space-y-4">
-                            {/* Username */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Consultant Username
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={consultantUsername}
-                                    onChange={(e) => setConsultantUsername(e.target.value.toLowerCase())}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="e.g. john_doe"
-                                />
-                                {statusMessage && (
-                                    <p className={`text-[11px] mt-1 font-semibold ${
-                                        usernameStatus === 'available' ? 'text-green-500' :
-                                        usernameStatus === 'checking' ? 'text-yellow-500' : 'text-red-500'
-                                    }`}>
-                                        {statusMessage}
-                                    </p>
-                                )}
-                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Username */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Consultant Username
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={consultantUsername}
+                                        onChange={(e) => setConsultantUsername(e.target.value.toLowerCase())}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="e.g. john_doe"
+                                    />
+                                    {statusMessage && (
+                                        <p className={`text-[11px] mt-1 font-semibold ${
+                                            usernameStatus === 'available' ? 'text-green-500' :
+                                            usernameStatus === 'checking' ? 'text-yellow-500' : 'text-red-500'
+                                        }`}>
+                                            {statusMessage}
+                                        </p>
+                                    )}
+                                </div>
 
-                            {/* Password */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Consultant Password
-                                </label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={consultantPassword}
-                                    onChange={(e) => setConsultantPassword(e.target.value)}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="••••••••"
-                                />
-                            </div>
+                                {/* Password */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Consultant Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        required
+                                        value={consultantPassword}
+                                        onChange={(e) => setConsultantPassword(e.target.value)}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
 
-                            {/* First Name */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    First Name
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="Enter first name"
-                                />
-                            </div>
+                                {/* First Name */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        First Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="Enter first name"
+                                    />
+                                </div>
 
-                            {/* Last Name */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Last Name
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="Enter last name"
-                                />
-                            </div>
+                                {/* Last Name */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Last Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="Enter last name"
+                                    />
+                                </div>
 
-                            {/* Mobile Number */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Mobile Number
-                                </label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={mobileNumber}
-                                    maxLength={10}
-                                    onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="Enter 10-digit mobile number"
-                                />
-                            </div>
+                                {/* Email Address */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="Enter email address"
+                                    />
+                                </div>
 
-                            {/* Email Address */}
-                            <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
-                                    Email Address
-                                </label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                    placeholder="Enter email address"
-                                />
+                                {/* Mobile Number */}
+                                <div className="space-y-1">
+                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                        Mobile Number
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={mobileNumber}
+                                        maxLength={10}
+                                        onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
+                                        className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                        placeholder="Enter 10-digit mobile number"
+                                    />
+                                </div>
                             </div>
 
                             <button

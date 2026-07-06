@@ -41,6 +41,10 @@ public class SuperAdminController {
             return ResponseEntity.badRequest().body("Admin email is mandatory");
         }
 
+        if (userRepository.findByEmailGlobal(request.getAdminEmail().trim()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
         // Create Tenant
         Tenant tenant = new Tenant();
         tenant.setName(request.getHospitalName());
@@ -138,10 +142,15 @@ public class SuperAdminController {
                 admin.setMobileNumber(request.getAdminMobileNumber().trim());
             }
             if (request.getAdminEmail() != null) {
-                if (request.getAdminEmail().trim().isEmpty()) {
+                String newEmail = request.getAdminEmail().trim();
+                if (newEmail.isEmpty()) {
                     return ResponseEntity.badRequest().body("Admin email is mandatory");
                 }
-                admin.setEmail(request.getAdminEmail().trim());
+                java.util.Optional<User> existingUserWithEmail = userRepository.findByEmailGlobal(newEmail);
+                if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(admin.getId())) {
+                    return ResponseEntity.badRequest().body("Email already exists");
+                }
+                admin.setEmail(newEmail);
             }
             userRepository.save(admin);
         }
