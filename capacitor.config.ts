@@ -4,6 +4,9 @@ const config: CapacitorConfig = {
   appId: 'com.robotrix.app',
   appName: 'Robotrix',
   webDir: 'dist',
+  server: {
+    androidScheme: 'http'
+  },
   plugins:{
     CapacitorAssets: {
       pwa: false

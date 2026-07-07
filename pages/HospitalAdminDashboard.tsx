@@ -226,7 +226,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
             <div className="absolute top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-950/10 rounded-full blur-[120px] pointer-events-none" />
 
             {/* Stacked Toasts Container */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse space-y-4 space-y-reverse max-w-sm w-full pointer-events-none">
+            <div className="fixed bottom-24 right-6 z-50 flex flex-col-reverse space-y-4 space-y-reverse max-w-sm w-full pointer-events-none">
                 {toasts.map(t => (
                     <div 
                         key={t.id} 

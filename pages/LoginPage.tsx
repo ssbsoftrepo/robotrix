@@ -124,7 +124,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             }
         } catch (err: any) {
             const msg = err.message || 'Login failed. Please check your credentials.';
-            showToast('error', msg);
+            showToast('error', `${msg} (Server: ${api.getApiBaseUrl()})`);
             setLoading(false);
         }
     };
@@ -132,30 +132,28 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     return (
         <div className="relative min-h-screen w-full overflow-y-auto bg-gradient-to-br from-[#1E1E1E] to-[#121212] flex flex-col justify-between items-center p-4 md:p-8 select-none">
             {/* Stacked Toasts Container (Bottom Right) */}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse space-y-4 space-y-reverse max-w-sm w-full pointer-events-none">
+            <div className="fixed bottom-24 right-6 z-50 flex flex-col-reverse space-y-4 space-y-reverse max-w-sm w-full pointer-events-none">
                 {toasts.map(t => (
-                    <div 
-                        key={t.id} 
-                        className={`pointer-events-auto flex items-start space-x-3 p-4 rounded-sm border shadow-[0_10px_30px_rgba(0,0,0,0.8)] transition-all duration-300 animate-slide-in ${
-                            t.type === 'success' 
-                                ? 'bg-[#121c15] border-emerald-900 border-l-4 border-l-emerald-500 text-emerald-400' 
+                    <div
+                        key={t.id}
+                        className={`pointer-events-auto flex items-start space-x-3 p-4 rounded-sm border shadow-[0_10px_30px_rgba(0,0,0,0.8)] transition-all duration-300 animate-slide-in ${t.type === 'success'
+                                ? 'bg-[#121c15] border-emerald-900 border-l-4 border-l-emerald-500 text-emerald-400'
                                 : t.type === 'error'
-                                ? 'bg-[#1c1212] border-red-900 border-l-4 border-l-red-600 text-red-400'
-                                : 'bg-[#1c1a12] border-yellow-950 border-l-4 border-l-yellow-600 text-yellow-400'
-                        }`}
+                                    ? 'bg-[#1c1212] border-red-900 border-l-4 border-l-red-600 text-red-400'
+                                    : 'bg-[#1c1a12] border-yellow-950 border-l-4 border-l-yellow-600 text-yellow-400'
+                            }`}
                     >
                         <span className="text-base mt-0.5">
                             {t.type === 'success' ? '✓' : '⚠️'}
                         </span>
                         <div className="flex-1 text-left">
-                            <h4 className={`text-xs font-bold uppercase tracking-wider ${
-                                t.type === 'success' ? 'text-emerald-400' : t.type === 'error' ? 'text-red-400' : 'text-yellow-400'
-                            }`}>
+                            <h4 className={`text-xs font-bold uppercase tracking-wider ${t.type === 'success' ? 'text-emerald-400' : t.type === 'error' ? 'text-red-400' : 'text-yellow-400'
+                                }`}>
                                 {t.type === 'success' ? 'Success' : t.type === 'error' ? 'Error' : 'Warning'}
                             </h4>
                             <p className="text-xs text-[#E0E0E0] mt-1 font-medium">{t.message}</p>
                         </div>
-                        <button 
+                        <button
                             onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))}
                             className="text-gray-500 hover:text-white text-xs font-bold transition-colors focus:outline-none cursor-pointer"
                         >
@@ -173,7 +171,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
             {/* Content Container */}
             <div className="relative z-10 flex flex-col items-center justify-center space-y-6 md:space-y-8 max-w-md w-full px-2 md:px-4 py-8 my-auto">
-                
+
                 {/* Brand Header */}
                 <div className="space-y-3 text-center">
                     <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-[#E0E0E0] tracking-tighter leading-none drop-shadow-lg uppercase">
@@ -265,6 +263,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             >
                                 {loginSuccess ? 'REDIRECTING...' : loading ? 'AUTHENTICATING...' : 'LOGIN'}
                             </button>
+
                         </form>
                     )}
 
@@ -272,7 +271,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                         <form onSubmit={handleRequestOtp} className="space-y-4 md:space-y-5">
                             <h2 className="text-sm font-bold text-[#E0E0E0] uppercase tracking-wider mb-2">Forgot Password</h2>
                             <p className="text-xs text-gray-400 font-light">We will send a 6-digit OTP to your registered email address.</p>
-                            
+
                             {/* Email */}
                             <div className="space-y-1 text-left">
                                 <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
@@ -311,7 +310,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                         <form onSubmit={handleVerifyOtp} className="space-y-4 md:space-y-5">
                             <h2 className="text-sm font-bold text-[#E0E0E0] uppercase tracking-wider mb-2">Verify OTP</h2>
                             <p className="text-xs text-gray-400 font-light">Please enter the 6-digit OTP code sent to <strong className="text-gray-300">{email}</strong>.</p>
-                            
+
                             {/* OTP */}
                             <div className="space-y-1 text-left">
                                 <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
@@ -351,7 +350,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                         <form onSubmit={handleResetPassword} className="space-y-4 md:space-y-5">
                             <h2 className="text-sm font-bold text-[#E0E0E0] uppercase tracking-wider mb-2">Reset Password</h2>
                             <p className="text-xs text-gray-400 font-light">Create a secure new password for your account.</p>
-                            
+
                             {/* New Password */}
                             <div className="space-y-1 text-left">
                                 <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">

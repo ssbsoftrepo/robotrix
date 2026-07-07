@@ -1,4 +1,15 @@
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8081';
+import { Capacitor } from '@capacitor/core';
+
+export const getApiBaseUrl = () => {
+    if (Capacitor.isNativePlatform()) {
+        return 'http://192.168.1.84:8081';
+    }
+    const hostname = window.location.hostname;
+    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        return `http://${hostname}:8081`;
+    }
+    return 'http://localhost:8081';
+};
 
 export const getAuthToken = () => localStorage.getItem('robotrix_token');
 export const setAuthToken = (token: string) => localStorage.setItem('robotrix_token', token);
@@ -21,7 +32,8 @@ async function request(path: string, options: RequestInit = {}) {
         headers['Content-Type'] = 'application/json';
     }
 
-    const response = await fetch(`${BASE_URL}${path}`, {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}${path}`, {
         ...options,
         headers,
     });
@@ -78,4 +90,5 @@ export const api = {
     forgotPasswordRequest: (email: string) => request('/api/auth/forgot-password/request', { method: 'POST', body: JSON.stringify({ email }) }),
     forgotPasswordVerify: (email: string, otp: string) => request('/api/auth/forgot-password/verify', { method: 'POST', body: JSON.stringify({ email, otp }) }),
     forgotPasswordReset: (body: any) => request('/api/auth/forgot-password/reset', { method: 'POST', body: JSON.stringify(body) }),
+    getApiBaseUrl
 };
