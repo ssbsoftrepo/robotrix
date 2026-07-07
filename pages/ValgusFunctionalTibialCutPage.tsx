@@ -15,13 +15,13 @@ const CuttingBlock: React.FC<{
         className={`relative flex flex-col items-center transition-all duration-300 cursor-pointer w-full ${isSelected ? 'scale-105 z-10' : 'opacity-60 hover:opacity-100 hover:scale-102'}`}
     >
         {isRecommended && (
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[10px] font-bold px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[0.625rem] font-bold px-2 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
                 RECOMMENDED
             </div>
         )}
 
         {/* SVG Representation of a Metal Cutting Jig */}
-        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[130px] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
+        <svg viewBox="0 0 320 130" className={`w-full h-auto max-h-[8.125rem] ${isSelected ? 'drop-shadow-[0_0_10px_rgba(109,40,44,0.6)]' : 'drop-shadow-lg'}`}>
             <defs>
                 <linearGradient id={`metalGrad-${degree}`} x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#f3f4f6" />
@@ -204,7 +204,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                 <div className="bg-[#6D282C] text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-base font-bold shadow-lg border-2 border-[#893338]">
                                     1
                                 </div>
-                                <p className="text-[18px] text-gray-400 leading-snug text-justify">
+                                <p className="text-[1.125rem] text-gray-400 leading-snug text-justify">
                                     Choose appropriate <span className="text-white font-bold">Robotrix+ universal varus cutting jigs</span> to do a functional recut of the tibia to open medial gap avoid/minimise soft tissue release.
                                 </p>
                             </div>
@@ -235,7 +235,7 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                     </div>
 
                     {/* Center Column: Image Upload & Red Lines */}
-                    <div className="flex flex-col h-[500px] lg:h-full items-center justify-center relative p-0 overflow-visible lg:overflow-hidden min-h-[450px] lg:min-h-0">
+                    <div className="flex flex-col h-[31.25rem] lg:h-full items-center justify-center relative p-0 overflow-visible lg:overflow-hidden min-h-[28.125rem] lg:min-h-0">
 
                         <div
                             ref={containerRef}
@@ -244,20 +244,20 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                         >
 
                             {/* Gap Info Overlays - swap based on leg side */}
-                            <div className={`absolute top-4 ${isLeftLeg ? 'right-4' : 'left-4'} z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#333333] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(0,0,0,0.8)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105`}>
-                                <p className="text-[10px] text-gray-400 uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Lateral Gap</p>
+                            <div className={`absolute top-4 ${isLeftLeg ? 'right-4' : 'left-4'} z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#333333] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(0,0,0,0.8)] pointer-events-none min-w-[6.25rem] transform transition-transform hover:scale-105`}>
+                                <p className="text-[0.625rem] text-gray-400 uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Lateral Gap</p>
                                 <p className="text-2xl font-black text-white leading-none drop-shadow-xl">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
                             </div>
 
-                            <div className={`absolute top-4 ${isLeftLeg ? 'left-4' : 'right-4'} z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#6D282C] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(109,40,44,0.3)] pointer-events-none min-w-[100px] transform transition-transform hover:scale-105`}>
-                                <p className="text-[10px] text-[#ff8fa3] uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
+                            <div className={`absolute top-4 ${isLeftLeg ? 'left-4' : 'right-4'} z-40 bg-[#1a1a1a]/90 backdrop-blur-xl border-2 border-[#6D282C] rounded-lg px-4 py-3 text-center shadow-[0_0_30px_rgba(109,40,44,0.3)] pointer-events-none min-w-[6.25rem] transform transition-transform hover:scale-105`}>
+                                <p className="text-[0.625rem] text-[#ff8fa3] uppercase font-extrabold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
                                 <p className="text-2xl font-black text-[#ff8fa3] leading-none drop-shadow-xl">{medialGapValue} <span className="text-sm text-[#ff8fa3]/70 font-bold">mm</span></p>
                             </div>
 
                             {/* Corrected Varus Overlay */}
                             <div className="absolute top-[75%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
                                 <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-                                    <p className="text-gray-500 text-[9px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
+                                    <p className="text-gray-500 text-[0.5625rem] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
                                     <p className="text-3xl font-extrabold text-white tracking-tighter">{selectedDegree}°</p>
                                 </div>
                             </div>
@@ -325,12 +325,12 @@ const ValgusFunctionalTibialCutPage: React.FC = () => {
                                             }`}
                                     >
                                         {currentRecommendation === 0 && (
-                                            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[8px] font-bold px-1.5 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
+                                            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-[#6D282C] text-white text-[0.5rem] font-bold px-1.5 py-0.5 rounded-sm shadow-lg z-20 whitespace-nowrap tracking-wider">
                                                 RECOMMENDED
                                             </div>
                                         )}
                                         <span>0 DEGREE</span>
-                                        <span className="text-[10px] font-normal opacity-80">NEUTRAL CUT</span>
+                                        <span className="text-[0.625rem] font-normal opacity-80">NEUTRAL CUT</span>
                                     </button>
                                 </div>
 

@@ -199,7 +199,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                         <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                             {/* Username */}
                             <div className="space-y-1 text-left">
-                                <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
                                     Username
                                 </label>
                                 <input
@@ -215,13 +215,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             {/* Password */}
                             <div className="space-y-1 text-left">
                                 <div className="flex justify-between items-center">
-                                    <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
+                                    <label className="block text-[0.625rem] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
                                         Password
                                     </label>
                                     <button
                                         type="button"
                                         onClick={() => setFlowState('request')}
-                                        className="text-[10px] md:text-xs font-bold text-gray-500 hover:text-white transition-colors focus:outline-none cursor-pointer"
+                                        className="text-[0.625rem] md:text-xs font-bold text-gray-500 hover:text-white transition-colors focus:outline-none cursor-pointer"
                                     >
                                         Forgot password?
                                     </button>
@@ -274,7 +274,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
                             {/* Email */}
                             <div className="space-y-1 text-left">
-                                <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
                                     Email Address
                                 </label>
                                 <input
@@ -313,7 +313,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
                             {/* OTP */}
                             <div className="space-y-1 text-left">
-                                <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
                                     OTP Code
                                 </label>
                                 <input
@@ -353,7 +353,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
                             {/* New Password */}
                             <div className="space-y-1 text-left">
-                                <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
                                     New Password
                                 </label>
                                 <div className="relative">
@@ -386,7 +386,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
                             {/* Confirm Password */}
                             <div className="space-y-1 text-left">
-                                <label className="block text-[10px] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] md:text-xs font-bold tracking-wider text-[#888888] uppercase">
                                     Confirm Password
                                 </label>
                                 <div className="relative">

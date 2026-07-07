@@ -266,7 +266,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                         <h1 className="text-2xl font-black tracking-tight uppercase leading-none">
                             ROBOTRIX<span className="text-[#6D282C]">+</span> <span className="text-xs font-semibold text-gray-500 ml-2 tracking-widest">HOSPITAL ADMIN</span>
                         </h1>
-                        <p className="text-[10px] text-[#888888] tracking-widest uppercase mt-1">
+                        <p className="text-[0.625rem] text-[#888888] tracking-widest uppercase mt-1">
                             {hospitalName || 'Tenant'} Administration
                         </p>
                     </div>
@@ -345,7 +345,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                         <h2 className="text-sm font-black tracking-wider uppercase text-gray-400">
                             Registered Hospital Consultants
                         </h2>
-                        <span className="text-[10px] bg-[#232323] px-2.5 py-1 text-gray-500 font-bold uppercase rounded-full">
+                        <span className="text-[0.625rem] bg-[#232323] px-2.5 py-1 text-gray-500 font-bold uppercase rounded-full">
                             Total: {totalElements}
                         </span>
                     </div>
@@ -368,7 +368,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
-                                        <tr className="border-b border-[#232323] text-[10px] font-bold tracking-wider text-gray-500 uppercase">
+                                        <tr className="border-b border-[#232323] text-[0.625rem] font-bold tracking-wider text-gray-500 uppercase">
                                             <th className="px-6 py-4">Consultant ID</th>
                                             <th className="px-6 py-4">First Name</th>
                                             <th className="px-6 py-4">Last Name</th>
@@ -398,7 +398,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <span
-                                                        className={`inline-flex items-center justify-center px-4 py-2 text-xs font-bold tracking-widest uppercase rounded-sm border select-none min-w-[110px] ${
+                                                        className={`inline-flex items-center justify-center px-4 py-2 text-xs font-bold tracking-widest uppercase rounded-sm border select-none min-w-[6.875rem] ${
                                                             d.active
                                                                 ? 'bg-emerald-950/20 text-emerald-400 border-emerald-900/50'
                                                                 : 'bg-red-950/20 text-red-400 border-red-900/50'
@@ -480,7 +480,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Username */}
                                 <div className="space-y-1">
-                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                         Consultant Username
                                     </label>
                                     <input
@@ -492,7 +492,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
                                         placeholder="e.g. john_doe"
                                     />
                                     {statusMessage && (
-                                        <p className={`text-[11px] mt-1 font-semibold ${
+                                        <p className={`text-[0.6875rem] mt-1 font-semibold ${
                                             usernameStatus === 'available' ? 'text-green-500' :
                                             usernameStatus === 'checking' ? 'text-yellow-500' : 'text-red-500'
                                         }`}>
@@ -503,7 +503,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                                 {/* Password */}
                                 <div className="space-y-1">
-                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                         Consultant Password
                                     </label>
                                     <input
@@ -518,7 +518,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                                 {/* First Name */}
                                 <div className="space-y-1">
-                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                         First Name
                                     </label>
                                     <input
@@ -533,7 +533,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                                 {/* Last Name */}
                                 <div className="space-y-1">
-                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                         Last Name
                                     </label>
                                     <input
@@ -548,7 +548,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                                 {/* Email Address */}
                                 <div className="space-y-1">
-                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                         Email Address
                                     </label>
                                     <input
@@ -563,7 +563,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                                 {/* Mobile Number */}
                                 <div className="space-y-1">
-                                    <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                    <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                         Mobile Number
                                     </label>
                                     <input
@@ -620,7 +620,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                             {/* First Name */}
                             <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                     First Name
                                 </label>
                                 <input
@@ -635,7 +635,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                             {/* Last Name */}
                             <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                     Last Name
                                 </label>
                                 <input
@@ -650,7 +650,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                             {/* Mobile Number */}
                             <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                     Mobile Number
                                 </label>
                                 <input
@@ -666,7 +666,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                             {/* Email Address */}
                             <div className="space-y-1">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                     Email Address
                                 </label>
                                 <input
@@ -681,7 +681,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
                             {/* Status Option */}
                             <div className="space-y-2">
-                                <label className="block text-[10px] font-bold tracking-wider text-[#888888] uppercase">
+                                <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
                                     Consultant Status
                                 </label>
                                 <div className="flex items-center space-x-6 py-1">
@@ -724,7 +724,7 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
 
             {/* Footer */}
             <footer className="relative z-10 w-full py-4 border-t border-[#2b2b2b] bg-[#161616]/20 mt-8">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between text-[10px] text-gray-500 font-medium uppercase tracking-widest">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between text-[0.625rem] text-gray-500 font-medium uppercase tracking-widest">
                     <span>© {new Date().getFullYear()} PLUS Orthopedics. All Rights Reserved.</span>
                     <span className="mt-2 md:mt-0">Powered by Robotrix+ Execution Platform</span>
                 </div>

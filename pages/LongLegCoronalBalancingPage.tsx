@@ -113,7 +113,7 @@
 //                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-2.5 rounded-xl flex flex-col items-center text-center overflow-y-auto shrink-0">
 //                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 //                         <div className="w-full flex justify-center mb-1.5">
-//                             <span className="px-3 py-1 rounded-sm text-[12px] font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">STEP 4</span>
+//                             <span className="px-3 py-1 rounded-sm text-[0.75rem] font-black bg-[#6D282C] text-white shadow-lg tracking-widest uppercase">STEP 4</span>
 //                         </div>
 //                         <p className="font-bold text-[#E0E0E0] mb-2 text-base leading-tight">
 //                             Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span><br />
@@ -159,7 +159,7 @@
 //                                 </div>
 //                                 <div className="flex items-center justify-center gap-3">
 //                                     <div className="h-px bg-white/5 flex-grow"></div>
-//                                     <span className="text-[10px] text-gray-500 font-black tracking-widest font-mono">OR</span>
+//                                     <span className="text-[0.625rem] text-gray-500 font-black tracking-widest font-mono">OR</span>
 //                                     <div className="h-px bg-white/5 flex-grow"></div>
 //                                 </div>
 //                                 <div className="bg-[#6D282C]/20 p-2 rounded-lg border border-[#6D282C]/80">
@@ -167,7 +167,7 @@
 //                                 </div>
 //                                 <div className="flex items-center justify-center gap-3">
 //                                     <div className="h-px bg-white/5 flex-grow"></div>
-//                                     <span className="text-[10px] text-gray-500 font-black tracking-widest font-mono">OR</span>
+//                                     <span className="text-[0.625rem] text-gray-500 font-black tracking-widest font-mono">OR</span>
 //                                     <div className="h-px bg-white/5 flex-grow"></div>
 //                                 </div>
 //                                 <div className="bg-[#6D282C]/20 p-2 rounded-lg border border-[#6D282C]/80">
@@ -287,7 +287,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                             Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span> (Asymmetrical Incremental blocks) To gauge lateral and medial extension gaps
                         </p>
 
-                        <div className="w-full aspect-square max-h-[220px] rounded-lg flex items-center justify-center relative overflow-hidden my-auto self-center border border-[#333333] bg-black shrink-0 z-10">
+                        <div className="w-full aspect-square max-h-[13.75rem] rounded-lg flex items-center justify-center relative overflow-hidden my-auto self-center border border-[#333333] bg-black shrink-0 z-10">
                             <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain" />
                         </div>
 
@@ -299,7 +299,7 @@ const LongLegCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Image with Side Panels */}
-                <div className="h-full flex flex-col overflow-visible lg:overflow-hidden min-h-[450px] lg:min-h-0">
+                <div className="h-full flex flex-col overflow-visible lg:overflow-hidden min-h-[28.125rem] lg:min-h-0">
                     <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-black overflow-hidden rounded-xl border border-[#333333]">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="flex items-stretch justify-center w-full h-full gap-0 p-4">

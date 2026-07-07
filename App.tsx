@@ -139,7 +139,7 @@ const App: React.FC = () => {
             <div className="h-screen flex flex-col">
                 <header
                     className="relative z-50 flex items-center justify-between px-2 pb-2 border-b border-[#333333] shadow-md no-print bg-gradient-to-r from-[#1a1a1a] to-[#252525]"
-                    style={{ paddingTop: 'max(0.2rem, env(safe-area-inset-top, 0.2rem))' }}
+                    style={{ paddingTop: Capacitor.isNativePlatform() ? 'max(1.8rem, env(safe-area-inset-top, 1.8rem))' : 'max(0.2rem, env(safe-area-inset-top, 0.2rem))' }}
                 >
                     <div className="flex-1" />
                     <h1 className="text-4xl font-black text-[#E0E0E0] tracking-tighter drop-shadow-lg pointer-events-none select-none relative z-10">

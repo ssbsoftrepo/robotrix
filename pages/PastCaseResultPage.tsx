@@ -317,7 +317,7 @@ const ResultItem: React.FC<{ label: string; value: string | number | null; large
 
     return (
         <div className={`bg-[#252525] rounded-lg border border-[#6D282C]/50 ${large ? 'p-1.5' : 'p-1'}`}>
-            <p className="text-[9px] text-[#ff8fa3] font-bold uppercase whitespace-nowrap overflow-hidden text-ellipsis">{label}</p>
+            <p className="text-[0.5625rem] text-[#ff8fa3] font-bold uppercase whitespace-nowrap overflow-hidden text-ellipsis">{label}</p>
             <p className={`font-bold text-[#ff8fa3] ${large ? 'text-xl' : 'text-xs'} truncate`} title={displayValue}>
                 {displayValue}
             </p>
@@ -987,7 +987,7 @@ const PostOpPlanner: React.FC = () => {
             <CameraModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onCapture={(dataUrl) => { setPostOpLongLegImage(dataUrl); setFileName('Camera Capture'); }} />
             <div className="grid grid-cols-1 lg:grid-cols-[70fr_30fr] gap-4 flex-grow h-full min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden pb-4">
                 {/* Viewer - Left side (70%) */}
-                <div className="relative w-full h-full min-h-[450px] lg:min-h-0 lg:max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
+                <div className="relative w-full h-full min-h-[28.125rem] lg:min-h-0 lg:max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
                     {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
                     {postOpLongLegImage && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
@@ -1080,7 +1080,7 @@ const PostOpPlanner: React.FC = () => {
                                 </button>
                             </div>
                             <p className="text-xs text-gray-500 mt-2 truncate">{fileName}</p>
-                            <p className="text-gray-500 text-[10px]">Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
+                            <p className="text-gray-500 text-[0.625rem]">Side: <span className="text-[#E0E0E0] font-bold uppercase">{legSide}</span></p>
                         </section>
 
                     </div>
@@ -1088,7 +1088,7 @@ const PostOpPlanner: React.FC = () => {
                     <div className="flex-grow flex flex-col min-h-0">
                         <div className="flex justify-between items-center mb-1">
                             <h4 className="text-sm font-semibold text-[#E0E0E0] uppercase">Markings</h4>
-                            <button onClick={handleResetAll} className="text-[10px] text-red-400 hover:text-red-300 uppercase font-bold tracking-wider">Reset</button>
+                            <button onClick={handleResetAll} className="text-[0.625rem] text-red-400 hover:text-red-300 uppercase font-bold tracking-wider">Reset</button>
                         </div>
                         <div className="flex-grow overflow-y-auto space-y-1 pr-1 custom-scrollbar">
                             {landmarkButtons.map((btn, idx) => {
@@ -1162,7 +1162,7 @@ const PastCaseResultPage: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-4 flex-grow min-h-0 px-0.5 pb-0 relative z-10 overflow-visible lg:overflow-hidden">
                 {/* Column 1: Pre-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[400px] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[25rem] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Pre-Op Analysis</h3>
                     <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden">
@@ -1173,18 +1173,18 @@ const PastCaseResultPage: React.FC = () => {
                     </div>
                     <div className="mt-auto grid grid-cols-2 gap-0.5 text-center relative z-10 shrink-0">
                         <div className="bg-[#252525] p-1 rounded-lg border border-[#6D282C]/50">
-                            <p className="text-[8px] text-[#ff8fa3] font-bold uppercase">Pre-Op CPAK</p>
+                            <p className="text-[0.5rem] text-[#ff8fa3] font-bold uppercase">Pre-Op CPAK</p>
                             <p className="font-bold text-base text-[#ff8fa3]">CPAK {longLegResults.cpak}</p>
                         </div>
                         <div className="bg-[#252525] p-1 rounded-lg border border-[#6D282C]/50">
-                            <p className="text-[8px] text-[#ff8fa3] font-bold uppercase">Pre-Op JLO</p>
+                            <p className="text-[0.5rem] text-[#ff8fa3] font-bold uppercase">Pre-Op JLO</p>
                             <p className="font-bold text-base text-[#ff8fa3]">{longLegResults.jloType}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Column 2: Post-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[700px] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[43.75rem] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Post-Op Verification</h3>
                     <div className="flex-grow min-h-0 max-h-full relative mt-0.5 overflow-visible lg:overflow-hidden">

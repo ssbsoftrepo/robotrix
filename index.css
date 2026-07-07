@@ -20,6 +20,12 @@
   --font-family-roboto-condensed: 'Roboto Condensed', sans-serif;
 }
 
+/* Viewport-relative root font-size for proportional scaling across all screen sizes.
+   All Tailwind rem-based classes (text-sm, px-4, w-10, etc.) scale automatically. */
+html {
+  font-size: clamp(12px, 1.15vw, 18px);
+}
+
 /* Base styles */
 body {
   font-family: 'Roboto', sans-serif;
@@ -81,6 +87,11 @@ h6 {
 
 /* Print styles */
 @media print {
+
+  /* Reset root font-size to fixed value for consistent print output */
+  html {
+    font-size: 14px !important;
+  }
 
   * {
     overflow: visible !important;

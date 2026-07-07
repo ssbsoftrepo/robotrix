@@ -519,7 +519,7 @@ const SimulationPage: React.FC = () => {
                 </div>
 
                 {/* Simulation View - 50% */}
-                <div className="lg:col-span-2 relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg flex items-center justify-center bg-black min-h-[450px] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
+                <div className="lg:col-span-2 relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg flex items-center justify-center bg-black min-h-[28.125rem] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     {!isLoaded && !longLegImageSrc && <p className="text-gray-500 p-4 text-center relative z-10">Load a Long Leg X-ray in the planner to begin simulation.</p>}
                     {!isLoaded && longLegImageSrc && <p className="text-gray-400 relative z-10">Loading Simulation...</p>}

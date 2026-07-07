@@ -201,7 +201,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <h3 className="text-md font-bold text-[#E0E0E0] text-center relative z-10 uppercase">Laxity Level Reference Images</h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-grow min-h-[600px] lg:min-h-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-grow min-h-[37.5rem] lg:min-h-0">
                         {laxityLevels.map((level, index) => {
                             let staticImage = null;
                             if (level === 'No Lateral Laxity') staticImage = '/nolaterl.png';
@@ -225,7 +225,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
                 </div>
 
                 {/* Right Side: Patient Upload */}
-                <div className="flex-grow-[2] flex flex-col min-w-[250px] h-full overflow-visible lg:overflow-hidden min-h-[450px] lg:min-h-0">
+                <div className="flex-grow-[2] flex flex-col min-w-[15.625rem] h-full overflow-visible lg:overflow-hidden min-h-[28.125rem] lg:min-h-0">
                     <div className="relative bg-[#1a1a1a] border border-[#6D282C]/50 p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <h3 className="text-md font-bold text-[#ff8fa3] text-center relative z-10 uppercase">Patient X-ray</h3>

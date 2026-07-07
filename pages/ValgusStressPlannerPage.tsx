@@ -348,7 +348,7 @@ const MetricItem: React.FC<{ label: string; value: string | number; highlight?: 
       ? 'bg-[#6D282C]/20 border-2 border-[#6D282C]'
       : 'bg-[#1a1a1a] border border-[#333333]'}`}>
     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
-    <p className="text-[10px] text-gray-500 uppercase tracking-wider font-medium relative z-10">{label}</p>
+    <p className="text-[0.625rem] text-gray-500 uppercase tracking-wider font-medium relative z-10">{label}</p>
     <p className={`font-bold text-xl relative z-10 font-mono ${highlight ? 'text-[#ff8fa3]' : 'text-gray-100'}`}>{value}</p>
   </div>
 );
@@ -1242,7 +1242,7 @@ const ValgusStressPlannerPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-[70fr_30fr] gap-2 flex-grow min-h-0 px-2 relative z-10 pb-4">
 
         {/* LEFT: X-Ray Canvas (75%) */}
-        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[550px] md:h-full flex items-center justify-center">
+        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[34.375rem] md:h-full flex items-center justify-center">
           <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
           {zoom > 1 && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">

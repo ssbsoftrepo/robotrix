@@ -235,18 +235,18 @@ const ValgusStressReportPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
                     <ReportCard title="Annotated X-Ray Analysis" className="border-t-4 border-t-[#6D282C] h-full">
                         {valgusCanvasDataUrl ? (
-                            <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
+                            <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[18.75rem] print-image-container">
                                 <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="w-full h-full object-contain" />
                             </div>
                         ) : (
-                            <div className="h-[300px] flex items-center justify-center bg-black border-2 border-[#333333] rounded-lg">
+                            <div className="h-[18.75rem] flex items-center justify-center bg-black border-2 border-[#333333] rounded-lg">
                                 <p className="text-gray-500 text-sm">No analysis image available.</p>
                             </div>
                         )}
                     </ReportCard>
 
                     <ReportCard title="Functional Tibial Planning" className="border-t-4 border-t-[#6D282C] h-full">
-                        <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[300px] w-full mx-auto print-image-container">
+                        <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center relative aspect-[3/4] h-[18.75rem] w-full mx-auto print-image-container">
                             <img src={functionalCutImageSrc} alt="Functional Cut Plan" className="w-full h-full object-contain" />
 
                             <svg className="absolute inset-0 w-full h-full pointer-events-none z-20">
@@ -286,18 +286,18 @@ const ValgusStressReportPage: React.FC = () => {
 
                             {/* Gap Info Overlays - Scaled Down slightly for report */}
                             <div className="absolute bottom-4 left-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#333333] rounded-xl px-4 py-2 text-center shadow-lg">
-                                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-0.5">Lateral Gap</p>
+                                <p className="text-[0.625rem] text-gray-400 uppercase font-bold tracking-widest mb-0.5">Lateral Gap</p>
                                 <p className="text-2xl font-black text-white leading-none">{lateralGapValue} <span className="text-sm text-gray-500 font-bold">mm</span></p>
                             </div>
 
                             <div className="absolute bottom-4 right-4 z-40 bg-[#1a1a1a]/90 backdrop-blur-sm border-2 border-[#6D282C] rounded-xl px-4 py-2 text-center shadow-lg">
-                                <p className="text-[10px] text-[#ff8fa3] uppercase font-bold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
+                                <p className="text-[0.625rem] text-[#ff8fa3] uppercase font-bold tracking-widest mb-1 shadow-black drop-shadow-md">Medial Gap</p>
                                 <p className="text-2xl font-black text-[#ff8fa3] leading-none">{medialGapValue} <span className="text-sm text-[#ff8fa3]/70 font-bold">mm</span></p>
                             </div>
 
                             {/* Corrected Varus Overlay */}
                             <div className="absolute top-[65%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-[#333333] shadow-lg text-center">
-                                <p className="text-gray-500 text-[10px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
+                                <p className="text-gray-500 text-[0.625rem] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
                                 <p className="text-2xl font-extrabold text-white">{selectedDegree}°</p>
                             </div>
                         </div>
@@ -331,11 +331,11 @@ const ValgusStressReportPage: React.FC = () => {
                                 <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Lateral laxity</p>
                                 <div className="flex gap-2">
                                     <div className="flex-1 bg-[#252525] border border-[#333333] rounded-lg p-2 text-center">
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Level</p>
+                                        <p className="text-[0.625rem] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Level</p>
                                         <p className="text-sm font-bold text-[#ff8fa3]">{lateralLaxity ?? 'Not checked'}</p>
                                     </div>
                                     <div className="flex-1 bg-[#252525] border border-[#333333] rounded-lg p-2 text-center">
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Applied</p>
+                                        <p className="text-[0.625rem] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Applied</p>
                                         <p className="text-sm font-bold text-white">{valgusIntraOpCoronalBalancingData.additionalLaxity} mm</p>
                                     </div>
                                 </div>

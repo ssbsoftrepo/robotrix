@@ -206,7 +206,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-grow min-h-0 px-2 relative z-10 overflow-visible lg:overflow-hidden pb-4">
 
                 {/* Column 1: Image (Reduced Width ~25%) */}
-                <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center min-h-[300px] lg:min-h-0 bg-black text-center">
+                <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center min-h-[18.75rem] lg:min-h-0 bg-black text-center">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     {valgusCanvasDataUrl ?
                         <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="max-w-full max-h-full object-contain rounded-md relative z-10" /> :

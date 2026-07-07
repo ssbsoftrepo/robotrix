@@ -60,7 +60,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                             Use <span className="text-[#ff8fa3]">Robotrix+ AI blocks</span> (Asymmetrical Incremental blocks) To gauge lateral and medial extension gaps
                         </p>
 
-                        <div className="w-full aspect-square max-h-[220px] rounded-lg flex items-center justify-center relative overflow-hidden my-auto self-center border border-[#333333] bg-black shrink-0 z-10">
+                        <div className="w-full aspect-square max-h-[13.75rem] rounded-lg flex items-center justify-center relative overflow-hidden my-auto self-center border border-[#333333] bg-black shrink-0 z-10">
                             <img src="/leftside.png" alt="AI Block Reference" className="w-full h-full object-contain" />
                         </div>
 
@@ -72,7 +72,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Image with Side Panels */}
-                <div className="h-full flex flex-col overflow-visible lg:overflow-hidden min-h-[450px] lg:min-h-0">
+                <div className="h-full flex flex-col overflow-visible lg:overflow-hidden min-h-[28.125rem] lg:min-h-0">
                     <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-black overflow-hidden rounded-xl border border-[#333333]">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="flex items-stretch justify-center w-full h-full gap-0 p-4">

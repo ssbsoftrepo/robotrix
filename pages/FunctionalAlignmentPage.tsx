@@ -5,7 +5,7 @@ import { useAppContext } from '../context/AppContext';
 
 const KneeJointDrawing: React.FC = () => (
     <div className="p-4 bg-black rounded-lg flex items-center justify-center h-full">
-        <svg viewBox="0 0 200 150" className="w-full h-auto max-w-[250px]" aria-label="Diagram of a knee joint with medial and lateral spaces indicated.">
+        <svg viewBox="0 0 200 150" className="w-full h-auto max-w-[15.625rem]" aria-label="Diagram of a knee joint with medial and lateral spaces indicated.">
             {/* Distal Femur */}
             <path d="M 40 10 C 20 10, 10 30, 10 50 L 10 60 L 190 60 L 190 50 C 190 30, 180 10, 160 10 Z" fill="#e3e3e3" />
 

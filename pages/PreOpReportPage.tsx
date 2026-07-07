@@ -153,11 +153,11 @@ const PreOpReportPage: React.FC = () => {
                                 <p className="text-xs text-gray-500 font-bold uppercase mb-1">Matrix Selection</p>
                                 <div className="flex justify-between gap-2">
                                     <div className="flex-1 text-center bg-black/30 p-1 rounded">
-                                        <p className="text-[10px] text-gray-500">Femur</p>
+                                        <p className="text-[0.625rem] text-gray-500">Femur</p>
                                         <p className="text-sm text-[#ff8fa3] font-bold capitalize">{femurBoundary ?? 'Expanded'} Matrix</p>
                                     </div>
                                     <div className="flex-1 text-center bg-black/30 p-1 rounded">
-                                        <p className="text-[10px] text-gray-500">Tibia</p>
+                                        <p className="text-[0.625rem] text-gray-500">Tibia</p>
                                         <p className="text-sm text-[#ff8fa3] font-bold capitalize">{tibiaBoundary ?? 'Expanded'} Matrix</p>
                                     </div>
                                 </div>
@@ -190,7 +190,7 @@ const PreOpReportPage: React.FC = () => {
                     <ReportCard title="Surgical Simulation" className="border-t-4 border-t-[#6D282C]">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
                             <div className="flex flex-col">
-                                <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
+                                <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[18.75rem] print-image-container">
                                     <span className="absolute top-2 left-2 bg-black/70 text-white px-2 py-0.5 rounded text-xs font-bold border border-[#333333] z-10 print-badge">PRE-OP</span>
                                     {longLegCanvasDataUrl ? (
                                         <img src={longLegCanvasDataUrl} className="w-full h-full object-contain" alt="Pre-Op Xray" />
@@ -198,7 +198,7 @@ const PreOpReportPage: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex flex-col">
-                                <div className="bg-black border-2 border-[#6D282C] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[300px] print-image-container">
+                                <div className="bg-black border-2 border-[#6D282C] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[18.75rem] print-image-container">
                                     <span className="absolute top-2 left-2 bg-[#6D282C] text-white px-2 py-0.5 rounded text-xs font-bold border border-[#893338] z-10 print-badge">SIMULATION</span>
                                     {simAfterImage ? (
                                         <img src={simAfterImage} className="w-full h-full object-contain" alt="Post-Op Simulation" />
