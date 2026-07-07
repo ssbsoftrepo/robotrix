@@ -1098,10 +1098,33 @@ const CaseManagementPage: React.FC = () => {
                             </div>
 
                             {!isPlanSelected && (
-                                <div className="text-center p-4 mb-6 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
-                                    <p className="text-[#ff8fa3] text-lg">
-                                        {currentPatientId ? 'Please select a plan to continue.' : 'Please enter and save patient details to begin planning.'}
-                                    </p>
+                                <div className="max-w-4xl mx-auto mb-6 p-4 bg-[#6D282C]/15 border border-[#6D282C]/40 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300">
+                                    <div className="flex items-center gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#ff8fa3] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <p className="text-gray-300 text-base font-medium text-left">
+                                            {currentPatientId ? 'Please select a plan to continue.' : 'Please enter and save patient details to begin planning.'}
+                                        </p>
+                                    </div>
+                                    {currentPatientId && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setPlanModalConfig({ isOpen: true, patientId: currentPatientId, intent: 'load' })}
+                                            className="group relative py-2 px-5 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                                       shadow-[0_2px_8px_rgba(109,40,44,0.3)] 
+                                                       transition-all duration-200 ease-out
+                                                       hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_12px_rgba(109,40,44,0.5)]
+                                                       active:scale-[0.98] shrink-0"
+                                        >
+                                            <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                            <span className="relative text-xs font-bold text-white tracking-wider">
+                                                SELECT OR CREATE PLAN
+                                            </span>
+                                            <div className="absolute top-0 left-0 w-1 h-1 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                            <div className="absolute bottom-0 right-0 w-1 h-1 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </>
