@@ -132,7 +132,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     return (
         <div className="relative min-h-screen w-full overflow-y-auto bg-gradient-to-br from-[#1E1E1E] to-[#121212] flex flex-col justify-between items-center p-4 md:p-8 select-none">
             {/* Stacked Toasts Container (Bottom Right) */}
-            <div className="fixed bottom-24 right-6 z-50 flex flex-col-reverse space-y-4 space-y-reverse max-w-sm w-full pointer-events-none">
+            <div className="fixed bottom-12 right-6 z-50 flex flex-col-reverse space-y-4 space-y-reverse max-w-sm w-full pointer-events-none">
                 {toasts.map(t => (
                     <div
                         key={t.id}
