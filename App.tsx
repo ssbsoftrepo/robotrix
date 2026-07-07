@@ -198,7 +198,7 @@ const App: React.FC = () => {
                 </header>
 
                 <div className="flex flex-1 min-h-0">
-                    <main className="flex-1 p-1 md:p-1 overflow-hidden relative flex flex-col min-h-0">
+                    <main className="flex-1 p-1 md:p-1 overflow-y-auto lg:overflow-hidden relative flex flex-col min-h-0">
                         {renderPage()}
                     </main>
                 </div>

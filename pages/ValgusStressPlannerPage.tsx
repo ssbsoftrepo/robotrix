@@ -1218,7 +1218,7 @@ const ValgusStressPlannerPage: React.FC = () => {
   }, [valgusLandmarks, visibleLandmarkSets, legSide, setValgusCanvasDataUrl]);
 
   return (
-    <div className="relative flex flex-col h-full gap-4 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+    <div className="relative flex flex-col h-full gap-4 overflow-y-auto md:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
       <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
 
@@ -1239,10 +1239,10 @@ const ValgusStressPlannerPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[75fr_25fr] gap-2 flex-grow min-h-0 px-2 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-[70fr_30fr] gap-2 flex-grow min-h-0 px-2 relative z-10 pb-4">
 
         {/* LEFT: X-Ray Canvas (75%) */}
-        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-full flex items-center justify-center">
+        <div className="relative bg-[#0a0a0a] border border-[#333333] rounded-lg overflow-hidden h-[550px] md:h-full flex items-center justify-center">
           <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
           {zoom > 1 && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-amber-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">

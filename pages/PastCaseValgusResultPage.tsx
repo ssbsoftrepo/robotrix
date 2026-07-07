@@ -889,9 +889,9 @@ const PostOpValgusPlanner: React.FC = () => {
     return (
         <div className="relative flex flex-col h-full rounded-lg">
             <CameraModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onCapture={(dataUrl) => { setPostOpValgusImage(dataUrl); setFileName('Camera Capture'); }} />
-            <div className="grid grid-cols-1 lg:grid-cols-[70fr_30fr] gap-2 flex-grow h-full min-h-0 max-h-full overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[70fr_30fr] gap-4 flex-grow h-full min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden pb-4">
                 {/* Viewer - Left side (75%) */}
-                <div className="relative w-full h-full max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
+                <div className="relative w-full h-full min-h-[450px] lg:min-h-0 lg:max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
                     {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
                     {postOpValgusImage && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
@@ -1060,7 +1060,7 @@ const PastCaseValgusResultPage: React.FC = () => {
     const { setPage, valgusCanvasDataUrl, valgusResults } = useAppContext();
 
     return (
-        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-full overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -1069,9 +1069,9 @@ const PastCaseValgusResultPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">Valgus Stress Result Verification</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-0.5 flex-grow min-h-0 px-0.5 pb-0 relative z-10 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[30fr_70fr] gap-4 flex-grow min-h-0 px-0.5 pb-0 relative z-10 overflow-visible lg:overflow-hidden">
                 {/* Column 1: Pre-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 max-h-full overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[400px] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Pre-Op Analysis</h3>
                     <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden">
@@ -1087,10 +1087,10 @@ const PastCaseValgusResultPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Post-op */}
-                <div className="relative bg-[#1a1a1a] border border-[#333333] p-0.5 rounded-lg flex flex-col min-h-0 max-h-full overflow-hidden">
+                <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[700px] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Post-Op Verification</h3>
-                    <div className="flex-grow min-h-0 max-h-full relative mt-0.5 mb-2 overflow-hidden">
+                    <div className="flex-grow min-h-0 max-h-full relative mt-0.5 mb-2 overflow-visible lg:overflow-hidden">
                         <PostOpValgusPlanner />
                     </div>
                 </div>

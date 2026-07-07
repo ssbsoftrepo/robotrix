@@ -161,7 +161,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
     const laxityColors = ['#6D282C', '#6D282C', '#6D282C', '#6D282C'];
 
     return (
-        <div className="relative flex flex-col h-full p-2 overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-full p-2 overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Overhead Surgical Lamp Effect */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -187,21 +187,21 @@ const LongLegLaxityCheckPage: React.FC = () => {
                             CANCEL
                         </span>
                         <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
-                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-white/50" />
                     </button>
                 </div>
             </div>
 
             {/* Main Layout */}
-            <div className="flex flex-col lg:flex-row gap-2 flex-grow min-h-0 relative z-10 overflow-hidden">
+            <div className="flex flex-col lg:flex-row gap-4 flex-grow min-h-0 relative z-10 overflow-visible lg:overflow-hidden pb-4">
 
                 {/* Left Side: Reference Images Group */}
-                <div className="flex-grow-[3] flex flex-col min-w-0 h-full">
+                <div className="flex-grow-[3] flex flex-col min-w-0 h-full overflow-visible lg:overflow-hidden">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <h3 className="text-md font-bold text-[#E0E0E0] text-center relative z-10 uppercase">Laxity Level Reference Images</h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-grow min-h-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 flex-grow min-h-[600px] lg:min-h-0">
                         {laxityLevels.map((level, index) => {
                             let staticImage = null;
                             if (level === 'No Lateral Laxity') staticImage = '/nolaterl.png';
@@ -225,7 +225,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
                 </div>
 
                 {/* Right Side: Patient Upload */}
-                <div className="flex-grow-[2] flex flex-col min-w-[250px] h-full">
+                <div className="flex-grow-[2] flex flex-col min-w-[250px] h-full overflow-visible lg:overflow-hidden min-h-[450px] lg:min-h-0">
                     <div className="relative bg-[#1a1a1a] border border-[#6D282C]/50 p-1 rounded-lg mb-1 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <h3 className="text-md font-bold text-[#ff8fa3] text-center relative z-10 uppercase">Patient X-ray</h3>
@@ -265,7 +265,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
             </div>
 
             {/* Footer */}
-            <div className="mt-1 flex items-center justify-between relative z-10 bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg shrink-0">
+            <div className="mt-1 flex flex-col md:flex-row items-stretch md:items-center justify-between relative z-10 bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg shrink-0 gap-4">
                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                 <div className="flex flex-col justify-center relative z-10 text-md text-gray-500">
                     <p className="font-bold text-[#E0E0E0] mb-1">Important Note:</p>
@@ -275,7 +275,7 @@ const LongLegLaxityCheckPage: React.FC = () => {
                     </ul>
                 </div>
 
-                <div className="flex flex-col items-end justify-center relative z-10 shrink-0 ml-4">
+                <div className="flex flex-col items-stretch md:items-end justify-center relative z-10 shrink-0 md:ml-4">
                     <p className="text-gray-400 text-md mb-2 self-center lg:self-end">
                         Selected: <span className="font-bold text-[#E0E0E0]">{userSelection || 'None'}</span>
                     </p>

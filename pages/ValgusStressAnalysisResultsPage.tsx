@@ -194,7 +194,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
     }, [recommendedFemoralCut, anticipatedTibiaCut, valgusCoronalBalancingResults, setValgusCoronalBalancingResults, valgusFunctionalCutDegree, setValgusFunctionalCutDegree]);
 
     return (
-        <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative h-full flex flex-col overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -203,7 +203,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">PRE – OP Valgus Stress Analysis</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-grow min-h-0 px-2 relative z-10 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 flex-grow min-h-0 px-2 relative z-10 overflow-visible lg:overflow-hidden pb-4">
 
                 {/* Column 1: Image (Reduced Width ~25%) */}
                 <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center min-h-[300px] lg:min-h-0 bg-black text-center">

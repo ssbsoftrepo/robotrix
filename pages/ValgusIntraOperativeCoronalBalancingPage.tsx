@@ -243,7 +243,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-full overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -253,10 +253,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">INTRA – OP Coronal Balancing Screen</h2>
             </div>
 
-            <div className="flex-grow grid grid-cols-[25fr_50fr_25fr] gap-2 min-h-0 p-1 relative z-10">
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-4 min-h-0 p-1 relative z-10 overflow-visible lg:overflow-hidden pb-4">
                 {/* Column 1: Lateral Balancing */}
-                <div className="h-full flex flex-col overflow-hidden">
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-1 rounded-xl flex flex-col h-full shadow-2xl overflow-hidden">
+                <div className="h-full flex flex-col overflow-visible lg:overflow-hidden">
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-1 rounded-xl flex flex-col h-full shadow-2xl overflow-visible lg:overflow-hidden">
                         <h3 className="text-center text-sm font-black text-[#ff8fa3] uppercase tracking-widest py-2 border-b border-[#333333]">Lateral Balancing</h3>
 
                         {/* Section 1: +/- Controls — evenly spaced */}
@@ -336,7 +336,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Visual Simulation */}
-                <div className="h-full flex flex-col gap-1">
+                <div className="h-full flex flex-col gap-1 overflow-visible lg:overflow-hidden min-h-[450px] lg:min-h-0">
                     <div className="relative flex-grow bg-black border border-[#333333] rounded-xl flex flex-col items-center justify-start p-1 overflow-hidden">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
@@ -356,56 +356,58 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
 
                             {/* Center - Bone Image */}
                             <div className="flex-grow flex items-center justify-center relative w-full h-[90%]">
-                                <img src={isLeftLeg ? '/intracoronal-left.png' : '/intracoronal-right.png'} alt="Simulation" className="h-full w-full object-cover" />
+                                <div className="relative max-w-full max-h-full flex items-center justify-center">
+                                    <img src={isLeftLeg ? '/intracoronal-left.png' : '/intracoronal-right.png'} alt="Simulation" className="max-w-full max-h-full w-auto h-auto object-contain block" />
 
-                                {/* Simulation Cut Lines - positioned to overlay on bone */}
-                                {(() => {
-                                    const femurBaseY = isLeftLeg ? 53.5 : 54.5;
-                                    const tibiaBaseY = isLeftLeg ? 60.3 : 62.5;
-                                    return (
-                                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
-                                            {/* Femur horizontal cut line - at bottom edge of femur */}
-                                            <line
-                                                x1="0" y1={`${femurBaseY - additionalFemurCut * 1}%`}
-                                                x2="100%" y2={`${femurBaseY - additionalFemurCut * 1}%`}
-                                                stroke="#6D282C" strokeWidth="4"
-                                            />
+                                    {/* Simulation Cut Lines - positioned to overlay on bone */}
+                                    {(() => {
+                                        const femurBaseY = isLeftLeg ? 53.5 : 54.5;
+                                        const tibiaBaseY = isLeftLeg ? 60.3 : 62.5;
+                                        return (
+                                            <svg className="absolute inset-0 w-full h-full pointer-events-none z-20 overflow-visible">
+                                                {/* Femur horizontal cut line - at bottom edge of femur */}
+                                                <line
+                                                    x1="0" y1={`${femurBaseY - additionalFemurCut * 1}%`}
+                                                    x2="100%" y2={`${femurBaseY - additionalFemurCut * 1}%`}
+                                                    stroke="#6D282C" strokeWidth="4"
+                                                />
 
-                                            {/* Baseline Tibia dotted line - at top edge of tibia */}
-                                            <line x1="0" y1={`${femurBaseY}%`} x2="100%" y2={`${femurBaseY}%`} stroke="#444444" strokeWidth="1.5" strokeDasharray="5,2" />
+                                                {/* Baseline Tibia dotted line - at top edge of tibia */}
+                                                <line x1="0" y1={`${femurBaseY}%`} x2="100%" y2={`${femurBaseY}%`} stroke="#444444" strokeWidth="1.5" strokeDasharray="5,2" />
 
-                                            {/* Dynamic Tibia horizontal cut - at top edge of tibia */}
-                                            <line
-                                                x1="0" y1={`${tibiaBaseY + additionalTibiaCut * 1}%`}
-                                                x2="100%" y2={`${tibiaBaseY + additionalTibiaCut * 1}%`}
-                                                stroke="#6D282C" strokeWidth="4"
-                                            />
+                                                {/* Dynamic Tibia horizontal cut - at top edge of tibia */}
+                                                <line
+                                                    x1="0" y1={`${tibiaBaseY + additionalTibiaCut * 1}%`}
+                                                    x2="100%" y2={`${tibiaBaseY + additionalTibiaCut * 1}%`}
+                                                    stroke="#6D282C" strokeWidth="4"
+                                                />
 
-                                            {/* Varus Angle Lines - pivot side based on leg */}
-                                            <circle cx={isLeftLeg ? '77%' : '22.3%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
-                                            {[0, 1, 2, 3, 4].map((angle) => {
-                                                const isSelected = selectedJig === angle;
-                                                const baseY = tibiaBaseY + additionalTibiaCut * 1;
-                                                const yOffsetPercent = isLeftLeg ? (angle * 2.5 * (80 / 57)) : (angle * 2.5 * (81 / 62));
-                                                return (
-                                                    <line
-                                                        key={angle}
-                                                        x1={isLeftLeg ? '77%' : '22.3%'} y1={`${baseY}%`}
-                                                        x2={isLeftLeg ? '0%' : '100%'} y2={`${baseY + yOffsetPercent}%`}
-                                                        stroke={isSelected ? "#6D282C" : "#333333"}
-                                                        strokeWidth={isSelected ? "4" : "1.5"}
-                                                        strokeDasharray={isSelected ? "0" : "5,2"}
-                                                        opacity={isSelected ? 1 : 0.6}
-                                                    />
-                                                );
-                                            })}
-                                        </svg>
-                                    );
-                                })()}
-                                <div className="absolute top-[90%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
-                                    <div className="bg-black/60 backdrop-blur-md px-8 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-                                        <p className="text-gray-500 text-[9px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
-                                        <p className="text-3xl font-extrabold text-white tracking-tighter">{selectedJig}°</p>
+                                                {/* Varus Angle Lines - pivot side based on leg */}
+                                                <circle cx={isLeftLeg ? '77%' : '22.3%'} cy={`${tibiaBaseY + additionalTibiaCut * 1}%`} r="6" fill="#6D282C" />
+                                                {[0, 1, 2, 3, 4].map((angle) => {
+                                                    const isSelected = selectedJig === angle;
+                                                    const baseY = tibiaBaseY + additionalTibiaCut * 1;
+                                                    const yOffsetPercent = isLeftLeg ? (angle * 2.5 * (80 / 57)) : (angle * 2.5 * (81 / 62));
+                                                    return (
+                                                        <line
+                                                            key={angle}
+                                                            x1={isLeftLeg ? '77%' : '22.3%'} y1={`${baseY}%`}
+                                                            x2={isLeftLeg ? '0%' : '100%'} y2={`${baseY + yOffsetPercent}%`}
+                                                            stroke={isSelected ? "#6D282C" : "#333333"}
+                                                            strokeWidth={isSelected ? "4" : "1.5"}
+                                                            strokeDasharray={isSelected ? "0" : "5,2"}
+                                                            opacity={isSelected ? 1 : 0.6}
+                                                        />
+                                                    );
+                                                })}
+                                            </svg>
+                                        );
+                                    })()}
+                                    <div className="absolute top-[90%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
+                                        <div className="bg-black/60 backdrop-blur-md px-8 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                                            <p className="text-gray-500 text-[9px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
+                                            <p className="text-3xl font-extrabold text-white tracking-tighter">{selectedJig}°</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -434,8 +436,8 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 3: Medial Balancing */}
-                <div className="h-full flex flex-col gap-1">
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-1 h-full">
+                <div className="h-full flex flex-col gap-1 overflow-visible lg:overflow-hidden">
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-xl flex flex-col gap-1 h-full overflow-visible lg:overflow-hidden pb-4">
                         <h3 className="text-center text-sm font-black text-[#ff8fa3] uppercase tracking-widest pb-2 border-b border-[#333333]">Medial Balancing</h3>
 
                         <div className="flex-grow flex flex-col gap-1">

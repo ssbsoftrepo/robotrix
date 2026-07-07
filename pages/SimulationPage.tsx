@@ -462,7 +462,7 @@ const SimulationPage: React.FC = () => {
     const { initialFemoral, initialTibial } = getBoundaryAdjustedValues();
 
     return (
-        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-full overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -470,14 +470,14 @@ const SimulationPage: React.FC = () => {
             <div className="flex justify-between items-center no-print px-2 py-1 relative z-10">
                 <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">PRE – OP Resection Simulation</h2>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 flex-grow min-h-0 px-2 mb-2 relative z-10 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-grow min-h-0 px-2 mb-2 relative z-10 overflow-visible lg:overflow-hidden pb-4">
                 {/* Column 1: Pre-Op HKA View - 25% */}
                 <div className="lg:col-span-1 hidden lg:flex flex-col min-h-0 max-h-full overflow-hidden">
                     <HKAView />
                 </div>
 
                 {/* Column 2: Controls - 25% */}
-                <div className="lg:col-span-1 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg space-y-2 flex flex-col min-h-0 max-h-full overflow-y-auto">
+                <div className="lg:col-span-1 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg space-y-2 flex flex-col min-h-0 lg:max-h-full overflow-y-auto">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <div className="flex items-center justify-between relative z-10">
                         <label htmlFor="split-view-toggle" className="text-sm font-semibold text-gray-400">Split View</label>
@@ -519,7 +519,7 @@ const SimulationPage: React.FC = () => {
                 </div>
 
                 {/* Simulation View - 50% */}
-                <div className="lg:col-span-2 relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg flex items-center justify-center bg-black min-h-0 max-h-full overflow-hidden">
+                <div className="lg:col-span-2 relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg flex items-center justify-center bg-black min-h-[450px] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     {!isLoaded && !longLegImageSrc && <p className="text-gray-500 p-4 text-center relative z-10">Load a Long Leg X-ray in the planner to begin simulation.</p>}
                     {!isLoaded && longLegImageSrc && <p className="text-gray-400 relative z-10">Loading Simulation...</p>}

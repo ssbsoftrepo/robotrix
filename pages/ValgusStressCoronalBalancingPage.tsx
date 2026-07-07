@@ -37,7 +37,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
+        <div className="relative flex flex-col h-full overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
             {/* Cinematic Lighting */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
@@ -47,9 +47,9 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-[#E0E0E0] uppercase">Coronal Balancing Screen (Valgus Stress)</h2>
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-0.5 min-h-0 px-2 relative z-10">
+            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-4 min-h-0 px-2 relative z-10 overflow-visible lg:overflow-hidden pb-4">
                 {/* Column 1: Instructions & Block Upload */}
-                <div className="h-full flex flex-col overflow-hidden">
+                <div className="h-full flex flex-col overflow-visible lg:overflow-hidden">
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-1.5 rounded-lg flex-grow flex flex-col items-start text-left overflow-y-auto">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                         <div className="w-full shrink-0 relative z-10">
@@ -72,7 +72,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 2: Image with Side Panels */}
-                <div className="h-full flex flex-col overflow-hidden">
+                <div className="h-full flex flex-col overflow-visible lg:overflow-hidden min-h-[450px] lg:min-h-0">
                     <div className="w-full relative flex-grow min-h-0 flex items-center justify-center bg-black overflow-hidden rounded-xl border border-[#333333]">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
                         <div className="flex items-stretch justify-center w-full h-full gap-0 p-4">
@@ -141,7 +141,7 @@ const ValgusStressCoronalBalancingPage: React.FC = () => {
                 </div>
 
                 {/* Column 3: Flowchart Logic */}
-                <div className="h-full flex flex-col gap-1 min-h-0">
+                <div className="h-full flex flex-col gap-2 min-h-0 overflow-visible lg:overflow-hidden">
                     {/* Right Path (Verification Success) */}
                     <div className="relative bg-[#1a1a1a] border border-[#6D282C]/30 rounded-xl p-2 flex flex-col items-center justify-center text-center overflow-hidden shadow-lg transition-all hover:bg-[#1f1f1f] flex-[0.8]">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
