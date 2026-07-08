@@ -2,7 +2,7 @@ import { Capacitor } from '@capacitor/core';
 
 export const getApiBaseUrl = () => {
     if (Capacitor.isNativePlatform()) {
-        return 'http://192.168.1.84:8081';
+        return 'http://136.185.1.251:8081';
     }
     const hostname = window.location.hostname;
     if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
