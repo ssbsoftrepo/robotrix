@@ -26,8 +26,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ssbsoftrepo@gmail.com
-    password: vgdw zdaw tzkv gtmk
+    username: robotrixapp@gmail.com
+    password: ijko jalm auwx ykhw
     properties:
       mail:
         smtp:
