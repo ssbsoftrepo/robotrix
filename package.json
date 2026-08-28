@@ -13,9 +13,7 @@
   "dependencies": {
     "@bcyesil/capacitor-plugin-printer": "^0.0.6",
     "@capacitor/android": "^7.4.4",
-    "@capacitor/camera": "^7.0.3",
     "@capacitor/core": "^7.4.4",
-    "@capacitor/filesystem": "^7.1.5",
     "@capacitor/ios": "^7.4.4",
     "@capacitor/screen-orientation": "^7.0.3",
     "@google/genai": "^1.29.1",

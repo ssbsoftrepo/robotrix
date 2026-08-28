@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useAppContext } from './context/AppContext';
 import CaseManagementPage from './pages/CaseManagementPage';
 import LongLegPlannerPage from './pages/LongLegPlannerPage';
@@ -26,22 +26,7 @@ import ValgusPreOpReportPage from './pages/ValgusPreOpReportPage';
 import LoginPage from './pages/LoginPage';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import HospitalAdminDashboard from './pages/HospitalAdminDashboard';
-import { Camera } from '@capacitor/camera';
-import { Filesystem } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
-
-
-
-async function requestAllPermissions() {
-    try {
-        const camPerm = await Camera.requestPermissions();
-        const fsPerm = await Filesystem.requestPermissions();
-
-
-    } catch (err) {
-        console.error('Permission request failed', err);
-    }
-}
 
 
 
@@ -56,13 +41,6 @@ const App: React.FC = () => {
         login,
         logout
     } = useAppContext();
-
-    useEffect(() => {
-        // Only run on native Android/iOS
-        if (Capacitor.isNativePlatform()) {
-            requestAllPermissions();
-        }
-    }, []);
 
     const handleHomeClick = () => {
         setPage('case-management');
