@@ -39,3 +39,17 @@ spring:
 jwt:
   secret: dGhpcy1pcy1hLXNlY3VyZS1hbmQtc3VwZXItc2VjcmV0LWtleS1mb3Itam9zZS1qd3QtdG9rZW4tc2lnbmluZw==
   expiration: 86400000 # 24 hours
+
+app:
+  storage:
+    type: ${STORAGE_TYPE:local} # "local" for dev, "s3" for prod
+    local-dir: ${STORAGE_LOCAL_DIR:./uploads}
+
+aws:
+  s3:
+    bucket-name: ${AWS_S3_BUCKET:robotrix-prod-image-559947225352-ap-south-1-an}
+    region: ${AWS_REGION:ap-south-1}
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+    endpoint: ${AWS_S3_ENDPOINT:}
+

@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tar.gz
 
 # Editor directories and files
 .vscode/*
@@ -28,4 +29,6 @@ backend/build/
 backend/.gradle/
 backend/bin/
 backend/*.log
+uploads/
+backend/uploads/
 

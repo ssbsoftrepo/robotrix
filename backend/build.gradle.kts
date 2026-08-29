@@ -24,6 +24,7 @@ repositories {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.4")
+        mavenBom("software.amazon.awssdk:bom:2.25.16")
     }
 }
 
@@ -41,6 +42,9 @@ dependencies {
 
     // For JSONB database columns mapping support
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.4")
+
+    // AWS SDK v2 for S3 storage
+    implementation("software.amazon.awssdk:s3")
 
     // JWT token utilities
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")

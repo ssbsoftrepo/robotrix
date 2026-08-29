@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 import com.robotrix.model.TenantScopedEntity;
+import com.robotrix.service.StorageService;
 import java.util.UUID;
 
 @RestController
@@ -36,6 +37,9 @@ public class SurgeryController {
 
     @Autowired
     private PlanImageRepository planImageRepository;
+
+    @Autowired
+    private StorageService storageService;
 
     private boolean isSameTenant(TenantScopedEntity entity, RobotrixUserDetails principal) {
         if (entity == null || principal == null) {
@@ -127,11 +131,18 @@ public class SurgeryController {
         if (!isSameTenant(patient, principal) || !isOwner(patient, principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         }
+
+        // Clean up images associated with this patient's plans
+        List<SurgeryPlan> plans = surgeryPlanRepository.findByPatientId(id);
+        for (SurgeryPlan p : plans) {
+            storageService.deletePlanDirectory(principal.getTenantId(), p.getId());
+        }
+
         patientRepository.delete(patient);
         return ResponseEntity.ok(java.util.Map.of("message", "Patient deleted successfully"));
     }
 
-    // 3. Save Plan and upload binary image BLOBs
+    // 3. Save Plan and upload images (scoped by tenant folder)
     @PostMapping(value = "/plans", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     @Transactional
     public ResponseEntity<?> savePlan(
@@ -161,8 +172,6 @@ public class SurgeryController {
                 plan.setCaseData(caseDataJson);
                 plan.setUpdatedAt(java.time.LocalDateTime.now());
             } else {
-
-
                 plan = new SurgeryPlan();
                 plan.setTenantId(principal.getTenantId());
                 plan.setPatient(patient);
@@ -175,13 +184,22 @@ public class SurgeryController {
             
             surgeryPlanRepository.save(plan);
 
-            // Handle dynamic image uploads
+            // Handle dynamic image uploads (Local disk or AWS S3 based on active environment)
             java.util.Map<String, MultipartFile> fileMap = request.getFileMap();
             for (java.util.Map.Entry<String, MultipartFile> entry : fileMap.entrySet()) {
                 String imageType = entry.getKey();
                 MultipartFile imageFile = entry.getValue();
                 
                 if (imageFile != null && !imageFile.isEmpty()) {
+                    // Upload to storage folder: tenants/{tenantId}/plans/{planId}/{imageType}
+                    String s3Key = storageService.uploadImage(
+                            principal.getTenantId(),
+                            plan.getId(),
+                            imageType,
+                            imageFile.getContentType(),
+                            imageFile.getBytes()
+                    );
+
                     // Check if an image with this type already exists for the plan
                     Optional<PlanImage> existingImageOpt = planImageRepository.findByPlanIdAndImageType(plan.getId(), imageType);
                     PlanImage planImage;
@@ -194,7 +212,8 @@ public class SurgeryController {
                         planImage.setImageType(imageType);
                     }
                     planImage.setMimeType(imageFile.getContentType());
-                    planImage.setImageData(imageFile.getBytes());
+                    planImage.setS3Key(s3Key);
+                    planImage.setImageData(null); // Save DB storage; binary is stored in local storage or S3
                     
                     planImageRepository.save(planImage);
                 }
@@ -206,8 +225,7 @@ public class SurgeryController {
         }
     }
 
-
-    // 4. Download Binary Image
+    // 4. Download Binary Image (streams from storage or fallback to DB during migration)
     @GetMapping("/images/{planId}/{imageType}")
     @Transactional(readOnly = true)
     public ResponseEntity<byte[]> getPlanImage(
@@ -230,9 +248,25 @@ public class SurgeryController {
         }
 
         PlanImage planImage = planImageOpt.get();
+        byte[] imageBytes = null;
+
+        // 1. Try fetching from active storage (Local disk or AWS S3) if storageKey exists
+        if (planImage.getS3Key() != null && !planImage.getS3Key().isBlank()) {
+            imageBytes = storageService.downloadImage(planImage.getS3Key());
+        }
+
+        // 2. Fallback to legacy database BLOB if S3 key is not yet set
+        if (imageBytes == null && planImage.getImageData() != null) {
+            imageBytes = planImage.getImageData();
+        }
+
+        if (imageBytes == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(planImage.getMimeType()))
-                .body(planImage.getImageData());
+                .body(imageBytes);
     }
 
     // 5. Get Plans for Patient

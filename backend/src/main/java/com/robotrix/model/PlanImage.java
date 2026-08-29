@@ -25,6 +25,9 @@ public class PlanImage extends TenantScopedEntity {
     @Column(name = "mime_type", nullable = false)
     private String mimeType;
 
-    @Column(name = "image_data", columnDefinition = "bytea", nullable = false)
+    @Column(name = "image_data", columnDefinition = "bytea")
     private byte[] imageData;
+
+    @Column(name = "s3_key")
+    private String s3Key;
 }
