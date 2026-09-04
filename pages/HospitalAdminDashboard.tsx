@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAppContext } from '../context/AppContext';
+import { Capacitor } from '@capacitor/core';
 
 interface HospitalAdminDashboardProps {
     hospitalName: string;
@@ -260,8 +261,11 @@ const HospitalAdminDashboard: React.FC<HospitalAdminDashboardProps> = ({ hospita
             </div>
 
             {/* Header */}
-            <header className="relative z-10 w-full border-b border-[#2b2b2b] bg-[#161616]/40 backdrop-blur-md">
-                <div className="max-w-7xl mx-auto px-4 md:px-8 py-5 flex items-center justify-between">
+            <header
+                className="relative z-50 w-full border-b border-[#333333] bg-gradient-to-r from-[#1a1a1a] to-[#252525] shadow-md"
+                style={{ paddingTop: Capacitor.isNativePlatform() ? 'max(1.8rem, env(safe-area-inset-top, 1.8rem))' : 'max(0.2rem, env(safe-area-inset-top, 0.2rem))' }}
+            >
+                <div className="max-w-7xl mx-auto px-4 md:px-8 py-2.5 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-black tracking-tight uppercase leading-none">
                             ROBOTRIX<span className="text-[#6D282C]">+</span> <span className="text-xs font-semibold text-gray-500 ml-2 tracking-widest">HOSPITAL ADMIN</span>

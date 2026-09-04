@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
+import { getFemurType } from '../types';
 import { printCurrentPage } from '../utils/printer';
 import { formatDate } from '../utils/date';
 
@@ -37,7 +38,11 @@ const PreOpReportPage: React.FC = () => {
         setPage,
         longLegCoronalBalancingResults,
         legSide,
-        implantThickness
+        implantThickness,
+        appliedFemoralCutSim,
+        appliedTibialCutSim,
+        femoralCutSim,
+        tibialCutSim
     } = useAppContext();
 
     const patient = patients.find(p => p.id === currentPatientId);
@@ -77,6 +82,17 @@ const PreOpReportPage: React.FC = () => {
 
     const displayFemoralCut = getFemoralCut();
     const displayTibialCut = getTibialCut();
+
+    const finalFemoralVal = appliedFemoralCutSim ?? femoralCutSim;
+    const finalTibialVal = appliedTibialCutSim ?? tibialCutSim;
+
+    const displayFinalFemoralCut = (finalFemoralVal && finalFemoralVal > 0)
+        ? `${finalFemoralVal}° valgus cut`
+        : displayFemoralCut;
+
+    const displayFinalTibialCut = (finalTibialVal !== null && finalTibialVal !== undefined && finalTibialVal > 0)
+        ? `${finalTibialVal}° varus cut`
+        : (finalTibialVal === 0 ? '0° (neutral cut)' : displayTibialCut);
     const { lateralGap, selectedSeries } = longLegCoronalBalancingResults;
 
     const thickness = implantThickness ?? 10;
@@ -135,6 +151,7 @@ const PreOpReportPage: React.FC = () => {
                     {/* Left Col: Analysis */}
                     <ReportCard title="Pre-Operative Analysis" className="h-full border-t-4 border-t-[#6D282C]">
                         <div className="space-y-1">
+                            <ReportItem label="Femur Type" value={longLegResults.femurType || getFemurType(longLegResults.ldfa)} highlight />
                             <ReportItem label="JLO Type" value={longLegResults.jloType} highlight />
                             <ReportItem label="CPAK Classification" value={`CPAK ${longLegResults.cpak}`} highlight />
                             <div className="py-1"></div>
@@ -189,6 +206,7 @@ const PreOpReportPage: React.FC = () => {
                 {(simAfterImage || longLegCanvasDataUrl) && (
                     <ReportCard title="Surgical Simulation" className="border-t-4 border-t-[#6D282C]">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
+                            {/* Pre-Op Image */}
                             <div className="flex flex-col">
                                 <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[18.75rem] print-image-container">
                                     <span className="absolute top-2 left-2 bg-black/70 text-white px-2 py-0.5 rounded text-xs font-bold border border-[#333333] z-10 print-badge">PRE-OP</span>
@@ -197,12 +215,30 @@ const PreOpReportPage: React.FC = () => {
                                     ) : <p className="text-gray-500 text-sm">No Image</p>}
                                 </div>
                             </div>
+
+                            {/* Simulation Image with Final Cuts chosen mentioned inside on the side */}
                             <div className="flex flex-col">
-                                <div className="bg-black border-2 border-[#6D282C] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[18.75rem] print-image-container">
+                                <div className="bg-black border-2 border-[#6D282C] rounded-lg overflow-hidden flex items-center justify-between p-2 relative h-[18.75rem] print-image-container">
                                     <span className="absolute top-2 left-2 bg-[#6D282C] text-white px-2 py-0.5 rounded text-xs font-bold border border-[#893338] z-10 print-badge">SIMULATION</span>
-                                    {simAfterImage ? (
-                                        <img src={simAfterImage} className="w-full h-full object-contain" alt="Post-Op Simulation" />
-                                    ) : <p className="text-gray-500 text-sm">No Simulation</p>}
+                                    
+                                    {/* Simulation Image */}
+                                    <div className="flex-1 h-full flex items-center justify-center min-w-0">
+                                        {simAfterImage ? (
+                                            <img src={simAfterImage} className="max-w-full h-full object-contain" alt="Post-Op Simulation" />
+                                        ) : <p className="text-gray-500 text-sm">No Simulation</p>}
+                                    </div>
+
+                                    {/* Final Cuts Mentioned inside the simulation box on the side */}
+                                    <div className="w-44 sm:w-48 shrink-0 flex flex-col justify-center space-y-2 pl-2 pr-1 z-10">
+                                        <div className="p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg text-left">
+                                            <p className="text-[11px] text-gray-400 font-medium">Femoral Cut Chosen</p>
+                                            <p className="text-sm font-extrabold text-[#ff8fa3] mt-0.5">{displayFinalFemoralCut}</p>
+                                        </div>
+                                        <div className="p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg text-left">
+                                            <p className="text-[11px] text-gray-400 font-medium">Tibial Cut Chosen</p>
+                                            <p className="text-sm font-extrabold text-[#ff8fa3] mt-0.5">{displayFinalTibialCut}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -26,6 +26,7 @@ import ValgusPreOpReportPage from './pages/ValgusPreOpReportPage';
 import LoginPage from './pages/LoginPage';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import HospitalAdminDashboard from './pages/HospitalAdminDashboard';
+import LogoutConfirmationModal from './components/LogoutConfirmationModal';
 import { Capacitor } from '@capacitor/core';
 
 
@@ -42,6 +43,13 @@ const App: React.FC = () => {
         logout
     } = useAppContext();
 
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
+
+    const handleConfirmLogout = () => {
+        setIsLogoutModalOpen(false);
+        logout();
+    };
+
     const handleHomeClick = () => {
         setPage('case-management');
     };
@@ -54,12 +62,12 @@ const App: React.FC = () => {
 
         // 2. Super Admin Dashboard routing
         if (role === 'SUPERADMIN') {
-            return <SuperAdminDashboard onLogout={logout} />;
+            return <SuperAdminDashboard onLogout={() => setIsLogoutModalOpen(true)} />;
         }
 
         // 3. Hospital Admin Dashboard routing
         if (role === 'HOSPITAL_ADMIN') {
-            return <HospitalAdminDashboard hospitalName={hospitalName || 'Clinic'} onLogout={logout} />;
+            return <HospitalAdminDashboard hospitalName={hospitalName || 'Clinic'} onLogout={() => setIsLogoutModalOpen(true)} />;
         }
 
         const renderPage = () => {
@@ -155,7 +163,7 @@ const App: React.FC = () => {
                             </span>
                             <div className="w-[1px] h-3.5 bg-[#333]" />
                             <button
-                                onClick={logout}
+                                onClick={() => setIsLogoutModalOpen(true)}
                                 className="text-[#888888] hover:text-[#6D282C] active:scale-[0.9] transition-all duration-300 cursor-pointer flex items-center justify-center"
                                 title="Logout"
                                 aria-label="Logout"
@@ -187,6 +195,11 @@ const App: React.FC = () => {
     return (
         <>
             {renderContent()}
+            <LogoutConfirmationModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleConfirmLogout}
+            />
         </>
     );
 };

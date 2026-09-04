@@ -349,6 +349,8 @@ const CaseManagementPage: React.FC = () => {
 
     });
 
+    const [newPatientLegSide, setNewPatientLegSide] = useState<'left' | 'right'>('left');
+
     const [suggestedId, setSuggestedId] = useState<string>('Loading...');
 
     useEffect(() => {
@@ -417,10 +419,9 @@ const CaseManagementPage: React.FC = () => {
 
         const saved = await savePatient(patientToSave);
         if (saved) {
-            await setCurrentPatientId(saved.id, saved);
+            await setCurrentPatientId(saved.id);
             if (!currentPatientId) {
-                const defaultLegSide = legSide === 'right' ? 'right' : 'left';
-                const planId = await createNewPlan(saved.id, defaultLegSide);
+                const planId = await createNewPlan(saved.id, newPatientLegSide);
                 await setCurrentPlanId(planId, saved);
                 setPlannerMode('advanced');
             }
@@ -1029,7 +1030,7 @@ const CaseManagementPage: React.FC = () => {
                                     </h3>
                                     <form
                                         onSubmit={handleSubmit}
-                                        className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end max-w-4xl mx-auto justify-items-center relative z-10"
+                                        className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end max-w-5xl mx-auto justify-items-center relative z-10"
                                     >
                                         <div className="md:col-span-3 w-full">
                                             <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
@@ -1046,7 +1047,7 @@ const CaseManagementPage: React.FC = () => {
                                             />
                                         </div>
 
-                                        <div className="md:col-span-3 w-full">
+                                        <div className="md:col-span-2 w-full">
                                             <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
                                                 Patient ID
                                             </label>
@@ -1062,7 +1063,30 @@ const CaseManagementPage: React.FC = () => {
                                             />
                                         </div>
 
-                                        <div className="md:col-span-3 w-full">
+                                        <div className="md:col-span-2 w-full">
+                                            <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
+                                                Leg Side
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    id="legSideSelect"
+                                                    value={newPatientLegSide}
+                                                    onChange={(e) => setNewPatientLegSide(e.target.value as 'left' | 'right')}
+                                                    className="w-full h-14 px-3 pr-10 rounded-md text-lg bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C] appearance-none cursor-pointer"
+                                                    style={{ colorScheme: 'dark' }}
+                                                >
+                                                    <option value="left">LEFT</option>
+                                                    <option value="right">RIGHT</option>
+                                                </select>
+                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="md:col-span-2 w-full">
                                             <label className="block mb-2 text-sm font-medium text-gray-400 text-center">
                                                 Date
                                             </label>

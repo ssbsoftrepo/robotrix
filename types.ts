@@ -29,16 +29,24 @@ export interface LongLegResults {
     mhka: number | null;
     jlo: number | null;
     jloType: string;
+    femurType?: string;
     cpak: string;
     cut: string;
     recommendedVarusCut: string;
     ama: number | null;
 }
 
+export const getFemurType = (ldfa: number | null): string => {
+    if (ldfa === null || ldfa === undefined) return '--';
+    if (ldfa > 91) return 'VAROID';
+    if (ldfa >= 89) return 'NEUTRAL';
+    return 'VALGOID';
+};
+
 export interface ValgusResults {
     obliquity: number | null;
     femurType: string;           // LDFA-based classification
-    femurTypeByObliquity: string; // Obliquity-based classification (Valgoid/Median/Varoid)
+    femurTypeByObliquity?: string; // Obliquity-based classification (Valgoid/Median/Varoid)
     cpak: string;
     cut: string;
     ldfa: number | null;
@@ -62,6 +70,8 @@ export type Page =
     'planner-valgus-stress-laxity-check' |
     'planner-valgus-stress-report' |
     'planner-valgus-functional-tibial-cut' |
+    'pre-op-report' |
+    'valgus-pre-op-report' |
     'simulation' |
     'report' |
     'results-analysis' |
@@ -161,7 +171,7 @@ export interface CaseData {
     valgusIntraOpCoronalBalancingData: IntraOpCoronalBalancingData;
 }
 
-export const initialLongLegResults: LongLegResults = { ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', ama: null };
+export const initialLongLegResults: LongLegResults = { ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', femurType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', ama: null };
 export const initialValgusResults: ValgusResults = { obliquity: null, femurType: '--', femurTypeByObliquity: '--', cpak: '--', cut: '--', ldfa: null, mpta: null };
 export const initialCoronalBalancingResults: CoronalBalancingResults = { selectedSeries: null, lateralGap: '', medialRelease: 0, simFemoralCut: 3.0, simTibialCut: 0.0, simResectionDepth: 20 };
 export const initialIntraOpValidationData: IntraOpValidationData = { medialGap: 16, lateralGap: 16, tibiaWidth: 70 };

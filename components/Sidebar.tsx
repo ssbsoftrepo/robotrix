@@ -63,7 +63,7 @@ const Sidebar: React.FC = () => {
     if (plannerMode === 'advanced') {
         navItems.push(
             <NavItem key="functional"
-                nav="functional-alignment-planner" 
+                nav="planner-long-leg-coronal-balancing" 
                 title="Functional Planner" 
                 currentNav={page} 
                 setNav={setPage} 

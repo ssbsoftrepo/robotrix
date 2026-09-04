@@ -1,13 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { Landmarks, LegSide, Point } from '../types';
+import { Landmarks, LegSide, Point, getFemurType } from '../types';
 
-const landmarkInstructions = {
-    hkaLine: ["Mark hip center.", "Mark knee center.", "Mark ankle center."],
-    femurAnatomicAxis: ["Mark the anatomical mid femoral axis."],
-    femoralJointLine: ["Mark the most distal part of medial (M) femoral condyle.", "Mark the most distal part of lateral (L) femoral condyle."],
-    tibialJointLine: ["Mark the highest point of medial (M) tibial condyle.", "Mark the highest point of lateral (L) tibial condyle."],
-};
 
 const BASE_HANDLE_RADIUS = 6;
 const BASE_LINE_WIDTH = 4;
@@ -15,17 +9,23 @@ const BASE_LINE_WIDTH = 4;
 const resolveMedialLateral = (
     p1: Point,
     p2: Point,
-    kneeCenter: Point,
+    _kneeCenter: Point,
     legSide: LegSide
 ) => {
-    const isP1Medial =
-        legSide === 'right'
-            ? p1.x > kneeCenter.x
-            : p1.x < kneeCenter.x;
+    // Compare p1 and p2 directly with each other (never against kneeCenter / HKA line)
+    const leftPoint = p1.x <= p2.x ? p1 : p2;
+    const rightPoint = p1.x <= p2.x ? p2 : p1;
+
+    // In radiological AP view (patient facing viewer):
+    // Right Leg: Medial (inner, toward midline) is to the RIGHT (larger X)
+    //            Lateral (outer, toward fibula) is to the LEFT (smaller X)
+    // Left Leg:  Medial (inner, toward midline) is to the LEFT (smaller X)
+    //            Lateral (outer, toward fibula) is to the RIGHT (larger X)
+    const isRightLeg = legSide === 'right';
 
     return {
-        medial: isP1Medial ? p1 : p2,
-        lateral: isP1Medial ? p2 : p1,
+        medial: isRightLeg ? rightPoint : leftPoint,
+        lateral: isRightLeg ? leftPoint : rightPoint,
     };
 };
 const classifyJloType = (jlo: number) => {
@@ -347,16 +347,69 @@ const CameraModal: React.FC<{
     );
 };
 
-const MetricItem: React.FC<{ label: string; value: string | number; highlight?: boolean }> = ({ label, value, highlight }) => (
-    <div className={`relative flex flex-col justify-center items-center p-2 rounded-lg text-center h-full overflow-hidden transition-all
-        ${highlight
-            ? 'bg-[#6D282C]/20 border-2 border-[#6D282C]'
-            : 'bg-[#1a1a1a] border border-[#333333]'}`}>
-        <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
-        <p className="text-[0.625rem] text-gray-500 uppercase tracking-wider font-medium relative z-10">{label}</p>
-        <p className={`font-bold text-xl relative z-10 font-mono ${highlight ? 'text-[#ff8fa3]' : 'text-gray-100'}`}>{value}</p>
-    </div>
-);
+
+const LandmarkGuideImage: React.FC<{ landmarkKey: string | null }> = ({ landmarkKey }) => {
+    if (!landmarkKey) {
+        return (
+            <div className="flex items-center justify-center py-6 text-gray-500 text-xs text-center">
+                <p>Select a workflow step to see its anatomical guide</p>
+            </div>
+        );
+    }
+
+    const guides: Record<string, { title: string; description: string; image: string }> = {
+        hkaLine: {
+            title: '1. Hip-Knee-Ankle Axis (HKA)',
+            description: 'To define the HKA, connect the hip center to the knee center and extend the line to the ankle center.',
+            image: '/guides/guide_hka.jpg',
+        },
+        femurAnatomicAxis: {
+            title: '2. Femoral Anatomical Axis',
+            description: 'To define the femoral anatomical axis, position one end of the line at the center of the femoral canal and the other end at the center of the knee joint.',
+            image: '/guides/guide_femur_axis.jpg',
+        },
+        femoralJointLine: {
+            title: '3. Femoral Joint Line',
+            description: 'To define the femoral joint line, place one end of the line at the most distal point of the medial femoral condyle and extend the other end to the most distal point of the lateral femoral condyle.',
+            image: '/guides/guide_femoral_joint.jpg',
+        },
+        tibialJointLine: {
+            title: '4. Tibial Joint Line',
+            description: 'To define the tibial joint line, place one end of the line on the medial tibial plateau and extend the other end to the lateral tibial plateau.',
+            image: '/guides/guide_tibial_joint.jpg',
+        },
+    };
+
+    const guide = guides[landmarkKey];
+    if (!guide) {
+        return (
+            <div className="flex items-center justify-center py-6 text-gray-500 text-xs text-center">
+                <p>No guide available for this step</p>
+            </div>
+        );
+    }
+
+    const titleColor = LANDMARK_COLORS[landmarkKey as keyof typeof LANDMARK_COLORS] || '#38bdf8';
+
+    return (
+        <div className="flex flex-col items-center gap-1.5 w-full pb-1">
+            <h5 className="text-xs font-bold text-center tracking-wide w-full shrink-0" style={{ color: titleColor }}>
+                {guide.title}
+            </h5>
+            <div className="w-full h-64 bg-black rounded-lg p-2 border border-[#333333] flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                <img
+                    src={guide.image}
+                    alt={guide.title}
+                    className="max-h-full max-w-full object-contain"
+                    draggable={false}
+                />
+            </div>
+            <p className="text-xs text-gray-300 leading-relaxed text-center font-medium px-1">
+                {guide.description}
+            </p>
+        </div>
+    );
+};
 
 const LongLegPlannerPage: React.FC = () => {
     const {
@@ -380,7 +433,6 @@ const LongLegPlannerPage: React.FC = () => {
         if (longLegLandmarks.tibialMedial || longLegLandmarks.tibialLateral) initial.add('tibialJointLine');
         return initial;
     });
-    const [activeInstruction, setActiveInstruction] = useState<string[] | null>(null);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [pipPosition, setPipPosition] = useState({ x: 20, y: 20 });
 
@@ -452,10 +504,12 @@ const LongLegPlannerPage: React.FC = () => {
             kneeCenter: { x: w * 0.5, y: h * 0.5 },
             ankleCenter: { x: w * 0.5, y: h * 0.9 },
             femurAnatomicAxisPoint: { x: w * 0.5, y: h * 0.25 },
-            femoralMedial: { x: isLeft ? w * 0.55 : w * 0.45, y: h * 0.55 },
-            femoralLateral: { x: isLeft ? w * 0.45 : w * 0.55, y: h * 0.55 },
-            tibialMedial: { x: isLeft ? w * 0.55 : w * 0.45, y: h * 0.6 },
-            tibialLateral: { x: isLeft ? w * 0.45 : w * 0.55, y: h * 0.6 },
+            // Left leg: Medial is to the left (0.45), Lateral is to the right (0.55)
+            // Right leg: Medial is to the right (0.55), Lateral is to the left (0.45)
+            femoralMedial: { x: isLeft ? w * 0.45 : w * 0.55, y: h * 0.55 },
+            femoralLateral: { x: isLeft ? w * 0.55 : w * 0.45, y: h * 0.55 },
+            tibialMedial: { x: isLeft ? w * 0.45 : w * 0.55, y: h * 0.6 },
+            tibialLateral: { x: isLeft ? w * 0.55 : w * 0.45, y: h * 0.6 },
         });
     }, [setLongLegLandmarks, legSide]);
 
@@ -540,13 +594,14 @@ const LongLegPlannerPage: React.FC = () => {
 
             const cpakType = getLongLegCpakType(cpakHka, jlo);
             const jloType = classifyJloType(jlo);
-
+            const femurType = getFemurType(newResults.ldfa);
 
             newResults = {
                 ...newResults,
                 ahka,
                 jlo,
                 jloType,
+                femurType,
                 cpak: cpakType,
                 cut: getLongLegValgusCut(newResults.ldfa),
                 recommendedVarusCut: getRecommendedVarusCut(newResults.mpta),
@@ -557,6 +612,7 @@ const LongLegPlannerPage: React.FC = () => {
                 ahka: null,
                 jlo: null,
                 jloType: null,
+                femurType: '--',
                 cpak: '--',
                 cut: '--',
                 recommendedVarusCut: '--',
@@ -683,8 +739,8 @@ const LongLegPlannerPage: React.FC = () => {
 
                 const baseOffset = 15;
                 const scaledOffset = baseOffset / (zoom * scaleX);
-                const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
-                const lOffsetX = lateral.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
+                const mOffsetX = medial.x <= lateral.x ? -scaledOffset * 2 : scaledOffset;
+                const lOffsetX = lateral.x <= medial.x ? -scaledOffset * 2 : scaledOffset;
                 const boxWidth = 20 / (zoom * scaleX);
                 const boxHeight = 22 / (zoom * scaleX);
 
@@ -719,8 +775,8 @@ const LongLegPlannerPage: React.FC = () => {
 
                 const baseOffset = 15;
                 const scaledOffset = baseOffset / (zoom * scaleX);
-                const mOffsetX = medial.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
-                const lOffsetX = lateral.x < kneeCenter.x ? -scaledOffset * 2 : scaledOffset;
+                const mOffsetX = medial.x <= lateral.x ? -scaledOffset * 2 : scaledOffset;
+                const lOffsetX = lateral.x <= medial.x ? -scaledOffset * 2 : scaledOffset;
                 const boxWidth = 20 / (zoom * scaleX);
                 const boxHeight = 22 / (zoom * scaleX);
 
@@ -825,17 +881,15 @@ const LongLegPlannerPage: React.FC = () => {
         }
     };
 
-    const toggleLandmarkSet = (setName: keyof typeof landmarkInstructions) => {
+    const toggleLandmarkSet = (setName: string) => {
         const newSets = new Set(visibleLandmarkSets);
         if (newSets.has(setName)) {
             newSets.delete(setName);
             activeLandmarkRef.current = null;
-            setActiveInstruction(null);
         }
         else {
             newSets.add(setName);
             activeLandmarkRef.current = setName === 'hkaLine' ? 'hipCenter' : setName === 'femurAnatomicAxis' ? 'femurAnatomicAxisPoint' : null;
-            setActiveInstruction(landmarkInstructions[setName]);
 
             if (setName === 'femoralJointLine' || setName === 'tibialJointLine') {
                 const canvas = canvasRef.current;
@@ -858,8 +912,8 @@ const LongLegPlannerPage: React.FC = () => {
             // Fallback (unlikely)
             resetLandmarks(canvasRef.current.width / (window.devicePixelRatio || 1), canvasRef.current.height / (window.devicePixelRatio || 1));
         }
-        setVisibleLandmarkSets(new Set()); setActiveInstruction(null);
-        setLongLegResults({ ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', ama: null });
+        setVisibleLandmarkSets(new Set());
+        setLongLegResults({ ldfa: null, mpta: null, ahka: null, mhka: null, jlo: null, jloType: '--', femurType: '--', cpak: '--', cut: '--', recommendedVarusCut: '--', ama: null });
         setFemurBoundary(null); setTibiaBoundary(null);
         setLongLegCanvasDataUrl(null);
     };
@@ -1184,8 +1238,8 @@ const LongLegPlannerPage: React.FC = () => {
             if (femoralMedial && femoralLateral && kneeCenter) {
                 const { medial, lateral } = resolveMedialLateral(femoralMedial, femoralLateral, kneeCenter, legSide);
                 const baseOffset = 15 * refScale;
-                const mOffsetX = medial.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
-                const lOffsetX = lateral.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
+                const mOffsetX = medial.x <= lateral.x ? -baseOffset * 2 : baseOffset;
+                const lOffsetX = lateral.x <= medial.x ? -baseOffset * 2 : baseOffset;
                 const boxWidth = 20 * refScale; const boxHeight = 22 * refScale;
 
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
@@ -1208,8 +1262,8 @@ const LongLegPlannerPage: React.FC = () => {
             if (tibialMedial && tibialLateral && kneeCenter) {
                 const { medial, lateral } = resolveMedialLateral(tibialMedial, tibialLateral, kneeCenter, legSide);
                 const baseOffset = 15 * refScale;
-                const mOffsetX = medial.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
-                const lOffsetX = lateral.x < kneeCenter.x ? -baseOffset * 2 : baseOffset;
+                const mOffsetX = medial.x <= lateral.x ? -baseOffset * 2 : baseOffset;
+                const lOffsetX = lateral.x <= medial.x ? -baseOffset * 2 : baseOffset;
                 const boxWidth = 20 * refScale; const boxHeight = 22 * refScale;
 
                 ctx.fillStyle = 'rgba(29, 29, 31, 0.85)';
@@ -1395,29 +1449,7 @@ const LongLegPlannerPage: React.FC = () => {
                         <p className="text-xs text-gray-500 mt-2 truncate">{fileName}</p>
                     </section>
 
-                    {/* Leg Side Toggle */}
-                    <section className="relative z-10">
-                        <div className="bg-[#252525] p-3 rounded-lg border border-[#333333] flex items-center justify-between">
-                            <span className="text-gray-400 font-medium text-xs uppercase tracking-wider">Leg Side</span>
-                            <div className="flex bg-[#1a1a1a] rounded-lg p-0.5 border border-[#333333]">
-                                <button onClick={() => setLegSide('left')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${legSide === 'left' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>LEFT</button>
-                                <button onClick={() => setLegSide('right')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${legSide === 'right' ? 'bg-[#6D282C] text-white shadow-lg' : 'text-gray-400 hover:text-gray-200'}`}>RIGHT</button>
-                            </div>
-                        </div>
-                    </section>
 
-                    {/* Metrics Grid */}
-                    <section className="relative z-10">
-                        <h4 className="text-sm font-semibold mb-3 text-gray-400 uppercase tracking-wider">Calculated Metrics</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            {/* <MetricItem label="LDFA" value={`${longLegResults.ldfa?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="MPTA" value={`${longLegResults.mpta?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="aHKA" value={`${longLegResults.ahka?.toFixed(1) ?? '--'}°`} />
-                            <MetricItem label="mHKA" value={`${longLegResults.mhka?.toFixed(1) ?? '--'}°`} highlight /> */}
-                            <MetricItem label="JLO" value={`${longLegResults.jlo?.toFixed(1) ?? '--'}°`} />
-
-                        </div>
-                    </section>
 
                     {/* Landmark Stepper Cards */}
                     <section className="relative z-10">
@@ -1463,20 +1495,24 @@ const LongLegPlannerPage: React.FC = () => {
                         </button>
                     </section>
 
-                    {/* Instructions Panel */}
-                    <section className="relative z-10 bg-[#252525]/50 p-3 rounded-lg border border-[#333333]">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="w-1 h-4 bg-cyan-400 rounded-full" />
-                            <h4 className="text-base font-semibold text-cyan-400 uppercase tracking-wider">Instructions</h4>
-                        </div>
-                        {activeInstruction ? (
-                            <ul className="list-disc list-inside space-y-1 text-base text-gray-300">
-                                {activeInstruction.map((i, idx) => (<li key={idx}>{i}</li>))}
-                            </ul>
-                        ) : (
-                            <p className="text-base text-gray-500">Select a workflow step to begin</p>
-                        )}
-                    </section>
+                    {/* Picture Guide Panel */}
+                    {(() => {
+                        const activeGuideKey = visibleLandmarkSets.size > 0
+                            ? [...visibleLandmarkSets].pop() || null
+                            : null;
+
+                        return (
+                            <section className="relative z-10 bg-[#252525]/50 p-2.5 rounded-lg border border-[#333333] flex flex-col shrink-0">
+                                <div className="flex items-center gap-2 pb-1.5 mb-2 border-b border-[#333333]/60 shrink-0">
+                                    <span className="w-1 h-4 bg-cyan-400 rounded-full" />
+                                    <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Landmark Guide</h4>
+                                </div>
+                                <div className="w-full">
+                                    <LandmarkGuideImage landmarkKey={activeGuideKey} />
+                                </div>
+                            </section>
+                        );
+                    })()}
 
                 </div>
             </div>

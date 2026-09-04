@@ -30,12 +30,12 @@ interface AppContextType extends CaseData {
     setImplantThickness: (thickness: number | null) => void;
 
     setLongLegImageSrc: (src: string | null) => void;
-    setLongLegLandmarks: (landmarks: Landmarks) => void;
+    setLongLegLandmarks: React.Dispatch<React.SetStateAction<Landmarks>>;
     setLongLegResults: (results: LongLegResults) => void;
     setLongLegCanvasDataUrl: (url: string | null) => void;
 
     setValgusImageSrc: (src: string | null) => void;
-    setValgusLandmarks: (landmarks: Landmarks) => void;
+    setValgusLandmarks: React.Dispatch<React.SetStateAction<Landmarks>>;
     setValgusResults: (results: ValgusResults) => void;
     setValgusCanvasDataUrl: (url: string | null) => void;
 
@@ -50,11 +50,11 @@ interface AppContextType extends CaseData {
 
     setCoronalBalancingSimImage: (src: string | null) => void;
     setPostOpLongLegImage: (src: string | null) => void;
-    setPostOpLongLegLandmarks: (landmarks: Landmarks) => void;
+    setPostOpLongLegLandmarks: React.Dispatch<React.SetStateAction<Landmarks>>;
     setPostOpLongLegResults: (results: Partial<LongLegResults>) => void;
 
     setPostOpValgusImage: (src: string | null) => void;
-    setPostOpValgusLandmarks: (landmarks: Landmarks) => void;
+    setPostOpValgusLandmarks: React.Dispatch<React.SetStateAction<Landmarks>>;
     setPostOpValgusResults: (results: Partial<ValgusResults>) => void;
 
     setLongLegCoronalBalancingMainImage: (src: string | null) => void;
@@ -78,8 +78,8 @@ interface AppContextType extends CaseData {
     setLongLegFunctionalLinesY: (y: number) => void;
     setIntraOpValidationData: (data: IntraOpValidationData) => void;
     setValgusIntraOpValidationData: (data: IntraOpValidationData) => void;
-    setIntraOpCoronalBalancingData: (data: IntraOpCoronalBalancingData) => void;
-    setValgusIntraOpCoronalBalancingData: (data: IntraOpCoronalBalancingData) => void;
+    setIntraOpCoronalBalancingData: React.Dispatch<React.SetStateAction<IntraOpCoronalBalancingData>>;
+    setValgusIntraOpCoronalBalancingData: React.Dispatch<React.SetStateAction<IntraOpCoronalBalancingData>>;
 
     isLoading: boolean;
     token: string | null;

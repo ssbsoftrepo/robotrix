@@ -248,17 +248,17 @@ const getValgusCpakType = (obliquity: number, ldfa: number | null, mpta: number 
 const resolveMedialLateral = (
     p1: Point,
     p2: Point,
-    kneeCenter: Point,
+    _kneeCenter: Point,
     legSide: string
 ) => {
-    const isP1Medial =
-        legSide === 'right'
-            ? p1.x > kneeCenter.x
-            : p1.x < kneeCenter.x;
+    const leftPoint = p1.x <= p2.x ? p1 : p2;
+    const rightPoint = p1.x <= p2.x ? p2 : p1;
+
+    const isRightLeg = legSide === 'right';
 
     return {
-        medial: isP1Medial ? p1 : p2,
-        lateral: isP1Medial ? p2 : p1,
+        medial: isRightLeg ? rightPoint : leftPoint,
+        lateral: isRightLeg ? leftPoint : rightPoint,
     };
 };
 

@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { getFemurType } from '../types';
 
 // A more visually appealing component for selecting boundary options
 const BoundarySelector: React.FC<{
@@ -269,7 +270,7 @@ const ResultAnalysisPage: React.FC = () => {
                         {/* Values Row */}
                         <div className="grid grid-cols-2 gap-4 mt-2 relative z-10">
                             <div className="border-r border-[#333333] pr-4 flex items-center justify-center text-center">
-                                <p className="font-bold text-2xl text-[#ff8fa3] leading-tight">{longLegResults.jloType}</p>
+                                <p className="font-bold text-2xl text-[#ff8fa3] leading-tight">{longLegResults.femurType || getFemurType(longLegResults.ldfa)}</p>
                             </div>
                             <div className="flex items-center gap-3">
                                 <p className="font-bold text-2xl text-[#ff8fa3] leading-none">CPAK {longLegResults.cpak}</p>

@@ -1,6 +1,9 @@
 import { Capacitor } from '@capacitor/core';
 
 export const getApiBaseUrl = () => {
+    if (import.meta.env.VITE_API_BASE_URL) {
+        return import.meta.env.VITE_API_BASE_URL;
+    }
     if (Capacitor.isNativePlatform()) {
         return 'http://13.206.205.222';
     }
