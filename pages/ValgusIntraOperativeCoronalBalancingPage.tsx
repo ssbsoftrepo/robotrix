@@ -416,7 +416,7 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                     className="relative flex items-center justify-center"
                                     style={{
                                         ...(imgRect.width ? { width: `${imgRect.width}px`, height: `${imgRect.height}px` } : { width: '100%', height: '100%' }),
-                                        transform: 'scale(1.12)'
+                                        transform: isLeftLeg ? 'scale(1.08)' : 'scale(1.05)'
                                     }}
                                 >
                                     <img 
@@ -471,10 +471,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                                             </svg>
                                         );
                                     })()}
-                                    <div className="absolute top-[90%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center">
-                                        <div className="bg-black/60 backdrop-blur-md px-8 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-                                            <p className="text-gray-500 text-xs uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
-                                            <p className="text-3xl font-extrabold text-white tracking-tighter">{selectedJig}°</p>
+                                    <div className={`absolute ${isLeftLeg ? 'top-[84.5%]' : 'top-[82.5%]'} left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30 flex flex-col items-center justify-center text-center`}>
+                                        <div className="bg-black/60 backdrop-blur-md px-6 py-1.5 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+                                            <p className="text-gray-500 text-[11px] uppercase tracking-wider font-bold mb-0">Corrected Varus</p>
+                                            <p className="text-2xl font-extrabold text-white tracking-tighter leading-tight">{selectedJig}°</p>
                                         </div>
                                     </div>
                                 </div>
@@ -494,10 +494,10 @@ const ValgusIntraOperativeCoronalBalancingPage: React.FC = () => {
                         </div>
 
                         {/* Likely Post-Op CPAK indicator below bone image */}
-                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 z-20">
-                            <div className="bg-black/60 backdrop-blur-md px-6 py-2 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)] flex items-center justify-center gap-2">
-                                <p className="text-gray-500 text-xs uppercase tracking-wider font-bold mb-0">LIKELY POST-OP CPAK</p>
-                                <p className="text-xl font-extrabold text-white tracking-tighter">Type {simulatedCPAK}</p>
+                        <div className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2 z-20">
+                            <div className="bg-black/60 backdrop-blur-md px-5 py-1.5 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)] flex items-center justify-center gap-2">
+                                <p className="text-gray-500 text-[11px] uppercase tracking-wider font-bold mb-0">LIKELY POST-OP CPAK</p>
+                                <p className="text-lg font-extrabold text-white tracking-tighter leading-tight">Type {simulatedCPAK}</p>
                             </div>
                         </div>
                     </div>

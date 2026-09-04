@@ -56,6 +56,36 @@ Run these commands from the project root (`/home/ssb/Desktop/Robotrix`).
    ssh -i /home/ssb/Desktop/robo-aws/LightsailDefaultKey-ap-south-1.pem ubuntu@13.206.205.222 "mkdir -p /home/ubuntu/robotrix/backend && mv /home/ubuntu/robotrix-backend.jar /home/ubuntu/robotrix/backend/ && sudo systemctl restart robotrix-backend"
    ```
 
+### C. Android Tablet APK Build (Capacitor Release)
+
+> [!IMPORTANT]
+> **Check `.env.local` before building!**
+> If you have `VITE_API_BASE_URL=http://192.168.1.x:8081` active in `.env.local`, Vite will hardcode your local Wi-Fi IP into the APK. Comment it out or rename `.env.local` so the APK connects to the production server (`http://13.206.205.222`).
+
+1. **Hide / Comment out `.env.local`:**
+   ```bash
+   # In .env.local:
+   # VITE_API_BASE_URL=http://192.168.1.84:8081
+   ```
+2. **Build web assets:**
+   ```bash
+   npm run build
+   ```
+3. **Sync web bundle to Android native folder:**
+   ```bash
+   npx cap sync android
+   ```
+4. **Compile the Release APK:**
+   ```bash
+   cd android
+   ./gradlew assembleRelease
+   cd ..
+   ```
+5. **Output APK Location:**
+   ```
+   android/app/build/outputs/apk/release/app-release-unsigned.apk
+   ```
+
 ---
 
 ## 2. Service Management (On the Server)
