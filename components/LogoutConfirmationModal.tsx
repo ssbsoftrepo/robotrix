@@ -57,7 +57,7 @@ const LogoutConfirmationModal: React.FC<LogoutConfirmationModalProps> = ({
                     Confirm Logout
                 </h3>
                 <p className="text-sm text-gray-400 mb-6 leading-relaxed relative z-10">
-                    Are you sure you want to log out of <span className="text-gray-200 font-semibold">ROBOTRIX+</span>? Any unsaved planning changes may be lost.
+                    Are you sure you want to log out of <span className="text-gray-200 font-semibold">ROBOTRIX+</span>?
                 </p>
 
                 {/* Actions */}
