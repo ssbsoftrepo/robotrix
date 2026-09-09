@@ -55,6 +55,11 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
     const [editActive, setEditActive] = useState(true);
     const [editLoading, setEditLoading] = useState(false);
 
+    // Reset Password states
+    const [resetPasswordHospital, setResetPasswordHospital] = useState<Hospital | null>(null);
+    const [newPassword, setNewPassword] = useState('');
+    const [resetLoading, setResetLoading] = useState(false);
+
     // Username validation states
     const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
     const [statusMessage, setStatusMessage] = useState('');
@@ -240,6 +245,22 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
             showToast('error', err.message || 'Failed to update hospital');
         } finally {
             setEditLoading(false);
+        }
+    };
+
+    const handleResetAdminPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!resetPasswordHospital || !newPassword.trim()) return;
+        setResetLoading(true);
+        try {
+            await api.resetHospitalAdminPassword(resetPasswordHospital.id, newPassword.trim());
+            showToast('success', `Password for hospital "${resetPasswordHospital.name}" admin reset successfully!`);
+            setResetPasswordHospital(null);
+            setNewPassword('');
+        } catch (err: any) {
+            showToast('error', err.message || 'Failed to reset password');
+        } finally {
+            setResetLoading(false);
         }
     };
 
@@ -429,6 +450,13 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                                         >
                                                             EDIT
                                                         </button>
+                                                        <button
+                                                            onClick={() => { setResetPasswordHospital(h); setNewPassword(''); }}
+                                                            className="py-1 px-3 bg-[#1a1a1a] hover:bg-[#6D282C]/20 border border-[#333] hover:border-[#6D282C] text-[#c0565b] hover:text-white font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer active:scale-95"
+                                                            title="Reset Admin Password"
+                                                        >
+                                                            RESET PASS
+                                                        </button>
                                                         {(h.subscriptionStatus === 'EXPIRED' || h.subscriptionStatus === 'EXPIRING_SOON') && (
                                                             <button
                                                                 onClick={() => handleRenewSubscription(h.id, h.name)}
@@ -559,31 +587,29 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                                 {/* Admin Email */}
                                 <div className="space-y-1">
                                     <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
-                                        Admin Email
+                                        Admin Email (Optional)
                                     </label>
                                     <input
                                         type="email"
-                                        required
                                         value={adminEmail}
                                         onChange={(e) => setAdminEmail(e.target.value)}
                                         className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                        placeholder="e.g. admin@hospital.com"
+                                        placeholder="e.g. admin@hospital.com (optional)"
                                     />
                                 </div>
 
                                 {/* Admin Mobile Number */}
                                 <div className="space-y-1">
                                     <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
-                                        Admin Mobile Number
+                                        Admin Mobile Number (Optional)
                                     </label>
                                     <input
                                         type="tel"
-                                        required
                                         maxLength={10}
                                         value={adminMobileNumber}
                                         onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); if (v.length <= 10) setAdminMobileNumber(v); }}
                                         className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
-                                        placeholder="e.g. 9999999999"
+                                        placeholder="e.g. 9999999999 (optional)"
                                     />
                                 </div>
                             </div>
@@ -644,31 +670,29 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                             {/* Admin Mobile Number */}
                             <div className="space-y-1">
                                 <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
-                                    Admin Mobile Number
+                                    Admin Mobile Number (Optional)
                                 </label>
                                 <input
                                     type="tel"
-                                    required
                                     maxLength={10}
                                     value={editMobileNumber}
                                     onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); if (v.length <= 10) setEditMobileNumber(v); }}
                                     className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-cyan-500 transition-colors"
-                                    placeholder="e.g. 9999999999"
+                                    placeholder="e.g. 9999999999 (optional)"
                                 />
                             </div>
 
                             {/* Admin Email */}
                             <div className="space-y-1">
                                 <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
-                                    Admin Email
+                                    Admin Email (Optional)
                                 </label>
                                 <input
                                     type="email"
-                                    required
                                     value={editEmail}
                                     onChange={(e) => setEditEmail(e.target.value)}
                                     className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-cyan-500 transition-colors"
-                                    placeholder="e.g. admin@hospital.com"
+                                    placeholder="e.g. admin@hospital.com (optional)"
                                 />
                             </div>
 
@@ -710,6 +734,72 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) =
                             >
                                 {editLoading ? 'UPDATING...' : 'SAVE CHANGES'}
                             </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Reset Password Modal */}
+            {resetPasswordHospital && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-[#000000]/80 backdrop-blur-sm transition-opacity"
+                        onClick={() => setResetPasswordHospital(null)}
+                    />
+
+                    <div className="relative z-10 max-w-md w-full bg-[#161616] border border-[#2b2b2b] p-6 sm:p-8 rounded-sm shadow-2xl overflow-hidden">
+                        {/* Robotrix Top Accent Line */}
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-[#6D282C]" />
+
+                        <div className="flex items-center justify-between pb-4 border-b border-[#2b2b2b] mb-6">
+                            <div>
+                                <h3 className="text-sm font-black tracking-widest text-[#E0E0E0] uppercase">
+                                    Reset Admin Password
+                                </h3>
+                                <p className="text-xs text-[#c0565b] font-semibold mt-0.5">
+                                    {resetPasswordHospital.name} <span className="text-gray-500 font-mono">({resetPasswordHospital.hid})</span>
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setResetPasswordHospital(null)}
+                                className="text-gray-500 hover:text-white text-xl font-bold transition-colors cursor-pointer p-1"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleResetAdminPassword} className="space-y-5">
+                            <div className="space-y-1">
+                                <label className="block text-[0.625rem] font-bold tracking-wider text-[#888888] uppercase">
+                                    New Admin Password
+                                </label>
+                                <input
+                                    type="password"
+                                    required
+                                    minLength={4}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full bg-[#1e1e1e] border border-[#2b2b2b] text-[#E0E0E0] px-4 py-2.5 rounded-sm text-sm focus:outline-none focus:border-[#6D282C] transition-colors"
+                                    placeholder="Enter new password (min 4 chars)"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setResetPasswordHospital(null)}
+                                    className="py-2.5 px-4 bg-[#1a1a1a] hover:bg-[#2b2b2b] border border-[#333] text-gray-300 font-bold text-xs tracking-wider rounded-sm transition-all duration-300 cursor-pointer"
+                                >
+                                    CANCEL
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={resetLoading}
+                                    className="py-2.5 px-6 bg-[#6D282C] hover:bg-[#893338] border border-[#893338] text-white font-bold text-xs tracking-widest rounded-sm transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed select-none shadow-[0_4px_20px_rgba(109,40,44,0.4)] cursor-pointer"
+                                >
+                                    {resetLoading ? 'RESETTING...' : 'RESET PASSWORD'}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

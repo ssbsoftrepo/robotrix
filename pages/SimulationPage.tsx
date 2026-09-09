@@ -104,7 +104,9 @@ const SimulationPage: React.FC = () => {
         femoralCutSim, setFemoralCutSim,
         tibialCutSim, setTibialCutSim,
         appliedFemoralCutSim, setAppliedFemoralCutSim,
-        appliedTibialCutSim, setAppliedTibialCutSim
+        appliedTibialCutSim, setAppliedTibialCutSim,
+        longLegCoronalBalancingResults,
+        longLegFunctionalCutDegree
     } = useAppContext();
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -113,34 +115,16 @@ const SimulationPage: React.FC = () => {
 
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const [isSplitView, setIsSplitView] = useState(true);
+    const isSplitView = true;
     const [centerlineX, setCenterlineX] = useState(300);
     const [isDraggingCenterline, setIsDraggingCenterline] = useState(false);
 
     const getBoundaryAdjustedValues = useCallback(() => {
-        let displayFemoralCutStr = longLegResults.cut;
-        if (femurBoundary === 'basic') {
-            if (longLegResults.cut === '2° valgus cut') displayFemoralCutStr = '3° valgus cut';
-            else if (longLegResults.cut === '6° valgus cut') displayFemoralCutStr = '5° valgus cut';
-        }
-
-        const mpta = longLegResults.mpta;
-        let tibialVarusCut = 0;
-        if (mpta !== null) {
-            if (mpta <= 85) tibialVarusCut = 4;
-            else if (mpta <= 87) tibialVarusCut = 3;
-            else if (mpta <= 88) tibialVarusCut = 2;
-            else if (mpta <= 90) tibialVarusCut = 1;
-            // > 90 implies 0 (neutral) which is default initialized
-        }
-        if (tibiaBoundary === 'basic' && tibialVarusCut > 2) {
-            tibialVarusCut = 2;
-        }
-
-        const initialFemoral = displayFemoralCutStr ? parseFloat(displayFemoralCutStr) : 3;
-        const initialTibial = tibialVarusCut;
+        // Use the values computed by ResultAnalysisPage and synced to context
+        const initialFemoral = longLegCoronalBalancingResults.simFemoralCut ?? 3;
+        const initialTibial = longLegFunctionalCutDegree ?? 0;
         return { initialFemoral, initialTibial };
-    }, [longLegResults, femurBoundary, tibiaBoundary]);
+    }, [longLegCoronalBalancingResults.simFemoralCut, longLegFunctionalCutDegree]);
 
     const prevBoundaryRef = useRef<{ femur: string | null, tibia: string | null }>({ femur: null, tibia: null });
 
@@ -166,6 +150,15 @@ const SimulationPage: React.FC = () => {
             }
         }
     }, [getBoundaryAdjustedValues, femurBoundary, tibiaBoundary, femoralCutSim, tibialCutSim, setFemoralCutSim, setTibialCutSim, setAppliedFemoralCutSim, setAppliedTibialCutSim]);
+
+    // Auto-sync: whenever cut values change, immediately apply them (no separate Apply button needed)
+    useEffect(() => {
+        if (femoralCutSim !== null) setAppliedFemoralCutSim(femoralCutSim);
+    }, [femoralCutSim, setAppliedFemoralCutSim]);
+
+    useEffect(() => {
+        if (tibialCutSim !== null) setAppliedTibialCutSim(tibialCutSim);
+    }, [tibialCutSim, setAppliedTibialCutSim]);
 
 
     const resetSimulation = useCallback(() => {
@@ -202,11 +195,10 @@ const SimulationPage: React.FC = () => {
         const originalLandmarks = originalScaledLandmarksRef.current;
         const { hipCenter: originalHip, kneeCenter: originalKnee, ankleCenter: originalAnkle } = originalLandmarks;
         const lateralDirection = legSide === 'left' ? 1 : -1;
-        const ama = longLegResults.ama ?? 0;
-        const ldfa = longLegResults.ldfa ?? 90;
-        const mpta = longLegResults.mpta ?? 90;
-        const hipPivotAngle = (appliedFemoralCutSim ?? 0) - ama + (ldfa - 90);
-        const anklePivotAngle = (appliedTibialCutSim ?? 0);
+        // At 0° cuts, the x-ray should look identical to the original (no warping).
+        // Only the cut value itself drives the correction — no native LDFA/AMA offsets.
+        const hipPivotAngle = appliedFemoralCutSim ?? 0;
+        const anklePivotAngle = appliedTibialCutSim ?? 0;
 
         const femoralRad = hipPivotAngle * (Math.PI / 180);
         const dxFemoral = Math.abs(originalKnee.y - originalHip.y) * Math.tan(femoralRad);
@@ -483,14 +475,6 @@ const SimulationPage: React.FC = () => {
                 <div className="md:col-span-1 lg:col-span-1 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col gap-1 min-h-0 h-full overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     
-                    <div className="flex items-center justify-between relative z-10 shrink-0">
-                        <label htmlFor="split-view-toggle" className="text-xs font-semibold text-gray-400">Split View</label>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="split-view-toggle" className="sr-only peer" checked={isSplitView} onChange={() => setIsSplitView(!isSplitView)} />
-                            <div className="w-9 h-5 bg-[#333333] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#6D282C]"></div>
-                        </label>
-                    </div>
-
                     <div className="bg-black/40 px-2 py-1 rounded-md text-center border border-[#333333] relative z-10 shrink-0">
                         <p className="text-[11px] text-gray-400">Pre-Op mHKA</p>
                         <p className="font-bold text-lg text-gray-100">{longLegResults.mhka?.toFixed(1) ?? '--'}°</p>
@@ -498,22 +482,20 @@ const SimulationPage: React.FC = () => {
 
                     <div className="relative z-10 shrink-0">
                         <label className="block text-[11px] font-semibold mb-0.5 text-gray-400">Femoral Valgus Cut</label>
-                        <div className="flex items-center space-x-1">
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444448] text-white font-bold w-8 h-8 text-lg rounded-md transition">-</button>
-                            <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setFemoralCutSim(v); }} className="w-full h-8 p-1 rounded-md text-center text-base font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
-                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444448] text-white font-bold w-8 h-8 text-lg rounded-md transition">+</button>
+                        <div className="flex items-center space-x-1.5">
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) - 0.5)} className="bg-[#2A2B2C] hover:bg-[#38393B] border border-[#444448] text-white font-black w-12 h-11 text-2xl rounded-md transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0">−</button>
+                            <input type="number" step="0.5" value={femoralCutSim ?? ''} onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setFemoralCutSim(v); }} className="w-full h-11 p-1 rounded-md text-center text-xl font-bold bg-[#1e1e1e] border border-[#333333] text-gray-100 focus:outline-none focus:border-[#6D282C]" />
+                            <button onClick={() => setFemoralCutSim((femoralCutSim ?? initialFemoral) + 0.5)} className="bg-[#2A2B2C] hover:bg-[#38393B] border border-[#444448] text-white font-black w-12 h-11 text-2xl rounded-md transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0">+</button>
                         </div>
-                        <button onClick={() => setAppliedFemoralCutSim(femoralCutSim)} className="w-full h-9 py-2 px-4 bg-[#6D282C] hover:bg-[#893338] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition active:scale-98 shadow-sm flex items-center justify-center mt-1">Apply Femoral Cut</button>
                     </div>
 
                     <div className="relative z-10 shrink-0">
                         <label className="block text-[11px] font-semibold mb-0.5 text-gray-400">Tibial Varus Cut</label>
-                        <div className="flex items-center space-x-1">
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444448] text-white font-bold w-8 h-8 text-lg rounded-md transition">-</button>
-                            <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setTibialCutSim(v); }} className="w-full h-8 p-1 rounded-md text-center text-base font-bold bg-[#2A2B2C] border border-[#333333] text-gray-200 focus:outline-none focus:border-[#6D282C]" />
-                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="bg-[#252525] hover:bg-[#333333] border border-[#444448] text-white font-bold w-8 h-8 text-lg rounded-md transition">+</button>
+                        <div className="flex items-center space-x-1.5">
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) - 0.5)} className="bg-[#2A2B2C] hover:bg-[#38393B] border border-[#444448] text-white font-black w-12 h-11 text-2xl rounded-md transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0">−</button>
+                            <input type="number" step="0.5" value={tibialCutSim ?? ''} onChange={e => { const v = parseFloat(e.target.value); if (!isNaN(v)) setTibialCutSim(v); }} className="w-full h-11 p-1 rounded-md text-center text-xl font-bold bg-[#1e1e1e] border border-[#333333] text-gray-100 focus:outline-none focus:border-[#6D282C]" />
+                            <button onClick={() => setTibialCutSim((tibialCutSim ?? initialTibial) + 0.5)} className="bg-[#2A2B2C] hover:bg-[#38393B] border border-[#444448] text-white font-black w-12 h-11 text-2xl rounded-md transition active:scale-95 cursor-pointer flex items-center justify-center shrink-0">+</button>
                         </div>
-                        <button onClick={() => setAppliedTibialCutSim(tibialCutSim)} className="w-full h-9 py-2 px-4 bg-[#6D282C] hover:bg-[#893338] text-white font-bold text-xs uppercase tracking-wider rounded-lg transition active:scale-98 shadow-sm flex items-center justify-center mt-1">Apply Tibial Cut</button>
                     </div>
 
                     <div className="bg-[#6D282C]/20 border-2 border-[#6D282C] px-2 py-1 rounded-md text-center relative z-10 shrink-0">

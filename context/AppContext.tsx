@@ -120,7 +120,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 }
                 return storedToken;
             } catch (e) {
-                return null;
+                return storedToken;
             }
         }
         return null;

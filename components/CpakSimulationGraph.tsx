@@ -197,16 +197,16 @@ export const CpakSimulationGraph: React.FC<CpakSimulationGraphProps> = ({
                             y1="56"
                             x2={toSvgX(deg)}
                             y2="376"
-                            stroke={deg === 0 ? '#383842' : '#222228'}
-                            strokeWidth={deg === 0 ? 1.4 : 1}
+                            stroke={deg === 0 ? 'rgba(255, 255, 255, 0.22)' : '#222228'}
+                            strokeWidth={deg === 0 ? 1 : 1}
                         />
                         <line
                             x1="52"
                             y1={toSvgY(deg)}
                             x2="372"
                             y2={toSvgY(deg)}
-                            stroke={deg === 0 ? '#383842' : '#222228'}
-                            strokeWidth={deg === 0 ? 1.4 : 1}
+                            stroke={deg === 0 ? 'rgba(255, 255, 255, 0.22)' : '#222228'}
+                            strokeWidth={deg === 0 ? 1 : 1}
                         />
                     </React.Fragment>
                 ))}

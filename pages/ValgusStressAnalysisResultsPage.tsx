@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 
 // Helper component for statically selected matrix options
@@ -20,6 +20,8 @@ const BoundarySelector: React.FC<{
 );
 
 import { CpakDiagram } from '../src/components/CpakDiagram';
+import cpakImage from '../assets/CPAK.png';
+
 
 
 const ImageUploadBox: React.FC<{
@@ -164,6 +166,8 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
         return cut;
     };
 
+    const [showCpakModal, setShowCpakModal] = useState(false);
+
     const anticipatedTibiaCut = getAnticipatedTibiaCut();
     const recommendedFemoralCut = getFemoralCut();
 
@@ -223,7 +227,16 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                         {/* Headings Row */}
                         <div className="grid grid-cols-2 gap-4 relative z-10">
                             <p className="text-sm text-white font-bold uppercase tracking-wider border-r border-[#333333] pr-4">Femur Type:</p>
-                            <p className="text-sm text-white font-bold uppercase tracking-wider">CPAK Type:</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm text-white font-bold uppercase tracking-wider">CPAK Type:</p>
+                                <button
+                                    onClick={() => setShowCpakModal(true)}
+                                    className="w-5 h-5 rounded-full bg-[#333333] hover:bg-[#6D282C] border border-[#555555] hover:border-[#893338] text-gray-300 hover:text-white flex items-center justify-center text-xs font-bold transition-all duration-200 shrink-0 cursor-pointer"
+                                    title="View CPAK Matrix"
+                                >
+                                    i
+                                </button>
+                            </div>
                         </div>
 
                         {/* Values Row */}
@@ -231,12 +244,13 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                             <div className="border-r border-[#333333] pr-4 flex items-center justify-center text-center">
                                 <p className="font-bold text-2xl text-[#ff8fa3] leading-tight">{valgusResults.femurTypeByObliquity}</p>
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-between">
                                 <p className="font-bold text-2xl text-[#ff8fa3] leading-none">CPAK {valgusResults.cpak}</p>
                                 <CpakDiagram cpakType={valgusResults.cpak} />
                             </div>
                         </div>
                     </div>
+
 
                     {/* Matrix Selectors - STATIC FOR VALGUS */}
                     <div className="flex-grow flex flex-col gap-2 min-h-0">
@@ -353,8 +367,25 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {/* CPAK Matrix Modal */}
+            {showCpakModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowCpakModal(false)}>
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-2xl max-w-[90vw] max-h-[90vh] overflow-auto p-4" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setShowCpakModal(false)}
+                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#333333] hover:bg-[#6D282C] border border-[#555555] hover:border-[#893338] text-gray-300 hover:text-white flex items-center justify-center text-lg font-bold transition-all duration-200 cursor-pointer z-10"
+                        >
+                            ×
+                        </button>
+                        <h3 className="text-xl font-bold text-[#E0E0E0] mb-3 uppercase pr-10">CPAK Classification Matrix</h3>
+                        <img src={cpakImage} alt="CPAK Classification Matrix" className="max-w-full max-h-[75vh] object-contain rounded-lg" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
+
 
 export default ValgusStressAnalysisResultsPage;

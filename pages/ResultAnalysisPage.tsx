@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { getFemurType } from '../types';
 
@@ -61,6 +61,8 @@ const WarningMessage: React.FC<{ message: string }> = ({ message }) => (
 );
 
 import { CpakDiagram } from '../src/components/CpakDiagram';
+import cpakImage from '../assets/CPAK.png';
+
 
 const ImageUploadBox: React.FC<{
     imageSrc: string | null;
@@ -165,9 +167,11 @@ const ResultAnalysisPage: React.FC = () => {
         longLegFunctionalCutDegree, setLongLegFunctionalCutDegree
     } = useAppContext();
 
+    const [showCpakModal, setShowCpakModal] = useState(false);
+
     useEffect(() => {
-        if (femurBoundary === null) setFemurBoundary('expanded');
-        if (tibiaBoundary === null) setTibiaBoundary('expanded');
+        if (femurBoundary === null) setFemurBoundary('basic');
+        if (tibiaBoundary === null) setTibiaBoundary('basic');
     }, [femurBoundary, tibiaBoundary, setFemurBoundary, setTibiaBoundary]);
 
     const getFemoralCut = () => {
@@ -264,7 +268,16 @@ const ResultAnalysisPage: React.FC = () => {
                         {/* Headings Row */}
                         <div className="grid grid-cols-2 gap-4 relative z-10">
                             <p className="text-sm text-white font-bold uppercase tracking-wider border-r border-[#333333] pr-4">Femur Type:</p>
-                            <p className="text-sm text-white font-bold uppercase tracking-wider">CPAK Type:</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm text-white font-bold uppercase tracking-wider">CPAK Type:</p>
+                                <button
+                                    onClick={() => setShowCpakModal(true)}
+                                    className="w-5 h-5 rounded-full bg-[#333333] hover:bg-[#6D282C] border border-[#555555] hover:border-[#893338] text-gray-300 hover:text-white flex items-center justify-center text-xs font-bold transition-all duration-200 shrink-0 cursor-pointer"
+                                    title="View CPAK Matrix"
+                                >
+                                    i
+                                </button>
+                            </div>
                         </div>
 
                         {/* Values Row */}
@@ -272,11 +285,12 @@ const ResultAnalysisPage: React.FC = () => {
                             <div className="border-r border-[#333333] pr-4 flex items-center justify-center text-center">
                                 <p className="font-bold text-2xl text-[#ff8fa3] leading-tight">{longLegResults.femurType || getFemurType(longLegResults.ldfa)}</p>
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-between">
                                 <p className="font-bold text-2xl text-[#ff8fa3] leading-none">CPAK {longLegResults.cpak}</p>
                                 <CpakDiagram cpakType={longLegResults.cpak} />
                             </div>
                         </div>
+
                     </div>
 
                     {/* Matrix Selectors */}
@@ -385,6 +399,22 @@ const ResultAnalysisPage: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {/* CPAK Matrix Modal */}
+            {showCpakModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowCpakModal(false)}>
+                    <div className="relative bg-[#1a1a1a] border border-[#333333] rounded-xl shadow-2xl max-w-[90vw] max-h-[90vh] overflow-auto p-4" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setShowCpakModal(false)}
+                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#333333] hover:bg-[#6D282C] border border-[#555555] hover:border-[#893338] text-gray-300 hover:text-white flex items-center justify-center text-lg font-bold transition-all duration-200 cursor-pointer z-10"
+                        >
+                            ×
+                        </button>
+                        <h3 className="text-xl font-bold text-[#E0E0E0] mb-3 uppercase pr-10">CPAK Classification Matrix</h3>
+                        <img src={cpakImage} alt="CPAK Classification Matrix" className="max-w-full max-h-[75vh] object-contain rounded-lg" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

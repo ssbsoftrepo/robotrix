@@ -68,21 +68,20 @@ public class HospitalAdminController {
             return ResponseEntity.badRequest().body(Map.of("message", "Last name is mandatory"));
         }
 
-        if (request.getMobileNumber() == null || request.getMobileNumber().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mobile number is mandatory"));
+        String mobile = null;
+        if (request.getMobileNumber() != null && !request.getMobileNumber().trim().isEmpty()) {
+            mobile = request.getMobileNumber().replaceAll("\\D", "");
+            if (mobile.length() != 10) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Mobile number must be exactly 10 digits"));
+            }
         }
 
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
-        }
-
-        if (userRepository.findByEmailGlobal(request.getEmail().trim()).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
-        }
-
-        String mobile = request.getMobileNumber().replaceAll("\\D", "");
-        if (mobile.length() != 10) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mobile number must be exactly 10 digits"));
+        String email = null;
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            email = request.getEmail().trim();
+            if (userRepository.findByEmailGlobal(email).isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+            }
         }
 
         // Scope new user to the logged-in Hospital Admin's tenant
@@ -96,7 +95,7 @@ public class HospitalAdminController {
         doctor.setFirstName(request.getFirstName().trim());
         doctor.setLastName(request.getLastName().trim());
         doctor.setMobileNumber(mobile);
-        doctor.setEmail(request.getEmail().trim());
+        doctor.setEmail(email);
 
         // Generate hospital-specific sequence for Consultant ID: CON-0001, CON-0002 etc.
         java.util.UUID tenantId = principal.getTenantId();
@@ -118,12 +117,17 @@ public class HospitalAdminController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "search", defaultValue = "") String search,
             @AuthenticationPrincipal RobotrixUserDetails principal) {
+        
         if (principal == null || principal.getTenantId() == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied: Missing tenant context"));
         }
-        
+
         org.springframework.data.domain.PageRequest pageRequest = org.springframework.data.domain.PageRequest.of(page, size);
-        org.springframework.data.domain.Page<User> userPage = userRepository.findDoctorsWithSearch(search, pageRequest);
+        org.springframework.data.domain.Page<User> userPage = userRepository.findDoctorsWithSearch(
+                search == null || search.trim().isEmpty() ? null : search.trim(),
+                pageRequest
+        );
+
         
         java.util.List<UserDto> dtoList = userPage.getContent().stream().map(user -> {
             UserDto dto = new UserDto();
@@ -172,26 +176,26 @@ public class HospitalAdminController {
         if (request.getLastName() == null || request.getLastName().trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Last name is mandatory"));
         }
-        if (request.getMobileNumber() == null || request.getMobileNumber().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mobile number is mandatory"));
-        }
 
-        String mobile = request.getMobileNumber().replaceAll("\\D", "");
-        if (mobile.length() != 10) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Mobile number must be exactly 10 digits"));
+        String mobile = null;
+        if (request.getMobileNumber() != null && !request.getMobileNumber().trim().isEmpty()) {
+            mobile = request.getMobileNumber().replaceAll("\\D", "");
+            if (mobile.length() != 10) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Mobile number must be exactly 10 digits"));
+            }
         }
 
         user.setFirstName(request.getFirstName().trim());
         user.setLastName(request.getLastName().trim());
         user.setMobileNumber(mobile);
 
-        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Email is mandatory"));
-        }
-        String newEmail = request.getEmail().trim();
-        java.util.Optional<User> existingUserWithEmail = userRepository.findByEmailGlobal(newEmail);
-        if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(id)) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+        String newEmail = null;
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
+            newEmail = request.getEmail().trim();
+            java.util.Optional<User> existingUserWithEmail = userRepository.findByEmailGlobal(newEmail);
+            if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(id)) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+            }
         }
         user.setEmail(newEmail);
 
@@ -203,6 +207,37 @@ public class HospitalAdminController {
         
         return ResponseEntity.ok(Map.of("message", "Consultant updated successfully"));
     }
+
+    @PutMapping("/users/{id}/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @PathVariable("id") Long id,
+            @RequestBody Map<String, String> request,
+            @AuthenticationPrincipal RobotrixUserDetails principal) {
+        
+        java.util.Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        User user = userOpt.get();
+        if (!isSameTenant(user, principal)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied: User belongs to a different hospital"));
+        }
+        
+        String newPassword = request.get("newPassword");
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "New password is required"));
+        }
+        if (newPassword.trim().length() < 4) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Password must be at least 4 characters"));
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword.trim()));
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+    }
+
 
     @Data
     public static class UserCreateRequest {

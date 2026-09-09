@@ -37,12 +37,12 @@ public class SuperAdminController {
             return ResponseEntity.badRequest().body("Hospital already exists");
         }
 
-        if (request.getAdminEmail() == null || request.getAdminEmail().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Admin email is mandatory");
-        }
-
-        if (userRepository.findByEmailGlobal(request.getAdminEmail().trim()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
+        String adminEmail = null;
+        if (request.getAdminEmail() != null && !request.getAdminEmail().trim().isEmpty()) {
+            adminEmail = request.getAdminEmail().trim();
+            if (userRepository.findByEmailGlobal(adminEmail).isPresent()) {
+                return ResponseEntity.badRequest().body("Email already exists");
+            }
         }
 
         // Create Tenant
@@ -68,8 +68,8 @@ public class SuperAdminController {
         admin.setTenantId(tenant.getId());
         admin.setUsername(request.getAdminUsername());
         admin.setPasswordHash(passwordEncoder.encode(request.getAdminPassword()));
-        admin.setMobileNumber(request.getAdminMobileNumber());
-        admin.setEmail(request.getAdminEmail().trim());
+        admin.setMobileNumber(request.getAdminMobileNumber() != null ? request.getAdminMobileNumber().trim() : null);
+        admin.setEmail(adminEmail);
         admin.setRole("HOSPITAL_ADMIN");
         userRepository.save(admin);
 
@@ -143,14 +143,15 @@ public class SuperAdminController {
             }
             if (request.getAdminEmail() != null) {
                 String newEmail = request.getAdminEmail().trim();
-                if (newEmail.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Admin email is mandatory");
+                if (!newEmail.isEmpty()) {
+                    java.util.Optional<User> existingUserWithEmail = userRepository.findByEmailGlobal(newEmail);
+                    if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(admin.getId())) {
+                        return ResponseEntity.badRequest().body("Email already exists");
+                    }
+                    admin.setEmail(newEmail);
+                } else {
+                    admin.setEmail(null);
                 }
-                java.util.Optional<User> existingUserWithEmail = userRepository.findByEmailGlobal(newEmail);
-                if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(admin.getId())) {
-                    return ResponseEntity.badRequest().body("Email already exists");
-                }
-                admin.setEmail(newEmail);
             }
             userRepository.save(admin);
         }
@@ -165,6 +166,28 @@ public class SuperAdminController {
         responseMap.put("message", "Hospital updated successfully");
         return ResponseEntity.ok(responseMap);
     }
+
+    @PutMapping("/hospitals/{id}/reset-password")
+    public ResponseEntity<?> resetAdminPassword(@PathVariable("id") UUID id, @RequestBody java.util.Map<String, String> request) {
+        java.util.Optional<User> adminOpt = userRepository.findHospitalAdminByTenantId(id);
+        if (adminOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        String newPassword = request.get("newPassword");
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("New password is required");
+        }
+        if (newPassword.trim().length() < 4) {
+            return ResponseEntity.badRequest().body("Password must be at least 4 characters");
+        }
+
+        User admin = adminOpt.get();
+        admin.setPasswordHash(passwordEncoder.encode(newPassword.trim()));
+        userRepository.save(admin);
+
+        return ResponseEntity.ok(java.util.Map.of("message", "Hospital Admin password reset successfully"));
+    }
+
 
     @PostMapping("/hospitals/{id}/toggle")
     public ResponseEntity<?> toggleHospital(@PathVariable("id") UUID id) {

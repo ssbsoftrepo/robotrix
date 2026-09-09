@@ -338,7 +338,7 @@ const PostOpValgusPlanner: React.FC = () => {
     const isPanningRef = useRef(false);
     const panStartRef = useRef({ x: 0, y: 0 });
     const MIN_ZOOM = 1;
-    const MAX_ZOOM = 3;
+    const MAX_ZOOM = 4;
 
     // Pinch-to-Zoom Refs
     const initialPinchDistanceRef = useRef<number | null>(null);

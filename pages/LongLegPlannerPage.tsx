@@ -456,7 +456,7 @@ const LongLegPlannerPage: React.FC = () => {
     const isPanningRef = useRef(false);
     const panStartRef = useRef({ x: 0, y: 0 });
     const MIN_ZOOM = 1;
-    const MAX_ZOOM = 3;
+    const MAX_ZOOM = 4;
     const lastResizeTimeRef = useRef(0);
     const initialPinchDistanceRef = useRef<number | null>(null);
     const initialInitialPinchZoomRef = useRef<number>(1);
