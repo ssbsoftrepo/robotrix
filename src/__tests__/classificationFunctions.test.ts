@@ -6,6 +6,7 @@ import {
     classifyJloType,
     getCpakClassification,
 } from '../utils/classificationFunctions';
+import { getFemurType } from '../../types';
 
 // ============================================================================
 // CPAK Classification Test Cases (16 tests)
@@ -264,3 +265,32 @@ describe('JLO Type Classification', () => {
         });
     });
 });
+
+// ============================================================================
+// Femur Type Classification Test Cases
+// ============================================================================
+
+describe('Femur Type Classification', () => {
+    describe('getFemurType', () => {
+        it('LDFA > 91° should be VAROID', () => {
+            expect(getFemurType(91.1)).toBe('VAROID');
+            expect(getFemurType(95)).toBe('VAROID');
+        });
+
+        it('89° <= LDFA <= 91° should be NEUTRAL', () => {
+            expect(getFemurType(89)).toBe('NEUTRAL');
+            expect(getFemurType(89.7)).toBe('NEUTRAL');
+            expect(getFemurType(91)).toBe('NEUTRAL');
+        });
+
+        it('LDFA < 89° should be VALGOID', () => {
+            expect(getFemurType(88.9)).toBe('VALGOID');
+            expect(getFemurType(85)).toBe('VALGOID');
+        });
+
+        it('null or undefined LDFA should return "--"', () => {
+            expect(getFemurType(null)).toBe('--');
+        });
+    });
+});
+

@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { Landmarks, LongLegResults, Point, LegSide } from '../types';
+import { Landmarks, LongLegResults, Point, LegSide, getFemurType } from '../types';
 
 // --- Helper Functions ---
 const angleBetweenVectors = (v1: Point, v2: Point) => {
@@ -458,6 +458,7 @@ const PostOpPlanner: React.FC = () => {
             else if (jlo > 183) { jloType = 'APEX PROXIMAL'; }
             else { jloType = 'APEX NEUTRAL'; }
             newResults.jloType = jloType;
+            newResults.femurType = getFemurType(newResults.ldfa);
             newResults.jlo = jlo;
             newResults.ahka = ahka;
             newResults.cpak = getLongLegCpakType(ahka, jlo);
@@ -1138,7 +1139,7 @@ const PostOpPlanner: React.FC = () => {
                             <ResultItem label="CPAK Type" value={results.cpak ? `CPAK ${results.cpak}` : '--'} large={true} />
                         </div>
                         <div className="col-span-2">
-                            <ResultItem label="JLO Type" value={results.jloType ?? '--'} large={true} />
+                            <ResultItem label="Femur Type" value={results.femurType || getFemurType(results.ldfa)} large={true} />
                         </div>
                     </div>
                 </div>
@@ -1177,8 +1178,8 @@ const PastCaseResultPage: React.FC = () => {
                             <p className="font-bold text-base text-[#ff8fa3]">CPAK {longLegResults.cpak}</p>
                         </div>
                         <div className="bg-[#252525] p-1 rounded-lg border border-[#6D282C]/50">
-                            <p className="text-[0.5rem] text-[#ff8fa3] font-bold uppercase">Pre-Op JLO</p>
-                            <p className="font-bold text-base text-[#ff8fa3]">{longLegResults.jloType}</p>
+                            <p className="text-[0.5rem] text-[#ff8fa3] font-bold uppercase">Pre-Op Femur Type</p>
+                            <p className="font-bold text-base text-[#ff8fa3]">{longLegResults.femurType || getFemurType(longLegResults.ldfa)}</p>
                         </div>
                     </div>
                 </div>
