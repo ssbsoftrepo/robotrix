@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Patient, Page } from '../types';
 import { getPlansForPatient, createNewPlan, PlanMetadata, getNextPatientId, getNextPatientIdPreview } from '../utils/storage';
@@ -315,11 +315,30 @@ const PlanSelectionModal: React.FC<{
 
 
 const CaseManagementPage: React.FC = () => {
-    const { patients, savePatient, deletePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness, legSide } = useAppContext();
+    const { patients, savePatient, deletePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness, legSide, isOffline, syncStatus, pendingSyncCount } = useAppContext();
     const [view, setView] = useState<'main' | 'list'>('main');
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const [activePlanName, setActivePlanName] = useState<string | null>(null);
+    const [loadingRowId, setLoadingRowId] = useState<string | null>(null);
+
+    const [visibleCount, setVisibleCount] = useState(10);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const loadMoreRef = useCallback((node: HTMLDivElement | null) => {
+        if (observerRef.current) observerRef.current.disconnect();
+        if (node) {
+            observerRef.current = new IntersectionObserver(entries => {
+                if (entries[0].isIntersecting) {
+                    setVisibleCount(prev => prev + 10);
+                }
+            });
+            observerRef.current.observe(node);
+        }
+    }, []);
+
+    useEffect(() => {
+        setVisibleCount(10);
+    }, [searchTerm, view]);
 
 
     const [isLdfaModalOpen, setIsLdfaModalOpen] = useState(false);
@@ -355,21 +374,27 @@ const CaseManagementPage: React.FC = () => {
 
     useEffect(() => {
         if (!currentPatientId) {
-            api.getNextPid()
-                .then((res: any) => {
-                    if (res && res.pid) {
-                        setSuggestedId(res.pid);
-                    }
-                })
-                .catch(err => {
-                    console.error('Failed to fetch next PID', err);
-                    const nextCount = patients.length + 1;
-                    setSuggestedId(`PID-${nextCount.toString().padStart(4, '0')}`);
-                });
+            if (!isOffline) {
+                api.getNextPid()
+                    .then((res: any) => {
+                        if (res && res.pid) {
+                            setSuggestedId(res.pid);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to fetch next PID', err);
+                        const nextCount = patients.length + 1;
+                        setSuggestedId(`PID-${nextCount.toString().padStart(4, '0')}`);
+                    });
+            } else {
+                // Offline: generate a local preview PID based on cached patient count
+                const nextCount = patients.length + 1;
+                setSuggestedId(`PID-${nextCount.toString().padStart(4, '0')}`);
+            }
         } else {
             setSuggestedId('');
         }
-    }, [currentPatientId, patients]);
+    }, [currentPatientId, patients, isOffline]);
 
     // Fetch active plan name when a plan is loaded
     useEffect(() => {
@@ -429,8 +454,10 @@ const CaseManagementPage: React.FC = () => {
     };
 
     const selectPatient = async (id: string) => {
+        setLoadingRowId(id);
         await setCurrentPatientId(id);
         setPlanModalConfig({ isOpen: true, patientId: id, intent: 'load' });
+        setLoadingRowId(null);
     };
 
     const handlePlanSelected = async (planId: string) => {
@@ -450,26 +477,26 @@ const CaseManagementPage: React.FC = () => {
     };
 
     const handleResultClick = async (patientId: string) => {
-
+        setLoadingRowId(patientId);
         const plans = await getPlansForPatient(patientId);
         if (plans.length > 1) {
             await setCurrentPatientId(patientId);
             setPlanModalConfig({ isOpen: true, patientId, intent: 'result' });
         } else if (plans.length === 1) {
-
             await setCurrentPatientId(patientId);
             await setCurrentPlanId(plans[0].id);
             setIsResultTypeModalOpen(true);
             setSelectedPatientForResults(patientId);
         } else {
-
             await setCurrentPatientId(patientId);
             setIsResultTypeModalOpen(true);
             setSelectedPatientForResults(patientId);
         }
+        setLoadingRowId(null);
     };
 
     const handleReportClick = async (patientId: string) => {
+        setLoadingRowId(patientId);
         const plans = await getPlansForPatient(patientId);
         if (plans.length > 1) {
             await setCurrentPatientId(patientId);
@@ -482,6 +509,7 @@ const CaseManagementPage: React.FC = () => {
             await setCurrentPatientId(patientId);
             setIsReportSelectionOpen(true);
         }
+        setLoadingRowId(null);
     };
 
     const handleSelectResultType = async (type: 'long-leg' | 'valgus-stress') => {
@@ -641,6 +669,8 @@ const CaseManagementPage: React.FC = () => {
                 return dateB - dateA;
             });
 
+        const displayedPatients = filteredPatients.slice(0, visibleCount);
+
         return (
             <div className="mt-10 p-6 relative z-10">
                 <div className="flex justify-between items-center mb-6">
@@ -701,78 +731,99 @@ const CaseManagementPage: React.FC = () => {
                             {searchTerm ? `No cases found matching "${searchTerm}".` : 'No past cases found.'}
                         </p>
                     ) : (
-                        filteredPatients.map(p => (
+                        displayedPatients.map(p => (
                             <div key={p.id} className="relative bg-[#1a1a1a] border border-[#333333] p-6 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center hover:border-[#6D282C]/50 transition">
                                 <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                                 <div className="relative z-10">
                                     <p className="font-semibold text-2xl text-gray-200">{p.firstName} {p.lastName} (ID: {p.pid || p.id})</p>
                                     <p className="text-lg text-gray-500 mt-2">{formatDate(p.date)}</p>
                                 </div>
-                                <div className="flex space-x-4 mt-4 md:mt-0 relative z-10">
-                                    {/* Load Case - Primary Button */}
-                                    <button
-                                        onClick={() => selectPatient(p.id)}
-                                        className="group relative py-3 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
-                                                   shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
-                                                   transition-all duration-300 ease-out
-                                                   hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
-                                                   active:scale-[0.98]"
-                                    >
-                                        <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
-                                        <span className="relative text-lg font-bold text-white tracking-wider">LOAD CASE</span>
-                                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
-                                    </button>
-                                    {/* Result - Secondary Button */}
-                                    <button
-                                        onClick={() => handleResultClick(p.id)}
-                                        className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
-                                                   shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
-                                                   transition-all duration-300 ease-out
-                                                   hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
-                                                   active:scale-[0.98]"
-                                    >
-                                        <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
-                                        <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-white">RESULT</span>
-                                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
-                                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
-                                    </button>
-                                    {/* Report - Secondary Button */}
-                                    <button
-                                        onClick={() => handleReportClick(p.id)}
-                                        className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
-                                                   shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
-                                                   transition-all duration-300 ease-out
-                                                   hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
-                                                   active:scale-[0.98]"
-                                    >
-                                        <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
-                                        <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-white">REPORT</span>
-                                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
-                                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
-                                    </button>
-                                    {/* Delete - Danger Button */}
-                                    <button
-                                        onClick={() => setDeleteConfirmId(p.id)}
-                                        className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
-                                                   shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
-                                                   transition-all duration-300 ease-out
-                                                   hover:bg-red-900/30 hover:border-red-500/50 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]
-                                                   active:scale-[0.98]"
-                                    >
-                                        <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
-                                        <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-red-400 flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                <div className="flex space-x-4 mt-4 md:mt-0 relative z-10 min-w-[280px] justify-end">
+                                    {loadingRowId === p.id ? (
+                                        <div className="flex items-center justify-center py-3 px-6">
+                                            <svg className="animate-spin h-8 w-8 text-[#6D282C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            DELETE
-                                        </span>
-                                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-red-500/50" />
-                                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-red-500/50" />
-                                    </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Load Case - Primary Button */}
+                                            <button
+                                                onClick={() => selectPatient(p.id)}
+                                                className="group relative py-3 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
+                                                           shadow-[0_4px_15px_rgba(109,40,44,0.3)] 
+                                                           transition-all duration-300 ease-out
+                                                           hover:bg-[#893338] hover:border-[#a04046] hover:shadow-[0_0_20px_rgba(109,40,44,0.5)]
+                                                           active:scale-[0.98]"
+                                            >
+                                                <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
+                                                <span className="relative text-lg font-bold text-white tracking-wider">LOAD CASE</span>
+                                                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
+                                            </button>
+                                            {/* Result - Secondary Button */}
+                                            <button
+                                                onClick={() => handleResultClick(p.id)}
+                                                className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
+                                                           shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                                           transition-all duration-300 ease-out
+                                                           hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                                           active:scale-[0.98]"
+                                            >
+                                                <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                                <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-white">RESULT</span>
+                                                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                            </button>
+                                            {/* Report - Secondary Button */}
+                                            <button
+                                                onClick={() => handleReportClick(p.id)}
+                                                className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
+                                                           shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                                           transition-all duration-300 ease-out
+                                                           hover:bg-[#333333] hover:border-[#555555] hover:shadow-[0_0_20px_rgba(109,40,44,0.2)]
+                                                           active:scale-[0.98]"
+                                            >
+                                                <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                                <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-white">REPORT</span>
+                                                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-[#6D282C]/50" />
+                                            </button>
+                                            {/* Delete - Danger Button */}
+                                            <button
+                                                onClick={() => setDeleteConfirmId(p.id)}
+                                                className="group relative py-3 px-6 bg-[#252525] border border-[#444444] rounded-sm 
+                                                           shadow-[0_4px_15px_rgba(0,0,0,0.3)] 
+                                                           transition-all duration-300 ease-out
+                                                           hover:bg-red-900/30 hover:border-red-500/50 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]
+                                                           active:scale-[0.98]"
+                                            >
+                                                <div className="absolute inset-0 bg-noise opacity-[0.05] pointer-events-none" />
+                                                <span className="relative text-lg font-bold text-gray-200 tracking-wider group-hover:text-red-400 flex items-center gap-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                    </svg>
+                                                    DELETE
+                                                </span>
+                                                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-t border-l border-gray-600 transition-colors group-hover:border-red-500/50" />
+                                                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-b border-r border-gray-600 transition-colors group-hover:border-red-500/50" />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))
+                    )}
+                    
+                    {/* Infinite Scroll Sentinel / Loader */}
+                    {filteredPatients.length > 0 && visibleCount < filteredPatients.length && (
+                        <div ref={loadMoreRef} className="flex justify-center py-8">
+                            <svg className="animate-spin h-8 w-8 text-[#6D282C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
                     )}
                 </div>
             </div>
@@ -784,6 +835,8 @@ const CaseManagementPage: React.FC = () => {
             {/* Cinematic Overhead Surgical Lamp Effect */}
             <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
             <div className="fixed top-[-10%] left-1/2 transform -translate-x-1/2 w-[40vw] h-[40vw] bg-white/3 rounded-full blur-[100px] pointer-events-none" />
+
+
             {/* Modal for Legacy Flows */}
             <LdfaModeModal
                 isOpen={isLdfaModalOpen}

@@ -120,6 +120,32 @@ public class SurgeryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(patient);
     }
 
+    // 2a. Update Patient
+    @PutMapping("/patients/{id}")
+    @Transactional
+    public ResponseEntity<?> updatePatient(
+            @PathVariable("id") Long id,
+            @RequestBody PatientDto patientDto,
+            @AuthenticationPrincipal RobotrixUserDetails principal) {
+        if (principal == null || principal.getTenantId() == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
+
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+
+        if (!isSameTenant(patient, principal) || !isOwner(patient, principal)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
+
+        patient.setName(patientDto.getName());
+        patient.setAge(patientDto.getAge());
+        patient.setGender(patientDto.getGender());
+
+        patientRepository.save(patient);
+        return ResponseEntity.ok(patient);
+    }
+
     // 2b. Delete Patient (Enforces tenant scope and cascades to plans/images via database constraint)
     @DeleteMapping("/patients/{id}")
     @Transactional

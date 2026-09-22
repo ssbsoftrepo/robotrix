@@ -40,10 +40,25 @@ const App: React.FC = () => {
         username,
         hospitalName,
         login,
-        logout
+        logout,
+        isOffline,
+        syncStatus,
+        pendingSyncCount
     } = useAppContext();
 
     const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
+    const [isBrowserOnline, setIsBrowserOnline] = React.useState(navigator.onLine);
+
+    React.useEffect(() => {
+        const handleOnline = () => setIsBrowserOnline(true);
+        const handleOffline = () => setIsBrowserOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     const handleConfirmLogout = () => {
         setIsLogoutModalOpen(false);
@@ -146,6 +161,43 @@ const App: React.FC = () => {
                             >
                                 <span className="text-white font-bold tracking-widest select-none">HOME</span>
                             </button>
+                        )}
+                        {/* Offline / Sync Status Indicator */}
+                        {(isOffline || syncStatus === 'syncing' || syncStatus === 'done') && (
+                            <div className="flex items-center gap-2 bg-[#1e1e1e] border px-3.5 py-1.5 rounded-full relative z-50 mr-2" style={{
+                                borderColor: isOffline ? 'rgba(180,83,9,0.3)' :
+                                            syncStatus === 'syncing' ? 'rgba(59,130,246,0.3)' :
+                                            'rgba(34,197,94,0.3)'
+                            }}>
+                                {isOffline && (
+                                    <>
+                                        <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                        <span className="text-xs font-semibold text-amber-300">
+                                            {isBrowserOnline ? 'Connecting...' : 'Offline'}
+                                        </span>
+                                        {pendingSyncCount > 0 && (
+                                            <span className="text-amber-400/70 text-[10px] ml-1">
+                                                ({pendingSyncCount})
+                                            </span>
+                                        )}
+                                    </>
+                                )}
+                                {!isOffline && syncStatus === 'syncing' && (
+                                    <>
+                                        <svg className="animate-spin h-3.5 w-3.5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        <span className="text-xs font-semibold text-blue-300">Syncing...</span>
+                                    </>
+                                )}
+                                {!isOffline && syncStatus === 'done' && (
+                                    <>
+                                        <span className="text-green-400 text-xs">✓</span>
+                                        <span className="text-xs font-semibold text-green-300">Synced</span>
+                                    </>
+                                )}
+                            </div>
                         )}
                         <div className="flex items-center gap-3 bg-[#1e1e1e] border border-[#333] px-3.5 py-1.5 rounded-full relative z-50">
                             <svg 

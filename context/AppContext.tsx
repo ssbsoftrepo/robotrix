@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { Patient, Page, LongLegResults, ValgusResults, LegSide, Landmarks, FunctionalPlannerMode, KneeType, CaseData, CoronalBalancingResults, IntraOpValidationData, IntraOpCoronalBalancingData, initialCaseData } from '../types';
 import { savePatients, getPatients, saveCaseData, loadCaseData, updatePlanLegSide, getPlansForPatient } from '../utils/storage';
-import { api } from '../services/api';
+import { api, isNetworkError } from '../services/api';
+import { initNetworkMonitor, isOnline as getIsOnline, onStatusChange } from '../services/networkStatus';
+import { processSyncQueue, onSyncStatus } from '../services/syncQueue';
+import { getPendingSyncCount, getCachedPatients, cachePatients, addCachedPatient, removeCachedPatient, addToSyncQueue, setOfflineUser, clearUserCache } from '../services/offlineDb';
+import { generateSyncId, generateOfflineId } from '../services/syncQueue';
 
 
 // Combine all context values into a single interface
@@ -88,6 +92,11 @@ interface AppContextType extends CaseData {
     hospitalName: string | null;
     login: (token: string, role: string, username: string, tenantId: string | null) => void;
     logout: () => void;
+
+    // Offline state
+    isOffline: boolean;
+    syncStatus: 'idle' | 'syncing' | 'error' | 'done';
+    pendingSyncCount: number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -102,6 +111,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const loadedPlanIdRef = useRef<string | null>(null);
+
+    // Offline state
+    const [isOffline, setIsOffline] = useState<boolean>(!navigator.onLine);
+    const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error' | 'done'>('idle');
+    const [pendingSyncCount, setPendingSyncCount] = useState<number>(0);
 
     // Authentication States
     const [token, setToken] = useState<string | null>(() => {
@@ -126,7 +140,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         return null;
     });
     const [role, setRole] = useState<string | null>(() => token ? localStorage.getItem('robotrix_role') : null);
-    const [username, setUsername] = useState<string | null>(() => token ? localStorage.getItem('robotrix_username') : null);
+    const [username, setUsername] = useState<string | null>(() => {
+        const storedUsername = token ? localStorage.getItem('robotrix_username') : null;
+        // Initialise offline cache namespace for the already-logged-in user
+        if (storedUsername) setOfflineUser(storedUsername);
+        return storedUsername;
+    });
     const [hospitalName, setHospitalName] = useState<string | null>(() => token ? localStorage.getItem('robotrix_tenant') : null);
 
     const login = useCallback((newToken: string, newRole: string, newUsername: string, tenantId: string | null) => {
@@ -143,12 +162,37 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setToken(newToken);
         setRole(newRole);
         setUsername(newUsername);
+        // Set offline cache namespace for this doctor
+        setOfflineUser(newUsername);
         setPage('case-management');
     }, []);
 
 
 
-    const logout = useCallback(() => {
+    const logout = useCallback(async () => {
+        const pendingCount = await getPendingSyncCount();
+        
+        if (pendingCount > 0) {
+            if (!getIsOnline()) {
+                alert(`You have ${pendingCount} unsynced changes.\n\nPlease connect to the internet to sync your data before logging out, otherwise your offline changes will be trapped on this device.`);
+                return; // Block logout
+            }
+
+            // Try to sync before logging out
+            try {
+                await processSyncQueue();
+                // Check if it actually cleared
+                const newCount = await getPendingSyncCount();
+                if (newCount > 0) {
+                    alert(`Failed to sync ${newCount} changes to the server.\n\nPlease ensure your connection is stable before logging out.`);
+                    return; // Block logout
+                }
+            } catch (err) {
+                alert('An error occurred while syncing your data. Please try again before logging out.');
+                return;
+            }
+        }
+
         localStorage.removeItem('robotrix_token');
         localStorage.removeItem('robotrix_role');
         localStorage.removeItem('robotrix_username');
@@ -163,6 +207,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCaseData(initialCaseData);
         setPage('case-management');
         loadedPlanIdRef.current = null;
+        // Clear offline user context (cache data stays per-user namespaced so it's safe)
+        setOfflineUser('');
     }, []);
 
     useEffect(() => {
@@ -175,36 +221,60 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         };
     }, [logout]);
 
+    // ─── Network & Sync Initialisation ────────────────────────────────
+    useEffect(() => {
+        initNetworkMonitor();
+
+        const unsub = onStatusChange((online) => {
+            setIsOffline(!online);
+            if (online) {
+                // Trigger sync queue processing when we come back online
+                processSyncQueue();
+            }
+        });
+
+        // Listen for sync status updates
+        onSyncStatus((status, count, message) => {
+            setSyncStatus(status);
+            setPendingSyncCount(count);
+            if (status === 'done') {
+                // After successful sync, refresh patients from server
+                getPatients().then(p => setPatients(p)).catch(() => {});
+            }
+            if (status === 'error' && message) {
+                console.error('[Sync Error]', message);
+            }
+        });
+
+        // Load initial pending count
+        getPendingSyncCount().then(setPendingSyncCount);
+
+        const handleSyncQueueUpdate = (e: any) => {
+            setPendingSyncCount(e.detail);
+        };
+        window.addEventListener('robotrix-sync-queue-updated', handleSyncQueueUpdate);
+
+        return () => {
+            unsub();
+            window.removeEventListener('robotrix-sync-queue-updated', handleSyncQueueUpdate);
+        };
+    }, []);
 
 
     // All data for the currently loaded patient is in this state object.
     const [caseData, setCaseData] = useState<CaseData>(initialCaseData);
 
-    // Fetch patients list from server
+    // Fetch patients list from server (with offline cache fallback)
     useEffect(() => {
         if (token && role === 'DOCTOR') {
-            api.getPatients()
-                .then((data: any) => {
+            getPatients()
+                .then((data: Patient[]) => {
                     if (Array.isArray(data)) {
-                        const mapped = data.map((p: any) => {
-                            const nameParts = (p.name || '').trim().split(' ');
-                            const firstName = nameParts[0] || '';
-                            const lastName = nameParts.slice(1).join(' ') || '';
-                            return {
-                                id: String(p.id),
-                                pid: p.pid || `PID-${String(p.id).padStart(4, '0')}`,
-                                firstName,
-                                lastName,
-                                age: p.age ? String(p.age) : '',
-                                gender: p.gender || 'Male',
-                                date: p.createdAt ? p.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
-                            };
-                        });
-                        setPatients(mapped);
+                        setPatients(data);
                     }
                 })
                 .catch(err => {
-                    console.error('Failed to load patients from server', err);
+                    console.error('Failed to load patients', err);
                 });
         } else {
             setPatients([]);
@@ -237,64 +307,181 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [caseData, currentPlanId, currentPatientId, role, isLoading]);
 
     const deletePatient = useCallback(async (patientId: string) => {
-        try {
-            await api.deletePatient(patientId);
-            setPatients(currentPatients => {
-                return currentPatients.filter(p => p.id !== patientId);
-            });
-            // Clear current patient if we're deleting it
-            if (currentPatientId === patientId) {
-                _setCurrentPatientId(null);
-                setCurrentPlanId(null);
-                setCaseData(initialCaseData);
-                loadedPlanIdRef.current = null;
-            }
-        } catch (e) {
-            console.error('Failed to delete patient from server', e);
+        // Optimistically remove from local state & cache
+        setPatients(currentPatients => {
+            return currentPatients.filter(p => p.id !== patientId);
+        });
+        await removeCachedPatient(patientId);
+
+        // Clear current patient if we're deleting it
+        if (currentPatientId === patientId) {
+            _setCurrentPatientId(null);
+            setCurrentPlanId(null);
+            setCaseData(initialCaseData);
+            loadedPlanIdRef.current = null;
         }
+
+        if (getIsOnline() && !patientId.startsWith('offline-')) {
+            try {
+                await api.deletePatient(patientId);
+            } catch (e: any) {
+                if (isNetworkError(e)) {
+                    // Queue for later sync
+                    await addToSyncQueue({
+                        id: generateSyncId(),
+                        type: 'DELETE_PATIENT',
+                        payload: { patientId },
+                        createdAt: Date.now(),
+                        retryCount: 0,
+                        status: 'pending',
+                    });
+                    getPendingSyncCount().then(setPendingSyncCount);
+                } else {
+                    console.error('Failed to delete patient from server', e);
+                }
+            }
+        } else if (!patientId.startsWith('offline-')) {
+            // Offline: queue deletion
+            await addToSyncQueue({
+                id: generateSyncId(),
+                type: 'DELETE_PATIENT',
+                payload: { patientId },
+                createdAt: Date.now(),
+                retryCount: 0,
+                status: 'pending',
+            });
+            getPendingSyncCount().then(setPendingSyncCount);
+        }
+        // If it's an offline-only patient, no server call needed — just remove locally
     }, [currentPatientId]);
 
     const savePatient = useCallback(async (patientToSave: Patient) => {
         if (role !== 'DOCTOR') return;
 
-        try {
-            const fullName = `${patientToSave.firstName || ''} ${patientToSave.lastName || ''}`.trim();
-            const savedPatient = await api.createPatient({
-                name: fullName || 'Unknown',
-                age: patientToSave.age ? parseInt(patientToSave.age, 10) : null,
-                gender: patientToSave.gender
-            });
+        const fullName = `${patientToSave.firstName || ''} ${patientToSave.lastName || ''}`.trim();
+        const payload = {
+            name: fullName || 'Unknown',
+            age: patientToSave.age ? parseInt(patientToSave.age, 10) : null,
+            gender: patientToSave.gender
+        };
 
-            const nameParts = (savedPatient.name || '').trim().split(' ');
-            const firstName = nameParts[0] || '';
-            const lastName = nameParts.slice(1).join(' ') || '';
+        const isUpdate = !!patientToSave.id;
 
-            const mappedSavedPatient: Patient = {
-                id: String(savedPatient.id),
-                pid: savedPatient.pid || `PID-${String(savedPatient.id).padStart(4, '0')}`,
-                firstName,
-                lastName,
-                age: savedPatient.age ? String(savedPatient.age) : '',
-                gender: savedPatient.gender || 'Male',
-                date: savedPatient.createdAt ? savedPatient.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
-            };
-
-            // Update local state
-            setPatients(currentPatients => {
-                const index = currentPatients.findIndex(p => p.id === mappedSavedPatient.id);
-                const newPatientsList = [...currentPatients];
-                if (index === -1) {
-                    newPatientsList.push(mappedSavedPatient);
+        // Try online creation/update first
+        if (getIsOnline()) {
+            try {
+                let savedPatient;
+                if (isUpdate) {
+                    // Update existing patient
+                    savedPatient = await api.updatePatient(patientToSave.id, payload);
                 } else {
-                    newPatientsList[index] = mappedSavedPatient;
+                    // Create new patient
+                    savedPatient = await api.createPatient(payload);
+                }
+
+                const nameParts = (savedPatient.name || '').trim().split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+
+                const mappedSavedPatient: Patient = {
+                    id: String(savedPatient.id),
+                    pid: savedPatient.pid || `PID-${String(savedPatient.id).padStart(4, '0')}`,
+                    firstName,
+                    lastName,
+                    age: savedPatient.age ? String(savedPatient.age) : '',
+                    gender: savedPatient.gender || 'Male',
+                    date: savedPatient.createdAt ? savedPatient.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
+                };
+
+                // Update local state & cache
+                setPatients(currentPatients => {
+                    const index = currentPatients.findIndex(p => p.id === mappedSavedPatient.id);
+                    const newPatientsList = [...currentPatients];
+                    if (index === -1) {
+                        newPatientsList.push(mappedSavedPatient);
+                    } else {
+                        newPatientsList[index] = mappedSavedPatient;
+                    }
+                    return newPatientsList;
+                });
+                await addCachedPatient(mappedSavedPatient);
+                return mappedSavedPatient;
+            } catch (e: any) {
+                if (!isNetworkError(e)) {
+                    console.error('Failed to register patient on server', e);
+                    return undefined;
+                }
+                // Network error — fall through to offline creation
+            }
+        }
+
+        // Offline: update or create patient
+        let offlinePatient: Patient;
+        
+        if (isUpdate) {
+            offlinePatient = {
+                ...patientToSave,
+                date: patientToSave.date || new Date().toISOString().split('T')[0],
+            };
+            
+            // Update local state & cache
+            setPatients(currentPatients => {
+                const index = currentPatients.findIndex(p => p.id === offlinePatient.id);
+                const newPatientsList = [...currentPatients];
+                if (index !== -1) {
+                    newPatientsList[index] = offlinePatient;
+                } else {
+                    newPatientsList.push(offlinePatient);
                 }
                 return newPatientsList;
             });
-            return mappedSavedPatient;
-        } catch (e) {
-            console.error('Failed to register patient on server', e);
-            return undefined;
+            await addCachedPatient(offlinePatient);
+            
+            // Queue for sync
+            await addToSyncQueue({
+                id: generateSyncId(),
+                type: 'UPDATE_PATIENT',
+                payload: { id: offlinePatient.id, ...payload },
+                patientId: offlinePatient.id,
+                createdAt: Date.now(),
+                retryCount: 0,
+                status: 'pending',
+            });
+            console.warn(`[Offline] Patient updated locally with ID: ${offlinePatient.id}`);
+        } else {
+            // Offline: create patient with temp ID
+            const tempId = generateOfflineId();
+            offlinePatient = {
+                id: tempId,
+                pid: 'PID-????',
+                firstName: patientToSave.firstName || '',
+                lastName: patientToSave.lastName || '',
+                age: patientToSave.age || '',
+                gender: patientToSave.gender || 'Male',
+                date: new Date().toISOString().split('T')[0],
+            };
+
+            // Update local state & cache
+            setPatients(currentPatients => [...currentPatients, offlinePatient]);
+            await addCachedPatient(offlinePatient);
+
+            // Queue for sync
+            await addToSyncQueue({
+                id: generateSyncId(),
+                type: 'CREATE_PATIENT',
+                payload,
+                tempId,
+                createdAt: Date.now(),
+                retryCount: 0,
+                status: 'pending',
+            });
+            console.warn(`[Offline] Patient created locally with temp ID: ${tempId}`);
         }
+
+        // Update pending count
+        getPendingSyncCount().then(setPendingSyncCount);
+
+        return offlinePatient;
     }, [role]);
 
 
@@ -438,6 +625,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         hospitalName,
         login,
         logout,
+        isOffline,
+        syncStatus,
+        pendingSyncCount,
         ...caseData,
         setLegSide: handleSetLegSide,
         setPlannerMode: createSetter('plannerMode'),

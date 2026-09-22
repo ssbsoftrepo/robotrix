@@ -14,6 +14,20 @@ export const getApiBaseUrl = () => {
     return 'http://localhost:8081';
 };
 
+/**
+ * Check if an error is a network connectivity error (as opposed to a server error).
+ * Used by the offline cache layer to decide whether to fall back to cached data.
+ */
+export const isNetworkError = (e: any): boolean => {
+    if (e instanceof TypeError && (e.message === 'Failed to fetch' || e.message === 'NetworkError when attempting to fetch resource.' || e.message.includes('Network request failed'))) {
+        return true;
+    }
+    if (e && e._isNetworkError === true) {
+        return true;
+    }
+    return false;
+};
+
 export const getAuthToken = () => localStorage.getItem('robotrix_token');
 export const setAuthToken = (token: string) => localStorage.setItem('robotrix_token', token);
 export const removeAuthToken = () => {
@@ -36,10 +50,19 @@ async function request(path: string, options: RequestInit = {}) {
     }
 
     const baseUrl = getApiBaseUrl();
-    const response = await fetch(`${baseUrl}${path}`, {
-        ...options,
-        headers,
-    });
+
+    let response: Response;
+    try {
+        response = await fetch(`${baseUrl}${path}`, {
+            ...options,
+            headers,
+        });
+    } catch (e: any) {
+        // Tag network errors so the offline layer can identify them
+        const networkErr: any = new Error(e.message || 'Network request failed');
+        networkErr._isNetworkError = true;
+        throw networkErr;
+    }
 
     if (!response.ok) {
         const text = await response.text();
@@ -71,6 +94,7 @@ export const api = {
     getPatients: () => request('/api/patients'),
     getNextPid: () => request('/api/patients/next-pid'),
     createPatient: (body: any) => request('/api/patients', { method: 'POST', body: JSON.stringify(body) }),
+    updatePatient: (id: string | number, body: any) => request(`/api/patients/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     deletePatient: (id: string | number) => request(`/api/patients/${id}`, { method: 'DELETE' }),
     savePlan: (formData: FormData) => request('/api/plans', { method: 'POST', body: formData }),
     getPlanImage: (planId: number | string, imageType: string) => request(`/api/images/${planId}/${imageType}`),
