@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Landmarks, Point } from '../types';
+import { isDisplayableImage } from '../utils/storage';
 
 const landmarkInstructions = {
   jointLine: ["Mark the center of the medial M joint space.", "Mark the center of the lateral L joint space."],
@@ -1217,6 +1218,24 @@ const ValgusStressPlannerPage: React.FC = () => {
     setValgusCanvasDataUrl(canvas.toDataURL('image/png'));
   }, [valgusLandmarks, visibleLandmarkSets, legSide, setValgusCanvasDataUrl]);
 
+  // Auto-capture snapshot when landmarks or visibility changes, and on unmount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth > 0) {
+        captureFullResSnapshot();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [captureFullResSnapshot]);
+
+  useEffect(() => {
+    return () => {
+      if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth > 0) {
+        captureFullResSnapshot();
+      }
+    };
+  }, [captureFullResSnapshot]);
+
   return (
     <div className="relative flex flex-col h-full gap-4 overflow-y-auto md:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
       <div className="fixed top-[-30%] left-1/2 transform -translate-x-1/2 w-[80vw] h-[80vw] bg-cyan-900/5 rounded-full blur-[150px] pointer-events-none" />
@@ -1265,6 +1284,11 @@ const ValgusStressPlannerPage: React.FC = () => {
             >
               <p className="text-xl font-bold">Upload an X-ray to begin</p>
               <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
+            </div>
+          ) : !isDisplayableImage(valgusImageSrc) ? (
+            <div className="text-center p-10 border-2 border-dashed border-yellow-700/50 rounded-lg bg-yellow-900/10">
+              <p className="text-xl font-bold text-yellow-500">X-ray unavailable offline</p>
+              <p className="text-sm mt-2 text-yellow-600/70">Reconnect to the internet and reopen this plan to view</p>
             </div>
           ) : (
             <div className="relative w-full h-full flex items-center justify-center">
@@ -1325,6 +1349,11 @@ const ValgusStressPlannerPage: React.FC = () => {
 
                       // Trigger draw
                       requestAnimationFrame(draw);
+                      setTimeout(() => {
+                        if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth > 0) {
+                          captureFullResSnapshot();
+                        }
+                      }, 50);
                     }}
                   />
                 </div>

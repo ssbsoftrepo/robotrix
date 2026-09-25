@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { getFemurType } from '../types';
+import { isDisplayableImage } from '../utils/storage';
 
 // A more visually appealing component for selecting boundary options
 const BoundarySelector: React.FC<{
@@ -160,6 +161,7 @@ const ResultAnalysisPage: React.FC = () => {
     const {
         setPage,
         longLegCanvasDataUrl,
+        longLegImageSrc,
         longLegResults,
         femurBoundary, setFemurBoundary,
         tibiaBoundary, setTibiaBoundary,
@@ -168,6 +170,13 @@ const ResultAnalysisPage: React.FC = () => {
     } = useAppContext();
 
     const [showCpakModal, setShowCpakModal] = useState(false);
+
+    const displayPreOpImage = isDisplayableImage(longLegCanvasDataUrl)
+        ? longLegCanvasDataUrl
+        : isDisplayableImage(longLegImageSrc)
+            ? longLegImageSrc
+            : null;
+    const hasPreOpRef = !!(longLegCanvasDataUrl || longLegImageSrc);
 
     useEffect(() => {
         if (femurBoundary === null) setFemurBoundary('basic');
@@ -253,10 +262,16 @@ const ResultAnalysisPage: React.FC = () => {
                 {/* Column 1: Image */}
                 <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center min-h-[18.75rem] lg:min-h-0 bg-black text-center">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    {longLegCanvasDataUrl ?
-                        <img src={longLegCanvasDataUrl} alt="Long Leg Analysis" className="max-w-full max-h-full object-contain rounded-md relative z-10" /> :
+                    {displayPreOpImage ? (
+                        <img src={displayPreOpImage} alt="Long Leg Analysis" className="max-w-full max-h-full object-contain rounded-md relative z-10" />
+                    ) : hasPreOpRef ? (
+                        <div className="p-4 relative z-10">
+                            <p className="text-yellow-500 font-bold">X-ray unavailable offline</p>
+                            <p className="text-xs text-yellow-600/70 mt-1">Reconnect to the internet to view</p>
+                        </div>
+                    ) : (
                         <p className="text-gray-500 text-lg relative z-10">No analysis image.</p>
-                    }
+                    )}
                 </div>
 
                 {/* Column 2: Data & Matrix */}

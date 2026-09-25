@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { isDisplayableImage } from '../utils/storage';
 
 // Helper component for statically selected matrix options
 const BoundarySelector: React.FC<{
@@ -120,10 +121,18 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
     const {
         setPage,
         valgusCanvasDataUrl,
+        valgusImageSrc,
         valgusResults,
         valgusCoronalBalancingResults, setValgusCoronalBalancingResults,
         valgusFunctionalCutDegree, setValgusFunctionalCutDegree
     } = useAppContext();
+
+    const displayPreOpImage = isDisplayableImage(valgusCanvasDataUrl)
+        ? valgusCanvasDataUrl
+        : isDisplayableImage(valgusImageSrc)
+            ? valgusImageSrc
+            : null;
+    const hasPreOpRef = !!(valgusCanvasDataUrl || valgusImageSrc);
 
     const getAnticipatedTibiaCut = () => {
         const mpta = valgusResults.mpta;
@@ -212,10 +221,16 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                 {/* Column 1: Image (Reduced Width ~25%) */}
                 <div className="lg:col-span-3 relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex items-center justify-center min-h-[18.75rem] lg:min-h-0 bg-black text-center">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                    {valgusCanvasDataUrl ?
-                        <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="max-w-full max-h-full object-contain rounded-md relative z-10" /> :
+                    {displayPreOpImage ? (
+                        <img src={displayPreOpImage} alt="Valgus Analysis" className="max-w-full max-h-full object-contain rounded-md relative z-10" />
+                    ) : hasPreOpRef ? (
+                        <div className="p-4 relative z-10">
+                            <p className="text-yellow-500 font-bold">X-ray unavailable offline</p>
+                            <p className="text-xs text-yellow-600/70 mt-1">Reconnect to the internet to view</p>
+                        </div>
+                    ) : (
                         <p className="text-gray-500 text-lg relative z-10">No analysis image.</p>
-                    }
+                    )}
                 </div>
 
                 {/* Column 2: Data & Matrix (Medium Width ~33%) */}

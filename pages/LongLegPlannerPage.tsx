@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Landmarks, LegSide, Point, getFemurType } from '../types';
+import { isDisplayableImage } from '../utils/storage';
 
 
 const BASE_HANDLE_RADIUS = 6;
@@ -1279,6 +1280,24 @@ const LongLegPlannerPage: React.FC = () => {
         setLongLegCanvasDataUrl(canvas.toDataURL('image/png'));
     }, [longLegLandmarks, visibleLandmarkSets, legSide, ldfaMode, setLongLegCanvasDataUrl]);
 
+    // Auto-capture snapshot when landmarks or visibility changes, and upon unmount
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth > 0) {
+                captureFullResSnapshot();
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [captureFullResSnapshot]);
+
+    useEffect(() => {
+        return () => {
+            if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth > 0) {
+                captureFullResSnapshot();
+            }
+        };
+    }, [captureFullResSnapshot]);
+
     if (kneeType === 'valgus') {
         return (
             <div className="flex flex-col h-full items-center justify-center">
@@ -1324,6 +1343,11 @@ const LongLegPlannerPage: React.FC = () => {
                         <div className="text-center text-gray-400 cursor-pointer p-10 border-2 border-dashed border-gray-600 rounded-lg hover:bg-white/5 transition" onClick={() => document.getElementById('xray-upload')?.click()}>
                             <p className="text-xl font-bold">Upload an X-ray to begin</p>
                             <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
+                        </div>
+                    ) : !isDisplayableImage(longLegImageSrc) ? (
+                        <div className="text-center p-10 border-2 border-dashed border-yellow-700/50 rounded-lg bg-yellow-900/10">
+                            <p className="text-xl font-bold text-yellow-500">X-ray unavailable offline</p>
+                            <p className="text-sm mt-2 text-yellow-600/70">Reconnect to the internet and reopen this plan to view</p>
                         </div>
                     ) : (
                         <div className="relative w-full h-full flex items-center justify-center">
@@ -1406,6 +1430,11 @@ const LongLegPlannerPage: React.FC = () => {
 
                                             // Trigger draw
                                             requestAnimationFrame(draw);
+                                            setTimeout(() => {
+                                                if (imageRef.current && imageRef.current.complete && imageRef.current.naturalWidth > 0) {
+                                                    captureFullResSnapshot();
+                                                }
+                                            }, 50);
                                         }}
                                     />
                                 </div>

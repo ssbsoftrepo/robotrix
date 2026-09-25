@@ -251,6 +251,8 @@ const App: React.FC = () => {
                 isOpen={isLogoutModalOpen}
                 onClose={() => setIsLogoutModalOpen(false)}
                 onConfirm={handleConfirmLogout}
+                pendingSyncCount={pendingSyncCount}
+                isOffline={isOffline}
             />
         </>
     );

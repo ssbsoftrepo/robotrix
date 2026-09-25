@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import tibiaCutBg from '../assets/tibiacut.png';
 import { formatDate } from '../utils/date';
 import { printCurrentPage } from '../utils/printer';
+import { isDisplayableImage } from '../utils/storage';
 
 // Reusable Label-Value component with enhanced styling
 const ReportItem: React.FC<{ label: string; value: string | number | undefined | null; highlight?: boolean; large?: boolean }> = ({ label, value, highlight, large }) => (
@@ -31,6 +32,7 @@ const ValgusPreOpReportPage: React.FC = () => {
         patients,
         currentPatientId,
         valgusCanvasDataUrl,
+        valgusImageSrc,
         valgusResults,
         lateralLaxity,
         valgusCoronalBalancingResults,
@@ -40,6 +42,13 @@ const ValgusPreOpReportPage: React.FC = () => {
         legSide,
         implantThickness
     } = useAppContext();
+
+    const preOpXray = isDisplayableImage(valgusCanvasDataUrl)
+        ? valgusCanvasDataUrl
+        : isDisplayableImage(valgusImageSrc)
+            ? valgusImageSrc
+            : null;
+    const hasPreOpRef = !!(valgusCanvasDataUrl || valgusImageSrc);
 
     const patient = patients.find(p => p.id === currentPatientId);
 
@@ -191,9 +200,13 @@ const ValgusPreOpReportPage: React.FC = () => {
                 {/* X-Ray & Functional Planning Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
                     <ReportCard title="Annotated X-Ray Analysis" className="border-t-4 border-t-[#6D282C] h-full">
-                        {valgusCanvasDataUrl ? (
+                        {preOpXray ? (
                             <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[18.75rem] print-image-container">
-                                <img src={valgusCanvasDataUrl} alt="Valgus Analysis" className="w-full h-full object-contain" />
+                                <img src={preOpXray} alt="Valgus Analysis" className="w-full h-full object-contain" />
+                            </div>
+                        ) : hasPreOpRef ? (
+                            <div className="h-[18.75rem] flex items-center justify-center bg-black border-2 border-[#333333] rounded-lg p-2">
+                                <p className="text-yellow-500 text-xs font-medium">X-ray unavailable offline</p>
                             </div>
                         ) : (
                             <div className="h-[18.75rem] flex items-center justify-center bg-black border-2 border-[#333333] rounded-lg">

@@ -19,10 +19,18 @@ const probeServer = async (): Promise<boolean> => {
             method: 'GET',
             signal: controller.signal,
             cache: 'no-store',
+            headers: { 'Accept': 'application/json' }
         });
         clearTimeout(timeout);
-        // Any HTTP response (even 4xx) means the server is reachable
-        return true;
+        
+        if (!res.ok) {
+            // Server reached but returned error (e.g. 429 Too Many Requests), still means we have internet
+            return true;
+        }
+
+        // Verify it's actually our API and not a captive portal injecting HTML
+        const data = await res.json();
+        return data && typeof data === 'object' && 'available' in data;
     } catch {
         return false;
     }
@@ -73,6 +81,12 @@ export const initNetworkMonitor = () => {
     });
     window.addEventListener('offline', () => {
         setOnline(false);
+    });
+    window.addEventListener('robotrix-network-error', () => {
+        // A fetch request failed. If we think we're online, probe the server to verify if internet is actually dead.
+        if (_isOnline) {
+            probeServer().then(setOnline);
+        }
     });
 
     // Periodic probe every 30s when offline (to detect reconnection)

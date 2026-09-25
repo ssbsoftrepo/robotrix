@@ -198,6 +198,18 @@ export const updatePlanLegSide = async (patientId: string, planId: string, legSi
 const isBase64Image = (str: string) => typeof str === 'string' && str.startsWith('data:image');
 const isDbImageRef = (str: string) => typeof str === 'string' && str.startsWith('dbimage:');
 
+/**
+ * Returns true if the image string can be rendered in an <img> tag.
+ * Returns false for null, undefined, empty strings, and internal dbimage: references
+ * that haven't been resolved yet (e.g. when offline and image is not cached).
+ */
+export const isDisplayableImage = (src: string | null | undefined): boolean => {
+    if (!src) return false;
+    if (isDbImageRef(src)) return false;
+    return true;
+};
+
+
 const processForSave = async (data: any, files: { [key: string]: Blob }, path: string = ''): Promise<any> => {
     if (data === null || data === undefined) return data;
 
@@ -267,15 +279,17 @@ const processForLoad = async (data: any, planId: string): Promise<any> => {
                             const base64 = await blobToBase64(blob);
                             newData[key] = base64;
                         } else {
-                            newData[key] = null;
+                            // Preserve the dbimage: reference so auto-save doesn't destroy it
+                            newData[key] = value;
                         }
                     } catch (e: any) {
                         if (isNetworkError(e)) {
-                            console.warn(`[Offline] Image ${imageType} for plan ${planId} not cached, returning null`);
+                            console.warn(`[Offline] Image ${imageType} for plan ${planId} not cached, preserving reference`);
                         } else {
                             console.error(`Failed to load db image ${imageType} for plan ${planId}`, e);
                         }
-                        newData[key] = null;
+                        // Preserve the dbimage: reference so auto-save doesn't destroy it
+                        newData[key] = value;
                     }
                 } else if (typeof value === 'object') {
                     newData[key] = await processForLoad(value, planId);
@@ -301,22 +315,27 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
 
 export const saveCaseData = async (id: string, caseData: any, patientId: string) => {
     try {
+        const resolvedId = await resolveId(id);
+        const resolvedPatientId = await resolveId(patientId);
         const files: { [key: string]: Blob } = {};
         const optimizedData = await processForSave(caseData, files);
 
-        // Always save to local cache first (offline-first)
+        // Always save to local cache first (offline-first) under both IDs
         await cachePlanData(id, optimizedData);
+        if (resolvedId !== id) {
+            await cachePlanData(resolvedId, optimizedData);
+        }
 
-        // Cache extracted image blobs locally
+        // Cache extracted image blobs locally under both IDs
         for (const [key, blob] of Object.entries(files)) {
             await cachePlanImage(id, key, blob);
+            if (resolvedId !== id) {
+                await cachePlanImage(resolvedId, key, blob);
+            }
         }
 
         if (isOnline()) {
             try {
-                const resolvedId = await resolveId(id);
-                const resolvedPatientId = await resolveId(patientId);
-
                 // Construct FormData to send to the backend
                 const formData = new FormData();
                 formData.append('patientId', resolvedPatientId);
@@ -330,7 +349,7 @@ export const saveCaseData = async (id: string, caseData: any, patientId: string)
                 }
 
                 await api.savePlan(formData);
-                console.log(`Successfully saved case data and images to DB for plan ID ${id}`);
+                console.log(`Successfully saved case data and images to DB for plan ID ${resolvedId}`);
                 return; // Success — no need to queue
             } catch (e: any) {
                 if (!isNetworkError(e)) {
@@ -364,32 +383,34 @@ export const saveCaseData = async (id: string, caseData: any, patientId: string)
 };
 
 export const loadCaseData = async (id: string): Promise<any | null> => {
+    const resolvedId = await resolveId(id);
+
     // Try loading from server first when online
     if (isOnline()) {
         try {
-            const resolvedId = await resolveId(id);
             const caseData = await api.getPlanDetails(resolvedId);
             if (caseData) {
                 const processed = await processForLoad(caseData, resolvedId);
-                // Cache for offline use
-                await cachePlanData(id, caseData); // Cache the raw server data (with dbimage: refs)
+                // Cache for offline use under both IDs
+                await cachePlanData(id, caseData);
+                if (resolvedId !== id) {
+                    await cachePlanData(resolvedId, caseData);
+                }
                 return processed;
             }
-            return null;
         } catch (e: any) {
             if (!isNetworkError(e)) {
                 console.error(`Failed to load case data for plan ${id}`, e);
-                return null;
             }
-            // Network error — fall through to cache
+            // Fall through to cache
         }
     }
 
-    // Offline: load from cache
-    console.warn(`[Offline] Loading case data for plan ${id} from cache`);
-    const cachedData = await getCachedPlanData(id);
+    // Offline (or server request failed): load from cache
+    console.warn(`[Offline/Cache] Loading case data for plan ${id} (${resolvedId}) from cache`);
+    const cachedData = (await getCachedPlanData(resolvedId)) ?? (await getCachedPlanData(id));
     if (cachedData) {
-        return await processForLoad(cachedData, id);
+        return await processForLoad(cachedData, resolvedId || id);
     }
     return null;
 };

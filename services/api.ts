@@ -61,6 +61,10 @@ async function request(path: string, options: RequestInit = {}) {
         // Tag network errors so the offline layer can identify them
         const networkErr: any = new Error(e.message || 'Network request failed');
         networkErr._isNetworkError = true;
+        
+        // Notify network monitor that a request failed, in case we're in a dead Wi-Fi spot
+        window.dispatchEvent(new Event('robotrix-network-error'));
+        
         throw networkErr;
     }
 

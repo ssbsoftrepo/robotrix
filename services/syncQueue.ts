@@ -7,9 +7,10 @@ import {
     updateSyncQueueItem,
     addIdMapping,
     resolveId,
-    getIdMap,
     getCachedPlanData,
     getCachedPlanImage,
+    getCachedPlanMeta,
+    cachePlanMeta,
     addCachedPatient,
     renamePlanCache,
     type SyncQueueItem,
@@ -43,7 +44,7 @@ export const processSyncQueue = async (): Promise<void> => {
 
     _isSyncing = true;
     const queue = await getSyncQueue();
-    const pending = queue.filter(q => q.status === 'pending' || q.status === 'failed');
+    const pending = queue.filter(q => q.status === 'pending' || q.status === 'failed' || q.status === 'in_progress');
 
     if (pending.length === 0) {
         _isSyncing = false;
@@ -57,7 +58,7 @@ export const processSyncQueue = async (): Promise<void> => {
         if (!isOnline()) {
             // Lost connectivity mid-sync — stop and resume later
             _isSyncing = false;
-            const remaining = (await getSyncQueue()).filter(q => q.status === 'pending' || q.status === 'failed').length;
+            const remaining = (await getSyncQueue()).filter(q => q.status === 'pending' || q.status === 'failed' || q.status === 'in_progress').length;
             notify('idle', remaining);
             return;
         }
@@ -67,7 +68,7 @@ export const processSyncQueue = async (): Promise<void> => {
             await processItem(item);
             await removeFromSyncQueue(item.id);
 
-            const remaining = (await getSyncQueue()).filter(q => q.status === 'pending' || q.status === 'failed').length;
+            const remaining = (await getSyncQueue()).filter(q => q.status === 'pending' || q.status === 'failed' || q.status === 'in_progress').length;
             notify('syncing', remaining);
         } catch (e: any) {
             console.error(`[SyncQueue] Failed to process item ${item.id} (${item.type}):`, e);
@@ -85,7 +86,7 @@ export const processSyncQueue = async (): Promise<void> => {
 
     _isSyncing = false;
     const finalQueue = await getSyncQueue();
-    const finalPending = finalQueue.filter(q => q.status === 'pending' || q.status === 'failed').length;
+    const finalPending = finalQueue.filter(q => q.status === 'pending' || q.status === 'failed' || q.status === 'in_progress').length;
     notify(finalPending > 0 ? 'idle' : 'done', finalPending);
 };
 
@@ -142,6 +143,12 @@ const processCreatePatient = async (item: SyncQueueItem): Promise<void> => {
         date: savedPatient.createdAt ? savedPatient.createdAt.split('T')[0] : new Date().toISOString().split('T')[0],
     });
 
+    // Copy any plan metadata cached under temp patient ID to real patient ID
+    const tempPlans = await getCachedPlanMeta(tempId);
+    if (tempPlans && tempPlans.length > 0) {
+        await cachePlanMeta(realId, tempPlans.map(p => ({ ...p, patientId: realId })));
+    }
+
     // Also update any remaining queue items that reference this temp patient ID
     const queue = await getSyncQueue();
     let updated = false;
@@ -158,6 +165,7 @@ const processCreatePatient = async (item: SyncQueueItem): Promise<void> => {
         await setSyncQueue(queue);
     }
 
+    window.dispatchEvent(new CustomEvent('robotrix-id-mapped', { detail: { tempId, realId, type: 'patient' } }));
     console.log(`[SyncQueue] Patient synced: ${tempId} → ${realId}`);
 };
 
@@ -179,17 +187,45 @@ const processUpdatePatient = async (item: SyncQueueItem): Promise<void> => {
  * Sync a plan created offline → server, then store the real plan ID mapping.
  */
 const processCreatePlan = async (item: SyncQueueItem): Promise<void> => {
+    const tempPlanId = item.tempId!;
     const patientId = await resolveId(item.patientId || item.payload.patientId);
-    const { legSide, caseDataJson } = item.payload;
+    const legSide = item.payload.legSide || 'left';
+
+    // Prefer latest cachedData over initial empty caseDataJson
+    const cachedData = await getCachedPlanData(tempPlanId);
+    const caseDataToSend = cachedData ? JSON.stringify(cachedData) : (item.payload.caseDataJson || '{}');
 
     const formData = new FormData();
     formData.append('patientId', patientId);
     formData.append('legSide', legSide);
-    formData.append('caseDataJson', caseDataJson);
+    formData.append('caseDataJson', caseDataToSend);
+
+    // Attach any cached images if available
+    const allImageKeys = new Set<string>(item.payload.imageKeys || []);
+    if (cachedData) {
+        const extractKeys = (obj: any) => {
+            if (!obj || typeof obj !== 'object') return;
+            for (const k in obj) {
+                const v = obj[k];
+                if (typeof v === 'string' && v.startsWith('dbimage:')) {
+                    allImageKeys.add(v.replace('dbimage:', ''));
+                } else if (typeof v === 'object') {
+                    extractKeys(v);
+                }
+            }
+        };
+        extractKeys(cachedData);
+    }
+
+    for (const key of allImageKeys) {
+        const blob = await getCachedPlanImage(tempPlanId, key);
+        if (blob) {
+            formData.append(key, blob, `${key}.png`);
+        }
+    }
 
     const response = await api.savePlan(formData);
     const realPlanId = String(response);
-    const tempPlanId = item.tempId!;
 
     await addIdMapping(tempPlanId, realPlanId);
     await renamePlanCache(tempPlanId, realPlanId);
@@ -207,6 +243,7 @@ const processCreatePlan = async (item: SyncQueueItem): Promise<void> => {
         await setSyncQueue(queue);
     }
 
+    window.dispatchEvent(new CustomEvent('robotrix-id-mapped', { detail: { tempId: tempPlanId, realId: realPlanId, type: 'plan' } }));
     console.log(`[SyncQueue] Plan synced: ${tempPlanId} → ${realPlanId}`);
 };
 
@@ -224,15 +261,33 @@ const processSavePlan = async (item: SyncQueueItem): Promise<void> => {
     formData.append('patientId', patientId);
     formData.append('legSide', item.payload.legSide || 'left');
     formData.append('planId', planId);
-    formData.append('caseDataJson', item.payload.caseDataJson || JSON.stringify(cachedData));
 
-    // Attach any cached images that were part of this save
-    if (item.payload.imageKeys && Array.isArray(item.payload.imageKeys)) {
-        for (const key of item.payload.imageKeys) {
-            const blob = await getCachedPlanImage(item.payload.planId, key);
-            if (blob) {
-                formData.append(key, blob, `${key}.png`);
+    // Prefer the latest cachedData over the snapshot from when the save was queued
+    const caseDataToSend = cachedData ? JSON.stringify(cachedData) : (item.payload.caseDataJson || '{}');
+    formData.append('caseDataJson', caseDataToSend);
+
+    // Gather all image keys: from queue payload + from cachedData dbimage references
+    const allImageKeys = new Set<string>(item.payload.imageKeys || []);
+    if (cachedData) {
+        const extractKeys = (obj: any) => {
+            if (!obj || typeof obj !== 'object') return;
+            for (const k in obj) {
+                const v = obj[k];
+                if (typeof v === 'string' && v.startsWith('dbimage:')) {
+                    allImageKeys.add(v.replace('dbimage:', ''));
+                } else if (typeof v === 'object') {
+                    extractKeys(v);
+                }
             }
+        };
+        extractKeys(cachedData);
+    }
+
+    // Attach any cached images (checking both resolved planId and original temp planId)
+    for (const key of allImageKeys) {
+        const blob = await getCachedPlanImage(planId, key) ?? await getCachedPlanImage(item.payload.planId, key);
+        if (blob) {
+            formData.append(key, blob, `${key}.png`);
         }
     }
 

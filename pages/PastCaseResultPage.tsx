@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Landmarks, LongLegResults, Point, LegSide, getFemurType } from '../types';
+import { isDisplayableImage } from '../utils/storage';
 
 // --- Helper Functions ---
 const angleBetweenVectors = (v1: Point, v2: Point) => {
@@ -991,12 +992,22 @@ const PostOpPlanner: React.FC = () => {
                 <div className="relative w-full h-full min-h-[28.125rem] lg:min-h-0 lg:max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
                     {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
-                    {postOpLongLegImage && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                    {isDisplayableImage(postOpLongLegImage) && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                         <button onClick={zoomIn} className="bg-black/70 px-3 py-1 rounded"> ＋ </button>
                         <button onClick={zoomOut} className="bg-black/70 px-3 py-1 rounded"> － </button>
                         <button onClick={resetZoom} className="bg-black/70 px-2 py-1 rounded text-xs">Reset</button>
                     </div>}
-                    {postOpLongLegImage ? (
+                    {!postOpLongLegImage ? (
+                        <div className="text-center text-gray-400 cursor-pointer p-10 border-2 border-dashed border-gray-600 rounded-lg hover:bg-white/5 transition" onClick={() => document.getElementById('xray-upload')?.click()}>
+                            <p className="text-xl font-bold">Upload an X-ray to begin</p>
+                            <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
+                        </div>
+                    ) : !isDisplayableImage(postOpLongLegImage) ? (
+                        <div className="text-center p-10 border-2 border-dashed border-yellow-700/50 rounded-lg bg-yellow-900/10">
+                            <p className="text-xl font-bold text-yellow-500">X-ray unavailable offline</p>
+                            <p className="text-sm mt-2 text-yellow-600/70">Reconnect to the internet and reopen this plan to view</p>
+                        </div>
+                    ) : (
                         <>
                             <div ref={viewerRef} className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden"
                                 onMouseDown={(e) => {
@@ -1058,11 +1069,6 @@ const PostOpPlanner: React.FC = () => {
                                 <div className="absolute inset-0 rounded-full border-2 border-cyan-400/30 pointer-events-none" />
                             </div>
                         </>
-                    ) : (
-                        <div className="text-center text-gray-400 cursor-pointer p-10 border-2 border-dashed border-gray-600 rounded-lg hover:bg-white/5 transition" onClick={() => document.getElementById('xray-upload')?.click()}>
-                            <p className="text-xl font-bold">Upload an X-ray to begin</p>
-                            <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
-                        </div>
                     )}
                 </div>
 
@@ -1149,7 +1155,14 @@ const PostOpPlanner: React.FC = () => {
 }
 
 const PastCaseResultPage: React.FC = () => {
-    const { setPage, longLegCanvasDataUrl, longLegResults } = useAppContext();
+    const { setPage, longLegCanvasDataUrl, longLegImageSrc, longLegResults } = useAppContext();
+
+    const preOpXray = isDisplayableImage(longLegCanvasDataUrl)
+        ? longLegCanvasDataUrl
+        : isDisplayableImage(longLegImageSrc)
+            ? longLegImageSrc
+            : null;
+    const hasPreOpRef = !!(longLegCanvasDataUrl || longLegImageSrc);
 
     return (
         <div className="relative flex flex-col h-full overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -1166,11 +1179,16 @@ const PastCaseResultPage: React.FC = () => {
                 <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[25rem] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Pre-Op Analysis</h3>
-                    <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden">
-                        {longLegCanvasDataUrl ?
-                            <img src={longLegCanvasDataUrl} alt="Pre-op Analysis" className="absolute inset-0 m-auto max-w-full max-h-full object-contain" /> :
+                    <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden flex items-center justify-center">
+                        {preOpXray ? (
+                            <img src={preOpXray} alt="Pre-op Analysis" className="absolute inset-0 m-auto max-w-full max-h-full object-contain" />
+                        ) : hasPreOpRef ? (
+                            <div className="p-3 text-center">
+                                <p className="text-xs text-yellow-500 font-semibold">X-ray unavailable offline</p>
+                            </div>
+                        ) : (
                             <p className="text-sm text-gray-500 italic">No pre-op image available.</p>
-                        }
+                        )}
                     </div>
                     <div className="mt-auto grid grid-cols-2 gap-0.5 text-center relative z-10 shrink-0">
                         <div className="bg-[#252525] p-1 rounded-lg border border-[#6D282C]/50">

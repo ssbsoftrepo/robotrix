@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Landmarks, Point, ValgusResults, LegSide } from '../types';
+import { isDisplayableImage } from '../utils/storage';
 
 // --- Helper Functions ---
 const BASE_HANDLE_RADIUS = 6;
@@ -894,12 +895,22 @@ const PostOpValgusPlanner: React.FC = () => {
                 <div className="relative w-full h-full min-h-[28.125rem] lg:min-h-0 lg:max-h-full bg-black border border-[#333333] rounded-lg flex items-center justify-center overflow-hidden order-1 lg:order-none">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
                     {zoom > 1 && (<div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-yellow-500/90 text-black px-4 py-1 rounded-full font-bold shadow-lg">Drag to pan • Zoom: {(zoom * 100).toFixed(0)}%</div>)}
-                    {postOpValgusImage && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                    {isDisplayableImage(postOpValgusImage) && <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                         <button onClick={zoomIn} className="bg-black/70 px-3 py-1 rounded"> ＋ </button>
                         <button onClick={zoomOut} className="bg-black/70 px-3 py-1 rounded"> － </button>
                         <button onClick={resetZoom} className="bg-black/70 px-2 py-1 rounded text-xs">Reset</button>
                     </div>}
-                    {postOpValgusImage ? (<>
+                    {!postOpValgusImage ? (
+                        <div className="text-center text-gray-400 cursor-pointer p-10 border-2 border-dashed border-gray-600 rounded-lg hover:bg-white/5 transition" onClick={() => document.getElementById('xray-upload')?.click()}>
+                            <p className="text-xl font-bold">Upload an X-ray to begin</p>
+                            <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
+                        </div>
+                    ) : !isDisplayableImage(postOpValgusImage) ? (
+                        <div className="text-center p-10 border-2 border-dashed border-yellow-700/50 rounded-lg bg-yellow-900/10">
+                            <p className="text-xl font-bold text-yellow-500">X-ray unavailable offline</p>
+                            <p className="text-sm mt-2 text-yellow-600/70">Reconnect to the internet and reopen this plan to view</p>
+                        </div>
+                    ) : (<>
                         <div ref={viewerRef} className="relative w-full h-full max-h-full flex items-center justify-center overflow-hidden"
                             onMouseDown={(e) => {
                                 if (zoom > 1 && !draggingPointRef.current) {
@@ -959,10 +970,7 @@ const PostOpValgusPlanner: React.FC = () => {
                             <canvas ref={pipCanvasRef} width={176} height={176} className="rounded-full"></canvas>
                             <div className="absolute inset-0 rounded-full border-2 border-cyan-400/30 pointer-events-none" />
                         </div>
-                    </>) : <div className="text-center text-gray-400 cursor-pointer p-10 border-2 border-dashed border-gray-600 rounded-lg hover:bg-white/5 transition" onClick={() => document.getElementById('xray-upload')?.click()}>
-                        <p className="text-xl font-bold">Upload an X-ray to begin</p>
-                        <p className="text-sm mt-2 opacity-70">Tap here or use the controls on the right</p>
-                    </div>}
+                    </>)}
                 </div>
 
                 {/* Controls - Right side (25%) */}
@@ -1057,7 +1065,12 @@ const ResultItem: React.FC<{ label: string; value: string | number | null; large
 };
 
 const PastCaseValgusResultPage: React.FC = () => {
-    const { setPage, valgusCanvasDataUrl, valgusResults } = useAppContext();
+    const { setPage, valgusCanvasDataUrl, valgusImageSrc, valgusResults } = useAppContext();
+    const preOpXray = isDisplayableImage(valgusCanvasDataUrl)
+        ? valgusCanvasDataUrl
+        : isDisplayableImage(valgusImageSrc)
+            ? valgusImageSrc
+            : null;
 
     return (
         <div className="relative flex flex-col h-full overflow-y-auto lg:overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -1074,11 +1087,16 @@ const PastCaseValgusResultPage: React.FC = () => {
                 <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col min-h-[25rem] lg:min-h-0 lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     <h3 className="text-sm font-bold text-center text-[#E0E0E0] uppercase tracking-wider bg-[#252525] py-0.5 rounded relative z-10 shrink-0">Pre-Op Analysis</h3>
-                    <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden">
-                        {valgusCanvasDataUrl ?
-                            <img src={valgusCanvasDataUrl} alt="Pre-op Analysis" className="absolute inset-0 m-auto max-w-full max-h-full object-contain" /> :
+                    <div className="w-full flex-grow min-h-0 max-h-full bg-black rounded-lg border border-[#333333] relative z-10 my-0.5 overflow-hidden flex items-center justify-center">
+                        {preOpXray ? (
+                            <img src={preOpXray} alt="Pre-op Analysis" className="absolute inset-0 m-auto max-w-full max-h-full object-contain" />
+                        ) : (valgusCanvasDataUrl || valgusImageSrc) ? (
+                            <div className="p-3 text-center">
+                                <p className="text-xs text-yellow-500 font-semibold">X-ray unavailable offline</p>
+                            </div>
+                        ) : (
                             <p className="text-sm text-gray-500 italic">No pre-op image available.</p>
-                        }
+                        )}
                     </div>
                     <div className="mt-auto grid grid-cols-1 gap-0.5 text-center relative z-10 shrink-0">
                         <ResultItem label="Pre-Op CPAK" value={valgusResults.cpak ? `CPAK ${valgusResults.cpak}` : '--'} large={true} />

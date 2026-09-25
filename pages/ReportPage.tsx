@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { getFemurType } from '../types';
 import { printCurrentPage } from '../utils/printer';
 import { formatDate } from '../utils/date';
+import { isDisplayableImage } from '../utils/storage';
 
 // Reusable Label-Value component with enhanced styling
 const ReportItem: React.FC<{ label: string; value: string | number | undefined | null; highlight?: boolean }> = ({ label, value, highlight }) => (
@@ -57,6 +58,7 @@ const ReportPage: React.FC = () => {
         patients,
         currentPatientId,
         longLegCanvasDataUrl,
+        longLegImageSrc,
         longLegResults,
         simAfterImage,
         femurBoundary,
@@ -74,6 +76,13 @@ const ReportPage: React.FC = () => {
         femoralCutSim,
         tibialCutSim
     } = useAppContext();
+
+    const preOpXray = isDisplayableImage(longLegCanvasDataUrl)
+        ? longLegCanvasDataUrl
+        : isDisplayableImage(longLegImageSrc)
+            ? longLegImageSrc
+            : null;
+    const hasPreOpRef = !!(longLegCanvasDataUrl || longLegImageSrc);
 
     // Logic: Post-Op Simulation (Re-calculated for report)
     const nativeLDFA = longLegResults.ldfa ?? 87;
@@ -250,15 +259,17 @@ const ReportPage: React.FC = () => {
                 <div className="print-break-before w-full h-0"></div>
 
                 {/* Simulation Section - Full Width */}
-                {(simAfterImage || longLegCanvasDataUrl) && (
+                {(simAfterImage || hasPreOpRef) && (
                     <ReportCard title="Surgical Simulation" className="border-t-4 border-t-[#6D282C]">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print-grid-2">
                             {/* Pre-Op Image */}
                             <div className="flex flex-col">
                                 <div className="bg-black border-2 border-[#333333] rounded-lg overflow-hidden flex items-center justify-center p-2 relative h-[18.75rem] print-image-container">
                                     <span className="absolute top-2 left-2 bg-black/70 text-white px-2 py-0.5 rounded text-xs font-bold border border-[#333333] z-10 print-badge">PRE-OP</span>
-                                    {longLegCanvasDataUrl ? (
-                                        <img src={longLegCanvasDataUrl} className="w-full h-full object-contain" alt="Pre-Op Xray" />
+                                    {preOpXray ? (
+                                        <img src={preOpXray} className="w-full h-full object-contain" alt="Pre-Op Xray" />
+                                    ) : hasPreOpRef ? (
+                                        <p className="text-yellow-500 text-xs text-center p-2 font-medium">X-ray unavailable offline</p>
                                     ) : <p className="text-gray-500 text-sm">No Image</p>}
                                 </div>
                             </div>
@@ -270,8 +281,10 @@ const ReportPage: React.FC = () => {
                                     
                                     {/* Simulation Image */}
                                     <div className="flex-1 h-full flex items-center justify-center min-w-0">
-                                        {simAfterImage ? (
+                                        {isDisplayableImage(simAfterImage) ? (
                                             <img src={simAfterImage} className="max-w-full h-full object-contain" alt="Post-Op Simulation" />
+                                        ) : simAfterImage ? (
+                                            <p className="text-yellow-500 text-xs text-center p-2 font-medium">Simulation unavailable offline</p>
                                         ) : <p className="text-gray-500 text-sm">No Simulation</p>}
                                     </div>
 

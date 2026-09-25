@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { useAppContext } from '../context/AppContext';
 import { Landmarks, Point } from '../types';
 import { CpakSimulationGraph } from '../components/CpakSimulationGraph';
+import { isDisplayableImage } from '../utils/storage';
 
 // --- Helper Functions ---
 const angleBetweenVectors = (v1: Point, v2: Point) => {
@@ -20,7 +21,7 @@ const HKAView: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
-        if (!longLegImageSrc || !canvasRef.current || !longLegCanvasDataUrl) return;
+        if (!isDisplayableImage(longLegImageSrc) || !canvasRef.current || !isDisplayableImage(longLegCanvasDataUrl)) return;
 
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -78,6 +79,13 @@ const HKAView: React.FC = () => {
     }, [longLegImageSrc, longLegLandmarks, longLegCanvasDataUrl]);
 
     if (!longLegImageSrc) return null;
+    if (!isDisplayableImage(longLegImageSrc)) {
+        return (
+            <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col items-center justify-center h-full min-h-0 overflow-hidden text-center">
+                <p className="text-yellow-500 font-bold text-sm">X-ray unavailable offline</p>
+            </div>
+        );
+    }
 
     return (
         <div className="relative bg-[#1a1a1a] border border-[#333333] p-2 rounded-lg flex flex-col items-center h-full min-h-0 overflow-hidden">
@@ -293,7 +301,7 @@ const SimulationPage: React.FC = () => {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas || !longLegImageSrc) { setIsLoaded(false); return; }
+        if (!canvas || !isDisplayableImage(longLegImageSrc)) { setIsLoaded(false); return; }
 
         const mainImage = new Image();
         mainImage.crossOrigin = "anonymous";
@@ -530,7 +538,13 @@ const SimulationPage: React.FC = () => {
                 <div className="md:col-span-2 lg:col-span-2 relative bg-[#1a1a1a] border border-[#333333] p-1 rounded-lg flex items-center justify-center bg-black min-h-[28.125rem] md:min-h-0 lg:min-h-0 md:max-h-full lg:max-h-full overflow-visible lg:overflow-hidden">
                     <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
                     {!isLoaded && !longLegImageSrc && <p className="text-gray-500 p-4 text-center relative z-10">Load a Long Leg X-ray in the planner to begin simulation.</p>}
-                    {!isLoaded && longLegImageSrc && <p className="text-gray-400 relative z-10">Loading Simulation...</p>}
+                    {!isLoaded && longLegImageSrc && !isDisplayableImage(longLegImageSrc) && (
+                        <div className="text-center p-8 border-2 border-dashed border-yellow-700/50 rounded-lg bg-yellow-900/10 relative z-10">
+                            <p className="text-xl font-bold text-yellow-500">X-ray unavailable offline</p>
+                            <p className="text-sm mt-2 text-yellow-600/70">Reconnect to the internet to run surgical simulation</p>
+                        </div>
+                    )}
+                    {!isLoaded && isDisplayableImage(longLegImageSrc) && <p className="text-gray-400 relative z-10">Loading Simulation...</p>}
                     <canvas
                         ref={canvasRef}
                         className={`transition-opacity duration-300 relative z-10 ${!isLoaded ? 'opacity-0' : 'opacity-100'}`}

@@ -68,7 +68,26 @@ export const cachePlanMeta = async (patientId: string, plans: PlanMetadata[]): P
 };
 
 export const getCachedPlanMeta = async (patientId: string): Promise<PlanMetadata[]> => {
-    return (await get<PlanMetadata[]>(userKey(planMetaKey(patientId)), offlineStore)) ?? [];
+    let plans = await get<PlanMetadata[]>(userKey(planMetaKey(patientId)), offlineStore);
+    if (plans && plans.length > 0) return plans;
+
+    // Check if patientId resolves to a real ID
+    const resolved = await resolveId(patientId);
+    if (resolved !== patientId) {
+        plans = await get<PlanMetadata[]>(userKey(planMetaKey(resolved)), offlineStore);
+        if (plans && plans.length > 0) return plans;
+    }
+
+    // Reverse check: patientId is a real ID, look for temp ID
+    const map = await getIdMap();
+    for (const [tempId, realId] of Object.entries(map)) {
+        if (realId === patientId) {
+            plans = await get<PlanMetadata[]>(userKey(planMetaKey(tempId)), offlineStore);
+            if (plans && plans.length > 0) return plans;
+        }
+    }
+
+    return [];
 };
 
 export const addCachedPlanMeta = async (patientId: string, plan: PlanMetadata): Promise<void> => {
@@ -80,6 +99,12 @@ export const addCachedPlanMeta = async (patientId: string, plan: PlanMetadata): 
         existing.push(plan);
     }
     await cachePlanMeta(patientId, existing);
+
+    // If patientId resolves to another ID, keep both in sync
+    const resolved = await resolveId(patientId);
+    if (resolved !== patientId) {
+        await cachePlanMeta(resolved, existing);
+    }
 };
 
 // ─── Plan Case Data (full JSON) ──────────────────────────────────────
@@ -89,7 +114,27 @@ export const cachePlanData = async (planId: string, data: any): Promise<void> =>
 };
 
 export const getCachedPlanData = async (planId: string): Promise<any | null> => {
-    return (await get(userKey(planDataKey(planId)), offlineStore)) ?? null;
+    // 1. Direct lookup
+    let data = await get(userKey(planDataKey(planId)), offlineStore);
+    if (data) return data;
+
+    // 2. Check if planId is a temp ID that resolves to a real ID
+    const resolved = await resolveId(planId);
+    if (resolved !== planId) {
+        data = await get(userKey(planDataKey(resolved)), offlineStore);
+        if (data) return data;
+    }
+
+    // 3. Reverse check: planId is a real ID, look for temp ID
+    const map = await getIdMap();
+    for (const [tempId, realId] of Object.entries(map)) {
+        if (realId === planId) {
+            data = await get(userKey(planDataKey(tempId)), offlineStore);
+            if (data) return data;
+        }
+    }
+
+    return null;
 };
 
 // ─── Plan Images (Blobs) ─────────────────────────────────────────────
@@ -99,18 +144,38 @@ export const cachePlanImage = async (planId: string, imageType: string, blob: Bl
 };
 
 export const getCachedPlanImage = async (planId: string, imageType: string): Promise<Blob | null> => {
-    return (await get<Blob>(userKey(planImageKey(planId, imageType)), offlineStore)) ?? null;
+    // 1. Direct lookup
+    let blob = await get<Blob>(userKey(planImageKey(planId, imageType)), offlineStore);
+    if (blob) return blob;
+
+    // 2. Resolved ID lookup
+    const resolved = await resolveId(planId);
+    if (resolved !== planId) {
+        blob = await get<Blob>(userKey(planImageKey(resolved, imageType)), offlineStore);
+        if (blob) return blob;
+    }
+
+    // 3. Reverse check: planId is a real ID, look for temp ID
+    const map = await getIdMap();
+    for (const [tempId, realId] of Object.entries(map)) {
+        if (realId === planId) {
+            blob = await get<Blob>(userKey(planImageKey(tempId, imageType)), offlineStore);
+            if (blob) return blob;
+        }
+    }
+
+    return null;
 };
 
 export const renamePlanCache = async (oldPlanId: string, newPlanId: string): Promise<void> => {
-    // Rename plan data
+    // Copy plan data to new ID
     const data = await getCachedPlanData(oldPlanId);
     if (data) {
         await cachePlanData(newPlanId, data);
-        await del(userKey(planDataKey(oldPlanId)), offlineStore);
+        // Keep oldPlanId key intact as alias so in-memory React state can still read it
     }
     
-    // Rename all plan images
+    // Copy all plan images to new ID
     const allKeys = await keys(offlineStore);
     const prefix = userKey(`plan_image:${oldPlanId}:`);
     for (const key of allKeys) {
@@ -121,7 +186,7 @@ export const renamePlanCache = async (oldPlanId: string, newPlanId: string): Pro
             if (blob) {
                 await cachePlanImage(newPlanId, imageType, blob);
             }
-            await del(key, offlineStore);
+            // Keep old key intact as alias
         }
     }
 };
@@ -226,7 +291,7 @@ export const resolveId = async (id: string): Promise<string> => {
 
 export const getPendingSyncCount = async (): Promise<number> => {
     const queue = await getSyncQueue();
-    return queue.filter(q => q.status !== 'failed').length;
+    return queue.filter(q => q.status === 'pending' || q.status === 'failed' || q.status === 'in_progress').length;
 };
 
 /**

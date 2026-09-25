@@ -6,6 +6,7 @@ import { initNetworkMonitor, isOnline as getIsOnline, onStatusChange } from '../
 import { processSyncQueue, onSyncStatus } from '../services/syncQueue';
 import { getPendingSyncCount, getCachedPatients, cachePatients, addCachedPatient, removeCachedPatient, addToSyncQueue, setOfflineUser, clearUserCache } from '../services/offlineDb';
 import { generateSyncId, generateOfflineId } from '../services/syncQueue';
+import { prefetchAllCases, abortPrefetch } from '../services/prefetchService';
 
 
 // Combine all context values into a single interface
@@ -170,29 +171,39 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
 
     const logout = useCallback(async () => {
-        const pendingCount = await getPendingSyncCount();
-        
-        if (pendingCount > 0) {
-            if (!getIsOnline()) {
-                alert(`You have ${pendingCount} unsynced changes.\n\nPlease connect to the internet to sync your data before logging out, otherwise your offline changes will be trapped on this device.`);
-                return; // Block logout
-            }
-
-            // Try to sync before logging out
+        // Force an immediate save of current case data if loaded (flushes the 1.5s auto-save debounce)
+        if (currentPlanIdRef.current && currentPatientIdRef.current && loadedPlanIdRef.current === currentPlanIdRef.current) {
             try {
-                await processSyncQueue();
-                // Check if it actually cleared
-                const newCount = await getPendingSyncCount();
-                if (newCount > 0) {
-                    alert(`Failed to sync ${newCount} changes to the server.\n\nPlease ensure your connection is stable before logging out.`);
-                    return; // Block logout
-                }
+                const planName = caseDataRef.current.legSide === 'left' ? 'Left Leg' : 'Right Leg';
+                const caseDataWithMeta = { ...caseDataRef.current, planName };
+                await saveCaseData(currentPlanIdRef.current, caseDataWithMeta, currentPatientIdRef.current);
             } catch (err) {
-                alert('An error occurred while syncing your data. Please try again before logging out.');
-                return;
+                console.error('[Logout] Force save failed:', err);
             }
         }
 
+        // If online and there are pending changes, try to sync first (best-effort)
+        if (getIsOnline()) {
+            const pendingCount = await getPendingSyncCount();
+            if (pendingCount > 0) {
+                try {
+                    // Try to sync, but give up after 5 seconds to prevent hanging logout indefinitely
+                    // on connections that are physically alive (Wi-Fi) but logically dead (no internet).
+                    await Promise.race([
+                        processSyncQueue(),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Logout sync timeout')), 5000))
+                    ]);
+                } catch (err) {
+                    console.warn('[Logout] Sync attempt failed or timed out, proceeding with logout:', err);
+                }
+            }
+        }
+
+        // Abort any in-progress background prefetch
+        abortPrefetch();
+
+        // Always allow logout — data is safely stored per-user in IndexedDB
+        // and will sync automatically on next login with connectivity
         localStorage.removeItem('robotrix_token');
         localStorage.removeItem('robotrix_role');
         localStorage.removeItem('robotrix_username');
@@ -230,6 +241,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             if (online) {
                 // Trigger sync queue processing when we come back online
                 processSyncQueue();
+                // Also prefetch all cases in the background when connectivity returns
+                prefetchAllCases().catch(e => console.warn('[Prefetch on reconnect]', e));
             }
         });
 
@@ -238,8 +251,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             setSyncStatus(status);
             setPendingSyncCount(count);
             if (status === 'done') {
-                // After successful sync, refresh patients from server
-                getPatients().then(p => setPatients(p)).catch(() => {});
+                // After successful sync, refresh patients from server and prefetch
+                getPatients().then(p => {
+                    setPatients(p);
+                    // Prefetch all plan data + images for offline access
+                    prefetchAllCases(p).catch(e => console.warn('[Prefetch after sync]', e));
+                }).catch(() => {});
             }
             if (status === 'error' && message) {
                 console.error('[Sync Error]', message);
@@ -264,18 +281,52 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // All data for the currently loaded patient is in this state object.
     const [caseData, setCaseData] = useState<CaseData>(initialCaseData);
 
+    // Refs to track latest state for logout (which has an empty dependency array)
+    const caseDataRef = useRef<CaseData>(caseData);
+    const currentPlanIdRef = useRef<string | null>(currentPlanId);
+    const currentPatientIdRef = useRef<string | null>(currentPatientId);
+
+    useEffect(() => {
+        caseDataRef.current = caseData;
+        currentPlanIdRef.current = currentPlanId;
+        currentPatientIdRef.current = currentPatientId;
+    }, [caseData, currentPlanId, currentPatientId]);
+
     // Fetch patients list from server (with offline cache fallback)
+    // Also triggers background prefetch of all cases + images on login
     useEffect(() => {
         if (token && role === 'DOCTOR') {
-            getPatients()
-                .then((data: Patient[]) => {
+            // 1. Immediately show cached patients so UI doesn't look empty (or missing offline changes)
+            getCachedPatients().then(cached => {
+                if (cached && cached.length > 0) setPatients(cached);
+            });
+
+            const initData = async () => {
+                // 2. Wait for any pending offline changes to sync BEFORE fetching from server.
+                // This prevents the server fetch from overwriting the local cache with old data!
+                if (getIsOnline()) {
+                    try {
+                        await processSyncQueue();
+                    } catch (e) {
+                        console.warn('[Login sync]', e);
+                    }
+                }
+
+                // 3. NOW fetch fresh data from server (which now includes the newly synced changes)
+                try {
+                    const data = await getPatients();
                     if (Array.isArray(data)) {
                         setPatients(data);
+                        if (getIsOnline()) {
+                            prefetchAllCases(data).catch(e => console.warn('[Prefetch on login]', e));
+                        }
                     }
-                })
-                .catch(err => {
+                } catch (err) {
                     console.error('Failed to load patients', err);
-                });
+                }
+            };
+
+            initData();
         } else {
             setPatients([]);
         }
@@ -503,6 +554,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     };
 
+    // Listen for offline temporary ID resolutions from background sync
+    useEffect(() => {
+        const handleIdMapped = (e: any) => {
+            const { tempId, realId, type } = e.detail || {};
+            if (type === 'patient' && currentPatientId === tempId) {
+                _setCurrentPatientId(realId);
+            } else if (type === 'plan' && currentPlanId === tempId) {
+                setCurrentPlanId(realId);
+                if (loadedPlanIdRef.current === tempId) {
+                    loadedPlanIdRef.current = realId;
+                }
+            }
+        };
+
+        window.addEventListener('robotrix-id-mapped', handleIdMapped);
+        return () => window.removeEventListener('robotrix-id-mapped', handleIdMapped);
+    }, [currentPatientId, currentPlanId]);
+
     // New helper to load a specific plan
     const loadPlan = async (planId: string) => {
         setCurrentPlanId(planId);
@@ -511,44 +580,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             const storedData = await loadCaseData(planId);
             if (storedData) {
                 setCaseData({ ...initialCaseData, ...storedData });
+                loadedPlanIdRef.current = planId;
             } else {
-                // Should not happen for existing plans, but for new ones
-                setCaseData(initialCaseData);
+                console.warn(`[AppContext] loadPlan: Plan ${planId} returned no data; suppressing auto-save to prevent data loss`);
+                loadedPlanIdRef.current = null;
             }
-            loadedPlanIdRef.current = planId;
         } catch (error) {
             console.error("Error loading plan data", error);
-            setCaseData(initialCaseData);
+            loadedPlanIdRef.current = null;
         } finally {
             setIsLoading(false);
         }
     };
-
-    // We need to expose loadPlan functionality.
-    // Ideally we'd modify setCurrentPatientId to NOT return a promise of loaded data, but it was void/async.
-    // We can add loadPlan to the context.
-
-    /*
-     * Note: effectively `setCurrentPatientId` now just selects the patient context.
-     * The actual loading happens when `setCurrentPlanId` (which we need to expose) or a dedicated `loadPlan` is called.
-     * Since `setCurrentPlanId` is just state setter, we should add a `loadPlan` wrapper in the context value?
-     * Or just expose `setCurrentPlanId` and a SIDE EFFECT to load data?
-     * Side effect is better for consistency.
-     */
-
-    // Let's add an effect for currentPlanId changes to load data?
-    // BUT we already have an effect that SAVES data on change.
-    // If we change ID, we don't want to save old data to new ID.
-    // The save effect has [caseData, currentPlanId] dependency.
-    // If we change currentPlanId, the effect fires.
-    // We must ensure we LOAD data before the SAVE effect overwrites it with current state.
-    // This is a classic race condition in React contexts.
-
-    // Better approach: `loadPlan` function that updates state AND loads data, similar to how setCurrentPatientId used to work.
-    // And we keep `currentPlanId` state.
-
-    // Wait, the previous implementation of `setCurrentPatientId` (lines 257+) did exactly this: set ID, then load.
-    // So if we make `setCurrentPlanId` do the loading, we are good.
 
     const setPlanAndLoad = async (planId: string | null, overridePatient?: Patient, initialLegSide?: LegSide) => {
         setCurrentPlanId(planId);
@@ -557,28 +600,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             try {
                 const storedData = await loadCaseData(planId);
 
-                // Determine base data (stored or fresh)
-                let nextCaseData = storedData ? { ...initialCaseData, ...storedData } : initialCaseData;
-
-                // CRITICAL: Leg Side is now PLAN specific.
-                // If we are creating a new plan (passed initialLegSide), set it.
-                // Otherwise use the stored one (from nextCaseData).
-
-                if (initialLegSide) {
-                    nextCaseData = {
-                        ...nextCaseData,
-                        legSide: initialLegSide
-                    };
+                if (storedData) {
+                    let nextCaseData = { ...initialCaseData, ...storedData };
+                    if (initialLegSide) {
+                        nextCaseData.legSide = initialLegSide;
+                    }
+                    setCaseData(nextCaseData);
+                    loadedPlanIdRef.current = planId; // Plan loaded successfully, safe to auto-save updates
+                } else if (initialLegSide) {
+                    // Brand new plan explicitly created with initialLegSide
+                    const freshData = { ...initialCaseData, legSide: initialLegSide };
+                    setCaseData(freshData);
+                    loadedPlanIdRef.current = planId;
+                } else {
+                    // Existing plan returned null (e.g. offline/network issue) — do NOT mark as loaded so auto-save won't overwrite with empty data!
+                    console.warn(`[AppContext] Plan ${planId} returned no data; suppressing auto-save to prevent data loss`);
+                    loadedPlanIdRef.current = null;
                 }
-
-                // REMOVED: Logic that forced patient.legSide overwrite
-
-                setCaseData(nextCaseData);
-                loadedPlanIdRef.current = planId; // Set the ref to the loaded plan ID
-
             } catch (e) {
                 console.error("Error loading plan", e);
-                setCaseData(initialCaseData); // Should we also enforce leg side here? Ideally yes, but error case.
+                loadedPlanIdRef.current = null; // Do NOT allow auto-save to wipe out the plan
             } finally {
                 setIsLoading(false);
             }
