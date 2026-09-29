@@ -21,7 +21,7 @@ const BoundarySelector: React.FC<{
 );
 
 import { CpakDiagram } from '../src/components/CpakDiagram';
-import cpakImage from '../assets/CPAK.png';
+import cpakImage from '../assets/CPAK_new.png';
 
 
 
@@ -362,7 +362,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
 
                     {/* Proceed Button */}
                     <button
-                        onClick={() => setPage('valgus-pre-op-report')}
+                        onClick={() => setPage('valgus-intra-operative-validation')}
                         disabled={!valgusResults.cpak || valgusResults.cpak === '--'}
                         className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 
                                    shadow-[0_4px_20px_rgba(109,40,44,0.4)] 
@@ -372,7 +372,7 @@ const ValgusStressAnalysisResultsPage: React.FC = () => {
                     >
                         <div className="absolute inset-0 bg-noise opacity-[0.1] pointer-events-none" />
                         <span className="relative flex items-center gap-2 text-sm font-bold text-white tracking-wider">
-                            PRE-OP REPORT
+                            INTRA OP
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                             </svg>

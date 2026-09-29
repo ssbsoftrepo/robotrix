@@ -1363,21 +1363,6 @@ const LongLegPlannerPage: React.FC = () => {
                                             MPTA: {longLegResults.mpta.toFixed(1)}°
                                         </div>
                                     )}
-                                    {longLegResults.mhka != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            mHKA: {longLegResults.mhka.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {longLegResults.ahka != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            aHKA: {longLegResults.ahka.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {longLegResults.ama != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            AMA: {longLegResults.ama.toFixed(1)}°
-                                        </div>
-                                    )}
                                 </div>
                             )}
                             <div ref={viewerRef} className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center bg-black">
