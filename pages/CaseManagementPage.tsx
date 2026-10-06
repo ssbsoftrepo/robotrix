@@ -964,6 +964,34 @@ const CaseManagementPage: React.FC = () => {
                                     </button>
                                 ))}
                             </div>
+
+                            {/* Target gap description and boxes */}
+                            <div className="flex items-center justify-between gap-3 mt-5 relative z-10">
+                                {/* Target Lateral Gap - Left */}
+                                <div className="flex flex-col items-center flex-1">
+                                    <span className="text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Target Lateral Gap</span>
+                                    <div className="w-full h-20 rounded-lg border border-[#6D282C]/60 bg-[#6D282C]/15 flex flex-col items-center justify-center">
+                                        <span className="text-3xl font-bold text-gray-200">{tempThickness || '--'}</span>
+                                        {tempThickness && <span className="text-sm text-[#6D282C]">mm</span>}
+                                    </div>
+                                </div>
+
+                                {/* Center Text */}
+                                <div className="flex-1 text-center px-2 flex items-center justify-center">
+                                    <p className="text-base font-medium text-gray-300 leading-relaxed">
+                                        This will be your target gap for balancing the knee in Extension
+                                    </p>
+                                </div>
+
+                                {/* Target Medial Gap - Right */}
+                                <div className="flex flex-col items-center flex-1">
+                                    <span className="text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Target Medial Gap</span>
+                                    <div className="w-full h-20 rounded-lg border border-[#6D282C]/60 bg-[#6D282C]/15 flex flex-col items-center justify-center">
+                                        <span className="text-3xl font-bold text-gray-200">{tempThickness || '--'}</span>
+                                        {tempThickness && <span className="text-sm text-[#6D282C]">mm</span>}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
 

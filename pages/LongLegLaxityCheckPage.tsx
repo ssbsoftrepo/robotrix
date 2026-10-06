@@ -136,7 +136,11 @@ const LongLegLaxityCheckPage: React.FC = () => {
     const handleConfirmSelection = () => {
         if (!userSelection) return;
         setLateralLaxity(userSelection);
-        setPage('intra-operative-coronal-balancing');
+        if (previousPage) {
+            setPage(previousPage);
+        } else {
+            setPage('intra-operative-coronal-balancing');
+        }
     };
 
     const handleSkip = () => {
@@ -148,7 +152,11 @@ const LongLegLaxityCheckPage: React.FC = () => {
     };
 
     const goBack = () => {
-        setPage('intra-operative-coronal-balancing');
+        if (previousPage) {
+            setPage(previousPage);
+        } else {
+            setPage('intra-operative-coronal-balancing');
+        }
     };
 
     const laxityLevels = [

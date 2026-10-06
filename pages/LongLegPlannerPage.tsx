@@ -78,7 +78,7 @@ const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point, isLdfa: 
     // Ensure we are taking the angle that corresponds to the correct side.
     // To do this robustly, we can calculate the 4 angles around the intersection,
     // and pick the one that is inside the bone and on the correct side.
-    
+
     // Actually, we can just use the absolute angle between the axis and the lateral/medial vector.
     // For LDFA, we want the angle on the lateral side.
     // The vector from the joint center to the lateral point is what we need.
@@ -86,25 +86,25 @@ const calculateLineAngle = (p1: Point, p2: Point, p3: Point, p4: Point, isLdfa: 
     // Vector to lateral is `p4 - center` = `(p4 - p3)/2`. So jointVec points towards Lateral.
     // For MPTA, we want the angle on the medial side.
     // Vector to medial is `p3 - center` = `(p3 - p4)/2` = `-jointVec`.
-    
+
     // The axis points towards the joint (e.g. hip->knee or ankle->knee).
     // To get the angle INSIDE the bone, we need the axis vector pointing AWAY from the joint.
     // So we flip axisVec.
     const axisAway = { x: -axisVec.x, y: -axisVec.y };
-    
+
     // The side vector points from center to the side of interest.
     const sideVec = isLdfa ? jointVec : { x: -jointVec.x, y: -jointVec.y };
-    
+
     // Now just compute the angle between axisAway and sideVec!
     // Since sideVec might be pointing left or right depending on legSide, but it always points towards the correct anatomical side because p3=Medial, p4=Lateral.
     const dot = axisAway.x * sideVec.x + axisAway.y * sideVec.y;
     const mag1 = Math.sqrt(axisAway.x * axisAway.x + axisAway.y * axisAway.y);
     const mag2 = Math.sqrt(sideVec.x * sideVec.x + sideVec.y * sideVec.y);
-    
+
     if (mag1 === 0 || mag2 === 0) return 0;
-    
+
     let angle = Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2)))) * (180 / Math.PI);
-    
+
     return angle;
 };
 
@@ -1355,35 +1355,35 @@ const LongLegPlannerPage: React.FC = () => {
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
                                     <div className="flex flex-col gap-1.5">
                                         {longLegResults.ldfa != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            <div className="bg-[#1a2a4a]/90 border border-[#3b6eb5] px-3 py-1.5 rounded text-white font-bold text-sm">
                                                 LDFA: {longLegResults.ldfa.toFixed(1)}°
                                             </div>
                                         )}
                                         {longLegResults.mpta != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            <div className="bg-[#1a2a4a]/90 border border-[#3b6eb5] px-3 py-1.5 rounded text-white font-bold text-sm">
                                                 MPTA: {longLegResults.mpta.toFixed(1)}°
                                             </div>
                                         )}
                                         {longLegResults.mhka != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            <div className="bg-[#1a2a4a]/90 border border-[#3b6eb5] px-3 py-1.5 rounded text-white font-bold text-sm">
                                                 mHKA: {longLegResults.mhka.toFixed(1)}°
                                             </div>
                                         )}
                                     </div>
-                                    <div className="h-4"></div> {/* Space to differentiate sets of values */}
+                                    <div className="h-10"></div>
                                     <div className="flex flex-col gap-1.5">
                                         {longLegResults.ahka != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            <div className="bg-[#3a3010]/90 border border-[#b5942b] px-3 py-1.5 rounded text-white font-bold text-sm">
                                                 aHKA: {longLegResults.ahka.toFixed(1)}°
                                             </div>
                                         )}
                                         {longLegResults.jlo != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            <div className="bg-[#3a3010]/90 border border-[#b5942b] px-3 py-1.5 rounded text-white font-bold text-sm">
                                                 JLO: {longLegResults.jlo.toFixed(1)}°
                                             </div>
                                         )}
                                         {longLegResults.ama != null && (
-                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                            <div className="bg-[#3a3010]/90 border border-[#b5942b] px-3 py-1.5 rounded text-white font-bold text-sm">
                                                 VCA: {longLegResults.ama.toFixed(1)}°
                                             </div>
                                         )}

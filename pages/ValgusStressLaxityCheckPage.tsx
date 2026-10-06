@@ -137,7 +137,11 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
     const handleConfirmSelection = () => {
         if (!userSelection) return;
         setLateralLaxity(userSelection);
-        setPage('valgus-intra-operative-coronal-balancing');
+        if (previousPage) {
+            setPage(previousPage);
+        } else {
+            setPage('valgus-intra-operative-coronal-balancing');
+        }
     };
 
     const handleSkip = () => {
@@ -149,7 +153,11 @@ const ValgusStressLaxityCheckPage: React.FC = () => {
     };
 
     const goBack = () => {
-        setPage('valgus-intra-operative-coronal-balancing');
+        if (previousPage) {
+            setPage(previousPage);
+        } else {
+            setPage('valgus-intra-operative-coronal-balancing');
+        }
     };
 
     const laxityLevels = [

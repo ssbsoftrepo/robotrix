@@ -111,14 +111,11 @@ const CuttingBlock: React.FC<{
 const IntraOperativeCoronalBalancingPage: React.FC = () => {
     const {
         setPage,
-        setPreviousPage,
         longLegResults,
         implantThickness,
         intraOpValidationData,
         intraOpCoronalBalancingData,
         setIntraOpCoronalBalancingData,
-        kneeType,
-        lateralLaxity,
         longLegCoronalBalancingResults,
         setLongLegFunctionalCutDegree,
         longLegFunctionalCutDegree,
@@ -140,16 +137,6 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
         if (tibiaBoundary === 'basic' && varusCut > 2) varusCut = 2;
         return { degree: varusCut, label: varusCut === 0 ? 'neutral' : 'varus' };
     })();
-
-    const handleCheckLaxity = () => {
-        if (kneeType === 'valgus') {
-            setPreviousPage('planner-long-leg-coronal-balancing');
-            setPage('planner-valgus-stress-laxity-check');
-        } else {
-            setPreviousPage('planner-long-leg-coronal-balancing');
-            setPage('planner-long-leg-laxity-check');
-        }
-    };
 
     const { additionalFemurCut, additionalTibiaCut, additionalLaxity, functionalTibiaCutDegree } = intraOpCoronalBalancingData;
     const { medialGap, lateralGap, tibiaWidth } = intraOpValidationData;
@@ -321,79 +308,76 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-[25fr_50fr_25fr] gap-4 min-h-0 p-1 relative z-10 overflow-visible lg:overflow-hidden pb-4">
                 {/* Column 1: Lateral Balancing */}
                 <div className="h-full flex flex-col overflow-visible lg:overflow-hidden">
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-1 rounded-xl flex flex-col h-full shadow-2xl overflow-visible lg:overflow-hidden">
-                        <h3 className="text-center text-sm font-black text-[#ff8fa3] uppercase tracking-widest py-2 border-b border-[#333333]">Lateral Balancing</h3>
+                    <div className="bg-[#1a1a1a] border border-[#333333] p-3 rounded-xl flex flex-col h-full shadow-2xl overflow-visible lg:overflow-hidden">
+                        <h3 className="text-center text-sm font-black text-[#ff8fa3] uppercase tracking-widest pb-2.5 border-b border-[#333333] shrink-0">Lateral Balancing</h3>
 
-                        {/* Section 1: +/- Controls — evenly spaced */}
-                        <div className="flex flex-col justify-start gap-4 px-1 h-full py-4" style={{ flex: '0 0 50%' }}>
-                            {/* Femur Cut */}
-                            <div className="relative bg-[#2a2a2a]/60 p-1 rounded-xl border-l-4 border-[#6D282C] flex flex-col gap-2 flex-[1] min-h-0 shadow-lg justify-center items-center">
-                                <div className="flex items-start gap-2  w-full">
-                                    <p className="text-xs md:text-sm text-center font-bold text-gray-300 leading-snug w-full uppercase">Aim for lateral
-                                        space to match the minimum composite
-                                        implant thickness of your TKR system</p>
-                                </div>
+                        {/* Middle-aligned content container with comfortable, clean gaps */}
+                        <div className="flex-grow flex flex-col justify-center gap-7 px-1 py-4 min-h-0">
+                            {/* Top Instruction Banner */}
+                            <div className="relative bg-[#2a2a2a]/85 py-5 px-4 rounded-xl border-l-[5px] border-[#6D282C] shadow-lg flex items-center justify-center min-h-[5.5rem]">
+                                <p className="text-sm md:text-[15px] text-center font-bold text-gray-100 leading-snug w-full uppercase tracking-wide">
+                                    Aim for lateral space to match the minimum composite implant thickness of your TKR system
+                                </p>
                             </div>
+
+                            {/* Additional Femoral Cut */}
                             <div className="flex flex-col items-center">
-                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Additional foundational distal femoral cut resection</label>
+                                <label className="text-gray-300 text-xs md:text-sm font-black uppercase tracking-wider text-center leading-snug mb-2">
+                                    Additional foundational distal femoral cut resection
+                                </label>
                                 <div className="flex items-center justify-center gap-3 w-full">
-                                    <button onClick={() => handleUpdateData('additionalFemurCut', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
-                                    <div className="w-20 py-1 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
+                                    <button 
+                                        onClick={() => handleUpdateData('additionalFemurCut', -1)} 
+                                        className="w-11 h-11 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)] flex items-center justify-center"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}
+                                    >-</button>
+                                    <div className="w-24 py-1.5 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{additionalFemurCut}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalFemurCut', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
+                                    <button 
+                                        onClick={() => handleUpdateData('additionalFemurCut', 1)} 
+                                        className="w-11 h-11 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)] flex items-center justify-center"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}
+                                    >+</button>
                                 </div>
                             </div>
 
                             {/* Separator */}
-                            <div className="w-full border-t border-[#333333] my-1" />
+                            <div className="w-full border-t border-[#333333]/80" />
 
-                            {/* Tibia Cut */}
+                            {/* Additional Tibial Cut */}
                             <div className="flex flex-col items-center">
-                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Additional provisional 90 deg tibial cut resection</label>
+                                <label className="text-gray-300 text-xs md:text-sm font-black uppercase tracking-wider text-center leading-snug mb-2">
+                                    Additional provisional 90° tibial cut resection
+                                </label>
                                 <div className="flex items-center justify-center gap-3 w-full">
-                                    <button onClick={() => handleUpdateData('additionalTibiaCut', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
-                                    <div className="w-20 py-1 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
+                                    <button 
+                                        onClick={() => handleUpdateData('additionalTibiaCut', -1)} 
+                                        className="w-11 h-11 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)] flex items-center justify-center"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}
+                                    >-</button>
+                                    <div className="w-24 py-1.5 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
                                         <span className="text-2xl font-black text-white">{additionalTibiaCut}</span>
                                     </div>
-                                    <button onClick={() => handleUpdateData('additionalTibiaCut', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
+                                    <button 
+                                        onClick={() => handleUpdateData('additionalTibiaCut', 1)} 
+                                        className="w-11 h-11 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)] flex items-center justify-center"
+                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}
+                                    >+</button>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Section 2: Check Laxity */}
-                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 10%' }}>
-                            <button onClick={handleCheckLaxity} className="w-full py-2.5 bg-[#6D282C] text-white text-xs font-black rounded-sm border border-[#893338] shadow-lg tracking-wider">CHECK LATERAL LAXITY</button>
-                        </div>
+                            {/* Separator */}
+                            <div className="w-full border-t border-[#333333]/80" />
 
-                        {/* Section 3: Laxity Adjustment */}
-                        <div className="flex flex-col justify-center items-center gap-2 border-t border-[#333333] px-1 py-4" style={{ flex: '0 0 16%' }}>
-                            {/* Laxity */}
-                            <div className="flex flex-col items-center">
-                                <label className="text-gray-400 text-xs font-black uppercase tracking-widest text-center">Apply Pre-op lateral laxity</label>
-                                <div className="flex items-center justify-center gap-3 w-full">
-                                    <button onClick={() => handleUpdateData('additionalLaxity', -1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>-</button>
-                                    <div className="w-20 py-1 bg-black border border-[#333333] flex items-center justify-center rounded-sm">
-                                        <span className="text-2xl font-black text-white">{additionalLaxity}</span>
-                                    </div>
-                                    <button onClick={() => handleUpdateData('additionalLaxity', 1)} className="w-10 h-10 rounded-sm text-white font-bold text-xl transition-all duration-300 hover:brightness-125 active:scale-95 shadow-[0_2px_10px_rgba(109,40,44,0.5)]"
-                                        style={{ background: 'linear-gradient(180deg, rgba(109,40,44,0.25) 0%, rgba(60,18,22,0.4) 100%)', border: '2px solid transparent', borderImage: 'linear-gradient(180deg, #a04046, #6D282C, #4a1a1e) 1' }}>+</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Section 3: Pre-Op Tibia Cut */}
-                        <div className="flex flex-col justify-center gap-2 border-t border-[#333333] px-2 py-2 relative" style={{ flex: '0 0 18%' }}>
-                            <div className="bg-black border-2 border-[#333333] rounded-lg p-2 text-center w-full mt-1 shadow-lg">
-                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1 leading-tight">PRE OP CALCULATED FUNCTIONAL TIBIA CUT</p>
+                            {/* Pre-Op Tibia Cut */}
+                            <div className="bg-black/90 border-2 border-[#333333] rounded-xl p-3 text-center shadow-lg flex flex-col items-center justify-center shrink-0">
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1 leading-tight">
+                                    PRE OP CALCULATED FUNCTIONAL TIBIA CUT
+                                </p>
                                 <div className="flex items-center justify-center">
-                                    <span className="text-2xl font-black text-[#ff8fa3]">{preOpTibiaCut.degree}°</span>
-                                    <span className="text-sm font-bold text-[#ff8fa3] ml-1 uppercase">{preOpTibiaCut.label}</span>
+                                    <span className="text-2xl md:text-3xl font-black text-[#ff8fa3]">{preOpTibiaCut.degree}°</span>
+                                    <span className="text-sm font-bold text-[#ff8fa3] ml-1.5 uppercase">{preOpTibiaCut.label}</span>
                                 </div>
                             </div>
                         </div>

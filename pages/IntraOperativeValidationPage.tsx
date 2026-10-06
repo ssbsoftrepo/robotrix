@@ -11,6 +11,7 @@ const IntraOperativeValidationPage: React.FC = () => {
         setIntraOpValidationData,
         legSide,
         longLegCoronalBalancingResults,
+        intraOpCoronalBalancingData,
     } = useAppContext();
 
     const isLeftLeg = legSide === 'left';
@@ -22,8 +23,11 @@ const IntraOperativeValidationPage: React.FC = () => {
         }
     }, []);
 
+    const preOpLaxity = intraOpCoronalBalancingData.additionalLaxity;
 
     const thickness = implantThickness ?? 10;
+    const targetLateralGap = thickness;
+    const targetMedialGap = targetLateralGap - preOpLaxity;
     const femurCut = longLegCoronalBalancingResults.simFemoralCut ?? 3;
     const ama = longLegResults.ama ?? 0;
     const anticipatedLateralGap = thickness;
@@ -106,19 +110,34 @@ const IntraOperativeValidationPage: React.FC = () => {
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-xl" />
 
                         {/* Left Side */}
-                        <div className="flex flex-col items-center z-20 px-2 shrink-0 w-[9.5rem] py-2">
-                            <div className={`bg-black/90 border-2 ${isLeftLeg ? 'border-[#6D282C]' : 'border-[#333333]'} rounded-xl p-2 text-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] w-full`}>
-                                <p className={`${isLeftLeg ? 'text-[#ff8fa3]' : 'text-gray-500'} text-xs font-black uppercase tracking-wider mb-1 leading-tight`}>ANTICIPATED<br />{isLeftLeg ? 'MEDIAL' : 'LATERAL'} GAP</p>
-                                <p className={`text-3xl font-black ${isLeftLeg ? 'text-[#ff8fa3]' : 'text-white'}`}>{isLeftLeg ? anticipatedMedialGap : anticipatedLateralGap}<span className={`text-sm ${isLeftLeg ? 'text-[#ff8fa3]/70' : 'text-gray-400'} ml-1`}>mm</span></p>
+                        <div className="flex flex-col items-center z-20 px-2 shrink-0 w-[11rem] py-2 h-full">
+                            {/* Top Card: Target & Anticipated Medial/Lateral */}
+                            <div className="w-full bg-[#181818]/90 border border-[#333333] rounded-xl p-2 flex flex-col gap-2 shadow-lg">
+                                {/* Target Gap Box - Left */}
+                                <div className="border border-cyan-400 bg-cyan-950/20 rounded-lg py-1.5 px-2 text-center w-full shadow-[0_0_10px_rgba(6,182,212,0.15)]">
+                                    <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-0.5">TARGET {isLeftLeg ? 'MEDIAL' : 'LATERAL'} GAP</p>
+                                    <p className="text-2xl font-black text-white leading-tight">
+                                        {isLeftLeg ? targetMedialGap : targetLateralGap} <span className="text-xs font-bold text-cyan-400">mm</span>
+                                    </p>
+                                </div>
+                                {/* Anticipated Gap Box - Left */}
+                                <div className="border border-purple-400 bg-purple-950/20 rounded-lg py-1.5 px-2 text-center w-full shadow-[0_0_10px_rgba(192,132,252,0.15)]">
+                                    <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-0.5">ANTICIPATED {isLeftLeg ? 'MEDIAL' : 'LATERAL'} GAP</p>
+                                    <p className="text-2xl font-black text-white leading-tight">
+                                        {isLeftLeg ? anticipatedMedialGap : anticipatedLateralGap} <span className="text-xs font-bold text-purple-300">mm</span>
+                                    </p>
+                                </div>
                             </div>
+
+                            {/* Actual Gap Section - Left */}
                             <div className="flex-grow flex flex-col items-center justify-center gap-2 w-full mt-2">
-                                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest text-center">ACTUAL {isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest text-center">ACTUAL {isLeftLeg ? 'MEDIAL' : 'LATERAL'}</p>
                                 <div className="flex flex-col items-center gap-2 w-full">
-                                    <div className={`w-22 h-22 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-[#0a0a0a] shadow-[0_0_20px_rgba(0,0,0,0.8)] ${getStatusColor(isLeftLeg ? medialDiff : lateralDiff)}`} style={{ width: '5.5rem', height: '5.5rem' }}>
-                                        <span className={`text-3xl font-black leading-none`}>{isLeftLeg ? medialGap : lateralGap}</span>
-                                        <span className="text-xs font-bold opacity-70 mt-0.5">mm</span>
+                                    <div className={`rounded-full border-[3.5px] transition-all duration-500 flex flex-col items-center justify-center bg-[#0a0a0a] shadow-[0_0_20px_rgba(0,0,0,0.8)] ${getStatusColor(isLeftLeg ? medialDiff : lateralDiff)}`} style={{ width: '5.25rem', height: '5.25rem' }}>
+                                        <span className="text-3xl font-black leading-none">{isLeftLeg ? medialGap : lateralGap}</span>
+                                        <span className="text-xs font-bold opacity-80 mt-0.5">mm</span>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-md text-sm font-black uppercase tracking-widest w-full text-center shadow-lg ${isLeftLeg ? (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
+                                    <div className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest w-full text-center shadow-lg ${isLeftLeg ? (medialDiff === 0 ? 'bg-green-500/10 text-green-500 border border-green-500' : 'bg-red-500/10 text-red-500 border border-red-500') : (lateralDiff === 0 ? 'bg-green-500/10 text-green-500 border border-green-500' : 'bg-red-500/10 text-red-500 border border-red-500')}`}>
                                         {isLeftLeg ? getGapStatus(medialDiff) : getGapStatus(lateralDiff)}
                                     </div>
                                 </div>
@@ -131,19 +150,34 @@ const IntraOperativeValidationPage: React.FC = () => {
                         </div>
 
                         {/* Right Side */}
-                        <div className="flex flex-col items-center z-20 px-2 shrink-0 w-[9.5rem] py-2">
-                            <div className={`bg-black/90 border-2 ${isLeftLeg ? 'border-[#333333]' : 'border-[#6D282C]'} rounded-xl p-2 text-center shadow-[0_4px_15px_rgba(0,0,0,0.5)] w-full`}>
-                                <p className={`${isLeftLeg ? 'text-gray-500' : 'text-[#ff8fa3]'} text-xs font-black uppercase tracking-wider mb-1 leading-tight`}>ANTICIPATED<br />{isLeftLeg ? 'LATERAL' : 'MEDIAL'} GAP</p>
-                                <p className={`text-3xl font-black ${isLeftLeg ? 'text-white' : 'text-[#ff8fa3]'}`}>{isLeftLeg ? anticipatedLateralGap : anticipatedMedialGap}<span className={`text-sm ${isLeftLeg ? 'text-gray-400' : 'text-[#ff8fa3]/70'} ml-1`}>mm</span></p>
+                        <div className="flex flex-col items-center z-20 px-2 shrink-0 w-[11rem] py-2 h-full">
+                            {/* Top Card: Target & Anticipated Lateral/Medial */}
+                            <div className="w-full bg-[#181818]/90 border border-[#333333] rounded-xl p-2 flex flex-col gap-2 shadow-lg">
+                                {/* Target Gap Box - Right */}
+                                <div className="border border-cyan-400 bg-cyan-950/20 rounded-lg py-1.5 px-2 text-center w-full shadow-[0_0_10px_rgba(6,182,212,0.15)]">
+                                    <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-0.5">TARGET {isLeftLeg ? 'LATERAL' : 'MEDIAL'} GAP</p>
+                                    <p className="text-2xl font-black text-white leading-tight">
+                                        {isLeftLeg ? targetLateralGap : targetMedialGap} <span className="text-xs font-bold text-cyan-400">mm</span>
+                                    </p>
+                                </div>
+                                {/* Anticipated Gap Box - Right */}
+                                <div className="border border-purple-400 bg-purple-950/20 rounded-lg py-1.5 px-2 text-center w-full shadow-[0_0_10px_rgba(192,132,252,0.15)]">
+                                    <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-0.5">ANTICIPATED {isLeftLeg ? 'LATERAL' : 'MEDIAL'} GAP</p>
+                                    <p className="text-2xl font-black text-white leading-tight">
+                                        {isLeftLeg ? anticipatedLateralGap : anticipatedMedialGap} <span className="text-xs font-bold text-purple-300">mm</span>
+                                    </p>
+                                </div>
                             </div>
+
+                            {/* Actual Gap Section - Right */}
                             <div className="flex-grow flex flex-col items-center justify-center gap-2 w-full mt-2">
-                                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest text-center">ACTUAL {isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest text-center">ACTUAL {isLeftLeg ? 'LATERAL' : 'MEDIAL'}</p>
                                 <div className="flex flex-col items-center gap-2 w-full">
-                                    <div className={`w-22 h-22 rounded-full border-[4px] transition-all duration-500 flex flex-col items-center justify-center bg-[#0a0a0a] shadow-[0_0_20px_rgba(0,0,0,0.8)] ${getStatusColor(isLeftLeg ? lateralDiff : medialDiff)}`} style={{ width: '5.5rem', height: '5.5rem' }}>
-                                        <span className={`text-3xl font-black leading-none`}>{isLeftLeg ? lateralGap : medialGap}</span>
-                                        <span className="text-xs font-bold opacity-70 mt-0.5">mm</span>
+                                    <div className={`rounded-full border-[3.5px] transition-all duration-500 flex flex-col items-center justify-center bg-[#0a0a0a] shadow-[0_0_20px_rgba(0,0,0,0.8)] ${getStatusColor(isLeftLeg ? lateralDiff : medialDiff)}`} style={{ width: '5.25rem', height: '5.25rem' }}>
+                                        <span className="text-3xl font-black leading-none">{isLeftLeg ? lateralGap : medialGap}</span>
+                                        <span className="text-xs font-bold opacity-80 mt-0.5">mm</span>
                                     </div>
-                                    <div className={`px-3 py-1 rounded-md text-sm font-black uppercase tracking-widest w-full text-center shadow-lg ${isLeftLeg ? (lateralDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50') : (medialDiff === 0 ? 'bg-green-500/20 text-green-500 border border-green-500/50' : 'bg-red-500/20 text-red-500 border border-red-500/50')}`}>
+                                    <div className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest w-full text-center shadow-lg ${isLeftLeg ? (lateralDiff === 0 ? 'bg-green-500/10 text-green-500 border border-green-500' : 'bg-red-500/10 text-red-500 border border-red-500') : (medialDiff === 0 ? 'bg-green-500/10 text-green-500 border border-green-500' : 'bg-red-500/10 text-red-500 border border-red-500')}`}>
                                         {isLeftLeg ? getGapStatus(lateralDiff) : getGapStatus(medialDiff)}
                                     </div>
                                 </div>
