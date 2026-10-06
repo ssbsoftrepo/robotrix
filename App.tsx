@@ -23,6 +23,7 @@ import ValgusIntraOperativeValidationPage from './pages/ValgusIntraOperativeVali
 import ValgusIntraOperativeCoronalBalancingPage from './pages/ValgusIntraOperativeCoronalBalancingPage';
 import PreOpReportPage from './pages/PreOpReportPage';
 import ValgusPreOpReportPage from './pages/ValgusPreOpReportPage';
+import IntraOpInstructionsPage from './pages/IntraOpInstructionsPage';
 import LoginPage from './pages/LoginPage';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import HospitalAdminDashboard from './pages/HospitalAdminDashboard';
@@ -109,6 +110,8 @@ const App: React.FC = () => {
                     return <LongLegCoronalBalancingPage />;
                 case 'planner-long-leg-functional-tibial-cut':
                     return <LongLegFunctionalTibialCutPage />;
+                case 'intra-op-instructions':
+                    return <IntraOpInstructionsPage />;
                 case 'intra-operative-validation':
                     return <IntraOperativeValidationPage />;
                 case 'intra-operative-coronal-balancing':

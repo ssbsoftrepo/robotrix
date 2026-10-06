@@ -1353,16 +1353,41 @@ const LongLegPlannerPage: React.FC = () => {
                         <div className="relative w-full h-full flex items-center justify-center">
                             {(longLegResults.ldfa != null || longLegResults.mpta != null || longLegResults.mhka != null) && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2 pointer-events-none">
-                                    {longLegResults.ldfa != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            LDFA: {longLegResults.ldfa.toFixed(1)}°
-                                        </div>
-                                    )}
-                                    {longLegResults.mpta != null && (
-                                        <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
-                                            MPTA: {longLegResults.mpta.toFixed(1)}°
-                                        </div>
-                                    )}
+                                    <div className="flex flex-col gap-1.5">
+                                        {longLegResults.ldfa != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                LDFA: {longLegResults.ldfa.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {longLegResults.mpta != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                MPTA: {longLegResults.mpta.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {longLegResults.mhka != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                mHKA: {longLegResults.mhka.toFixed(1)}°
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="h-4"></div> {/* Space to differentiate sets of values */}
+                                    <div className="flex flex-col gap-1.5">
+                                        {longLegResults.ahka != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                aHKA: {longLegResults.ahka.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {longLegResults.jlo != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                JLO: {longLegResults.jlo.toFixed(1)}°
+                                            </div>
+                                        )}
+                                        {longLegResults.ama != null && (
+                                            <div className="bg-[#1a1a1a]/90 border border-[#333] px-3 py-1.5 rounded text-white font-bold text-sm">
+                                                VCA: {longLegResults.ama.toFixed(1)}°
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                             <div ref={viewerRef} className="relative w-full h-full overflow-hidden touch-none flex items-center justify-center bg-black">

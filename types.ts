@@ -83,7 +83,8 @@ export type Page =
     'intra-operative-validation' |
     'intra-operative-coronal-balancing' |
     'valgus-intra-operative-validation' |
-    'valgus-intra-operative-coronal-balancing';
+    'valgus-intra-operative-coronal-balancing' |
+    'intra-op-instructions';
 
 export interface CoronalBalancingResults {
     selectedSeries: number | null;

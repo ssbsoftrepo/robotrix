@@ -502,13 +502,7 @@ const IntraOperativeCoronalBalancingPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Likely Post-Op CPAK indicator below bone image */}
-                        <div className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2 z-20">
-                            <div className="bg-black/60 backdrop-blur-md px-5 py-1.5 rounded-xl border-2 border-[#333333] shadow-[0_0_30px_rgba(0,0,0,0.8)] flex items-center justify-center gap-2">
-                                <p className="text-gray-500 text-[11px] uppercase tracking-wider font-bold mb-0">LIKELY POST-OP CPAK</p>
-                                <p className="text-lg font-extrabold text-white tracking-tighter leading-tight">Type {simulatedCPAK}</p>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
                 {/* Column 3: Medial Balancing */}

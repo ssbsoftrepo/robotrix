@@ -63,7 +63,6 @@ const WarningMessage: React.FC<{ message: string }> = ({ message }) => (
 
 import { CpakDiagram } from '../src/components/CpakDiagram';
 import cpakImage from '../assets/CPAK_new.png';
-import cpakMatrixBaseImage from '../assets/CPAK_matrix_base.png';
 
 
 const ImageUploadBox: React.FC<{
@@ -275,56 +274,38 @@ const ResultAnalysisPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* Column 2: Values & CPAK Grid */}
-                <div className="lg:col-span-3 flex flex-col gap-3 min-h-0 overflow-hidden">
-                    <div className="bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg min-h-0 flex flex-col justify-center" style={{ flex: 3 }}>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center"><span className="text-gray-400 font-bold text-xs uppercase">LDFA</span><span className="text-[#ff8fa3] font-bold text-sm">{longLegResults.ldfa != null ? `${longLegResults.ldfa.toFixed(1)}°` : '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-gray-400 font-bold text-xs uppercase">MPTA</span><span className="text-[#ff8fa3] font-bold text-sm">{longLegResults.mpta != null ? `${longLegResults.mpta.toFixed(1)}°` : '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-gray-400 font-bold text-xs">mHKA</span><span className="text-[#ff8fa3] font-bold text-sm">{longLegResults.mhka != null ? `${longLegResults.mhka.toFixed(1)}°` : '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-gray-400 font-bold text-xs">aHKA</span><span className="text-[#ff8fa3] font-bold text-sm">{longLegResults.ahka != null ? `${longLegResults.ahka.toFixed(1)}°` : '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-gray-400 font-bold text-xs uppercase">VCA</span><span className="text-[#ff8fa3] font-bold text-sm">{longLegResults.ama != null ? `${longLegResults.ama.toFixed(1)}°` : '--'}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-gray-400 font-bold text-xs uppercase">JLO</span><span className="text-[#ff8fa3] font-bold text-sm">{longLegResults.jlo != null ? `${longLegResults.jlo.toFixed(1)}°` : '--'}</span></div>
-                        </div>
-                    </div>
-                    <div className="bg-[#1a1a1a] border border-[#333333] rounded-lg min-h-0 flex flex-col relative overflow-hidden" style={{ flex: 7 }}>
-                        <div className="p-3 pb-0 shrink-0">
-                            <span className="text-gray-400 font-bold text-xs uppercase">CPAK MATRIX</span>
-                        </div>
-                        <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden p-2">
-                            <div className="relative inline-flex max-h-full max-w-full">
-                                <img src={cpakMatrixBaseImage} alt="CPAK Matrix Base" className="block max-h-full max-w-full object-contain pointer-events-none" />
-                                <div className="absolute inset-0 grid grid-cols-3 gap-[2%] pt-[1.5%] pb-[3.5%] pl-[2%] pr-[2.5%]">
-                                    {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((type) => (
-                                        <div key={type} className={`transition-all rounded-md ${longLegResults.cpak === type ? 'bg-[#ff8fa3]/15 border-2 border-[#ff8fa3] shadow-[0_0_12px_rgba(255,143,163,0.4)]' : ''}`} />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Column 3: Data & Matrix */}
-                <div className="lg:col-span-3 flex flex-col gap-3 min-h-0 overflow-y-auto">
+                {/* Column 2: Data & Matrix */}
+                <div className="lg:col-span-4 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     {/* Results Box */}
                     <div className="relative bg-[#1a1a1a] border border-[#333333] p-4 rounded-lg min-h-0 shrink-0">
                         <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                        <div className="flex flex-col gap-4 relative z-10">
-                            <div>
-                                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Femur Type:</p>
-                                <p className="font-bold text-xl text-[#ff8fa3] leading-tight">{longLegResults.femurType || getFemurType(longLegResults.ldfa)}</p>
-                            </div>
-                            <div className="border-t border-[#333333] pt-4">
-                                <div className="flex items-center justify-between mb-1">
-                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">CPAK Type:</p>
-                                    <button onClick={() => setShowCpakModal(true)} className="w-5 h-5 rounded-full bg-[#333333] hover:bg-[#6D282C] border border-[#555555] hover:border-[#893338] text-gray-300 hover:text-white flex items-center justify-center text-xs font-bold transition-all duration-200 cursor-pointer" title="View CPAK Matrix">i</button>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <p className="font-bold text-xl text-[#ff8fa3] leading-none">PAK {longLegResults.cpak}</p>
-                                    <CpakDiagram cpakType={longLegResults.cpak} />
-                                </div>
+
+                        {/* Headings Row */}
+                        <div className="grid grid-cols-2 gap-4 relative z-10">
+                            <p className="text-sm text-white font-bold uppercase tracking-wider border-r border-[#333333] pr-4">Femur Type:</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm text-white font-bold uppercase tracking-wider">CPAK Type:</p>
+                                <button
+                                    onClick={() => setShowCpakModal(true)}
+                                    className="w-5 h-5 rounded-full bg-[#333333] hover:bg-[#6D282C] border border-[#555555] hover:border-[#893338] text-gray-200 hover:text-white flex items-center justify-center text-sm font-black transition-all duration-200 shrink-0 cursor-pointer"
+                                    title="View CPAK Matrix"
+                                >
+                                    i
+                                </button>
                             </div>
                         </div>
+
+                        {/* Values Row */}
+                        <div className="grid grid-cols-2 gap-4 mt-2 relative z-10">
+                            <div className="border-r border-[#333333] pr-4 flex items-center justify-center text-center">
+                                <p className="font-bold text-2xl text-[#ff8fa3] leading-tight">{longLegResults.femurType || getFemurType(longLegResults.ldfa)}</p>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <p className="font-bold text-2xl text-[#ff8fa3] leading-none">CPAK {longLegResults.cpak}</p>
+                                <CpakDiagram cpakType={longLegResults.cpak} />
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Matrix Selectors */}
@@ -348,8 +329,8 @@ const ResultAnalysisPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Column 4: Steps & Recommendations */}
-                <div className="lg:col-span-3 flex flex-col gap-3 min-h-0 overflow-y-auto">
+                {/* Column 3: Steps & Recommendations */}
+                <div className="lg:col-span-5 flex flex-col gap-3 min-h-0 overflow-y-auto">
                     <div className="p-1 rounded-lg bg-transparent flex-grow flex flex-col gap-3 min-h-0">
                         <StepCard
                             step={1}
