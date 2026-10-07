@@ -41,6 +41,7 @@ const PreOpReportPage: React.FC = () => {
         longLegCoronalBalancingResults,
         legSide,
         implantThickness,
+        intraOpCoronalBalancingData,
         appliedFemoralCutSim,
         appliedTibialCutSim,
         femoralCutSim,
@@ -102,17 +103,10 @@ const PreOpReportPage: React.FC = () => {
     const displayFinalTibialCut = (finalTibialVal !== null && finalTibialVal !== undefined && finalTibialVal > 0)
         ? `${finalTibialVal}° varus cut`
         : (finalTibialVal === 0 ? '0° (neutral cut)' : displayTibialCut);
-    const { lateralGap, selectedSeries } = longLegCoronalBalancingResults;
-
-    const thickness = implantThickness ?? 10;
-    const mpta = longLegResults.mpta ?? 86;
-    const rawTightness = 86 - mpta;
-    const anticipatedTightness = rawTightness > 4 ? 4 : Math.max(0, Math.round(rawTightness));
-    const anticipatedMedialGap = thickness - anticipatedTightness;
-    const anticipatedLateralGap = thickness;
-
-    const finalLateralGap = lateralGap || anticipatedLateralGap;
-    const finalMedialGap = selectedSeries ?? anticipatedMedialGap;
+    const thickness = implantThickness ?? 18;
+    const preOpLaxity = intraOpCoronalBalancingData?.additionalLaxity ?? 0;
+    const targetLateralGap = thickness;
+    const targetMedialGap = targetLateralGap - preOpLaxity; // 1 deg ≈ 1mm
 
     return (
         <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -192,8 +186,8 @@ const PreOpReportPage: React.FC = () => {
                             <div className="bg-[#252525] p-2 rounded-lg border border-[#333333]">
                                 <p className="text-xs text-gray-500 font-bold uppercase mb-1">Coronal Balancing Data</p>
                                 <div className="space-y-1">
-                                    <ReportItem label="Minimum Composite Implant thickness(Lateral gap)" value={`${finalLateralGap} mm`} large />
-                                    <ReportItem label="Anticipated Medial Gap" value={`${finalMedialGap} mm`} large />
+                                    <ReportItem label="Minimum Composite Implant thickness (Lateral Gap)" value={`${targetLateralGap} mm`} large />
+                                    <ReportItem label="Anticipated Medial Gap" value={`${targetMedialGap} mm`} large />
                                 </div>
                             </div>
 

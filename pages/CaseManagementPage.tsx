@@ -315,7 +315,7 @@ const PlanSelectionModal: React.FC<{
 
 
 const CaseManagementPage: React.FC = () => {
-    const { patients, savePatient, deletePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness, legSide, isOffline, syncStatus, pendingSyncCount } = useAppContext();
+    const { patients, savePatient, deletePatient, currentPatientId, setCurrentPatientId, setCurrentPlanId, currentPlanId, setPage, setPreviousPage, setPlannerMode, setLdfaMode, setKneeType, setImplantThickness, legSide, isOffline, syncStatus, pendingSyncCount } = useAppContext();
     const [view, setView] = useState<'main' | 'list'>('main');
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -595,7 +595,9 @@ const CaseManagementPage: React.FC = () => {
             {
                 page: 'planner-valgus-stress',
                 title: ['Valgus stress film planner', 'for VARUS KNEE'],
-                onClick: () => setImplantModalConfig({ isOpen: true, targetPage: 'planner-valgus-stress' }),
+                onClick: () => {
+                    setPage('planner-valgus-stress');
+                },
                 icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" /></svg>
             },
             {
@@ -607,7 +609,10 @@ const CaseManagementPage: React.FC = () => {
             {
                 page: 'intra-operative-planning',
                 title: ['Intra-Operative', 'Planning'],
-                onClick: () => setIsIntraOpSelectionOpen(true),
+                onClick: () => {
+                    setPreviousPage('case-management');
+                    setPage('intra-op-instructions');
+                },
                 icon: (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -933,69 +938,82 @@ const CaseManagementPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            )}
-
-            {/* Combined Long Leg Config Modal */}
+            )}            {/* Combined Long Leg Config Modal */}
             {isLongLegConfigOpen && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="flex flex-col items-center w-full max-w-5xl space-y-6">
-                        {/* Close Button */}
-                        <div className="w-full flex justify-end">
-                            <button type="button" onClick={() => setIsLongLegConfigOpen(false)} className="text-gray-500 hover:text-white p-2 transition-colors z-20">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex flex-col items-center w-full max-w-2xl space-y-4">
+                        {/* Box: Implant Thickness */}
+                        <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-7 rounded-2xl border border-[#333333] w-full shadow-2xl">
+                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-2xl" />
+
+                            {/* Close Button inside card top right */}
+                            <button
+                                type="button"
+                                onClick={() => setIsLongLegConfigOpen(false)}
+                                className="absolute top-4 right-4 text-gray-500 hover:text-white p-1 transition-colors z-20"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
-                        </div>
 
-                        {/* Box: Implant Thickness */}
-                        <div className="relative bg-gradient-to-br from-[#1E1E1E] to-[#181818] p-4 rounded-lg border border-[#333333] w-full shadow-2xl">
-                            <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none rounded-lg" />
-                            <h3 className="text-xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10 uppercase">Select minimum composite thickness</h3>
-                            <div className="grid grid-cols-3 gap-4 relative z-10">
+                            <h3 className="text-xl md:text-2xl font-bold text-[#E0E0E0] mb-4 text-center relative z-10 uppercase tracking-wide">
+                                Select minimum composite thickness
+                            </h3>
+                            <div className="grid grid-cols-3 gap-4 relative z-10 mb-4">
                                 {[18, 19, 20].map(thickness => (
                                     <button
                                         key={thickness}
                                         onClick={() => setTempThickness(thickness)}
-                                        className={`h-20 rounded-lg border flex flex-col items-center justify-center transition-all ${tempThickness === thickness ? 'border-[#6D282C] bg-[#6D282C]/30' : 'border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] hover:border-[#6D282C]/50'}`}
+                                        className={`h-20 rounded-xl border flex flex-col items-center justify-center transition-all ${tempThickness === thickness ? 'border-[#6D282C] bg-[#6D282C]/40 shadow-[0_0_15px_rgba(109,40,44,0.5)]' : 'border-[#333333] bg-[#1a1a1a] hover:bg-[#252525] hover:border-[#6D282C]/50'}`}
                                     >
                                         <span className="text-3xl font-bold text-gray-200">{thickness}</span>
-                                        <span className="text-sm text-[#6D282C]">mm</span>
+                                        <span className="text-sm text-[#ff8fa3] font-bold">mm</span>
                                     </button>
                                 ))}
                             </div>
 
-                            {/* Target gap description and boxes */}
-                            <div className="flex items-center justify-between gap-3 mt-5 relative z-10">
-                                {/* Target Lateral Gap - Left */}
+                            {/* Subtitle / Instruction */}
+                            <p className="text-base font-medium text-gray-300 text-center mb-6 relative z-10 leading-relaxed">
+                                This will be your target gap for balancing the knee in Extension
+                            </p>
+
+                            {/* Target gap description and boxes with bone model in center */}
+                            <div className="flex items-center justify-between gap-4 relative z-10 w-full">
+                                {/* Left Gap Box */}
                                 <div className="flex flex-col items-center flex-1">
-                                    <span className="text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Target Lateral Gap</span>
-                                    <div className="w-full h-20 rounded-lg border border-[#6D282C]/60 bg-[#6D282C]/15 flex flex-col items-center justify-center">
-                                        <span className="text-3xl font-bold text-gray-200">{tempThickness || '--'}</span>
-                                        {tempThickness && <span className="text-sm text-[#6D282C]">mm</span>}
+                                    <span className="text-xs md:text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider text-center">
+                                        {legSide === 'left' ? 'Target Medial Gap' : 'Target Lateral Gap'}
+                                    </span>
+                                    <div className="w-full h-24 rounded-xl border border-[#6D282C]/60 bg-[#6D282C]/20 flex flex-col items-center justify-center shadow-lg">
+                                        <span className="text-3xl md:text-4xl font-bold text-gray-200">{tempThickness || '--'}</span>
+                                        {tempThickness && <span className="text-sm text-[#ff8fa3] font-bold">mm</span>}
                                     </div>
                                 </div>
 
-                                {/* Center Text */}
-                                <div className="flex-1 text-center px-2 flex items-center justify-center">
-                                    <p className="text-base font-medium text-gray-300 leading-relaxed">
-                                        This will be your target gap for balancing the knee in Extension
-                                    </p>
+                                {/* Bone Model - Middle */}
+                                <div className="flex flex-col items-center justify-center shrink-0 px-2">
+                                    <img
+                                        src="/coronal-balancing-page.png"
+                                        alt="Bone Model"
+                                        className={`h-48 sm:h-52 w-auto object-contain drop-shadow-2xl transition-transform duration-300 ${legSide === 'left' ? 'scale-x-[-1]' : ''}`}
+                                    />
                                 </div>
 
-                                {/* Target Medial Gap - Right */}
+                                {/* Right Gap Box */}
                                 <div className="flex flex-col items-center flex-1">
-                                    <span className="text-xs font-bold text-gray-300 mb-2 uppercase tracking-wider">Target Medial Gap</span>
-                                    <div className="w-full h-20 rounded-lg border border-[#6D282C]/60 bg-[#6D282C]/15 flex flex-col items-center justify-center">
-                                        <span className="text-3xl font-bold text-gray-200">{tempThickness || '--'}</span>
-                                        {tempThickness && <span className="text-sm text-[#6D282C]">mm</span>}
+                                    <span className="text-xs md:text-sm font-bold text-gray-300 mb-2 uppercase tracking-wider text-center">
+                                        {legSide === 'left' ? 'Target Lateral Gap' : 'Target Medial Gap'}
+                                    </span>
+                                    <div className="w-full h-24 rounded-xl border border-[#6D282C]/60 bg-[#6D282C]/20 flex flex-col items-center justify-center shadow-lg">
+                                        <span className="text-3xl md:text-4xl font-bold text-gray-200">{tempThickness || '--'}</span>
+                                        {tempThickness && <span className="text-sm text-[#ff8fa3] font-bold">mm</span>}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-
-                        <div className="pt-4">
+                        <div className="pt-2">
                             <button
                                 disabled={!tempThickness}
                                 onClick={handleLongLegConfigConfirm}
@@ -1013,7 +1031,6 @@ const CaseManagementPage: React.FC = () => {
                                 <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff8fa3]/30 transition-colors group-hover:border-white/50" />
                             </button>
                         </div>
-
                     </div>
                 </div>
             )}

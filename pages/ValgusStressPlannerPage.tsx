@@ -355,6 +355,16 @@ const MetricItem: React.FC<{ label: string; value: string | number; highlight?: 
 );
 
 const ValgusStressPlannerPage: React.FC = () => {
+  return (
+    <div className="flex flex-col h-full items-center justify-center">
+      <h2 className="text-3xl font-bold mb-8 text-center uppercase">Valgus stress film planner for VARUS KNEE</h2>
+      <div className="gemini-dark-card p-12 rounded-lg text-center">
+        <p className="text-3xl text-yellow-400">Updates Coming Soon</p>
+        <p className="text-xl text-gray-300 mt-4">This planner is currently under development. Please check back later.</p>
+      </div>
+    </div>
+  );
+
   const {
     legSide, setLegSide,
     valgusImageSrc, setValgusImageSrc,

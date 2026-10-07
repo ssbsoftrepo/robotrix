@@ -106,6 +106,7 @@ const SimulationPage: React.FC = () => {
         setSimAfterImage,
         legSide,
         setPage,
+        setPreviousPage,
         longLegResults,
         femurBoundary,
         tibiaBoundary,
@@ -589,6 +590,7 @@ const SimulationPage: React.FC = () => {
                         if (canvasRef.current) {
                             setSimAfterImage(canvasRef.current.toDataURL('image/png'));
                         }
+                        setPreviousPage('simulation');
                         setPage('intra-op-instructions');
                     }}
                     className="group relative py-2 px-6 bg-[#6D282C] border border-[#893338] rounded-sm 

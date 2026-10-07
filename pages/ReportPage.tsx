@@ -147,16 +147,13 @@ const ReportPage: React.FC = () => {
         ? `${finalTibialVal}° varus cut`
         : (finalTibialVal === 0 ? '0° (neutral cut)' : displayTibialCut);
 
-    const { lateralGap, selectedSeries } = longLegCoronalBalancingResults;
+    const thickness = implantThickness ?? 18;
+    const preOpLaxity = intraOpCoronalBalancingData.additionalLaxity ?? 0;
+    const targetLateralGap = thickness;
+    const targetMedialGap = targetLateralGap - preOpLaxity; // 1 deg ≈ 1mm
 
-    const thickness = implantThickness ?? 10;
-    const ama = longLegResults.ama ?? 0;
-    const tibiaWidth = intraOpValidationData.tibiaWidth ?? 70;
-    const anticipatedLateralGap = thickness;
-    const anticipatedMedialGap = Math.round(anticipatedLateralGap - (tibiaWidth * Math.tan((ama - initialSimFemoralCut) * Math.PI / 180)));
-
-    const finalLateralGap = lateralGap || anticipatedLateralGap;
-    const finalMedialGap = selectedSeries ?? anticipatedMedialGap;
+    const finalLateralGap = targetLateralGap;
+    const finalMedialGap = targetMedialGap;
 
     return (
         <div className="relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#1E1E1E] to-[#121212]">
@@ -337,7 +334,7 @@ const ReportPage: React.FC = () => {
                                     </div>
                                     <div className="flex-1 bg-[#252525] border border-[#333333] rounded-lg p-2 text-center">
                                         <p className="text-[0.625rem] text-gray-500 uppercase font-bold tracking-wider mb-1">Laxity Applied</p>
-                                        <p className="text-sm font-bold text-white">{intraOpCoronalBalancingData.additionalLaxity} mm</p>
+                                        <p className="text-sm font-bold text-white">{intraOpCoronalBalancingData.additionalLaxity}°</p>
                                     </div>
                                 </div>
                             </div>
@@ -347,14 +344,8 @@ const ReportPage: React.FC = () => {
                                 <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-2">Coronal Balancing Achieved</p>
                                 <div className="space-y-1">
                                     <ReportItem label="Lateral Gap" value={`${Number(finalLateralGap) + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut + intraOpCoronalBalancingData.additionalLaxity}mm`} />
-                                    <ReportItem label="Medial Gap" value={`${finalMedialGap + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut}mm`} />
+                                    <ReportItem label="Target Medial Gap" value={`${finalMedialGap + intraOpCoronalBalancingData.additionalFemurCut + intraOpCoronalBalancingData.additionalTibiaCut}mm`} />
                                 </div>
-                            </div>
-
-                            {/* Post Operative CPAK */}
-                            <div className="flex items-center justify-between p-2 bg-[#6D282C]/20 border border-[#6D282C]/50 rounded-lg">
-                                <span className="text-gray-400 text-sm font-medium">Post Operative CPAK</span>
-                                <span className="text-lg font-extrabold text-[#ff8fa3]">TYPE {simulatedCPAK}</span>
                             </div>
                         </div>
                     </ReportCard>
